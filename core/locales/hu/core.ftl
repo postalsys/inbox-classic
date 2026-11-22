@@ -10,7 +10,6 @@ messages = { $count ->
 }
 # a tizedesjel a méretekben: 2,4 MB
 decimal-separator = ,
-# review: new
 list-separator = { ", " }
 size-bytes = { $count ->
     [one] 1 bájt
@@ -626,7 +625,7 @@ agent-read-search = { $count ->
     [one] Keresés: „{ $query }”, eredmény: 1 üzenet
    *[other] Keresés: „{ $query }”, eredmény: { $count } üzenet
 }
-agent-read-people = Személyek keresése név vagy e-mail-cím eleje alapján: „{ $query }”
+agent-read-people = Személyek keresése név vagy e-mail-cím alapján: „{ $query }”
 agent-read-list = { $count ->
     [one] 1 bejegyzés megtekintve. Lista: { $folder }
    *[other] { $count } bejegyzés megtekintve. Lista: { $folder }

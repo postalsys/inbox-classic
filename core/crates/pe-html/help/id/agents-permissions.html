@@ -1,10 +1,9 @@
-<!--review-->
 <h1>Yang boleh dilakukan agen</h1>
 <p class="summary">Pilih apa yang boleh dilakukan setiap agen AI dengan email Anda, lalu lihat dan batalkan tindakannya.</p>
 <p>Saat agen sebuah program tersambung untuk pertama kalinya, Inbox Classic bertanya kepada Anda dengan menyebutkan nama program tersebut. Pilih apa yang boleh dilakukannya:</p>
 <ul>
     <li>membaca email: folder, daftar, percakapan, pencarian, pesan, aturan, dan orang. Lampiran PDF, Office, dan gambar yang didukung dapat berukuran hingga 10 MB; lampiran teks hingga 256 KB</li>
-    <li>mengatur email: status baca, bendera beserta warnanya, sampah, pemindahan, pengarsipan, folder baru, penggantian nama folder Anda sendiri, mengikuti dan mengabaikan percakapan, menghapus ke <b data-text="folder-deleted"></b>, serta keluar dari milis setelah Anda menyetujuinya. Beberapa tindakan pesan juga berlaku untuk hasil pencarian, seperti dijelaskan di bawah</li>
+    <li>mengatur email: status baca, bendera beserta warnanya, sampah, pemindahan, pengarsipan, folder baru, penggantian nama folder Anda sendiri, memantau dan mengabaikan percakapan, menghapus ke <b data-text="folder-deleted"></b>, serta keluar dari milis setelah Anda menyetujuinya. Beberapa tindakan pesan juga berlaku untuk hasil pencarian, seperti dijelaskan di bawah</li>
     <li>menulis draf untuk Anda kirim, serta mengubah atau menghapus draf yang ditulisnya selama Anda belum menyimpan atau mengirimnya, termasuk penyimpanan otomatis di editor</li>
     <li>mengirim email, setiap pesan hanya setelah Anda menyetujuinya</li>
 </ul>
@@ -16,7 +15,7 @@
     <li><!--os:windows--><b data-text="win-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os--> meminta setiap milis berhenti mengirim kepada Anda.</li>
     <li><!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os-->, pilihan default, membiarkannya seperti semula.</li>
 </ul>
-<p>Agen tidak dapat membuat Anda berhenti berlangganan dari pesan di <b data-text="folder-junk"></b>. Setiap program dapat menerima persetujuan untuk paling banyak 30 permintaan dalam 24 jam, termasuk permintaan yang gagal. Log mencatat persetujuan sebelum permintaan dikirim, bukan konfirmasi bahwa email sudah berhenti.</p>
+<p>Agen tidak dapat meminta berhenti berlangganan melalui pesan di <b data-text="folder-junk"></b>, <b data-text="folder-sent"></b>, atau <b data-text="folder-drafts"></b>. Setiap program dapat menerima persetujuan untuk paling banyak 30 permintaan dalam 24 jam, termasuk permintaan yang gagal. Log mencatat persetujuan sebelum permintaan dikirim, bukan konfirmasi bahwa email sudah berhenti.</p>
 <h2>Mengubah banyak pesan sekaligus</h2>
 <p>Agen dengan akses mengatur dapat mengubah status baca, bendera, warna, folder, atau status sampah untuk hasil pencarian. Agen terlebih dahulu menghitung pesan yang memenuhi syarat dan melihat contohnya. Jika ada lebih dari 1.000 pesan yang memenuhi syarat, atau lebih dari 10.000 hasil pencarian yang harus diperiksa, agen menolak permintaan itu. Kemudian agen memeriksa ulang pesan yang dipilih, melewati pesan yang tidak lagi memenuhi syarat, dan tidak menyertakan pesan yang tiba kemudian. Tidak diperlukan persetujuan baru. Log menampilkan satu baris; Batalkan mungkin hanya memulihkan sebagian pesannya.</p>
 <h2>Melihat dan mengubah akses</h2>
@@ -25,10 +24,9 @@
 <ul>
     <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> mengubah apa yang boleh dilakukan program.</li>
     <li><b data-text="ui-remove"></b> menghapus akses dan log yang tersimpan untuk program, sehingga Anda ditanya lagi lain kali. Tindakan ini tidak menghapus instalan program tersebut.</li>
-    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> mengembalikan status baca, bendera atau warnanya, pemindahan, sampah, pengarsipan atau penghapusan, serta pesan yang masih ada di Kotak Keluar.</li>
-    <li><!--os:windows--><b data-text="win-undo-since"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-since-button"></b><!--/os--> mencoba mengembalikan perubahan program yang dipilih dalam periode yang Anda pilih, dari yang terbaru. Jumlahnya adalah entri log, bukan pesan satu per satu.</li>
+    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> membatalkan perubahan status baca, bendera atau warnanya, pemindahan, penandaan sebagai sampah, pengarsipan, atau penghapusan, serta pengiriman pesan yang masih ada di Kotak Keluar.</li>
+    <li><!--os:windows--><b data-text="win-undo-since"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-since-button"></b><!--/os--> mencoba membatalkan perubahan program yang dipilih dalam periode yang Anda pilih, dari yang terbaru. Jumlahnya adalah entri log, bukan pesan satu per satu.</li>
 </ul>
-<p>Pembatalan melewati pesan yang tidak lagi berada di lokasi atau status yang diharapkan. Entri log dihitung sudah dikembalikan meskipun hanya sebagian yang berhasil. Agen dapat membatalkan perubahannya sendiri, tetapi tidak pernah perubahan program lain.</p>
+<p>Pembatalan melewati pesan yang tidak lagi berada di lokasi atau status yang diharapkan. Entri log dianggap sudah dibatalkan meskipun hanya sebagian yang berhasil. Agen dapat membatalkan perubahannya sendiri, tetapi tidak pernah perubahan program lain.</p>
 <aside class="warning">Email ditulis oleh orang lain, dan sebuah pesan dapat mencoba membujuk agen agar meneruskan atau menghapus email Anda. Inbox Classic menyembunyikan dari agen teks yang disembunyikan pesan dari Anda, dan memberi tahu agen bahwa email bukanlah instruksi. Agen tetap dapat tertipu. Izinkan hanya yang Anda perlukan.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>
-<!--/review-->

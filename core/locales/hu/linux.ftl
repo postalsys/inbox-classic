@@ -105,7 +105,7 @@ gtk-link-status = { $link }    (megnyitás: Ctrl+kattintás)
 ## Accounts
 
 gtk-plain-warning =
-    Titkosítás nélkül bárki, aki lehallgatja a hálózati forgalmát, elolvashatja a jelszavát és az üzeneteit. Ezt a kapcsolatot csak a saját számítógépén vagy helyi hálózatán futó kiszolgálóval használja.
+    Titkosítás nélkül bárki, aki lehallgatja a hálózati forgalmát, elolvashatja a jelszavát és az üzeneteit. Csak akkor folytassa, ha a kapcsolat más módon védett; a helyi hálózat önmagában nem biztosít titkosítást.
 
     Folytatja?
 gtk-account-name-title = Fiók neve

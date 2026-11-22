@@ -10,7 +10,6 @@ messages = { $count ->
 }
 # the separator of decimals in sizes: 2,4 MB
 decimal-separator = ,
-# review: new
 list-separator = { ", " }
 size-bytes = { $count ->
     [one] 1 octet
@@ -705,7 +704,7 @@ agent-read-search = { $count ->
     [few] A căutat „{ $query }”: { $count } mesaje
    *[other] A căutat „{ $query }”: { $count } de mesaje
 }
-agent-read-people = A căutat persoane al căror nume sau adresă începe cu „{ $query }”
+agent-read-people = A căutat persoane după nume sau adresă: „{ $query }”
 agent-read-list = { $count ->
     [one] A consultat 1 rând din lista „{ $folder }”
     [few] A consultat { $count } rânduri din lista „{ $folder }”

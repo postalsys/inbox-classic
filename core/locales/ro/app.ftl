@@ -88,7 +88,6 @@ cmd-options = &Opțiuni...
 cmd-message-rules = Reguli pentru m&esaje...
 cmd-encryption-keys = &Chei de criptare...
 cmd-create-rule-from-message = Creare regulă din mesa&j...
-# review: new
 cmd-unsubscribe = D&ezabonare de la listă...
 cmd-select-all = Selectare &totală
 cmd-undo = An&ulare
@@ -251,7 +250,6 @@ ui-no-items = Nu există mesaje în această vizualizare.
 ui-choose-folder = Alegeți un folder pentru a-i vedea mesajele.
 ui-unsubscribe = Dezabonare
 ui-open-in-calendar = Deschidere în Calendar
-# review: changed
 ui-pictures-blocked = Unele imagini au fost blocate pentru a limita urmărirea deschiderii mesajului de către expeditor.
 ui-not-shown = Mesajul nu a putut fi afișat.
 ui-attachment-not-read = Atașarea nu a putut fi citită.
@@ -265,21 +263,13 @@ ui-unsubscribing = Se face dezabonarea de la { $target }...
 ui-cannot-unsubscribe = Acest mesaj nu oferă o opțiune de dezabonare.
 ui-unsubscribed = Cererea de dezabonare a fost acceptată.
 ui-not-unsubscribed = Dezabonarea nu a reușit: { $reason }
-# review: new
 ui-list-bar = Acest mesaj este de la o listă de corespondență ({ $domain }).
-# review: new
 ui-list-bar-plain = Acest mesaj este de la o listă de corespondență.
-# review: new
-ui-list-bar-asked = Ați cerut să părăsiți această listă pe { $date }.
-# review: new
-ui-list-bar-came-after = Ați cerut să părăsiți această listă pe { $date }, dar acest mesaj a sosit după aceea.
-# review: new
-ui-list-bar-opened = Ați deschis pagina listei pentru a o părăsi pe { $date }.
-# review: new
-ui-list-bar-failed = Lista nu a acceptat cererea: { $reason }
-# review: new
+ui-list-bar-asked = Ați solicitat dezabonarea de la această listă la { $date }.
+ui-list-bar-came-after = Ați solicitat dezabonarea la { $date }, dar acest mesaj a sosit cu mai mult de două zile mai târziu.
+ui-list-bar-opened = Ați deschis pagina de dezabonare a acestei liste la { $date }.
+ui-list-bar-failed = Cererea de dezabonare a eșuat: { $reason }
 ui-unsubscribe-ask = Dezabonare…
-# review: new
 ui-unsubscribe-again = Dezabonare din nou…
 ui-event-span = De la { $start } până la { $end }
 ui-event-floating = { $when } (fus orar nespecificat sau necunoscut)
@@ -319,7 +309,7 @@ ui-found-autodiscover = Aceste setări au fost găsite prin Microsoft Autodiscov
 ui-found-other = Aceste setări au fost găsite pentru această adresă.
 ui-app-password-needed = { $provider } nu acceptă parola obișnuită în programele de e-mail. Dacă acest cont permite parole de aplicație, creați una în contul { $provider } și introduceți-o în câmpul Parolă din formularul următor. Pentru Outlook.com și Microsoft 365, folosiți conectarea prin browser.
 ui-app-password-open = Deschideți în browser instrucțiunile oferite de { $provider }?
-ui-plain-warning = Fără criptare, oricine interceptează traficul de rețea vă poate citi parola și mesajele. O rețea locală nu protejează singură conexiunea. Continuați numai dacă înțelegeți și acceptați expunerea datelor.
+ui-plain-warning = Fără criptare, oricine interceptează traficul de rețea vă poate citi parola și mesajele. O rețea locală nu protejează singură conexiunea. Continuați numai dacă conexiunea este protejată în alt mod.
 ui-continue-ask = Continuați?
 ui-add-sign-in-app = Adăugare aplicație de conectare...
 ui-turned-off = Opțiunea „{ $name }” este dezactivată pe acest computer.
@@ -434,6 +424,8 @@ ui-account-move-down = Mutare în &jos
 ui-menu-open = Desc&hidere
 ui-menu-flag = Semnali&zare
 ui-menu-view-source = &Vizualizare sursă
+# Context menu: the same action as cmd-unsubscribe, with its own access key.
+ui-menu-unsubscribe = Deza&bonare de la listă...
 ui-save-attachments = Salvare atașări
 ui-attachment-open = Deschidere
 ui-attachment-save-as = Salvare ca...

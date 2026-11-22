@@ -86,7 +86,6 @@ cmd-options = Пара&метры...
 cmd-message-rules = &Правила для сообщений...
 cmd-encryption-keys = &Ключи шифрования...
 cmd-create-rule-from-message = Со&здать правило из сообщения...
-# review: new
 cmd-unsubscribe = Отпис&аться от рассылки...
 cmd-select-all = В&ыделить все
 cmd-undo = О&тменить
@@ -248,7 +247,6 @@ ui-no-items = Здесь нет сообщений.
 ui-choose-folder = Выберите папку, чтобы просмотреть сообщения в ней.
 ui-unsubscribe = Отписаться
 ui-open-in-calendar = Открыть в календаре
-# review: changed
 ui-pictures-blocked = Некоторые изображения заблокированы для защиты от отслеживания отправителем.
 ui-not-shown = Не удалось отобразить сообщение.
 ui-attachment-not-read = Не удалось прочитать вложение.
@@ -262,21 +260,13 @@ ui-unsubscribing = Отправка запроса на отписку: { $targe
 ui-cannot-unsubscribe = В этом сообщении нет ссылки или адреса для отписки.
 ui-unsubscribed = Запрос на отписку принят.
 ui-not-unsubscribed = Не удалось отписаться: { $reason }
-# review: new
 ui-list-bar = Это сообщение из рассылки ({ $domain }).
-# review: new
 ui-list-bar-plain = Это сообщение из рассылки.
-# review: new
 ui-list-bar-asked = Вы попросили отписать вас от этой рассылки { $date }.
-# review: new
-ui-list-bar-came-after = Вы попросили отписать вас от этой рассылки { $date }, но это сообщение пришло позже.
-# review: new
-ui-list-bar-opened = Вы открыли страницу рассылки для отписки { $date }.
-# review: new
-ui-list-bar-failed = Рассылка не приняла запрос: { $reason }
-# review: new
+ui-list-bar-came-after = Вы запросили отписку { $date }, но это сообщение пришло более чем через два дня.
+ui-list-bar-opened = Вы открыли страницу отписки от этой рассылки { $date }.
+ui-list-bar-failed = Не удалось выполнить запрос на отписку: { $reason }
 ui-unsubscribe-ask = Отписаться…
-# review: new
 ui-unsubscribe-again = Отписаться снова…
 ui-event-span = с { $start } до { $end }
 ui-event-floating = { $when } (время из приглашения, без пересчета в ваш часовой пояс)
@@ -431,6 +421,8 @@ ui-account-move-down = В&низ
 ui-menu-open = &Открыть
 ui-menu-flag = &Флажок
 ui-menu-view-source = Ис&ходный текст
+# Context menu: the same action as cmd-unsubscribe, with its own access key.
+ui-menu-unsubscribe = &Отписаться от рассылки...
 ui-save-attachments = Сохранить вложения
 ui-attachment-open = Открыть
 ui-attachment-save-as = Сохранить как...

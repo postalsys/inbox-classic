@@ -106,7 +106,7 @@ gtk-link-status = { $link }    (Ctrl+clic per aprire)
 ## Accounts
 
 gtk-plain-warning =
-    Senza crittografia, chiunque intercetti il tuo traffico di rete può leggere la tua password e i tuoi messaggi. Usa questa connessione solo con un server sul tuo computer o nella tua rete locale.
+    Senza crittografia, chiunque intercetti il tuo traffico di rete può leggere la password e i messaggi. Continua solo se la connessione è protetta in altro modo; una rete locale da sola non offre crittografia.
 
     Continuare?
 gtk-account-name-title = Nome account
@@ -161,7 +161,7 @@ gtk-nothing-yet = Ancora niente.
 ## Preferences
 
 gtk-preferences = Preferenze
-gtk-notify-subtitle = Solo mentre Inbox Classic è in background
+gtk-notify-subtitle = Solo quando la finestra principale non è in primo piano
 
 ## The desktop entry and the page of the software stores
 

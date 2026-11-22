@@ -104,7 +104,7 @@ gtk-link-status = { $link }    (avamiseks Ctrl+klõps)
 ## Accounts
 
 gtk-plain-warning =
-    Krüptimata ühenduse korral saavad võrguliiklust jälgivad isikud lugeda teie parooli ja kirju. Kasutage seda ainult oma arvutis või kohalikus võrgus oleva serveriga.
+    Krüptimata ühenduse korral saavad võrguliiklust jälgivad isikud lugeda teie parooli ja kirju. Jätkake ainult siis, kui ühendus on muul viisil kaitstud; kohalik võrk ise krüptimist ei taga.
 
     Kas jätkata?
 gtk-account-name-title = Konto nimi
@@ -159,7 +159,7 @@ gtk-nothing-yet = Veel mitte midagi.
 ## Preferences
 
 gtk-preferences = Eelistused
-gtk-notify-subtitle = Ainult siis, kui Inbox Classic on taustal
+gtk-notify-subtitle = Ainult siis, kui põhiaken pole esiplaanil
 
 ## The desktop entry and the page of the software stores
 

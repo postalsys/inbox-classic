@@ -45,10 +45,22 @@ Rules for every language:
   not the total number of messages or files.
 - An `&` marks the menu letter on Windows and Linux; choose a letter of your own word, different within one menu.
 - No en or em dashes (a test checks it): commas, colons or separate sentences instead.
-- "Re: " and "Fw: " in the subjects of replies and forwards stay English in every language (every mail program
-  threads by them); the "Original Message" block of a reply follows the language.
+- Newly added reply and forward prefixes stay "Re: " and "Fw: " in every language. Recognized prefixes already in
+  the subject are kept, including supported localized forms. The "Original Message" block follows the language.
 - Keys in the help stay `<kbd>Ctrl</kbd>`, `<kbd>Shift</kbd>`, `<kbd>Alt</kbd>`, `<kbd>Del</kbd>`, `<kbd>Enter</kbd>`
   in every language: the page names them as the keyboard does (`key-*` in `core.ftl`, and the Mac's symbols there).
+
+## Mailing-list bar and menu labels
+
+Request history belongs to a list within one account. A direct request is recorded after acceptance; an email
+request after sending. Opening a web page records only that it opened. The retry threshold is a message arriving
+more than two days after a request, not a promise that the list will stop within two days. A failed request may be a
+transport failure, not a refusal by the list. The domain is optional. Junk, Sent Items and Drafts suppress the bar
+and cannot supply agent unsubscribe requests.
+
+`cmd-unsubscribe` labels the main Message menu; `ui-menu-unsubscribe` labels the message context menu. Keep the same
+visible wording, but choose each access key against its own menu. Open Draft and Unsubscribe cannot appear together.
+Linux and macOS display these context labels without the Windows mnemonic marker.
 
 ## Agent unsubscribe log timing
 
@@ -67,6 +79,23 @@ content is returned.
 
 Provider confirmation of a sending domain does not verify the identity of an individual person. Keep this separate
 from verification of an OpenPGP key's owner and from a signature's cryptographic validity.
+
+## Shared platform wording
+
+Removing an AI program from the permissions list deletes its saved permissions and activity history; it does not
+uninstall the program. New-mail notifications depend on the main window being out of the foreground, not on every
+Inbox Classic window being hidden.
+
+The no-encryption warning has the same meaning on every platform: continue only if the connection is protected in
+another way. A local network alone provides no encryption. Certificate checks described in account-security help
+apply to encrypted connections. DNS-over-HTTPS discovery refers to MX and SRV records, not every hostname lookup.
+
+Chinese, Japanese and Korean search terms can match inside longer words. Do not explain this by claiming that all
+three languages omit spaces. Contact lookup also supports these matches, so its activity log names a search by
+name or address rather than promising a prefix-only search.
+
+Keep bracketed CJK access keys and full-width field colons in catalogs. The help renderer removes those decorations
+when inserting control names into prose; translations must not compensate for rendering problems by changing labels.
 
 ## Fixed terms
 
@@ -363,7 +392,7 @@ differently, using an exact `[1]` (never `[one]`), and `[0]` where English has i
   The Flag submenu's colours take M, O, K, H, B, U, A, so Hapus Bendera uses P. The message list's context menu has
   more items than letters: Tambahkan Pengirim ke Buku Alamat (P, with Balas ke Pengirim), Lihat Sumber (U, with
   Belum Dibaca) and Properti (O, with Salin ke Folder) share letters there; the toggled pairs (read/unread,
-  junk/not junk) are never shown together. Some keys sit on less obvious letters to stay unique ("Salin ke F&older",
+  junk/not junk) are never shown together. Some keys sit on less obvious letters to stay unique ("Salin ke Fo&lder",
   "Simpan Seba&gai...", "Pa&ntau Percakapan").
 
 Review first:
@@ -377,6 +406,8 @@ Review first:
 - "Tetap Berlangganan" for Don't Unsubscribe, "Tetap Enkripsi" for Keep It Encrypted, "Cocok" / "Berbeda" for They
   Match / They Differ.
 - The Linux search keywords (surel; pesan; kotak masuk; surat).
+
+Review decisions: use pemilik kunci terverifikasi / memverifikasi pemilik kunci for ownership checks, memantau for Watch, menciutkan for collapsing quoted messages, and kredensial masuk for sign-in credentials. Write beri tahu as two words and use mengeklik as the inflected verb. Literal keyboard labels remain unchanged. The sender-to-book command uses Jadikan Pengirim sebagai Kontak; the raw-source context command uses Lihat Versi Asli to allow distinct menu access keys.
 
 ### Català (ca)
 
@@ -441,6 +472,8 @@ Plurals: `[one]` (exactly 1) and `*[other]` (0, 2 and more). A literal 1 in `[on
 
 ### Čeština (cs)
 
+- Use rozesílací seznam for mailing lists, including newsletters; do not narrow this to poštovní konference.
+
 Terms: Doručená pošta; Pošta k odeslání; Odeslaná pošta; Odstraněná pošta; Koncepty; Nevyžádaná pošta; zpráva;
 složka; účet; příloha; příznak (Označit příznakem, Zrušit příznak); Odpovědět všem; Přeposlat.
 
@@ -483,6 +516,8 @@ Plurals: `[one]` 1, `[few]` 2 to 4, `*[other]` 0 and 5 or more; `[many]` (fracti
 
 ### Dansk (da)
 
+- Use afmelding and afmeldingsside for leaving a mailing list. The full menu label is Afmeld abonnement på listen; the bar button may remain shorter.
+
 Terms: Indbakke; Udbakke; Sendt post; Slettet post; Kladder; Uønsket mail; meddelelse ("mail" as the mass noun);
 mappe; konto (pl. konti); vedhæftet fil; flag (sætte flag på, Fjern flag); Svar alle; Videresend; Adressekartotek (as
 Outlook Express).
@@ -520,6 +555,8 @@ Outlook Express).
 - Queued folder operations use Anmodede om at oprette/omdøbe, imported messages Satte i kø. Key storage can be unavailable or locked rather than lost; attachment previews do not imply that opened decrypted files stay off disk.
 
 ### Hrvatski (hr)
+
+- Use otkazivanje pretplate for leaving a mailing list, not literal izlazak.
 
 Terms: Ulazna pošta; Izlazna pošta; Poslane stavke; Izbrisane stavke; Skice; Neželjena e-pošta; poruka; mapa; račun;
 privitak; zastavica (Označi zastavicom); Odgovori svima; Proslijedi.
@@ -1161,6 +1198,8 @@ Terms: Postvak IN; Postvak UIT; Verzonden items; Verwijderde items; Concepten; O
 
 ### Norsk bokmål (nb)
 
+- Use avmelding and avmeldingsside in list history. The full menu label Avslutt abonnementet på listen permits distinct main-menu and context-menu keys; the bar button may remain shorter.
+
 Terms: Innboks; Utboks; Sendte elementer; Slettede elementer; Utkast; Søppelpost; Arkiv; Alle innbokser; melding (f./m.,
 "meldingen", pl. "meldinger"; "e-post" as the mass noun); mappe; konto (pl. kontoer); vedlegg; flagg (Merk med flagg,
 Fjern flagg); Svar avsender; Svar alle; Videresend; Send/motta; Merk som søppelpost / Merk som ikke søppelpost; Flytt
@@ -1456,6 +1495,8 @@ Plurals: `[one]` 1; `[few]` 0, 2 to 19 and numbers ending in 01 to 19 above 100;
 - Distinguish „previzualizare păstrată în memorie”, „copie temporară necriptată” and „index local necriptat”. Cache size is a limită orientativă, not a hard database limit.
 
 ### Slovenčina (sk)
+
+- Use the existing zoznam adresátov for a mailing list, rather than e-mailová konferencia.
 
 Terms: Doručená pošta; Pošta na odoslanie; Odoslaná pošta; Odstránená pošta; Koncepty; Nevyžiadaná pošta; správa;
 priečinok; konto (as Microsoft Slovak); príloha; príznak (Označiť príznakom, Zrušiť príznak); Odpovedať všetkým;
@@ -1765,22 +1806,30 @@ máy chủ, tải xuống, đăng nhập, trình duyệt, Thuộc tính, Lưu d�
   messages after "cho").
 - Days: Thứ Hai ... Thứ Bảy, Chủ Nhật. Repeats: Hằng ngày / Mỗi 3 ngày. Decimal separator is a comma.
 - "----- Thư gốc -----" for the quoted header; "Re: " and "Fw: " stay English.
-- Access keys are on ASCII letters only (a Vietnamese keyboard cannot type a toned letter with Alt), unique in each main
+- Explicit access keys use ASCII letters for keyboard compatibility, unique in each main
   menu, each submenu and each settings page with Apply ("Áp &dụng"). Menu bar: &Tệp, &Chỉnh sửa, &Xem, Cô&ng cụ,
-  T&hư, Trợ &giúp. The message context menu has two unavoidable repeats: M (Mở, only for drafts, and Xe&m nguồn) and H
-  (&Hủy đăng ký, only for list mail, and T&huộc tính).
+  T&hư, Trợ &giúp. The reviewed context menu uses E for source, M for Open, O for Watch and A for Unsubscribe.
+  All modeled menu and dialog scopes have distinct keys. Generated Windows color keys still depend on the platform's
+  character classification; the static review does not certify native keyboard behavior.
 
 Check first:
 
 - `cmd-reply` "Trả lời người gửi" (Outlook's menu says only "Trả lời"; the toolbar `ui-tb-reply` is "Trả lời").
 - `ui-tb-not-junk` "Không phải rác" is shortened for the toolbar; `ui-tb-mark-read` / `-unread` are "Đã đọc" / "Chưa đọc".
-- `cmd-layout-columns` "Dạng cột" and `ui-col-queued` "Đưa vào hàng đợi" (a column header; maybe "Thời gian xếp hàng").
+- `cmd-layout-columns` "Dạng cột"; `ui-col-queued` is "Xếp hàng lúc", a queued timestamp rather than an action.
 - `their-folders` "thư mục ban đầu của chúng" (in "Đã chuyển 3 thư trở lại thư mục ban đầu của chúng").
 - `agent-log-unsubscribed` records approval ("Bạn đã đồng ý hủy đăng ký ..."), not a completed unsubscribe.
 - `mac-zoom` "Thu/Phóng" and `mac-hide-others` "Ẩn các mục khác" should match the current macOS Vietnamese menus.
 - `secrets-windows` "Trình quản lý Thông tin xác thực", `secrets-mac` "chuỗi khóa", `secrets-linux` "vòng khóa của hệ
   thống" in "{ $store } không khả dụng".
 - `gtk-desktop-keywords` is a first guess at what Vietnamese users type in an app search.
+
+Review decisions: keep thiết đặt for account/server values and cài đặt for app settings. Use khóa riêng tư,
+mã thông báo, máy khách OAuth and Trình quản lý Thông tin xác thực của Windows consistently in help. Ký số is
+natural cryptographic prose; the command remains Ký điện tử and the footer Chữ ký. Runtime is môi trường chạy,
+not elapsed time. Chưa từng viết thư tới describes an address the user has never written to. Clear Flag uses Bỏ cờ,
+and Mark All Read uses Đánh dấu toàn bộ thư là đã đọc, with distinct ASCII access keys. Keep literal keyboard names,
+OAuth identifiers and search operators unchanged.
 
 ### Türkçe (tr)
 
@@ -1854,6 +1903,8 @@ Plurals: `[one]` and `*[other]`; a noun after a number stays singular ("3 ileti"
 - Key lock instructions check the system store before backup recovery. Exact zero-address verification cannot record ownership. Oturum açma bilgileri includes credentials beyond parolalar; setup transfers only selected available secrets.
 
 ### Ελληνικά (el)
+
+- Use Διακοπή συνδρομής στη λίστα for the full unsubscribe menu label; the shorter bar action keeps its established wording.
 
 Terms: Εισερχόμενα; Εξερχόμενα; Απεσταλμένα; Διαγραμμένα; Πρόχειρα; Ανεπιθύμητη αλληλογραφία; Archive: Αρχειοθέτηση
 (Outlook's name, as "Αρχείο" is the File menu); μήνυμα; φάκελος; λογαριασμός; συνημμένο; σημαία; Απάντηση σε όλους;
@@ -2121,6 +2172,9 @@ and acts; its wording is awkward); ui-about-core ("コア{ $version }", no space
 portal labels quoted in sign-in-register-microsoft; and the exact `[1]` variants (done-watched family, move window titles,
 repeats-every, pgp-compose-*), which a reviewer may prefer to fold into one counted form.
 
+Review decisions: distinguish キーの所有者を確認済み from signature integrity, and describe signing at send time. Keep literal keyboard names such as Click inside kbd elements. Program removal refers to its saved registration/permissions; installation names the current Windows user.
+
+
 ### 简体中文 (zh-Hans)
 
 Terms (Microsoft Simplified Chinese, Outlook Express and Outlook): 收件箱; 发件箱; 已发送邮件; 已删除邮件; 草稿; 垃圾邮件;
@@ -2172,6 +2226,9 @@ Review first:
 - The Windows sign-in button text 使用 Google 账号登录 follows Google's own button (账号), not Microsoft's 帐户.
 - ui-connect-agent-intro keeps Claude Desktop's menu path in English (Settings > Developer > Edit Config).
 
+Review decisions: keep Microsoft’s 帐户, 保存, 标志 and 监视对话 and polite 您. Use 提供商 consistently in help. OAuth 客户端密码 must not become OpenPGP 密钥. Owner confirmation is 已验证密钥所有者, separate from signature validity; removing an agent program means deleting its saved permissions.
+
+
 ### 繁體中文 (zh-Hant)
 
 Taiwan usage, written from English (not converted from Simplified). The voice of the windows is Microsoft's Traditional Chinese (Taiwan) Windows, Outlook Express and Outlook; the Mac catalog follows Apple's Taiwan terms, the Linux one GNOME's zh_TW where they differ.
@@ -2208,6 +2265,8 @@ For the reviewer to check first:
 - `ui-the-account` (此帳戶) and `ui-the-provider` (服務提供者), which stand in for names inside other sentences.
 - The Mac menus use ASCII `...`, not Apple's ⋯; Apple Taiwan's terms used: 結束, 隱藏其他, 顯示全部, 檢查更新項目, 縮到最小, 縮放, App.
 - Linux uses GNOME's 主選單 (Main Menu) and 離開 (Quit); Windows' own word for a menu is 功能表.
+
+Review decisions: retain Taiwan terminology and platform distinctions. Use 監看交談, 登入代碼, and 前往 for navigation; keep 驗證碼 for verification codes. Link destinations may be mailto:, so use 連結位址 rather than web-only 網址. Keep cryptographic 簽章 separate from footer 簽名, and saved permissions separate from uninstalling a program.
 
 ### 한국어 (ko)
 
@@ -2264,3 +2323,5 @@ Review first:
 
 - The help attaches a particle to a command name where it reads best (파일 > 새 계정을 선택합니다), chosen by the final
   consonant of the catalog word: renaming such a command in the catalog means checking its particle in the help.
+
+Review decisions: retain 합니다체 and 전자 메일 with normal Korean spaces. Use 키 소유자 확인됨 / 소유자 확인 for confirmed ownership, separate from signature integrity, and 확인 대상: before a value that may be a name, address or fingerprint. Use a 메시지 head noun after arbitrary subjects. Trusted-sender address/domain records are 항목 ...개, not people counted with 명. Keep 초안 for drafts, 임시 보관함 for the folder, 대화 지켜보기 for Watch, and 초록색 for green states.

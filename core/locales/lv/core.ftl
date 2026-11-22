@@ -12,7 +12,6 @@ messages = { $count ->
 }
 # the separator of decimals in sizes: 2,4 MB
 decimal-separator = ,
-# review: new
 list-separator = { ", " }
 size-bytes = { $count ->
     [zero] { $count } baitu
@@ -711,7 +710,7 @@ agent-read-search = { $count ->
     [one] Meklēja „{ $query }”: { $count } ziņojums
    *[other] Meklēja „{ $query }”: { $count } ziņojumi
 }
-agent-read-people = Meklēja kontaktpersonas, kuru vārds vai adrese sākas ar „{ $query }”
+agent-read-people = Meklēja kontaktpersonas pēc vārda vai adreses: „{ $query }”
 agent-read-list = { $count ->
     [zero] Skatīja { $count } saraksta ierakstus. Saraksts: { $folder }
     [one] Skatīja { $count } saraksta ierakstu. Saraksts: { $folder }

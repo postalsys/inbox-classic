@@ -3357,7 +3357,7 @@ void Mailbox::MessageMenu(POINT screen) {
                 MenuItem(PE_TEXT_CMD_CREATE_RULE_FROM_MESSAGE).c_str());
     // the message shown is of a mailing list whose bar offers leaving it
     if (CanUnsubscribe()) {
-        AppendMenuW(menu, MF_STRING, IDM_UNSUBSCRIBE, MenuItem(PE_TEXT_CMD_UNSUBSCRIBE).c_str());
+        AppendMenuW(menu, MF_STRING, IDM_UNSUBSCRIBE, MenuItem(PE_TEXT_UI_MENU_UNSUBSCRIBE).c_str());
     }
     AppendMenuW(menu, MF_STRING, IDM_MOVE, MenuItem(PE_TEXT_CMD_MOVE).c_str());
     AppendMenuW(menu, MF_STRING, IDM_COPY, MenuItem(PE_TEXT_CMD_COPY).c_str());

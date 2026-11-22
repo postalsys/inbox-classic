@@ -89,7 +89,6 @@ cmd-options = &Asetukset...
 cmd-message-rules = Viestisää&nnöt...
 cmd-encryption-keys = Salausa&vaimet...
 cmd-create-rule-from-message = Luo säänt&ö viestistä...
-# review: new
 cmd-unsubscribe = Peruuta &listan tilaus...
 cmd-select-all = &Valitse kaikki
 cmd-undo = &Kumoa
@@ -250,7 +249,6 @@ ui-no-items = Tässä näkymässä ei ole kohteita.
 ui-choose-folder = Valitse kansio, niin näet sen viestit.
 ui-unsubscribe = Peruuta tilaus
 ui-open-in-calendar = Avaa kalenterissa
-# review: changed
 ui-pictures-blocked = Ulkoisia kuvia on estetty yksityisyytesi suojaamiseksi.
 ui-not-shown = Viestiä ei voitu näyttää.
 ui-attachment-not-read = Liitettä ei voitu lukea.
@@ -264,21 +262,13 @@ ui-unsubscribing = Lähetetään tilauksen peruutuspyyntöä: { $target }...
 ui-cannot-unsubscribe = Tässä viestissä ei ole tilauksen peruutusmahdollisuutta.
 ui-unsubscribed = Tilauksen peruutuspyyntö hyväksyttiin.
 ui-not-unsubscribed = Tilausta ei voitu peruuttaa: { $reason }
-# review: new
 ui-list-bar = Tämä viesti on postituslistalta ({ $domain }).
-# review: new
 ui-list-bar-plain = Tämä viesti on postituslistalta.
-# review: new
-ui-list-bar-asked = Pyysit eroa tältä listalta { $date }.
-# review: new
-ui-list-bar-came-after = Pyysit eroa tältä listalta { $date }, mutta tämä viesti tuli sen jälkeen.
-# review: new
-ui-list-bar-opened = Avasit listan eroamissivun { $date }.
-# review: new
-ui-list-bar-failed = Lista ei hyväksynyt pyyntöä: { $reason }
-# review: new
+ui-list-bar-asked = Pyysit tämän listan tilauksen perumista { $date }.
+ui-list-bar-came-after = Pyysit tilauksen perumista { $date }, mutta tämä viesti saapui yli kaksi päivää myöhemmin.
+ui-list-bar-opened = Avasit listan tilauksen perumissivun { $date }.
+ui-list-bar-failed = Tilauksen perumispyyntö epäonnistui: { $reason }
 ui-unsubscribe-ask = Peruuta tilaus…
-# review: new
 ui-unsubscribe-again = Peruuta tilaus uudelleen…
 ui-event-span = { $start } - { $end }
 ui-event-floating = { $when } (aikavyöhykettä muuntamatta)
@@ -433,6 +423,8 @@ ui-account-move-down = Siirrä a&las
 ui-menu-open = &Avaa
 ui-menu-flag = L&ippu
 ui-menu-view-source = Nä&ytä lähdekoodi
+# Context menu: the same action as cmd-unsubscribe, with its own access key.
+ui-menu-unsubscribe = Peruut&a listan tilaus...
 ui-save-attachments = Tallenna liitteet
 ui-attachment-open = Avaa
 ui-attachment-save-as = Tallenna nimellä...

@@ -1,4 +1,3 @@
-<!--review-->
 <h1>搜尋字詞</h1>
 <p class="summary">搜尋方塊能理解的字詞和符號，可讓您準確找到想要的郵件。</p>
 <p>搜尋方塊支援下列 Gmail 風格的字詞。您可以任意組合：郵件必須符合所有字詞。將指標指向搜尋方塊，即可看到簡短的清單。</p>
@@ -14,7 +13,7 @@
     <tr><td><code>filename:pdf</code></td><td>附加檔案的名稱中含有該字詞</td></tr>
     <tr><td><code>list:news.example.com</code></td><td>來自某個郵寄清單的郵件，以其 List-Id 識別</td></tr>
     <tr><td><code>has:attachment</code></td><td>含有檔案的郵件</td></tr>
-    <tr><td><code>is:unread</code>、<code>is:read</code></td><td>未讀或已讀的郵件</td></tr>
+    <tr><td><code>is:unread</code>、<code>is:read</code></td><td>未讀取或已讀取的郵件</td></tr>
     <tr><td><code>is:starred</code> 或 <code>is:flagged</code></td><td>加上標幟的郵件</td></tr>
     <tr><td><code>is:answered</code></td><td>您已回覆的郵件</td></tr>
     <tr><td><code>is:bounce</code></td><td>郵件未送達或延遲的通知</td></tr>
@@ -23,12 +22,11 @@
     <tr><td><code>in:projects</code></td><td>只限具有該名稱的資料夾</td></tr>
     <tr><td><code>in:anywhere</code></td><td>所有資料夾</td></tr>
     <tr><td><code>before:2025/01/31</code>、<code>after:2025/01/01</code></td><td>某一天開始之前，或該天開始時及之後的郵件，以 UTC 計算。也可以寫成 <code>2025-01-31</code></td></tr>
-    <tr><td><code>older_than:2d</code>、<code>newer_than:1m</code></td><td>早於或晚於指定時間長度的郵件，單位為天（<code>d</code>）、30 天的月（<code>m</code>）或 365 天的年（<code>y</code>）</td></tr>
+    <tr><td><code>older_than:2d</code>、<code>newer_than:1m</code></td><td>距今超過或不到指定時間的郵件，單位為天（<code>d</code>）、30 天的月（<code>m</code>）或 365 天的年（<code>y</code>）</td></tr>
     <tr><td><code>larger:5M</code>、<code>smaller:100k</code></td><td>大於或小於某個大小的郵件，以位元組計，或加上 <code>K</code>、<code>M</code> 或 <code>G</code></td></tr>
 </table>
-<p>重音符號和大小寫都不影響結果。未加引號、至少兩個字元的字詞會比對字詞的開頭；單一字元則比對完整的字詞。無法辨識的搜尋運算子會被當成一般文字。</p>
-<p>中文、日文和韓文的字詞之間不以空格分隔，因此在這些語言中，字詞出現在文字中的任何位置都能找到：<code>會議</code> 可以找到<i>會議室</i>，<code>회의</code> 可以找到 <i>회의에서</i>。</p>
+<p>重音符號和大小寫都不影響結果。未加引號、至少兩個字元的字詞通常會比對字詞的開頭；單一字元通常會比對完整的字詞。無法辨識的搜尋運算子會被當成一般文字。</p>
+<p>中文、日文和韓文的搜尋字詞可以比對較長字詞中的一部分：<code>会议</code> 可以找到<i>会议室</i>，<code>회의</code> 可以找到 <i>회의에서</i>。</p>
 <p>加密的郵件可以依外層的寄件者、收件者和主旨找到。在<b data-settings="reading"></b>中開啟<b data-text="ui-search-encrypted"></b>時，解密後的文字和受保護的主旨，會在以可用的金鑰建立索引後變成可搜尋。</p>
 <p>清單不會顯示大小。若要查看郵件的網際網路標頭，請選擇<b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>。</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav>
-<!--/review-->

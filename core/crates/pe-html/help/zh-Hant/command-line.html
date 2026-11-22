@@ -1,4 +1,3 @@
-<!--review-->
 <h1>命令列選項</h1>
 <p class="summary">從終端機啟動 Inbox Classic 的選項，供測試和 AI 代理程式使用。</p>
 <p>使用下列選項啟動程式<!--os:windows--> <code>InboxClassic.exe</code><!--/os--><!--os:mac--> <code>"Inbox Classic.app/Contents/MacOS/Inbox Classic"</code><!--/os--><!--os:linux--> <code>inbox-classic</code><!--/os-->：</p>
@@ -6,13 +5,12 @@
     <tr><th>選項</th><th>作用</th></tr>
     <tr><td><code>--store &lt;file&gt;</code></td><td>使用其他郵件存放區，例如測試用的存放區</td></tr>
     <tr><td><code>--memory-passwords</code></td><td>登入認證只保留到這次執行結束，不儲存到系統的認證存放區</td></tr>
-    <tr><td><code>--pin-certificate &lt;file&gt;</code></td><td>測試伺服器只接受這個檔案中的憑證：一個 DER 憑證，或一或多個 PEM 憑證</td></tr>
+    <tr><td><code>--pin-certificate &lt;file&gt;</code></td><td>連線到測試伺服器時，只接受這個檔案中的憑證：一個 DER 憑證，或一或多個 PEM 憑證</td></tr>
     <tr><td><code>--sign-in-page-file &lt;file&gt;</code></td><td>將瀏覽器登入的 URL 寫入這個檔案，而不開啟瀏覽器</td></tr>
     <tr><td><code>--language &lt;code&gt;</code></td><td>這次執行以這個語言顯示視窗，例如 <code>de</code></td></tr>
     <tr><td><code>--background</code></td><td>啟動時不開啟視窗</td></tr>
-    <tr><td><code>--mcp</code></td><td>將 AI 代理程式連接到 Inbox Classic。由代理程式的程式啟動，而不是由您</td></tr>
+    <tr><td><code>--mcp</code></td><td>將 AI 代理程式連接到 Inbox Classic。由代理程式所屬的程式啟動，您不必手動執行</td></tr>
     <tr><td><code>--version</code></td><td>顯示版本後結束</td></tr>
 </table>
 <p>以引數提供的 <code>mailto:</code> 連結，在已設定帳戶時會開啟新郵件，效果和電子郵件連結相同。</p>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:default-mail-program"></a> <a href="topic:data-storage"></a></nav>
-<!--/review-->

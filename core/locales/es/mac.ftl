@@ -109,7 +109,7 @@ mac-sign-in-apps-button = Aplicaciones de inicio de sesión…
 
 ## AI agents
 
-mac-forget-program = ¿Quitar este programa y el historial de sus agentes?
+mac-forget-program = ¿Quitar los permisos guardados de este programa y el historial de sus agentes?
 mac-forget-program-detail = Se borrarán los permisos del programa. Se le volverá a pedir autorización la próxima vez que el programa se conecte.
 
 ## Sign-in apps

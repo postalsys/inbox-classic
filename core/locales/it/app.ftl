@@ -88,8 +88,7 @@ cmd-options = &Opzioni...
 cmd-message-rules = Re&gole per i messaggi...
 cmd-encryption-keys = &Chiavi di crittografia...
 cmd-create-rule-from-message = C&rea regola dal messaggio...
-# review: new
-cmd-unsubscribe = Annulla iscrizione alla &lista...
+cmd-unsubscribe = Annu&lla iscrizione alla lista...
 cmd-select-all = Seleziona &tutto
 cmd-undo = &Annulla
 cmd-copy = &Copia nella cartella...
@@ -249,7 +248,6 @@ ui-no-items = Non ci sono elementi in questa visualizzazione.
 ui-choose-folder = Scegli una cartella per vederne i messaggi.
 ui-unsubscribe = Annulla iscrizione
 ui-open-in-calendar = Apri nel calendario
-# review: changed
 ui-pictures-blocked = Alcune immagini sono state bloccate per limitare il tracciamento da parte del mittente.
 ui-not-shown = Impossibile mostrare il messaggio.
 ui-attachment-not-read = Impossibile leggere l’allegato.
@@ -263,21 +261,13 @@ ui-unsubscribing = Annullamento dell’iscrizione da { $target }...
 ui-cannot-unsubscribe = Questo messaggio non contiene istruzioni per annullare l’iscrizione.
 ui-unsubscribed = La mailing list ha accettato la richiesta di annullamento dell’iscrizione.
 ui-not-unsubscribed = Impossibile annullare l’iscrizione: { $reason }
-# review: new
 ui-list-bar = Questo messaggio proviene da una mailing list ({ $domain }).
-# review: new
 ui-list-bar-plain = Questo messaggio proviene da una mailing list.
-# review: new
-ui-list-bar-asked = Hai chiesto di lasciare questa lista il { $date }.
-# review: new
-ui-list-bar-came-after = Hai chiesto di lasciare questa lista il { $date }, ma questo messaggio è arrivato dopo.
-# review: new
-ui-list-bar-opened = Hai aperto la pagina della lista per lasciarla il { $date }.
-# review: new
-ui-list-bar-failed = La lista non ha accettato la richiesta: { $reason }
-# review: new
+ui-list-bar-asked = Hai chiesto di annullare l’iscrizione a questa lista il { $date }.
+ui-list-bar-came-after = Hai chiesto di annullare l’iscrizione il { $date }, ma questo messaggio è arrivato più di due giorni dopo.
+ui-list-bar-opened = Hai aperto la pagina per annullare l’iscrizione a questa lista il { $date }.
+ui-list-bar-failed = La richiesta di annullamento dell’iscrizione non è riuscita: { $reason }
 ui-unsubscribe-ask = Annulla iscrizione…
-# review: new
 ui-unsubscribe-again = Annulla di nuovo l’iscrizione…
 ui-event-span = da { $start } a { $end }
 ui-event-floating = { $when } (senza conversione del fuso orario)
@@ -432,6 +422,8 @@ ui-account-move-down = Sposta &giù
 ui-menu-open = &Apri
 ui-menu-flag = C&ontrassegno
 ui-menu-view-source = Visuali&zza origine
+# Context menu: the same action as cmd-unsubscribe, with its own access key.
+ui-menu-unsubscribe = &Annulla iscrizione alla lista...
 ui-save-attachments = Salva allegati
 ui-attachment-open = Apri
 ui-attachment-save-as = Salva con nome...

@@ -106,7 +106,7 @@ gtk-link-status = { $link }    (Ctrl+clic pour ouvrir)
 ## Accounts
 
 gtk-plain-warning =
-    Sans chiffrement, toute personne qui intercepte le trafic réseau peut lire votre mot de passe et vos messages. Utilisez cette connexion uniquement avec un serveur sur votre ordinateur ou votre réseau local.
+    Sans chiffrement, une personne qui intercepte le trafic réseau peut lire votre mot de passe et vos messages. Ne continuez que si la connexion est protégée par un autre moyen. Un réseau local ne garantit pas cette protection.
 
     Continuer ?
 gtk-account-name-title = Nom du compte
@@ -153,7 +153,7 @@ gtk-agent-it-may = Actions autorisées
 gtk-agent-accounts = Comptes accessibles
 gtk-never-used = Jamais utilisé
 gtk-last-used = Dernière utilisation { $date }
-gtk-forget-program = Supprimer ce programme ?
+gtk-forget-program = Supprimer les autorisations enregistrées de ce programme ?
 gtk-forget-program-detail = Les autorisations du programme et l'historique de ses agents seront effacés. Une autorisation vous sera de nouveau demandée à la prochaine connexion.
 gtk-no-agents-yet = Aucun agent n'a encore demandé à utiliser votre courrier.
 gtk-nothing-yet = Rien pour l'instant.
@@ -161,7 +161,7 @@ gtk-nothing-yet = Rien pour l'instant.
 ## Preferences
 
 gtk-preferences = Préférences
-gtk-notify-subtitle = Uniquement lorsqu’Inbox Classic est en arrière-plan
+gtk-notify-subtitle = Uniquement si la fenêtre principale n’est pas au premier plan
 
 ## The desktop entry and the page of the software stores
 

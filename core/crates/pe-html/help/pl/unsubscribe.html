@@ -1,10 +1,10 @@
 <h1>Wypisywanie się z listy mailingowej</h1>
-<p class="summary"><!--review-->Poproś listę mailingową o zaprzestanie wysyłania wiadomości, korzystając z paska nad jej wiadomościami.<!--/review--></p>
-<p><!--review-->Wiadomość z listy mailingowej, która podaje, jak się z niej wypisać, ma nad treścią pasek z domeną listy i przyciskiem <b data-text="ui-unsubscribe-ask"></b>. Pasek określa listę wyłącznie jej domeną, nigdy nazwą wybraną przez nadawcę. W folderach Wiadomości-śmieci, Elementy wysłane i Wersje robocze pasek się nie pojawia: wypisanie się z listy ze spamu zdradza nadawcy, że Twój adres działa.<!--/review--></p>
+<p class="summary">Poproś listę mailingową o zaprzestanie wysyłania wiadomości, korzystając z paska nad jej wiadomościami.</p>
+<p>Wiadomości z instrukcją wypisania pokazują nad treścią pasek z przyciskiem <b data-text="ui-unsubscribe-ask"></b>. Jeśli domena listy jest dostępna, pasek pokazuje ją zamiast nazwy wybranej przez nadawcę. Pasek nie pojawia się w folderach <b data-text="folder-junk"></b>, <b data-text="folder-sent"></b> i <b data-text="folder-drafts"></b>. Wypisanie się przez wiadomość ze spamu może potwierdzić nadawcy, że Twój adres jest aktywny.</p>
 <p>Aby wypisać się z listy:</p>
 <ol>
-    <li><!--review-->Kliknij <b data-text="ui-unsubscribe-ask"></b> na pasku lub wybierz <b data-text="menu-message"></b> &gt; <b data-text="cmd-unsubscribe"></b>. Inbox Classic najpierw powie, co się stanie, i zapyta o zgodę.<!--/review--></li>
-    <li><!--review-->Kliknij <!--os:windows--><b data-text="ui-yes"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os-->. Zależnie od listy stanie się jedna z trzech rzeczy:<!--/review-->
+    <li>Kliknij <b data-text="ui-unsubscribe-ask"></b> na pasku lub wybierz <b data-text="menu-message"></b> &gt; <b data-text="cmd-unsubscribe"></b>. Inbox Classic najpierw powie, co się stanie, i zapyta o zgodę.</li>
+    <li>Kliknij <!--os:windows--><b data-text="ui-yes"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os-->. Zależnie od listy stanie się jedna z trzech rzeczy:
         <ul>
             <li>Inbox Classic poprosi listę o zaprzestanie wysyłki. Nie otworzy się żadna strona i nie zostanie wysłana żadna wiadomość e-mail.</li>
             <li>Inbox Classic przygotuje wiadomość wymaganą przez listę z konta, na którym czytasz wiadomość, z tekstem podpisu tego konta. Kliknij <b data-text="ui-tb-send"></b>, aby ją wysłać.</li>
@@ -12,8 +12,8 @@
         </ul>
     </li>
 </ol>
-<p><!--review-->Potem pasek na każdej wiadomości z tej listy pokazuje, kiedy poproszono o wypisanie, i nic więcej nie proponuje. Prośba wysyłana e-mailem liczy się dopiero po jej wysłaniu. W przypadku listy, której stronę otwarto, pasek zachowuje przycisk, ponieważ Inbox Classic nie widzi, czy wypisywanie zostało tam dokończone.<!--/review--></p>
-<p><!--review-->Lista może potrzebować do dwóch dni, aby przestać wysyłać wiadomości. Jeśli któraś z jej wiadomości przyjdzie później, pasek zaproponuje <b data-text="ui-unsubscribe-again"></b>.<!--/review--></p>
+<p>Po przyjęciu bezpośredniej prośby lub wysłaniu e-maila z prośbą o wypisanie pasek pokazuje datę prośby i ukrywa przycisk. Dotyczy to wiadomości z tej listy na tym samym koncie. Jeśli otworzysz stronę listy, przycisk pozostanie: Inbox Classic nie może sprawdzić, czy wypisywanie zostało tam ukończone.</p>
+<p>Lista może potrzebować czasu, aby przestać wysyłać wiadomości. Jeśli wiadomość dotrze ponad dwa dni po Twojej prośbie, jej pasek zaproponuje <b data-text="ui-unsubscribe-again"></b>.</p>
 <p>Przy prośbie wysłanej bezpośrednio do serwera listy pasek stanu informuje o jej przyjęciu. Nie potwierdza to, że lista faktycznie przestanie wysyłać pocztę. Zakończenie wypisywania przez e-mail lub stronę odbywa się poza tą kontrolą.</p>
 <aside class="note">Inbox Classic wysyła prośbę bezpośrednio do serwera listy tylko po Twojej zgodzie i gdy dostawca poczty potwierdzi podpis DKIM obejmujący oba nagłówki wypisywania. Ogranicza to możliwość wykorzystania sfałszowanych wiadomości do wysyłania takich próśb.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>

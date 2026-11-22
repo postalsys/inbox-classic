@@ -1,4 +1,3 @@
-<!--review-->
 <h1>登录应用</h1>
 <p class="summary">在 Google、Microsoft 或兼容的 OpenID Connect 提供商处注册您自己的登录应用，以便通过浏览器登录。</p>
 <p>通过浏览器登录需要使用在提供商处注册的 OAuth 客户端。Inbox Classic 自带用于 Google 和 Microsoft 的客户端。在此配置中，内置的 Google 客户端仅供测试用户使用，因此<b data-text="win-sign-in-google"></b>默认关闭。您可以注册自己的客户端：在您的 Google Cloud 项目中、在您的 Microsoft Entra 租户中，或在支持邮件访问的兼容 OpenID Connect 提供商处。</p>
@@ -8,11 +7,10 @@
     <li>单击<!--os:windows--><b data-text="win-sign-in-apps-button"></b><!--/os--><!--os:mac--><b data-text="mac-sign-in-apps-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-sign-in-apps"></b><!--/os-->，然后单击<!--os:windows--><b data-text="win-add"></b><!--/os--><!--os:mac--><b data-text="mac-add-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-add"></b><!--/os-->。</li>
     <li>在<b data-text="ui-fill-in-for"></b>旁边，单击 Google 或 Microsoft 以填入颁发者、范围和服务器。如果是其他提供商，请自行键入。</li>
     <li>按照底部框中的说明，在提供商处注册客户端。注册那里显示的<b data-text="ui-redirect-uri"></b>。</li>
-    <li>键入<b data-text="ui-client-id"></b>，如果提供商给了您<b data-text="ui-client-secret"></b>，也一并键入。默认情况下，密钥保存在<!--os:windows-->Windows 凭据管理器<!--/os--><!--os:mac-->您的登录钥匙串<!--/os--><!--os:linux-->您的密钥环<!--/os-->中，并且不会再显示。</li>
+    <li>键入<b data-text="ui-client-id"></b>，如果提供商给了您<b data-text="ui-client-secret"></b>，也一并键入。默认情况下，客户端密码保存在<!--os:windows-->Windows 凭据管理器<!--/os--><!--os:mac-->您的登录钥匙串<!--/os--><!--os:linux-->您的密钥环<!--/os-->中，并且不会再显示。</li>
     <li>单击<b data-text="ui-check"></b>检查颁发者发现及其服务地址。这不会验证客户端 ID、客户端密码或邮件权限。然后单击<b data-text="ui-ok"></b>。</li>
     <li>在<b data-text="ui-add-account-title"></b>的第一页上，使用<!--os:windows,linux--><b data-text="ui-more-sign-in"></b><!--/os--><!--os:mac--><b data-text="mac-more-sign-in-options"></b><!--/os-->添加帐户。</li>
 </ol>
 <p>在<b data-text="ui-sign-in-apps"></b>中，<!--os:windows,mac-->每个应用的复选框<!--/os--><!--os:linux--><b data-text="gtk-offered-for-new"></b><!--/os-->表示是否为新帐户提供该应用，内置应用也是如此。已经使用某个应用的帐户会继续正常工作。<!--os:windows--><b data-text="win-edit"></b><!--/os--><!--os:mac--><b data-text="mac-edit-button"></b><!--/os--><!--os:linux--><b data-text="gtk-edit-button"></b><!--/os-->用于更改应用；没有帐户使用某个应用后，可以用<b data-text="ui-remove"></b>将其删除。</p>
 <p>如果邮件服务器拒绝该应用的令牌，请检查其范围是否包含邮件访问。</p>
 <nav class="related"><a href="topic:gmail-outlook"></a> <a href="topic:add-account"></a> <a href="topic:connections"></a></nav>
-<!--/review-->

@@ -89,7 +89,6 @@ cmd-options = &Opções...
 cmd-message-rules = Regras de &mensagens...
 cmd-encryption-keys = C&haves de encriptação...
 cmd-create-rule-from-message = Criar re&gra a partir da mensagem...
-# review: new
 cmd-unsubscribe = &Cancelar subscrição da lista...
 cmd-select-all = Selecionar t&udo
 cmd-undo = &Anular
@@ -250,8 +249,7 @@ ui-no-items = Não há itens nesta vista.
 ui-choose-folder = Escolha uma pasta para ver as respetivas mensagens.
 ui-unsubscribe = Cancelar subscrição
 ui-open-in-calendar = Abrir no Calendário
-# review: changed
-ui-pictures-blocked = Algumas imagens foram bloqueadas para ajudar a impedir que o remetente identifique o seu computador.
+ui-pictures-blocked = Algumas imagens foram bloqueadas para limitar o rastreio pelo remetente.
 ui-not-shown = Não foi possível mostrar a mensagem.
 ui-attachment-not-read = Não foi possível ler o anexo.
 ui-attachment-not-saved = Não foi possível guardar o anexo.
@@ -264,21 +262,13 @@ ui-unsubscribing = A enviar o pedido de cancelamento da subscrição para { $tar
 ui-cannot-unsubscribe = Esta mensagem não oferece uma opção para cancelar a subscrição.
 ui-unsubscribed = Pedido de cancelamento da subscrição aceite.
 ui-not-unsubscribed = Não foi possível cancelar a subscrição: { $reason }
-# review: new
 ui-list-bar = Esta mensagem é de uma lista de correio ({ $domain }).
-# review: new
 ui-list-bar-plain = Esta mensagem é de uma lista de correio.
-# review: new
-ui-list-bar-asked = Pediu para sair desta lista a { $date }.
-# review: new
-ui-list-bar-came-after = Pediu para sair desta lista a { $date }, mas esta mensagem chegou depois.
-# review: new
-ui-list-bar-opened = Abriu a página da lista para sair dela a { $date }.
-# review: new
-ui-list-bar-failed = A lista não aceitou o pedido: { $reason }
-# review: new
+ui-list-bar-asked = Pediu o cancelamento da subscrição desta lista a { $date }.
+ui-list-bar-came-after = Pediu o cancelamento da subscrição a { $date }, mas esta mensagem chegou mais de dois dias depois.
+ui-list-bar-opened = Abriu a página de cancelamento da subscrição desta lista a { $date }.
+ui-list-bar-failed = O pedido de cancelamento da subscrição falhou: { $reason }
 ui-unsubscribe-ask = Cancelar subscrição…
-# review: new
 ui-unsubscribe-again = Cancelar subscrição novamente…
 ui-event-span = { $start } a { $end }
 ui-event-floating = { $when } (sem fuso horário utilizável)
@@ -318,7 +308,7 @@ ui-found-autodiscover = Estas definições foram obtidas através do Microsoft A
 ui-found-other = Foram encontradas estas definições para este endereço.
 ui-app-password-needed = Para iniciar sessão em { $provider } desta forma, use uma palavra-passe de aplicação, se a conta o permitir. Crie-a nas definições da conta no site de { $provider } e introduza-a no campo Palavra-passe do formulário seguinte.
 ui-app-password-open = Abrir as instruções de { $provider } no browser?
-ui-plain-warning = Sem encriptação, quem intercetar o tráfego pode ler a sua palavra-passe e as mensagens. Uma rede local, por si só, não protege a ligação. Continue apenas se compreender e aceitar o risco.
+ui-plain-warning = Sem encriptação, quem intercetar o tráfego pode ler a sua palavra-passe e as mensagens. Uma rede local, por si só, não protege a ligação. Continue apenas se a ligação estiver protegida de outra forma.
 ui-continue-ask = Continuar?
 ui-add-sign-in-app = Adicionar uma aplicação de início de sessão...
 ui-turned-off = A opção «{ $name }» está desativada neste computador.
@@ -433,6 +423,8 @@ ui-account-move-down = Mover para &baixo
 ui-menu-open = &Abrir
 ui-menu-flag = Sinali&zar
 ui-menu-view-source = Ver código-&fonte
+# Context menu: the same action as cmd-unsubscribe, with its own access key.
+ui-menu-unsubscribe = Cancelar su&bscrição da lista...
 ui-save-attachments = Guardar anexos
 ui-attachment-open = Abrir
 ui-attachment-save-as = Guardar como...

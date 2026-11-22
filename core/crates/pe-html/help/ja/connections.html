@@ -1,9 +1,8 @@
-<!--review-->
 <h1>Inbox Classicが行う接続</h1>
 <p class="summary">技術的な詳細に関心のある方のために、Inbox Classicがどこに、なぜ接続するのかを説明します。</p>
 <ul>
     <li><b>メール サーバー</b>：メールを読むためにIMAPで、送信するためにSMTPで接続します。接続はTLSで暗号化され、各サーバーの証明書は、システムが信頼する証明書と照らし合わせて確認されます。Inbox Classicは、暗号化のないサーバーへの接続を拒否します。ただし、<b data-text="ui-security-none"></b>を選択して確認した場合は除きます。</li>
-    <li><b>アカウントの追加時</b>：サーバーを調べるために接続します。Inbox Classicは、ドメインのDNSレコードを通常のDNSではなく、DNS over HTTPS（Cloudflare、次にGoogle）で読み取ります。また、プロバイダーの自動構成ファイルとThunderbirdのプロバイダー一覧（ISPDB）も試します。Exchangeの場合はMicrosoft Autodiscoverに問い合わせます。Autodiscoverにパスワードが渡されるのは、HTTPSでパスワードを求められた場合だけです。暗号化のないサーバーが選ばれることはありません。</li>
+    <li><b>アカウントの追加時</b>：サーバーを調べるために接続します。Inbox Classicは、ドメインのMXレコードとSRVレコードをDNS over HTTPS（Cloudflare、次にGoogle）で調べます。また、プロバイダーの自動構成ファイルとThunderbirdのプロバイダー一覧（ISPDB）も試します。Exchangeの場合はMicrosoft Autodiscoverに問い合わせます。Autodiscoverにパスワードが渡されるのは、HTTPSでパスワードを求められた場合だけです。暗号化のないサーバーが選ばれることはありません。</li>
     <li><b>ブラウザーでのサインイン</b>：OAuth 2.0とPKCEで、Google、Microsoft、またはサインイン アプリのプロバイダーに接続します。ブラウザーは、このコンピューター上のInbox Classicにだけ戻ります。</li>
     <li><b>ブランドのロゴ</b>（BIMI）：メッセージに使えるロゴが含まれておらず、保存済みのコピーも再利用できない場合に、ブランドのHTTPSアドレスから取得します。ダウンロードしたロゴは、アプリを再起動してもキャッシュに保持されます。これが行われるのは、メッセージがメール サーバーのDMARCチェックに合格し、ロゴが承認された場合だけです。</li>
     <li><b>インターネット上の画像</b>：信頼する差出人や自動ダウンロードの設定による場合を含め、あなたが許可したときに取得します。</li>
@@ -13,4 +12,3 @@
 </ul>
 <p>サインイン コードが提示されるのは、コードのドメインまたはその親ドメインからの有効なDKIM署名をプロバイダーが報告した場合だけです。Inbox Classicは、この結果をプロバイダーのAuthentication-ResultsヘッダーまたはARC-Authentication-Resultsヘッダーから読み取ります。そのための接続は必要ありません。</p>
 <nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>
-<!--/review-->

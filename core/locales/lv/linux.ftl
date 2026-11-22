@@ -113,9 +113,9 @@ gtk-link-status = { $link }    (Ctrl+klikšķis, lai atvērtu)
 ## Accounts
 
 gtk-plain-warning =
-    Bez šifrēšanas ikviens, kas pārtver jūsu tīkla datplūsmu, var izlasīt jūsu paroli un ziņojumus. Izmantojiet šo savienojumu tikai ar serveri savā datorā vai lokālajā tīklā.
+    Bez šifrēšanas ikviens, kas pārtver jūsu tīkla datplūsmu, var izlasīt jūsu paroli un ziņojumus. Turpiniet tikai tad, ja savienojums ir aizsargāts citā veidā. Lokāls tīkls pats par sevi nenodrošina šifrēšanu.
 
-    Turpināt?
+    Vai turpināt?
 gtk-account-name-title = Konta nosaukums
 gtk-display-name-title = Parādāmais vārds
 gtk-turned-off-why = Iespēja „{ $button }” šajā datorā ir izslēgta. { $reason }
@@ -168,7 +168,7 @@ gtk-nothing-yet = Pagaidām nekā.
 ## Preferences
 
 gtk-preferences = Iestatījumi
-gtk-notify-subtitle = Tikai tad, kad Inbox Classic ir fonā
+gtk-notify-subtitle = Tikai tad, kad galvenais logs nav priekšplānā
 
 ## The desktop entry and the page of the software stores
 

@@ -1,9 +1,8 @@
-<!--review-->
 <h1>Inbox Classic이 만드는 연결</h1>
 <p class="summary">기술에 관심 있는 사용자를 위해 Inbox Classic이 어디에 왜 연결하는지 설명합니다.</p>
 <ul>
     <li><b>메일 서버</b>: 메일을 읽을 때는 IMAP으로, 보낼 때는 SMTP로 연결합니다. 연결은 TLS로 암호화되며, 각 서버의 인증서는 시스템이 신뢰하는 인증서와 대조하여 확인합니다. Inbox Classic은 암호화하지 않는 서버를 거부합니다. 단, <b data-text="ui-security-none"></b> 옵션을 선택하고 확인한 경우는 예외입니다.</li>
-    <li><b>계정을 추가할 때</b>: 계정의 서버를 찾습니다. Inbox Classic은 도메인의 DNS 레코드를 일반 DNS가 아닌 DNS over HTTPS(Cloudflare, 그다음 Google)로 읽습니다. 공급자의 autoconfig 파일과 Thunderbird의 공급자 목록(ISPDB)도 확인합니다. Exchange의 경우 Microsoft Autodiscover에 요청하며, Autodiscover가 HTTPS를 통해 암호를 요청할 때만 암호를 보냅니다. 암호화하지 않는 서버는 선택되지 않습니다.</li>
+    <li><b>계정을 추가할 때</b>: 계정의 서버를 찾습니다. Inbox Classic은 도메인의 MX 및 SRV 레코드를 HTTPS(Cloudflare, 그다음 Google)로 조회합니다. 공급자의 autoconfig 파일과 Thunderbird의 공급자 목록(ISPDB)도 확인합니다. Exchange의 경우 Microsoft Autodiscover에 요청하며, Autodiscover가 HTTPS를 통해 암호를 요청할 때만 암호를 보냅니다. 암호화하지 않는 서버는 선택되지 않습니다.</li>
     <li><b>브라우저 로그인</b>: OAuth 2.0과 PKCE를 사용하여 Google, Microsoft 또는 로그인 앱의 공급자에 연결합니다. 브라우저는 이 컴퓨터의 Inbox Classic으로만 돌아옵니다.</li>
     <li><b>브랜드 로고</b>(BIMI): 메시지에 사용할 수 있는 로고가 없고 저장된 복사본을 다시 사용할 수 없을 때 브랜드의 HTTPS 주소에서 가져옵니다. 다운로드한 로고는 앱을 다시 시작해도 캐시에 남습니다. 메일 서버가 메시지의 DMARC 검사를 통과시키고 로고를 승인한 경우에만 연결합니다.</li>
     <li><b>인터넷의 그림</b>: 신뢰할 수 있는 보낸 사람 설정이나 자동 다운로드 설정을 포함하여 사용자가 허용한 경우에 연결합니다.</li>
@@ -13,4 +12,3 @@
 </ul>
 <p>로그인 코드는 공급자가 코드의 도메인이나 상위 도메인의 유효한 DKIM 서명을 보고한 경우에만 제공됩니다. Inbox Classic은 이 결과를 공급자의 Authentication-Results 또는 ARC-Authentication-Results 헤더에서 읽습니다. 이를 위해 별도로 연결하지는 않습니다.</p>
 <nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>
-<!--/review-->

@@ -86,7 +86,6 @@ cmd-options = &Optionen...
 cmd-message-rules = Nachrichten&regeln...
 cmd-encryption-keys = &Verschlüsselungsschlüssel...
 cmd-create-rule-from-message = Regel au&s Nachricht erstellen...
-# review: new
 cmd-unsubscribe = &Von Liste abbestellen...
 cmd-select-all = &Alles auswählen
 cmd-undo = &Rückgängig
@@ -244,8 +243,7 @@ ui-no-items = In dieser Ansicht gibt es keine Elemente.
 ui-choose-folder = Wählen Sie einen Ordner, um seine Nachrichten zu sehen.
 ui-unsubscribe = Abbestellen
 ui-open-in-calendar = Im Kalender öffnen
-# review: changed
-ui-pictures-blocked = Einige Bilder wurden zum Schutz vor Nachverfolgung blockiert.
+ui-pictures-blocked = Einige Bilder wurden blockiert, um die Nachverfolgung durch den Absender zu begrenzen.
 ui-not-shown = Die Nachricht konnte nicht angezeigt werden.
 ui-attachment-not-read = Die Anlage konnte nicht gelesen werden.
 ui-attachment-not-saved = Die Anlage konnte nicht gespeichert werden.
@@ -258,21 +256,13 @@ ui-unsubscribing = Abmeldeanfrage an { $target } wird gesendet...
 ui-cannot-unsubscribe = Diese Nachricht bietet keine Möglichkeit zum Abbestellen.
 ui-unsubscribed = Die Abmeldeanfrage wurde angenommen.
 ui-not-unsubscribed = Abbestellen nicht möglich: { $reason }
-# review: new
 ui-list-bar = Diese Nachricht stammt von einer Mailingliste ({ $domain }).
-# review: new
 ui-list-bar-plain = Diese Nachricht stammt von einer Mailingliste.
-# review: new
-ui-list-bar-asked = Sie haben am { $date } darum gebeten, diese Liste zu verlassen.
-# review: new
-ui-list-bar-came-after = Sie haben am { $date } darum gebeten, diese Liste zu verlassen, aber diese Nachricht kam danach.
-# review: new
-ui-list-bar-opened = Sie haben am { $date } die Seite der Liste zum Abbestellen geöffnet.
-# review: new
-ui-list-bar-failed = Die Liste hat die Anfrage nicht angenommen: { $reason }
-# review: new
+ui-list-bar-asked = Sie haben diese Mailingliste am { $date } um Abmeldung gebeten.
+ui-list-bar-came-after = Sie haben am { $date } um Abmeldung gebeten, doch diese Nachricht kam mehr als zwei Tage später.
+ui-list-bar-opened = Sie haben am { $date } die Abmeldeseite dieser Mailingliste geöffnet.
+ui-list-bar-failed = Die Abmeldeanfrage ist fehlgeschlagen: { $reason }
 ui-unsubscribe-ask = Abbestellen…
-# review: new
 ui-unsubscribe-again = Erneut abbestellen…
 ui-event-span = { $start } bis { $end }
 ui-event-floating = { $when } (ohne Umrechnung der Zeitzone)
@@ -427,6 +417,8 @@ ui-account-move-down = N&ach unten
 ui-menu-open = Ö&ffnen
 ui-menu-flag = Kenn&zeichnung
 ui-menu-view-source = &Quelltext anzeigen
+# Context menu: the same action as cmd-unsubscribe, with its own access key.
+ui-menu-unsubscribe = V&on Liste abbestellen...
 ui-save-attachments = Anlagen speichern
 ui-attachment-open = Öffnen
 ui-attachment-save-as = Speichern unter...

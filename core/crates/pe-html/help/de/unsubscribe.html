@@ -1,10 +1,10 @@
 <h1>Eine Mailingliste verlassen</h1>
-<p class="summary"><!--review-->Fordern Sie eine Mailingliste über die Leiste oberhalb ihrer Nachrichten auf, Ihnen keine weiteren Nachrichten zu senden.<!--/review--></p>
-<p><!--review-->Eine Nachricht einer Mailingliste, die angibt, wie man sie verlässt, zeigt über ihrem Text eine Leiste mit der Domain der Liste und <b data-text="ui-unsubscribe-ask"></b>. Die Leiste nennt die Liste nur nach ihrer Domain, nie nach einem Namen, den der Absender gewählt hat. Junk-E-Mail, Gesendete Objekte und Entwürfe zeigen keine Leiste: Wer eine Liste aus Spam heraus abbestellt, verrät dem Absender, dass die eigene Adresse funktioniert.<!--/review--></p>
+<p class="summary">Fordern Sie eine Mailingliste über die Leiste oberhalb ihrer Nachrichten auf, Ihnen keine weiteren Nachrichten zu senden.</p>
+<p>Nachrichten mit Angaben zum Abbestellen zeigen oberhalb des Textes eine Leiste mit <b data-text="ui-unsubscribe-ask"></b>. Wenn die Domain der Liste verfügbar ist, zeigt die Leiste diese statt eines vom Absender gewählten Namens. In den Ordnern <b data-text="folder-junk"></b>, <b data-text="folder-sent"></b> und <b data-text="folder-drafts"></b> erscheint die Leiste nicht. Das Abbestellen von Spam kann dem Absender bestätigen, dass Ihre Adresse aktiv ist.</p>
 <p>So verlassen Sie die Liste:</p>
 <ol>
-    <li><!--review-->Klicken Sie in der Leiste auf <b data-text="ui-unsubscribe-ask"></b>, oder wählen Sie <b data-text="menu-message"></b> &gt; <b data-text="cmd-unsubscribe"></b>. Inbox Classic sagt, was geschehen wird, und fragt vorher nach.<!--/review--></li>
-    <li><!--review-->Klicken Sie auf <!--os:windows--><b data-text="ui-yes"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os-->. Je nach Liste geschieht eines von drei Dingen:<!--/review-->
+    <li>Klicken Sie in der Leiste auf <b data-text="ui-unsubscribe-ask"></b>, oder wählen Sie <b data-text="menu-message"></b> &gt; <b data-text="cmd-unsubscribe"></b>. Inbox Classic sagt, was geschehen wird, und fragt vorher nach.</li>
+    <li>Klicken Sie auf <!--os:windows--><b data-text="ui-yes"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os-->. Je nach Liste geschieht eines von drei Dingen:
         <ul>
             <li>Inbox Classic bittet die Liste, keine Nachrichten mehr zu senden. Es öffnet sich keine Seite, und es wird keine E-Mail gesendet.</li>
             <li>Inbox Classic erstellt die gewünschte E-Mail mit dem Konto, in dem Sie die Nachricht lesen, und dessen Textsignatur. Klicken Sie auf <b data-text="ui-tb-send"></b>, um sie zu senden.</li>
@@ -12,8 +12,8 @@
         </ul>
     </li>
 </ol>
-<p><!--review-->Danach zeigt die Leiste bei jeder Nachricht dieser Liste, wann Sie das Abbestellen angefordert haben, und bietet nichts weiter an. Eine Anfrage per E-Mail zählt, sobald sie gesendet wurde. Bei einer Liste, deren Seite Sie geöffnet haben, behält die Leiste ihre Schaltfläche, da Inbox Classic nicht sehen kann, ob Sie den Vorgang dort abgeschlossen haben.<!--/review--></p>
-<p><!--review-->Eine Liste kann bis zu zwei Tage brauchen, bis sie keine Nachrichten mehr sendet. Trifft eine ihrer Nachrichten später ein, bietet die Leiste <b data-text="ui-unsubscribe-again"></b> an.<!--/review--></p>
+<p>Sobald eine direkte Anfrage angenommen oder eine Abmelde-E-Mail gesendet wurde, zeigt die Leiste das Datum der Anfrage und blendet ihre Schaltfläche aus. Dies gilt für Nachrichten dieser Liste im selben Konto. Wenn Sie die Webseite der Liste öffnen, bleibt die Schaltfläche erhalten: Inbox Classic kann nicht feststellen, ob Sie die Abmeldung dort abgeschlossen haben.</p>
+<p>Es kann dauern, bis eine Liste keine Nachrichten mehr sendet. Trifft eine Nachricht mehr als zwei Tage nach Ihrer Anfrage ein, bietet ihre Leiste <b data-text="ui-unsubscribe-again"></b> an.</p>
 <p>Bei einer direkten Abmeldeanfrage meldet die Statusleiste, ob der Server sie angenommen hat. Das garantiert nicht, dass keine weiteren Nachrichten kommen. Den Abschluss im Browser oder per E-Mail kann Inbox Classic nicht bestätigen.</p>
 <aside class="note">Inbox Classic sendet eine direkte Abmeldeanfrage nur nach Ihrer Bestätigung. Ihr Mailanbieter muss eine gültige DKIM-Signatur bestätigen, die beide Abmeldekopfzeilen einschließt. Eine beliebige Signatur genügt nicht.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>

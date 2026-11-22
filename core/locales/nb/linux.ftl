@@ -106,7 +106,7 @@ gtk-link-status = { $link }    (Ctrl+klikk for å åpne)
 ## Accounts
 
 gtk-plain-warning =
-    Uten kryptering kan alle som fanger opp nettverkstrafikken din, lese passordet og meldingene dine. Bruk bare denne tilkoblingen med en server på din egen datamaskin eller ditt lokale nettverk.
+    Uten kryptering kan alle som fanger opp nettverkstrafikken din, lese passordet og meldingene dine. Fortsett bare hvis tilkoblingen er beskyttet på en annen måte; et lokalt nettverk gir ikke i seg selv kryptering.
 
     Vil du fortsette?
 gtk-account-name-title = Kontonavn
@@ -161,7 +161,7 @@ gtk-nothing-yet = Ingenting ennå.
 ## Preferences
 
 gtk-preferences = Brukervalg
-gtk-notify-subtitle = Bare mens Inbox Classic er i bakgrunnen
+gtk-notify-subtitle = Bare når hovedvinduet ikke er i forgrunnen
 
 ## The desktop entry and the page of the software stores
 

@@ -1,10 +1,10 @@
 <h1>Postituslistalta eroaminen</h1>
-<p class="summary"><!--review-->Pyydä postituslistaa lopettamaan viestien lähettäminen sen viestien yläpuolella olevasta palkista.<!--/review--></p>
-<p><!--review-->Jos postituslistan viesti kertoo, miten listalta erotaan, viestin tekstin yläpuolella on palkki, jossa näkyvät listan verkkotunnus ja <b data-text="ui-unsubscribe-ask"></b>. Palkki nimeää listan vain sen verkkotunnuksella, ei koskaan lähettäjän valitsemalla nimellä. Kansioissa Roskaposti, Lähetetyt ja Luonnokset palkkia ei näytetä: roskapostin kautta listalta eroaminen kertoo lähettäjälle, että osoitteesi toimii.<!--/review--></p>
+<p class="summary">Pyydä postituslistaa lopettamaan viestien lähettäminen viestin yläpuolella olevan palkin avulla.</p>
+<p>Perumisohjeita sisältävien viestien tekstin yläpuolella näkyy palkki, jossa on <b data-text="ui-unsubscribe-ask"></b>. Jos listan verkkotunnus on saatavilla, palkki näyttää sen lähettäjän valitseman nimen sijasta. Palkkia ei näytetä kansioissa <b data-text="folder-junk"></b>, <b data-text="folder-sent"></b> ja <b data-text="folder-drafts"></b>. Tilauksen peruminen roskapostin kautta voi vahvistaa lähettäjälle, että osoitteesi on käytössä.</p>
 <p>Näin perut tilauksen:</p>
 <ol>
-    <li><!--review-->Napsauta palkissa <b data-text="ui-unsubscribe-ask"></b> tai valitse <b data-text="menu-message"></b> &gt; <b data-text="cmd-unsubscribe"></b>. Inbox Classic kertoo perumistavan ja pyytää vahvistuksen.<!--/review--></li>
-    <li><!--review-->Napsauta <!--os:windows--><b data-text="ui-yes"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os-->. Postituslistasta riippuen tapahtuu jokin seuraavista:<!--/review-->
+    <li>Napsauta palkissa <b data-text="ui-unsubscribe-ask"></b> tai valitse <b data-text="menu-message"></b> &gt; <b data-text="cmd-unsubscribe"></b>. Inbox Classic kertoo perumistavan ja pyytää vahvistuksen.</li>
+    <li>Napsauta <!--os:windows--><b data-text="ui-yes"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os-->. Postituslistasta riippuen tapahtuu jokin seuraavista:
         <ul>
             <li>Inbox Classic lähettää perumispyynnön suoraan postituslistan palvelimelle. Verkkosivua ei avata eikä sähköpostiviestiä lähetetä.</li>
             <li>Inbox Classic valmistelee postituslistan edellyttämän perumisviestin. Luonnos käyttää tiliä, jolla luet viestiä, ja sen allekirjoitustekstiä, jos sellainen on asetettu. Tarkista se ja lähetä napsauttamalla <b data-text="ui-tb-send"></b>.</li>
@@ -12,8 +12,8 @@
         </ul>
     </li>
 </ol>
-<p><!--review-->Sen jälkeen palkki näyttää jokaisessa listan viestissä, milloin pyysit eroa, eikä tarjoa enää muuta. Sähköpostitse tehty pyyntö lasketaan tehdyksi, kun viesti on lähetetty. Jos avasit listan verkkosivun, palkki säilyttää painikkeensa, koska Inbox Classic ei näe, viimeistelitkö perumisen siellä.<!--/review--></p>
-<p><!--review-->Voi kestää jopa kaksi päivää, ennen kuin lista lopettaa lähettämisen. Jos listan viesti saapuu tätä myöhemmin, palkissa on <b data-text="ui-unsubscribe-again"></b>.<!--/review--></p>
+<p>Kun suora pyyntö hyväksytään tai perumisviesti lähetetään, palkki näyttää pyynnön päivämäärän ja piilottaa painikkeen. Tämä koskee listan viestejä samalla tilillä. Jos avaat listan verkkosivun, painike jää näkyviin: Inbox Classic ei voi tietää, viimeistelitkö perumisen siellä.</p>
+<p>Voi kestää jonkin aikaa, ennen kuin lista lopettaa viestien lähettämisen. Jos viesti saapuu yli kaksi päivää pyyntösi jälkeen, sen palkissa näkyy <b data-text="ui-unsubscribe-again"></b>.</p>
 <p>Tilarivi ilmoittaa, kun postituslistan palvelin on hyväksynyt suoran perumispyynnön. Tämä ei vielä takaa, että viestien lähettäminen loppuu.</p>
 <aside class="note">Suora perumispyyntö edellyttää postipalveluntarjoajan hyväksymää DKIM-allekirjoitusta, joka kattaa molemmat tilauksen perumisessa käytetyt otsakkeet. Tämä varmistaa perumisohjeiden yhteyden allekirjoitettuun viestiin, ei koko viestin luotettavuutta.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>

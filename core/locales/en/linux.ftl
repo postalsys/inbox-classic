@@ -106,7 +106,7 @@ gtk-link-status = { $link }    (Ctrl+click to open)
 ## Accounts
 
 gtk-plain-warning =
-    Without encryption, anyone who intercepts your network traffic can read your password and messages. Only use this connection with a server on your own computer or local network.
+    Without encryption, anyone who intercepts your network traffic can read your password and messages. Continue only if the connection is protected in another way. A local network alone does not provide encryption.
 
     Continue?
 gtk-account-name-title = Account name
@@ -153,7 +153,7 @@ gtk-agent-it-may = Allowed actions
 gtk-agent-accounts = Allowed accounts
 gtk-never-used = Never used
 gtk-last-used = Last used { $date }
-gtk-forget-program = Remove this program?
+gtk-forget-program = Remove this program’s saved permissions?
 gtk-forget-program-detail = The program’s permissions and its agents’ activity history will be deleted. You will be asked for permission again the next time it connects.
 gtk-no-agents-yet = No agent has asked to use your mail yet.
 gtk-nothing-yet = Nothing yet.
@@ -161,7 +161,7 @@ gtk-nothing-yet = Nothing yet.
 ## Preferences
 
 gtk-preferences = Preferences
-gtk-notify-subtitle = Only while Inbox Classic is in the background
+gtk-notify-subtitle = Only while the main window is not in front
 
 ## The desktop entry and the page of the software stores
 

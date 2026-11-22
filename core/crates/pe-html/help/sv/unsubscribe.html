@@ -1,10 +1,10 @@
 <h1>Lämna en e-postlista</h1>
-<p class="summary"><!--review-->Be en e-postlista att sluta skicka meddelanden, direkt från informationsfältet ovanför listans meddelanden.<!--/review--></p>
-<p><!--review-->Ett meddelande från en e-postlista som talar om hur du lämnar den har ett informationsfält ovanför texten med listans domän och <b data-text="ui-unsubscribe-ask"></b>. Fältet anger listan bara med dess domän, aldrig med ett namn som avsändaren har valt. Skräppost, Skickat och Utkast visar inget fält: att lämna en lista från skräppost visar avsändaren att din adress fungerar.<!--/review--></p>
+<p class="summary">Be en e-postlista att sluta skicka meddelanden, direkt från informationsfältet ovanför listans meddelanden.</p>
+<p>Meddelanden med instruktioner för att avsluta prenumerationen visar ett informationsfält ovanför texten med <b data-text="ui-unsubscribe-ask"></b>. Om listans domän är tillgänglig visar fältet den i stället för ett namn som avsändaren har valt. Fältet visas inte i mapparna <b data-text="folder-junk"></b>, <b data-text="folder-sent"></b> och <b data-text="folder-drafts"></b>. Att avsluta en prenumeration via skräppost kan bekräfta för avsändaren att din adress används.</p>
 <p>Så här lämnar du listan:</p>
 <ol>
-    <li><!--review-->Klicka på <b data-text="ui-unsubscribe-ask"></b> i fältet eller välj <b data-text="menu-message"></b> &gt; <b data-text="cmd-unsubscribe"></b>. Inbox Classic talar om vad som kommer att hända och frågar först.<!--/review--></li>
-    <li><!--review-->Klicka på <!--os:windows--><b data-text="ui-yes"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os-->. Beroende på listan händer en av tre saker:<!--/review-->
+    <li>Klicka på <b data-text="ui-unsubscribe-ask"></b> i fältet eller välj <b data-text="menu-message"></b> &gt; <b data-text="cmd-unsubscribe"></b>. Inbox Classic förklarar vad som kommer att hända och ber om din bekräftelse.</li>
+    <li>Klicka på <!--os:windows--><b data-text="ui-yes"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os-->. Beroende på listan händer en av tre saker:
         <ul>
             <li>Inbox Classic skickar en begäran om avregistrering till listans server. Ingen webbsida öppnas och inget e-postmeddelande skickas.</li>
             <li>Inbox Classic förbereder det meddelande som listan vill ha från kontot där du läser meddelandet, med kontots signaturtext. Klicka på <b data-text="ui-tb-send"></b> för att skicka det.</li>
@@ -12,8 +12,8 @@
         </ul>
     </li>
 </ol>
-<p><!--review-->Därefter visar fältet på varje meddelande från listan när du bad om att lämna den, och erbjuder inget mer. En begäran via e-post räknas när den har skickats. För en lista vars sida du öppnade behåller fältet sin knapp, eftersom Inbox Classic inte kan se om du slutförde avregistreringen där.<!--/review--></p>
-<p><!--review-->Det kan ta upp till två dagar innan en lista slutar skicka. Om ett av dess meddelanden kommer senare än så erbjuder fältet <b data-text="ui-unsubscribe-again"></b>.<!--/review--></p>
+<p>När en direkt begäran har godtagits eller ett e-postmeddelande för att avsluta prenumerationen har skickats, visar fältet datumet för begäran och döljer knappen. Detta gäller listans meddelanden på samma konto. Om du öppnar listans webbsida finns knappen kvar: Inbox Classic kan inte se om du slutförde avregistreringen där.</p>
+<p>Det kan ta tid innan en lista slutar skicka meddelanden. Om ett meddelande kommer mer än två dagar efter din begäran erbjuder dess informationsfält <b data-text="ui-unsubscribe-again"></b>.</p>
 <p>När begäran skickas direkt till listans server visar statusfältet om servern har godtagit den. Det bekräftar inte i sig att adressen har tagits bort.</p>
 <aside class="note">Inbox Classic skickar en sådan begäran direkt först efter din bekräftelse, och bara när e-postleverantören har godkänt en domänsignatur som även omfattar uppgifterna för avregistrering.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>

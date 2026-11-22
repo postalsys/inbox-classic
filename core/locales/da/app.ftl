@@ -88,8 +88,7 @@ cmd-options = &Indstillinger...
 cmd-message-rules = Meddelelses&regler...
 cmd-encryption-keys = Kr&ypteringsnøgler...
 cmd-create-rule-from-message = Opr&et regel ud fra meddelelse...
-# review: new
-cmd-unsubscribe = Afmeld &liste...
+cmd-unsubscribe = Afme&ld abonnement på listen...
 cmd-select-all = Marker &alt
 cmd-undo = F&ortryd
 cmd-copy = Ko&pier til mappe...
@@ -249,7 +248,6 @@ ui-no-items = Der er ingen elementer i denne visning.
 ui-choose-folder = Vælg en mappe for at se dens meddelelser.
 ui-unsubscribe = Afmeld
 ui-open-in-calendar = Åbn i Kalender
-# review: changed
 ui-pictures-blocked = Nogle billeder er blokeret for at begrænse afsenderens mulighed for at spore dig.
 ui-not-shown = Meddelelsen kunne ikke vises.
 ui-attachment-not-read = Den vedhæftede fil kunne ikke læses.
@@ -263,21 +261,13 @@ ui-unsubscribing = Sender anmodning om afmelding til { $target }...
 ui-cannot-unsubscribe = Denne meddelelse har ingen mulighed for afmelding.
 ui-unsubscribed = Anmodningen om afmelding er accepteret. Det kan vare lidt, før mailinglisten holder op med at sende meddelelser.
 ui-not-unsubscribed = Kunne ikke afmelde: { $reason }
-# review: new
 ui-list-bar = Denne meddelelse er fra en mailingliste ({ $domain }).
-# review: new
 ui-list-bar-plain = Denne meddelelse er fra en mailingliste.
-# review: new
-ui-list-bar-asked = Du bad om at forlade denne liste den { $date }.
-# review: new
-ui-list-bar-came-after = Du bad om at forlade denne liste den { $date }, men denne meddelelse kom bagefter.
-# review: new
-ui-list-bar-opened = Du åbnede listens side for at forlade den den { $date }.
-# review: new
-ui-list-bar-failed = Listen accepterede ikke anmodningen: { $reason }
-# review: new
+ui-list-bar-asked = Du bad om at blive afmeldt denne liste den { $date }.
+ui-list-bar-came-after = Du bad om afmelding den { $date }, men denne meddelelse kom mere end to dage senere.
+ui-list-bar-opened = Du åbnede listens afmeldingsside den { $date }.
+ui-list-bar-failed = Afmeldingsanmodningen mislykkedes: { $reason }
 ui-unsubscribe-ask = Afmeld…
-# review: new
 ui-unsubscribe-again = Afmeld igen…
 ui-event-span = { $start } til { $end }
 ui-event-floating = { $when } (uden omregning af tidszone)
@@ -432,6 +422,8 @@ ui-account-move-down = Flyt &ned
 ui-menu-open = Å&bn
 ui-menu-flag = &Flag
 ui-menu-view-source = Vis &kilde
+# Context menu: the same action as cmd-unsubscribe, with its own access key.
+ui-menu-unsubscribe = Afmeld a&bonnement på listen...
 ui-save-attachments = Gem vedhæftede filer
 ui-attachment-open = Åbn
 ui-attachment-save-as = Gem som...

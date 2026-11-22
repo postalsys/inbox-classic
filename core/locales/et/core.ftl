@@ -7,7 +7,6 @@ messages = { $count ->
    *[other] { $count } kirja
 }
 decimal-separator = ,
-# review: new
 list-separator = { ", " }
 size-bytes = { $count ->
     [one] 1 bait
@@ -624,7 +623,7 @@ agent-read-search = { $count ->
     [one] Otsiti teksti „{ $query }“: leiti 1 kiri
    *[other] Otsiti teksti „{ $query }“: leiti { $count } kirja
 }
-agent-read-people = Otsiti inimesi, kelle nimi või aadress algab tekstiga „{ $query }“
+agent-read-people = Otsiti inimesi nime või aadressi järgi: „{ $query }“
 agent-read-list = { $count ->
     [one] Vaadati 1 kirjet. Loend: { $folder }
    *[other] Vaadati { $count } kirjet. Loend: { $folder }

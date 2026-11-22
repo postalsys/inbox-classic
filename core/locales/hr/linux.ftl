@@ -103,9 +103,9 @@ gtk-link-status = { $link }    (Ctrl + klik za otvaranje)
 ## Accounts
 
 gtk-plain-warning =
-    Bez šifriranja veze netko tko presretne mrežni promet može pročitati vaše podatke za prijavu i poruke. Ovu vezu upotrebljavajte samo s poslužiteljem na svojem računalu ili u lokalnoj mreži.
+    Bez šifriranja svatko tko presretne vaš mrežni promet može pročitati vašu lozinku i poruke. Nastavite samo ako je veza zaštićena na drugi način; sama lokalna mreža ne pruža šifriranje.
 
-    Želite li nastaviti?
+    Nastaviti?
 gtk-account-name-title = Naziv računa
 gtk-display-name-title = Ime za prikaz
 gtk-turned-off-why = Mogućnost „{ $button }“ isključena je na ovom računalu. { $reason }
@@ -158,7 +158,7 @@ gtk-nothing-yet = Zasad ništa.
 ## Preferences
 
 gtk-preferences = Postavke
-gtk-notify-subtitle = Samo dok je Inbox Classic u pozadini
+gtk-notify-subtitle = Samo kada glavni prozor nije u prvom planu
 
 ## The desktop entry and the page of the software stores
 

@@ -1,9 +1,8 @@
-<!--review-->
 <h1>Các kết nối Inbox Classic thực hiện</h1>
 <p class="summary">Inbox Classic kết nối tới đâu và vì sao, dành cho người muốn tìm hiểu kỹ thuật.</p>
 <ul>
     <li><b>Máy chủ thư của bạn</b>, qua IMAP để đọc thư và SMTP để gửi thư. Kết nối được mã hóa bằng TLS, và chứng chỉ của từng máy chủ được kiểm tra với các chứng chỉ mà hệ thống của bạn tin cậy. Inbox Classic từ chối máy chủ không mã hóa, trừ khi bạn chọn <b data-text="ui-security-none"></b> và xác nhận.</li>
-    <li><b>Khi bạn thêm tài khoản</b>, để tìm máy chủ của tài khoản. Inbox Classic đọc bản ghi DNS của tên miền qua DNS over HTTPS (Cloudflare, rồi Google), không bao giờ qua DNS thường. Ứng dụng cũng thử tệp autoconfig của nhà cung cấp và danh sách nhà cung cấp của Thunderbird (ISPDB). Với Exchange, ứng dụng hỏi Microsoft Autodiscover, dịch vụ này chỉ nhận mật khẩu của bạn khi nó yêu cầu qua HTTPS. Máy chủ không mã hóa không bao giờ được chọn.</li>
+    <li><b>Khi bạn thêm tài khoản</b>, để tìm máy chủ của tài khoản. Inbox Classic tra cứu bản ghi MX và SRV của tên miền qua HTTPS (Cloudflare, rồi Google). Ứng dụng cũng thử tệp autoconfig của nhà cung cấp và danh sách nhà cung cấp của Thunderbird (ISPDB). Với Exchange, ứng dụng hỏi Microsoft Autodiscover, dịch vụ này chỉ nhận mật khẩu của bạn khi nó yêu cầu qua HTTPS. Máy chủ không mã hóa không bao giờ được chọn.</li>
     <li><b>Đăng nhập qua trình duyệt</b>, bằng OAuth 2.0 và PKCE, tới Google, Microsoft hoặc nhà cung cấp của ứng dụng đăng nhập. Trình duyệt chỉ quay về Inbox Classic trên máy tính này.</li>
     <li><b>Biểu trưng thương hiệu</b> (BIMI), từ địa chỉ HTTPS của thương hiệu khi thư không mang biểu trưng dùng được và không có bản lưu nào dùng lại được. Biểu trưng đã tải xuống được lưu đệm qua các lần khởi động lại ứng dụng. Việc này chỉ xảy ra khi máy chủ thư của bạn đã chấp nhận kiểm tra DMARC của thư và chấp thuận biểu trưng.</li>
     <li><b>Ảnh từ Internet</b>, khi bạn cho phép, kể cả qua cài đặt người gửi tin cậy hoặc tải xuống tự động.</li>
@@ -13,4 +12,3 @@
 </ul>
 <p>Mã đăng nhập chỉ được đề xuất khi nhà cung cấp báo có chữ ký DKIM hợp lệ từ tên miền của mã hoặc tên miền mẹ. Inbox Classic đọc kết quả này từ tiêu đề Authentication-Results hoặc ARC-Authentication-Results của nhà cung cấp. Việc này không cần kết nối riêng.</p>
 <nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>
-<!--/review-->

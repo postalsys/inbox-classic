@@ -112,7 +112,7 @@ gtk-link-status = { $link }    (Ctrl+clic pentru deschidere)
 ## Accounts
 
 gtk-plain-warning =
-    Fără criptare, oricine interceptează traficul de rețea vă poate citi parola și mesajele. Folosiți această conexiune doar cu un server de pe propriul computer sau din rețeaua locală.
+    Fără criptare, oricine interceptează traficul de rețea vă poate citi parola și mesajele. O rețea locală nu protejează singură conexiunea. Continuați numai dacă conexiunea este protejată în alt mod.
 
     Continuați?
 gtk-account-name-title = Nume cont
@@ -167,7 +167,7 @@ gtk-nothing-yet = Nimic încă.
 ## Preferences
 
 gtk-preferences = Preferințe
-gtk-notify-subtitle = Doar cât timp Inbox Classic este în fundal
+gtk-notify-subtitle = Doar când fereastra principală nu este în prim-plan
 
 ## The desktop entry and the page of the software stores
 

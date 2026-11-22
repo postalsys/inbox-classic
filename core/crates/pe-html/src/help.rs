@@ -166,20 +166,19 @@ fn source(language: &str, id: &str) -> Option<&'static str> {
     find(language).or_else(|| find("en"))
 }
 
-/// A message of the catalog as the help names it: without its access key's `&` and a menu item's "...", escaped
+/// A catalog label in help prose: without its mnemonic, trailing menu dots or field colon, escaped.
 fn words(language: &str, id: &str) -> String {
     let text = pe_i18n::message_in(language, id).unwrap_or_else(|| id.to_string());
-    let text = text.replace("&&", "\u{0}").replace('&', "").replace('\u{0}', "&");
-    // GTK's labels mark their access key with _
+    // GTK's own labels use _. Normalize CJK's entire (_C) suffix before removing other underscore marks.
     let text = if id.starts_with("gtk-") {
-        text.replace('_', "")
+        text.replace("(_", "(&").replace('_', "")
     } else {
         text
     };
+    let text = pe_i18n::without_mnemonic(&text);
     escape(
-        text.trim_end_matches("...")
-            .trim_end_matches('\u{2026}')
-            .trim_end_matches(':')
+        text.trim_end()
+            .trim_end_matches(['.', '\u{2026}', ':', '\u{ff1a}'])
             .trim_end(),
     )
 }
@@ -754,6 +753,9 @@ mod tests {
         assert_eq!(words("en", "cmd-new-account"), "New Account");
         assert_eq!(words("de", "cmd-mark-read"), "Als gelesen markieren");
         assert_eq!(words("en", "help-title"), "Inbox Classic Help");
+        assert_eq!(words("zh-Hant", "menu-file"), "檔案");
+        assert_eq!(words("zh-Hans", "ui-field-name"), "显示名称");
+        assert_eq!(words("ko", "gtk-show-cc"), "참조");
     }
 
     #[test]

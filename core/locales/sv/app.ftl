@@ -88,8 +88,7 @@ cmd-options = Al&ternativ...
 cmd-message-rules = Meddelande&regler...
 cmd-encryption-keys = &Krypteringsnycklar...
 cmd-create-rule-from-message = Skapa regel utifrån me&ddelande...
-# review: new
-cmd-unsubscribe = Avsluta prenumeration på &listan...
+cmd-unsubscribe = Avs&luta prenumeration på listan...
 cmd-select-all = Markera &allt
 cmd-undo = &Ångra
 cmd-copy = &Kopiera till mapp...
@@ -249,7 +248,6 @@ ui-no-items = Det finns inga objekt i den här vyn.
 ui-choose-folder = Välj en mapp för att se dess meddelanden.
 ui-unsubscribe = Avsluta prenumeration
 ui-open-in-calendar = Öppna i kalendern
-# review: changed
 ui-pictures-blocked = Vissa bilder har blockerats för att minska risken för spårning.
 ui-not-shown = Det gick inte att visa meddelandet.
 ui-attachment-not-read = Det gick inte att läsa bilagan.
@@ -263,21 +261,13 @@ ui-unsubscribing = Avslutar prenumerationen hos { $target }...
 ui-cannot-unsubscribe = Det här meddelandet erbjuder inget sätt att avsluta prenumerationen.
 ui-unsubscribed = Servern tog emot begäran om att avsluta prenumerationen.
 ui-not-unsubscribed = Det gick inte att avsluta prenumerationen: { $reason }
-# review: new
 ui-list-bar = Det här meddelandet kommer från en e-postlista ({ $domain }).
-# review: new
 ui-list-bar-plain = Det här meddelandet kommer från en e-postlista.
-# review: new
-ui-list-bar-asked = Du bad om att lämna den här listan { $date }.
-# review: new
-ui-list-bar-came-after = Du bad om att lämna den här listan { $date }, men det här meddelandet kom efteråt.
-# review: new
-ui-list-bar-opened = Du öppnade listans sida för att lämna den { $date }.
-# review: new
-ui-list-bar-failed = Listan tog inte emot begäran: { $reason }
-# review: new
+ui-list-bar-asked = Du bad om att avsluta prenumerationen på den här listan { $date }.
+ui-list-bar-came-after = Du bad om att avsluta prenumerationen { $date }, men det här meddelandet kom mer än två dagar senare.
+ui-list-bar-opened = Du öppnade listans sida för att avsluta prenumerationen { $date }.
+ui-list-bar-failed = Begäran om att avsluta prenumerationen misslyckades: { $reason }
 ui-unsubscribe-ask = Avsluta prenumeration…
-# review: new
 ui-unsubscribe-again = Avsluta prenumeration igen…
 ui-event-span = { $start } till { $end }
 ui-event-floating = { $when } (utan tidszonsomvandling)
@@ -432,6 +422,8 @@ ui-account-move-down = Flytta ne&d
 ui-menu-open = &Öppna
 ui-menu-flag = Fla&ggfärg
 ui-menu-view-source = Visa k&ällkod
+# Context menu: the same action as cmd-unsubscribe, with its own access key.
+ui-menu-unsubscribe = Avsluta prenumeration p&å listan...
 ui-save-attachments = Spara bilagor
 ui-attachment-open = Öppna
 ui-attachment-save-as = Spara som...

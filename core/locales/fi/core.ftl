@@ -10,7 +10,6 @@ messages = { $count ->
 }
 # the separator of decimals in sizes: 2,4 Mt
 decimal-separator = ,
-# review: new
 list-separator = { ", " }
 size-bytes = { $count ->
     [one] { $count } tavu
@@ -645,7 +644,7 @@ agent-read-search = { $count ->
     [one] Haki tekstillä ”{ $query }”: 1 viesti
    *[other] Haki tekstillä ”{ $query }”: { $count } viestiä
 }
-agent-read-people = Haki yhteystietoja nimen tai osoitteen alulla ”{ $query }”
+agent-read-people = Haki yhteystietoja nimen tai osoitteen perusteella: ”{ $query }”
 agent-read-list = { $count ->
     [one] Haki 1 luettelomerkinnän. Luettelo: { $folder }
    *[other] Haki { $count } luettelomerkintää. Luettelo: { $folder }

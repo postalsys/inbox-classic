@@ -10,7 +10,6 @@ messages = { $count ->
 }
 # the separator of decimals in sizes: 2,4 MB
 decimal-separator = ,
-# review: new
 list-separator = { ", " }
 size-bytes = { $count ->
     [one] { $count } byte
@@ -680,7 +679,7 @@ agent-read-search = { $count ->
     [one] Αναζήτησε «{ $query }»: 1 μήνυμα
    *[other] Αναζήτησε «{ $query }»: { $count } μηνύματα
 }
-agent-read-people = Αναζήτησε άτομα με όνομα ή διεύθυνση που αρχίζει από «{ $query }»
+agent-read-people = Αναζήτησε άτομα με βάση το όνομα ή τη διεύθυνση: «{ $query }»
 agent-read-list = { $count ->
     [one] Είδε 1 καταχώριση στη λίστα: { $folder }
    *[other] Είδε { $count } καταχωρίσεις στη λίστα: { $folder }

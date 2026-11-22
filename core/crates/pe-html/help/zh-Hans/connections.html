@@ -1,9 +1,8 @@
-<!--review-->
 <h1>Inbox Classic 建立的连接</h1>
 <p class="summary">Inbox Classic 连接到哪里以及原因，供想了解技术细节的用户参考。</p>
 <ul>
     <li><b>您的邮件服务器</b>，通过 IMAP 读取邮件，通过 SMTP 发送邮件。连接使用 TLS 加密，并根据系统信任的证书检查每个服务器的证书。Inbox Classic 会拒绝没有加密的服务器，除非您选择<b data-text="ui-security-none"></b>并确认。</li>
-    <li><b>添加帐户时</b>，查找其服务器。Inbox Classic 通过 DNS over HTTPS（先 Cloudflare，后 Google）读取您域的 DNS 记录，从不使用普通 DNS。它还会尝试您的提供商的自动配置文件和 Thunderbird 的提供商列表（ISPDB）。对于 Exchange，它会询问 Microsoft Autodiscover，只有当 Autodiscover 通过 HTTPS 要求时才会向其提供您的密码。从不选择没有加密的服务器。</li>
+    <li><b>添加帐户时</b>，查找其服务器。Inbox Classic 通过 DNS over HTTPS（先 Cloudflare，后 Google）查询您域的 MX 和 SRV 记录。它还会尝试您的提供商的自动配置文件和 Thunderbird 的提供商列表（ISPDB）。对于 Exchange，它会询问 Microsoft Autodiscover，只有当 Autodiscover 通过 HTTPS 要求时才会向其提供您的密码。从不选择没有加密的服务器。</li>
     <li><b>浏览器登录</b>，使用 OAuth 2.0 和 PKCE 连接到 Google、Microsoft 或您的登录应用的提供商。浏览器只会返回到这台计算机上的 Inbox Classic。</li>
     <li><b>品牌徽标</b>（BIMI），当邮件本身没有可用的徽标且没有可重复使用的已保存副本时，从品牌的 HTTPS 地址获取。下载的徽标会缓存，应用重启后仍可使用。只有当您的邮件服务器认定邮件通过了 DMARC 检查并认可该徽标时，才会这样做。</li>
     <li><b>来自 Internet 的图片</b>，在您允许时下载，包括通过受信任的发件人或自动下载设置允许的情况。</li>
@@ -13,4 +12,3 @@
 </ul>
 <p>只有当您的提供商报告验证码所属的域或其上级域有有效的 DKIM 签名时，才会提供验证码。Inbox Classic 从提供商的 Authentication-Results 或 ARC-Authentication-Results 标头中读取此结果，不需要单独建立连接。</p>
 <nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>
-<!--/review-->

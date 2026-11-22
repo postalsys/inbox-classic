@@ -87,7 +87,6 @@ cmd-options = &Možnosti...
 cmd-message-rules = P&ravila za sporočila...
 cmd-encryption-keys = Šifrirni &ključi...
 cmd-create-rule-from-message = &Ustvari pravilo iz sporočila...
-# review: new
 cmd-unsubscribe = O&djavi se s seznama...
 cmd-select-all = Izberi &vse
 cmd-undo = &Razveljavi
@@ -252,7 +251,6 @@ ui-no-items = V tem pogledu ni sporočil.
 ui-choose-folder = Izberite mapo, da vidite njena sporočila.
 ui-unsubscribe = Odjavi
 ui-open-in-calendar = Odpri v koledarju
-# review: changed
 ui-pictures-blocked = Nekatere slike so blokirane, da bi omejili pošiljateljevo sledenje odpiranju sporočila.
 ui-not-shown = Sporočila ni bilo mogoče prikazati.
 ui-attachment-not-read = Priponke ni bilo mogoče prebrati.
@@ -266,21 +264,13 @@ ui-unsubscribing = Pošiljanje zahteve za odjavo: { $target }...
 ui-cannot-unsubscribe = To sporočilo ne ponuja možnosti odjave.
 ui-unsubscribed = Zahteva za odjavo je bila sprejeta.
 ui-not-unsubscribed = Odjava ni uspela: { $reason }
-# review: new
 ui-list-bar = To sporočilo je s poštnega seznama ({ $domain }).
-# review: new
 ui-list-bar-plain = To sporočilo je s poštnega seznama.
-# review: new
 ui-list-bar-asked = Za odjavo s tega seznama ste zaprosili { $date }.
-# review: new
-ui-list-bar-came-after = Za odjavo s tega seznama ste zaprosili { $date }, vendar je to sporočilo prispelo pozneje.
-# review: new
-ui-list-bar-opened = Stran seznama za odjavo ste odprli { $date }.
-# review: new
-ui-list-bar-failed = Seznam zahteve ni sprejel: { $reason }
-# review: new
+ui-list-bar-came-after = Za odjavo ste zaprosili { $date }, vendar je to sporočilo prispelo več kot dva dni pozneje.
+ui-list-bar-opened = Stran za odjavo s tega seznama ste odprli { $date }.
+ui-list-bar-failed = Zahteva za odjavo ni uspela: { $reason }
 ui-unsubscribe-ask = Odjavi…
-# review: new
 ui-unsubscribe-again = Znova odjavi…
 ui-event-span = { $start } do { $end }
 ui-event-floating = { $when } (časovni pas ni naveden ali ni prepoznan)
@@ -320,7 +310,7 @@ ui-found-autodiscover = Te nastavitve je našla storitev Microsoft Autodiscover 
 ui-found-other = Te nastavitve so bile najdene za ta naslov.
 ui-app-password-needed = Ponudnik { $provider } v poštnih programih ne sprejema običajnega gesla. Če vaš račun podpira gesla za aplikacije, ga ustvarite v njegovih varnostnih nastavitvah in vnesite v polje Geslo v naslednjem obrazcu. Za Outlook.com in Microsoft 365 uporabite prijavo prek brskalnika.
 ui-app-password-open = Želite odpreti navodila ponudnika { $provider } v brskalniku?
-ui-plain-warning = Brez šifriranja lahko vsakdo, ki prestreže omrežni promet, prebere vaše geslo in sporočila. Tudi lokalno omrežje samo po sebi ne zaščiti povezave. Nadaljujte le, če razumete in sprejemate izpostavljenost podatkov.
+ui-plain-warning = Brez šifriranja lahko vsakdo, ki prestreže omrežni promet, prebere vaše geslo in sporočila. Tudi lokalno omrežje samo po sebi ne zaščiti povezave. Nadaljujte le, če je povezava zaščitena na drug način.
 ui-continue-ask = Želite nadaljevati?
 ui-add-sign-in-app = Dodaj aplikacijo za prijavo...
 ui-turned-off = Možnost »{ $name }« je v tem računalniku izklopljena.
@@ -435,6 +425,8 @@ ui-account-move-down = Premakni &dol
 ui-menu-open = O&dpri
 ui-menu-flag = Zastavi&ca
 ui-menu-view-source = Pokaži i&zvorno kodo
+# Context menu: the same action as cmd-unsubscribe, with its own access key.
+ui-menu-unsubscribe = O&djavi se s seznama...
 ui-save-attachments = Shrani priponke
 ui-attachment-open = Odpri
 ui-attachment-save-as = Shrani kot...

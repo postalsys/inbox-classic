@@ -7,7 +7,6 @@ messages = { $count ->
    *[other] { $count } mensajes
 }
 decimal-separator = ,
-# review: new
 list-separator = { ", " }
 size-bytes = { $count ->
     [one] 1 byte
@@ -648,7 +647,7 @@ agent-read-search = { $count ->
     [one] Buscó «{ $query }»: 1 mensaje
    *[other] Buscó «{ $query }»: { $count } mensajes
 }
-agent-read-people = Buscó personas cuyo nombre o dirección empieza por «{ $query }»
+agent-read-people = Buscó personas por nombre o dirección: «{ $query }»
 agent-read-list = { $count ->
     [one] Consultó 1 entrada en la lista: { $folder }
    *[other] Consultó { $count } entradas en la lista: { $folder }

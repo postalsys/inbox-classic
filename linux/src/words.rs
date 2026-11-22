@@ -94,7 +94,7 @@ mod tests {
         assert_eq!(t!(GtkUnreadMessages, count = 0u64), "No unread messages");
         assert_eq!(t!(GtkUnreadMessages, count = 3u64), "3 unread messages");
         // a blank line inside a message is kept
-        assert!(t!(GtkPlainWarning).ends_with("network.\n\nContinue?"));
+        assert!(t!(GtkPlainWarning).ends_with("encryption.\n\nContinue?"));
         assert_eq!(plain(Text::CmdOptions), "Options\u{2026}");
     }
 

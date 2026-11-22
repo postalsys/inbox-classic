@@ -646,7 +646,7 @@ agent-read-search = { $count ->
     [one] Searched for “{ $query }”: 1 message
    *[other] Searched for “{ $query }”: { $count } messages
 }
-agent-read-people = Looked up people by the start of their name or address: “{ $query }”
+agent-read-people = Looked up people by name or address: “{ $query }”
 agent-read-list = { $count ->
     [one] Looked at 1 list entry (scope: { $folder })
    *[other] Looked at { $count } list entries (scope: { $folder })

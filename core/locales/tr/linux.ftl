@@ -106,7 +106,7 @@ gtk-link-status = { $link }    (açmak için Ctrl tuşunu basılı tutarak tıkl
 ## Hesaplar
 
 gtk-plain-warning =
-    Şifreleme olmadan, ağ trafiğinizi ele geçiren herkes parolanızı ve iletilerinizi okuyabilir. Bu bağlantıyı yalnızca kendi bilgisayarınızdaki veya yerel ağınızdaki bir sunucuyla kullanın.
+    Şifreleme olmadan, ağ trafiğinizi ele geçiren herkes parolanızı ve iletilerinizi okuyabilir. Yalnızca bağlantı başka bir yolla korunuyorsa devam edin; yerel ağ tek başına şifreleme sağlamaz.
 
     Devam edilsin mi?
 gtk-account-name-title = Hesap adı
@@ -161,7 +161,7 @@ gtk-nothing-yet = Henüz etkinlik yok.
 ## Tercihler
 
 gtk-preferences = Tercihler
-gtk-notify-subtitle = Yalnızca Inbox Classic arka plandayken
+gtk-notify-subtitle = Yalnızca ana pencere ön planda değilken
 
 ## Masaüstü girdisi ve yazılım mağazalarının sayfası
 

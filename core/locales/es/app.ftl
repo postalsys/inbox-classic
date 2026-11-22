@@ -86,7 +86,6 @@ cmd-options = &Opciones...
 cmd-message-rules = &Reglas de mensajes...
 cmd-encryption-keys = Claves de &cifrado...
 cmd-create-rule-from-message = Crear regla a partir del mensa&je...
-# review: new
 cmd-unsubscribe = &Cancelar suscripción a la lista...
 cmd-select-all = Seleccionar &todo
 cmd-undo = &Deshacer
@@ -244,7 +243,6 @@ ui-no-items = No hay elementos en esta vista.
 ui-choose-folder = Elija una carpeta para ver sus mensajes.
 ui-unsubscribe = Cancelar suscripción
 ui-open-in-calendar = Abrir en el calendario
-# review: changed
 ui-pictures-blocked = Se han bloqueado algunas imágenes para reducir el seguimiento por parte del remitente.
 ui-not-shown = No se pudo mostrar el mensaje.
 ui-attachment-not-read = No se pudo leer el archivo adjunto.
@@ -258,21 +256,13 @@ ui-unsubscribing = Enviando la solicitud de baja a { $target }...
 ui-cannot-unsubscribe = Este mensaje no permite cancelar la suscripción.
 ui-unsubscribed = La lista ha aceptado la solicitud de baja.
 ui-not-unsubscribed = No se pudo cancelar la suscripción: { $reason }
-# review: new
 ui-list-bar = Este mensaje es de una lista de correo ({ $domain }).
-# review: new
 ui-list-bar-plain = Este mensaje es de una lista de correo.
-# review: new
-ui-list-bar-asked = Pidió salir de esta lista el { $date }.
-# review: new
-ui-list-bar-came-after = Pidió salir de esta lista el { $date }, pero este mensaje llegó después.
-# review: new
-ui-list-bar-opened = Abrió la página de la lista para salir de ella el { $date }.
-# review: new
-ui-list-bar-failed = La lista no aceptó la solicitud: { $reason }
-# review: new
+ui-list-bar-asked = Solicitó darse de baja de esta lista el { $date }.
+ui-list-bar-came-after = Solicitó la baja el { $date }, pero este mensaje llegó más de dos días después.
+ui-list-bar-opened = Abrió la página de baja de esta lista el { $date }.
+ui-list-bar-failed = La solicitud de baja falló: { $reason }
 ui-unsubscribe-ask = Cancelar suscripción…
-# review: new
 ui-unsubscribe-again = Volver a cancelar la suscripción…
 ui-event-span = { $start } a { $end }
 ui-event-floating = { $when } (sin conversión de zona horaria)
@@ -427,6 +417,8 @@ ui-account-move-down = Mover a&bajo
 ui-menu-open = A&brir
 ui-menu-flag = Marc&a
 ui-menu-view-source = Ver código &fuente
+# Context menu: the same action as cmd-unsubscribe, with its own access key.
+ui-menu-unsubscribe = Cancelar &suscripción a la lista...
 ui-save-attachments = Guardar archivos adjuntos
 ui-attachment-open = Abrir
 ui-attachment-save-as = Guardar como...

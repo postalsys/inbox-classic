@@ -90,7 +90,6 @@ cmd-options = &Opcije...
 cmd-message-rules = &Pravila za poruke...
 cmd-encryption-keys = &Ključevi za šifrovanje...
 cmd-create-rule-from-message = Napravi pravi&lo iz poruke...
-# review: new
 cmd-unsubscribe = &Otkaži pretplatu na listu...
 cmd-select-all = &Izaberi sve
 cmd-undo = &Opozovi
@@ -253,8 +252,7 @@ ui-no-items = U ovom prikazu nema stavki.
 ui-choose-folder = Izaberite fasciklu da biste videli njene poruke.
 ui-unsubscribe = Otkaži pretplatu
 ui-open-in-calendar = Otvori u kalendaru
-# review: changed
-ui-pictures-blocked = Neke slike su blokirane da bi se sprečilo praćenje.
+ui-pictures-blocked = Neke slike su blokirane da bi se ograničilo praćenje od strane pošiljaoca.
 ui-not-shown = Poruku nije moguće prikazati.
 ui-attachment-not-read = Prilog nije moguće pročitati.
 ui-attachment-not-saved = Prilog nije moguće sačuvati.
@@ -267,21 +265,13 @@ ui-unsubscribing = Slanje zahteva za otkazivanje pretplate: { $target }...
 ui-cannot-unsubscribe = Ova poruka ne nudi opciju za otkazivanje pretplate.
 ui-unsubscribed = Lista je prihvatila zahtev za otkazivanje pretplate.
 ui-not-unsubscribed = Otkazivanje pretplate nije uspelo: { $reason }
-# review: new
 ui-list-bar = Ova poruka je sa liste za slanje ({ $domain }).
-# review: new
 ui-list-bar-plain = Ova poruka je sa liste za slanje.
-# review: new
 ui-list-bar-asked = Zatražili ste odjavu sa ove liste { $date }.
-# review: new
-ui-list-bar-came-after = Zatražili ste odjavu sa ove liste { $date }, ali ova poruka je stigla posle toga.
-# review: new
-ui-list-bar-opened = Otvorili ste stranicu liste za odjavu { $date }.
-# review: new
-ui-list-bar-failed = Lista nije prihvatila zahtev: { $reason }
-# review: new
+ui-list-bar-came-after = Zatražili ste odjavu { $date }, ali ova poruka je stigla više od dva dana kasnije.
+ui-list-bar-opened = Otvorili ste stranicu za odjavu sa ove liste { $date }.
+ui-list-bar-failed = Zahtev za odjavu nije uspeo: { $reason }
 ui-unsubscribe-ask = Otkaži pretplatu…
-# review: new
 ui-unsubscribe-again = Ponovo otkaži pretplatu…
 ui-event-span = { $start } do { $end }
 ui-event-floating = { $when } (vreme navedeno u pozivnici)
@@ -436,6 +426,8 @@ ui-account-move-down = Premesti d&ole
 ui-menu-open = &Otvori
 ui-menu-flag = Zasta&vica
 ui-menu-view-source = Prikaži izvorni ko&d
+# Context menu: the same action as cmd-unsubscribe, with its own access key.
+ui-menu-unsubscribe = &Otkaži pretplatu na listu...
 ui-save-attachments = Sačuvaj priloge
 ui-attachment-open = Otvori
 ui-attachment-save-as = Sačuvaj kao...

@@ -89,8 +89,7 @@ cmd-options = &Opcijas...
 cmd-message-rules = Ziņojumu &kārtulas...
 cmd-encryption-keys = Šifrēšanas &atslēgas...
 cmd-create-rule-from-message = I&zveidot kārtulu no ziņojuma...
-# review: new
-cmd-unsubscribe = Atteikties no &saraksta...
+cmd-unsubscribe = Atteiktie&s no saraksta...
 cmd-select-all = Atlasīt &visu
 cmd-undo = &Atsaukt
 cmd-copy = Kopēt uz &mapi...
@@ -252,7 +251,6 @@ ui-no-items = Šajā skatā nav ziņojumu.
 ui-choose-folder = Izvēlieties mapi, lai redzētu tās ziņojumus.
 ui-unsubscribe = Atteikties no abonēšanas
 ui-open-in-calendar = Atvērt kalendārā
-# review: changed
 ui-pictures-blocked = Daži attēli ir bloķēti, lai sūtītājam būtu grūtāk izsekot, kad lasāt ziņojumu.
 ui-not-shown = Neizdevās parādīt ziņojumu.
 ui-attachment-not-read = Neizdevās nolasīt pielikumu.
@@ -266,21 +264,13 @@ ui-unsubscribing = Nosūta atteikšanās pieprasījumu vietnei „{ $target }”
 ui-cannot-unsubscribe = Šajā ziņojumā nav iespējas atteikties no abonēšanas.
 ui-unsubscribed = Atteikšanās pieprasījums pieņemts.
 ui-not-unsubscribed = Neizdevās atteikties no abonēšanas: { $reason }
-# review: new
 ui-list-bar = Šis ziņojums ir no adresātu saraksta ({ $domain }).
-# review: new
 ui-list-bar-plain = Šis ziņojums ir no adresātu saraksta.
-# review: new
-ui-list-bar-asked = Jūs lūdzāt izstāties no šī saraksta { $date }.
-# review: new
-ui-list-bar-came-after = Jūs lūdzāt izstāties no šī saraksta { $date }, bet šis ziņojums pienāca vēlāk.
-# review: new
-ui-list-bar-opened = Jūs atvērāt saraksta atteikšanās lapu { $date }.
-# review: new
-ui-list-bar-failed = Saraksts nepieņēma pieprasījumu: { $reason }
-# review: new
+ui-list-bar-asked = Jūs pieprasījāt atteikties no šī saraksta abonēšanas { $date }.
+ui-list-bar-came-after = Jūs pieprasījāt atteikšanos { $date }, bet šis ziņojums pienāca vairāk nekā divas dienas vēlāk.
+ui-list-bar-opened = Jūs atvērāt šī saraksta atteikšanās lapu { $date }.
+ui-list-bar-failed = Atteikšanās pieprasījums neizdevās: { $reason }
 ui-unsubscribe-ask = Atteikties…
-# review: new
 ui-unsubscribe-again = Atteikties vēlreiz…
 ui-event-span = { $start } līdz { $end }
 ui-event-floating = { $when } (laika josla nav noteikta)
@@ -320,7 +310,7 @@ ui-found-autodiscover = Šie iestatījumi atrasti, izmantojot Microsoft Autodisc
 ui-found-other = Šai adresei tika atrasti šie iestatījumi.
 ui-app-password-needed = Pakalpojuma sniedzējs: { $provider }. Ja konts atbalsta lietotņu paroles, izveidojiet tādu konta drošības iestatījumos un ierakstiet to nākamās veidlapas laukā Parole. Pretējā gadījumā pierakstieties pārlūkā, ja tas ir pieejams.
 ui-app-password-open = Vai pārlūkprogrammā atvērt norādījumus, ko sniedz { $provider }?
-ui-plain-warning = Bez šifrēšanas ikviens, kas pārtver jūsu tīkla datplūsmu, var izlasīt jūsu paroli un ziņojumus. Izmantojiet nešifrētu savienojumu tikai apzināti izvēlētā un citādi aizsargātā vidē. Arī lokāls tīkls pats par sevi nenodrošina drošību.
+ui-plain-warning = Bez šifrēšanas ikviens, kas pārtver jūsu tīkla datplūsmu, var izlasīt jūsu paroli un ziņojumus. Turpiniet tikai tad, ja savienojums ir aizsargāts citā veidā. Lokāls tīkls pats par sevi nenodrošina šifrēšanu.
 ui-continue-ask = Vai turpināt?
 ui-add-sign-in-app = Pievienot pierakstīšanās lietotni...
 ui-turned-off = Iespēja „{ $name }” šajā datorā ir izslēgta.
@@ -435,6 +425,8 @@ ui-account-move-down = Pārvietot l&ejup
 ui-menu-open = &Atvērt
 ui-menu-flag = &Karodziņš
 ui-menu-view-source = Skatīt p&irmkodu
+# Context menu: the same action as cmd-unsubscribe, with its own access key.
+ui-menu-unsubscribe = &Atteikties no saraksta...
 ui-save-attachments = Saglabāt pielikumus
 ui-attachment-open = Atvērt
 ui-attachment-save-as = Saglabāt kā...

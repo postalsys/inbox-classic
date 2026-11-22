@@ -88,7 +88,6 @@ cmd-options = &Beállítások...
 cmd-message-rules = Üzenet&szabályok...
 cmd-encryption-keys = &Titkosítási kulcsok...
 cmd-create-rule-from-message = &Szabály létrehozása az üzenetből...
-# review: new
 cmd-unsubscribe = Le&iratkozás a listáról...
 cmd-select-all = Az összes k&ijelölése
 cmd-undo = &Visszavonás
@@ -248,7 +247,6 @@ ui-no-items = Ebben a nézetben nincsenek elemek.
 ui-choose-folder = Válasszon egy mappát az üzenetei megtekintéséhez.
 ui-unsubscribe = Leiratkozás
 ui-open-in-calendar = Megnyitás a naptárban
-# review: changed
 ui-pictures-blocked = Néhány kép letöltése le van tiltva, hogy a feladó nehezebben követhesse nyomon az üzenet megnyitását.
 ui-not-shown = Az üzenetet nem sikerült megjeleníteni.
 ui-attachment-not-read = A mellékletet nem sikerült beolvasni.
@@ -262,21 +260,13 @@ ui-unsubscribing = Leiratkozás: { $target }...
 ui-cannot-unsubscribe = Ez az üzenet nem kínál leiratkozási lehetőséget.
 ui-unsubscribed = A leiratkozási kérést elfogadták.
 ui-not-unsubscribed = Nem sikerült leiratkozni: { $reason }
-# review: new
 ui-list-bar = Ez az üzenet egy levelezőlistáról érkezett ({ $domain }).
-# review: new
 ui-list-bar-plain = Ez az üzenet egy levelezőlistáról érkezett.
-# review: new
-ui-list-bar-asked = { $date } napon kérte, hogy leiratkozzon erről a listáról.
-# review: new
-ui-list-bar-came-after = { $date } napon kérte, hogy leiratkozzon erről a listáról, de ez az üzenet ezután érkezett.
-# review: new
-ui-list-bar-opened = { $date } napon megnyitotta a lista leiratkozási oldalát.
-# review: new
-ui-list-bar-failed = A lista nem fogadta el a kérést: { $reason }
-# review: new
+ui-list-bar-asked = Leiratkozást kért erről a listáról. A kérelem dátuma: { $date }
+ui-list-bar-came-after = Ez az üzenet több mint két nappal a leiratkozási kérelem után érkezett. A kérelem dátuma: { $date }
+ui-list-bar-opened = Megnyitotta a lista leiratkozási oldalát. Dátum: { $date }
+ui-list-bar-failed = A leiratkozási kérelem sikertelen: { $reason }
 ui-unsubscribe-ask = Leiratkozás…
-# review: new
 ui-unsubscribe-again = Leiratkozás újra…
 ui-event-span = Kezdés: { $start }, befejezés: { $end }
 ui-event-floating = { $when } (nincs használható időzónaadat)
@@ -431,6 +421,8 @@ ui-account-move-down = &Lejjebb
 ui-menu-open = M&egnyitás
 ui-menu-flag = &Jelölő
 ui-menu-view-source = &Forrás megtekintése
+# Context menu: the same action as cmd-unsubscribe, with its own access key.
+ui-menu-unsubscribe = Le&iratkozás a listáról...
 ui-save-attachments = Mellékletek mentése
 ui-attachment-open = Megnyitás
 ui-attachment-save-as = Mentés másként...

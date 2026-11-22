@@ -9,7 +9,6 @@ messages = { $count ->
    *[other] { $count } сообщения
 }
 decimal-separator = ,
-# review: new
 list-separator = { ", " }
 size-bytes = { $count ->
     [one] { $count } байт
@@ -720,7 +719,7 @@ agent-read-search = { $count ->
     [many] Поиск «{ $query }»: { $count } сообщений
    *[other] Поиск «{ $query }»: { $count } сообщения
 }
-agent-read-people = Поиск по началу имени или адреса: «{ $query }»
+agent-read-people = Поиск людей по имени или адресу: «{ $query }»
 agent-read-list = { $count ->
     [one] Просмотрена { $count } запись. Список: «{ $folder }»
     [few] Просмотрены { $count } записи. Список: «{ $folder }»

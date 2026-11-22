@@ -106,7 +106,7 @@ gtk-link-status = { $link }    (avaa Ctrl-napsautuksella)
 ## Accounts
 
 gtk-plain-warning =
-    Ilman salausta kuka tahansa, joka sieppaa verkkoliikenteesi, voi lukea salasanasi ja viestisi. Käytä tätä yhteyttä vain oman tietokoneesi tai lähiverkkosi palvelimen kanssa.
+    Ilman salausta kuka tahansa, joka sieppaa verkkoliikenteesi, voi lukea salasanasi ja viestisi. Jatka vain, jos yhteys on suojattu muulla tavoin; lähiverkko ei itsessään tarjoa salausta.
 
     Jatketaanko?
 gtk-account-name-title = Tilin nimi
@@ -161,7 +161,7 @@ gtk-nothing-yet = Ei vielä mitään.
 ## Preferences
 
 gtk-preferences = Asetukset
-gtk-notify-subtitle = Vain kun Inbox Classic on taustalla
+gtk-notify-subtitle = Vain kun pääikkuna ei ole etualalla
 
 ## The desktop entry and the page of the software stores
 

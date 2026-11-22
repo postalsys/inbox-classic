@@ -1,10 +1,10 @@
 <h1>Leiratkozás levelezőlistáról</h1>
-<p class="summary"><!--review-->Kérje a levelezőlistáról való leiratkozást az üzenetei fölötti sávból.<!--/review--></p>
-<p><!--review-->Ha egy levelezőlista üzenete megadja, hogyan lehet leiratkozni, a szövege fölött sáv jelenik meg a lista tartományával és a <b data-text="ui-unsubscribe-ask"></b> gombbal. A sáv csak a tartományával nevezi meg a listát, sosem a feladó által választott névvel. A Levélszemét, az Elküldött elemek és a Piszkozatok mappában nincs sáv: ha levélszemétből iratkozik le egy listáról, azzal elárulja a feladónak, hogy a címe működik.<!--/review--></p>
+<p class="summary">Kérje a levelezőlistáról való leiratkozást az üzenetei fölötti sávból.</p>
+<p>A leiratkozási útmutatót tartalmazó üzenetek szövege fölött sáv jelenik meg a <b data-text="ui-unsubscribe-ask"></b> gombbal. Ha a lista tartományneve rendelkezésre áll, a sáv ezt jeleníti meg a feladó által választott név helyett. A sáv nem jelenik meg a következő mappákban: <b data-text="folder-junk"></b>, <b data-text="folder-sent"></b> és <b data-text="folder-drafts"></b>. A levélszemétből indított leiratkozás megerősítheti a feladónak, hogy a cím használatban van.</p>
 <p>Leiratkozás a listáról:</p>
 <ol>
-    <li><!--review-->Kattintson a sávon a <b data-text="ui-unsubscribe-ask"></b> gombra, vagy válassza az <b data-text="menu-message"></b> &gt; <b data-text="cmd-unsubscribe"></b> parancsot. Az Inbox Classic megmutatja, hová és hogyan jut el a kérés, majd megerősítést kér.<!--/review--></li>
-    <li><!--review-->Kattintson <!--os:windows-->az <b data-text="ui-yes"></b><!--/os--><!--os:mac,linux-->a <b data-text="ui-unsubscribe"></b><!--/os--> gombra. A lista által megadott módtól függően az alábbiak egyike történik:<!--/review-->
+    <li>Kattintson a sávon a <b data-text="ui-unsubscribe-ask"></b> gombra, vagy válassza az <b data-text="menu-message"></b> &gt; <b data-text="cmd-unsubscribe"></b> parancsot. Az Inbox Classic megmutatja, hová és hogyan jut el a kérés, majd megerősítést kér.</li>
+    <li>Kattintson <!--os:windows-->az <b data-text="ui-yes"></b><!--/os--><!--os:mac,linux-->a <b data-text="ui-unsubscribe"></b><!--/os--> gombra. A lista által megadott módtól függően az alábbiak egyike történik:
         <ul>
             <li>Az Inbox Classic közvetlenül, az interneten küldi el a leiratkozási kérést. Nem nyit böngészőlapot, és nem küld e-mailt.</li>
             <li>Az Inbox Classic abból a fiókból készíti elő a leiratkozási üzenetet, amelyben a levelet olvassa, a fiók aláírásszövegével. Elküldéséhez kattintson a <b data-text="ui-tb-send"></b> gombra.</li>
@@ -12,8 +12,8 @@
         </ul>
     </li>
 </ol>
-<p><!--review-->Ezután a sáv a lista minden üzenetén jelzi, mikor kérte a leiratkozást, és mást nem kínál fel. Az e-mailben küldött kérés akkor számít, amikor már elküldte. Ha a lista oldalát nyitotta meg, a sáv megtartja a gombját, mert az Inbox Classic nem látja, hogy ott befejezte-e a leiratkozást.<!--/review--></p>
-<p><!--review-->A leiratkozás érvénybe lépése akár két napig is tarthat. Ha a lista egy üzenete ennél később érkezik, a sáv felkínálja a <b data-text="ui-unsubscribe-again"></b> gombot.<!--/review--></p>
+<p>A közvetlen kérelem elfogadása vagy a leiratkozási e-mail elküldése után a sáv megjeleníti a kérelem dátumát, és elrejti a gombot. Ez a lista ugyanabban a fiókban lévő üzeneteire vonatkozik. Ha a lista weboldalát nyitja meg, a gomb megmarad: az Inbox Classic nem tudja megállapítani, hogy ott befejezte-e a leiratkozást.</p>
+<p>Időbe telhet, amíg a lista leállítja az üzenetek küldését. Ha egy üzenet a kérelem után több mint két nappal érkezik, a sávja felkínálja a <b data-text="ui-unsubscribe-again"></b> gombot.</p>
 <p>A közvetlenül küldött kérés eredményét az állapotsor jelzi. A sikeres visszajelzés a kérés elfogadását jelenti; a leiratkozás feldolgozása a listától függ.</p>
 <aside class="note">A közvetlen leiratkozási kérést az Inbox Classic csak akkor kínálja fel, ha a levelezési szolgáltató érvényesnek találta az üzenet digitális aláírását, és az a leiratkozási adatokat is védi. A kérés elküldéséhez ekkor is megerősítés szükséges.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>

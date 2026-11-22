@@ -220,7 +220,7 @@
       <li>Downloaded mail stays readable offline while its local copy is kept; sign-in credentials normally use your system keyring when available</li>
       <li xml:lang="id">Skrip pesan dan konten aktif lainnya dihapus; gambar dari internet hanya dimuat jika Anda mengizinkannya</li>
       <li xml:lang="id">Cari subjek, pengirim, penerima, nama lampiran, dan teks pesan dengan operator gaya Gmail yang sudah dikenal</li>
-      <li xml:lang="id">Balasan melipat pesan sebelumnya yang dikutipnya</li>
+      <li xml:lang="id">Balasan menciutkan kutipan pesan sebelumnya</li>
       <li xml:lang="id">Email yang diunduh tetap dapat dibaca secara offline selama salinan lokalnya disimpan; kredensial masuk biasanya disimpan di keyring sistem jika tersedia</li>
       <li xml:lang="ca">Els missatges es mostren sense executar-ne els scripts; les imatges d’internet només es carreguen amb la vostra autorització</li>
       <li xml:lang="ca">Cerca a l’assumpte, els remitents, els destinataris, els noms dels fitxers adjunts i el text dels missatges, amb operadors inspirats en els del Gmail</li>

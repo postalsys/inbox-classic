@@ -87,7 +87,6 @@ cmd-options = Пара&метри...
 cmd-message-rules = &Правила для повідомлень...
 cmd-encryption-keys = &Ключі шифрування...
 cmd-create-rule-from-message = &Створити правило з повідомлення...
-# review: new
 cmd-unsubscribe = С&касувати підписку на розсилку...
 cmd-select-all = Виді&лити все
 cmd-undo = &Скасувати
@@ -250,7 +249,6 @@ ui-no-items = У цьому поданні немає елементів.
 ui-choose-folder = Виберіть папку, щоб побачити її повідомлення.
 ui-unsubscribe = Скасувати підписку
 ui-open-in-calendar = Відкрити в календарі
-# review: changed
 ui-pictures-blocked = Деякі зображення заблоковано, щоб зменшити можливості відстеження.
 ui-not-shown = Не вдалося показати повідомлення.
 ui-attachment-not-read = Не вдалося прочитати вкладення.
@@ -264,21 +262,13 @@ ui-unsubscribing = Надсилання запиту на скасування �
 ui-cannot-unsubscribe = Це повідомлення не містить способу скасувати підписку.
 ui-unsubscribed = Запит на скасування підписки прийнято.
 ui-not-unsubscribed = Не вдалося скасувати підписку: { $reason }
-# review: new
 ui-list-bar = Це повідомлення з розсилки ({ $domain }).
-# review: new
 ui-list-bar-plain = Це повідомлення з розсилки.
-# review: new
 ui-list-bar-asked = Ви попросили скасувати підписку на цю розсилку { $date }.
-# review: new
-ui-list-bar-came-after = Ви попросили скасувати підписку на цю розсилку { $date }, але це повідомлення надійшло пізніше.
-# review: new
-ui-list-bar-opened = Ви відкрили сторінку розсилки для скасування підписки { $date }.
-# review: new
-ui-list-bar-failed = Розсилка не прийняла запит: { $reason }
-# review: new
+ui-list-bar-came-after = Ви попросили скасувати підписку { $date }, але це повідомлення надійшло більш ніж через два дні.
+ui-list-bar-opened = Ви відкрили сторінку скасування підписки на цю розсилку { $date }.
+ui-list-bar-failed = Не вдалося виконати запит на скасування підписки: { $reason }
 ui-unsubscribe-ask = Скасувати підписку…
-# review: new
 ui-unsubscribe-again = Скасувати підписку знову…
 ui-event-span = { $start } - { $end }
 ui-event-floating = { $when } (часовий пояс не визначено)
@@ -318,7 +308,7 @@ ui-found-autodiscover = Ці параметри знайдено через Micr
 ui-found-other = Ці параметри знайдено для цієї адреси.
 ui-app-password-needed = Для входу поштової програми може знадобитися пароль застосунку, якщо ваш обліковий запис його підтримує. Створіть такий пароль на вебсайті { $provider } і введіть його в поле «Пароль» на наступному кроці. Для Outlook.com і Microsoft 365 використовуйте вхід через браузер.
 ui-app-password-open = Відкрити інструкції на вебсайті { $provider } у браузері?
-ui-plain-warning = Без шифрування той, хто перехоплює мережевий трафік, може прочитати ваш пароль і повідомлення. Використовуйте таке з’єднання лише із сервером на власному комп’ютері або в довіреній локальній мережі. Сама локальна мережа не шифрує дані.
+ui-plain-warning = Без шифрування той, хто перехоплює мережевий трафік, може прочитати ваш пароль і повідомлення. Продовжуйте лише тоді, коли з’єднання захищене іншим способом. Сама локальна мережа не шифрує дані.
 ui-continue-ask = Продовжити?
 ui-add-sign-in-app = Додати застосунок для входу...
 ui-turned-off = Спосіб входу «{ $name }» вимкнено на цьому комп’ютері.
@@ -434,6 +424,8 @@ ui-account-move-down = Вн&из
 ui-menu-open = Відкр&ити
 ui-menu-flag = Прапоре&ць
 ui-menu-view-source = Переглянути ви&хідний текст
+# Context menu: the same action as cmd-unsubscribe, with its own access key.
+ui-menu-unsubscribe = Скас&увати підписку на розсилку...
 ui-save-attachments = Зберегти вкладення
 ui-attachment-open = Відкрити
 ui-attachment-save-as = Зберегти як...
