@@ -716,7 +716,12 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         // a moment after the last key, not for each
         findTimer?.invalidate()
         findTimer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: false) { [weak self] _ in
-            MainActor.assumeIsolated { self?.searchChanged() }
+            MainActor.assumeIsolated {
+                // not while an input method composes (Japanese, Chinese, Korean): its confirmed text changes the
+                // field again, and that is searched
+                if let editor = self?.searchField.currentEditor() as? NSTextView, editor.hasMarkedText() { return }
+                self?.searchChanged()
+            }
         }
     }
 

@@ -476,6 +476,9 @@ A Japanese, a Chinese and a Korean message, in a folder of their own (CJK), dele
 - a Chinese word inside the subject finds its message (会议)
 - a Korean word with its ending left off finds its message (회의 in 회의에서)
 - one character alone finds it too (議)
+- while an input method composes, its unconfirmed text is not searched; the folder stays as it is (the Mac, its
+  marked text set as an input method does; Windows' edit control gets only confirmed text, GTK's search entry no
+  composition)
 
 ## 22. Saving and importing a message as a file
 
@@ -901,6 +904,8 @@ Screenshots: `write-17-complete`
 
 - typing in To lists the people it may be
 - with someone heard from
+- while an input method composes, Enter and the arrows are its own and take no address (Linux, its composition as GTK
+  says it; Windows' edit control sees no key of a composition, AppKit gives them to the input method first)
 - Enter takes the first, with a comma for the next
 - and closes the list
 
