@@ -14,14 +14,14 @@ extension UITest {
 
     /// what the harness's OpenPGP.js says of a message sent: signed, valid, encrypted (kind), its text, whom it was
     /// encrypted to, its attachments
-    func pgpCheck(_ message: [String: Any]) async -> [String: Any] {
+    func pgpCheck(_ message: [String: Any], recipients: [String] = ["alice.asc"]) async -> [String: Any] {
         let read = { (name: String) in (try? String(contentsOf: self.pgpFixtures.appendingPathComponent(name), encoding: .utf8)) ?? "" }
         var request = URLRequest(url: URL(string: "http://127.0.0.1:\(port("pgp"))/pgp/check")!)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try? JSONSerialization.data(withJSONObject: [
             "raw": message["raw"] as? String ?? "", "key": read("me.asc"),
-            "passphrase": read("me.passphrase").trimmingCharacters(in: .whitespacesAndNewlines), "recipients": [read("alice.asc")],
+            "passphrase": read("me.passphrase").trimmingCharacters(in: .whitespacesAndNewlines), "recipients": recipients.map(read),
         ])
         guard let (data, _) = try? await URLSession.shared.data(for: request),
               let answer = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return [:] }

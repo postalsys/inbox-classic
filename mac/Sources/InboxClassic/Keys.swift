@@ -114,23 +114,75 @@ enum KeyActions {
             inform(Text.uiUnknownReason.text, title: title, style: .warning)
             return false
         }
-        var (outcome, message) = core.pgpImport(data, passphrase: nil)
+        return importKeys(core: core, data, source: PE_KEY_SOURCE_FILE, title: title)
+    }
+
+    /// Import from Clipboard: the clipboard's text imported as a file's keys are; a clipboard without a key says so
+    static func importPasted(core: Core) -> Bool {
+        let title = Text.uiKeysImportTitle.text
+        let pasted = NSPasteboard.general.string(forType: .string) ?? ""
+        guard !pasted.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            inform(Text.uiKeysPasteNone.text, title: title, style: .warning)
+            return false
+        }
+        return importKeys(core: core, Data(pasted.utf8), source: PE_KEY_SOURCE_PASTE, title: title)
+    }
+
+    /// the keys of `data` imported, the passphrase of a private key asked while it needs one; the summary, then whether
+    /// to use a private key for the own addresses it holds
+    private static func importKeys(core: Core, _ data: Data, source: PeKeySource, title: String) -> Bool {
+        var (outcome, message) = core.pgpImport(data, passphrase: nil, source: source)
         while outcome == PE_IMPORT_OUTCOME_NEEDS_PASSPHRASE || outcome == PE_IMPORT_OUTCOME_WRONG_PASSPHRASE {
             let problem = outcome == PE_IMPORT_OUTCOME_WRONG_PASSPHRASE ? message : nil
             guard let passphrase = PassphraseWindow(title: title, intro: Text.uiKeysImportPassphrase.text, problem: problem,
                                                     id: "key.import").run() else { return false }
-            (outcome, message) = core.pgpImport(data, passphrase: passphrase)
+            (outcome, message) = core.pgpImport(data, passphrase: passphrase, source: source)
         }
         guard outcome == PE_IMPORT_OUTCOME_IMPORTED else {
-            inform(message, title: title, style: .warning)
+            // text that holds no key, as the clipboard words it
+            let none = source == PE_KEY_SOURCE_PASTE && message == Text.pgpErrorNotAKey.text
+            inform(none ? Text.uiKeysPasteNone.text : message, title: title, style: .warning)
             return false
         }
-        inform(message, title: title)
+        imported(core: core, message, title: title)
+        return true
+    }
+
+    /// what an import took in, then "Use this key for ...?" when own addresses an own key holds use none yet
+    static func imported(core: Core, _ summary: String, title: String) {
+        inform(summary, title: title)
         if let question = core.pgpUnclaimedQuestion(),
            ask(question, title: title, yes: Text.uiKeysUse.text, no: Text.uiKeysNotNow.text, style: .information) {
             core.pgpClaimUnclaimed()
         }
+    }
+
+    /// the publishes running, each with what its window does once it is done
+    private static var publishing: [UInt64: () -> Void] = [:]
+
+    /// Publish: asked first, naming the key's addresses, then uploaded; `done` runs when the server answered (or it
+    /// could not start). False when it was not started.
+    static func publish(core: Core, key: PgpKey, done: @escaping () -> Void) -> Bool {
+        let title = Text.uiKeysPublish.title
+        // the command's word as the alert's heading, the question under it, as Mac alerts have them
+        let question = title + "\n\n" + Text.uiKeysPublishAsk.text(["addresses": key.addresses.joined(separator: ", ")])
+        guard ask(question, title: title,
+                  yes: Text.uiKeysPublishNow.text, no: Text.uiCancel.text, style: .information) else { return false }
+        let request = core.pgpPublish(key.fingerprint)
+        guard request != 0 else {
+            inform(Text.uiUnknownReason.text, title: title, style: .warning)
+            return false
+        }
+        publishing[request] = done
         return true
+    }
+
+    /// KeyPublished: what the server did, in the core's words; the window that asked shows it is done
+    static func published(core: Core, _ request: UInt64) {
+        guard let done = publishing.removeValue(forKey: request), let result = core.pgpPublishResult(request) else { return }
+        done()
+        // after this event, so the message does not hold up the others
+        onMain { inform(result.text, title: Text.uiKeysPublish.title, style: result.ok ? .information : .warning) }
     }
 
     /// Export: where to save the public key
@@ -655,6 +707,11 @@ private final class KeysListWindow: NSObject, NSTableViewDataSource, NSTableView
     private let verify = NSButton(title: Text.uiKeysVerify.opens, target: nil, action: nil)
     private let properties = NSButton(title: Text.macPropertiesButton.text, target: nil, action: nil)
     private let remove = NSButton(title: Text.uiRemove.text, target: nil, action: nil)
+    private let publish = NSButton(title: Text.uiKeysPublish.opens, target: nil, action: nil)
+    /// turning beside Help while a key is published
+    private let spinner = busySpinner()
+    /// the key being published: Publish is greyed until the server answered
+    private var publishing: String?
     private var keys: [PgpKey] = []
 
     init(core: Core) {
@@ -707,7 +764,9 @@ private final class KeysListWindow: NSObject, NSTableViewDataSource, NSTableView
         ])
         let new = keyButton(Text.uiKeysNew.opens, self, #selector(newClicked), "keys.new")
         let importButton = keyButton(Text.uiKeysImport.opens, self, #selector(importClicked), "keys.import")
+        let paste = keyButton(Text.uiKeysPaste.text, self, #selector(pasteClicked), "keys.paste")
         for (button, action, id) in [(export, #selector(exportClicked), "keys.export"), (backup, #selector(backupClicked), "keys.backup"),
+                                     (publish, #selector(publishClicked), "keys.publish"),
                                      (verify, #selector(verifyClicked), "keys.verify"),
                                      (properties, #selector(propertiesClicked), "keys.properties"),
                                      (remove, #selector(removeClicked), "keys.remove")] {
@@ -721,11 +780,11 @@ private final class KeysListWindow: NSObject, NSTableViewDataSource, NSTableView
         let gap = NSView()
         gap.heightAnchor.constraint(equalToConstant: 8).isActive = true
         // the buttons as wide as the widest of them, at least 120
-        let side = NSStackView(views: [new, importButton, gap, export, backup, verify, properties, remove, NSView(), close])
+        let side = NSStackView(views: [new, importButton, paste, gap, export, backup, publish, verify, properties, remove, NSView(), close])
         side.orientation = .vertical
         side.alignment = .leading
         side.widthAnchor.constraint(greaterThanOrEqualToConstant: 120).isActive = true
-        for button in [new, importButton, export, backup, verify, properties, remove, close] {
+        for button in [new, importButton, paste, export, backup, publish, verify, properties, remove, close] {
             button.widthAnchor.constraint(equalTo: side.widthAnchor).isActive = true
         }
         // the list takes the width the buttons leave
@@ -733,7 +792,7 @@ private final class KeysListWindow: NSObject, NSTableViewDataSource, NSTableView
         let intro = wrappingLabel(Text.uiKeysIntro.text)
         let middle = NSStackView(views: [listArea, side])
         middle.alignment = .top
-        let help = HelpButton("encryption-keys")
+        let help = NSStackView(views: [HelpButton("encryption-keys"), spinner])
         let stack = NSStackView(views: [intro, middle, help])
         stack.orientation = .vertical
         stack.alignment = .leading
@@ -785,6 +844,8 @@ private final class KeysListWindow: NSObject, NSTableViewDataSource, NSTableView
         export.isEnabled = key != nil
         backup.isEnabled = key?.canBackUp ?? false
         verify.isEnabled = key?.canVerify ?? false
+        // a contact's key is theirs to publish
+        publish.isEnabled = key?.own == true && publishing == nil
         properties.isEnabled = key != nil
         remove.isEnabled = key != nil
     }
@@ -799,6 +860,25 @@ private final class KeysListWindow: NSObject, NSTableViewDataSource, NSTableView
         if KeyActions.importFile(core: core) {
             fill()
         }
+    }
+
+    @objc private func pasteClicked() {
+        if KeyActions.importPasted(core: core) {
+            fill()
+        }
+    }
+
+    @objc private func publishClicked() {
+        guard let key = selected, key.own, publishing == nil else { return }
+        let started = KeyActions.publish(core: core, key: key) { [weak self] in
+            self?.publishing = nil
+            self?.spinner.stopAnimation(nil)
+            self?.showSelected()
+        }
+        guard started else { return }
+        publishing = key.fingerprint
+        spinner.startAnimation(nil)
+        showSelected()
     }
 
     @objc private func exportClicked() {
@@ -839,6 +919,8 @@ private final class KeysListWindow: NSObject, NSTableViewDataSource, NSTableView
         NSApp.runModal(for: window)
         Modal.closed(window)
         window.orderOut(nil)
+        // the Address Book's key marks follow what was imported, verified or removed here
+        AddressBookWindow.refresh()
     }
 }
 
@@ -948,14 +1030,24 @@ final class AccountSecurityWindow: NSObject {
 
 // ---- a contact's keys (Contact Properties) ----
 
-/// The key in use for each of a card's addresses, with Verify, and a newer key waiting for the user's decision
+/// The key in use for each of a card's addresses, with Verify, and a newer key waiting for the user's decision; Find
+/// Key while an address of a saved card has no key that can encrypt
 @MainActor
 final class ContactKeys: NSObject {
     let view = NSStackView()
     private let core: Core
     private var addresses: [String] = []
+    /// the card as it is stored, 0 for one not saved yet (Find Key looks up the stored card's addresses)
+    var card: Int64 = 0
     /// the window's size follows what is shown
     var resized: () -> Void = {}
+    /// Find Key's lookup running, 0 for none
+    private var lookup: UInt64 = 0
+    /// what the last lookup found, under the keys
+    private var found = ""
+
+    /// the key sections of the contact windows open
+    private static var shown: [ContactKeys] = []
 
     init(core: Core) {
         self.core = core
@@ -964,6 +1056,24 @@ final class ContactKeys: NSObject {
         view.alignment = .leading
         view.spacing = 6
         view.setAccessibilityIdentifier("contact.keys")
+        Self.shown.append(self)
+    }
+
+    /// its window closed: no more events
+    func closed() {
+        Self.shown.removeAll { $0 === self }
+    }
+
+    /// KeysFound: a lookup a contact window started is taken in and its words shown; the keys read again (another
+    /// window's lookup may have found a key of this card's addresses too)
+    static func keysFound(_ request: UInt64) {
+        for keys in shown {
+            if request != 0, request == keys.lookup {
+                keys.lookup = 0
+                keys.found = keys.core.pgpFindResult(request) ?? ""
+            }
+            keys.show(keys.addresses)
+        }
     }
 
     /// the keys of `addresses`, one entry each that has one
@@ -971,9 +1081,14 @@ final class ContactKeys: NSObject {
         self.addresses = addresses
         view.arrangedSubviews.forEach { $0.removeFromSuperview() }
         var any = false
+        var missing = false
         for (index, address) in addresses.enumerated() {
             let peer = core.pgpPeer(address)
-            if let inUse = peer.inUse, let key = core.pgpKey(inUse) {
+            let inUse = peer.inUse.flatMap { core.pgpKey($0) }
+            if inUse?.state != PE_KEY_STATE_VALID {
+                missing = true
+            }
+            if let key = inUse {
                 any = true
                 let words = wrappingLabel("\(address): \(key.grouped) (\(key.status))")
                 words.isSelectable = true
@@ -1004,7 +1119,45 @@ final class ContactKeys: NSObject {
             none.setAccessibilityIdentifier("contact.key.none")
             view.addArrangedSubview(none)
         }
+        // Find Key for a saved card with an address that has no key to encrypt with; its words under it once done
+        if card != 0 && (missing || lookup != 0) {
+            view.addArrangedSubview(findRow())
+        }
+        if !found.isEmpty {
+            let words = wrappingLabel(found)
+            words.textColor = .secondaryLabelColor
+            words.setAccessibilityIdentifier("contact.key.found")
+            words.preferredMaxLayoutWidth = 400
+            words.widthAnchor.constraint(equalToConstant: 400).isActive = true
+            view.addArrangedSubview(words)
+        }
         resized()
+    }
+
+    /// Find Key, greyed with the spinner beside it while it looks
+    private func findRow() -> NSView {
+        let find = keyButton(Text.uiContactFindKey.text, self, #selector(findClicked), "contact.key.find")
+        find.controlSize = .small
+        find.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+        find.isEnabled = lookup == 0
+        let spinner = busySpinner()
+        if lookup != 0 {
+            spinner.startAnimation(nil)
+        }
+        let row = NSStackView(views: [find, spinner])
+        row.spacing = 6
+        return row
+    }
+
+    @objc private func findClicked() {
+        guard card != 0, lookup == 0 else { return }
+        lookup = core.contactFindKeys(card)
+        if lookup == 0 {
+            // nothing to ask: every address was looked up a moment ago
+            NSSound.beep()
+        }
+        found = lookup == 0 ? "" : Text.pgpRecipientLooking.text
+        show(addresses)
     }
 
     /// the words of an entry, its buttons under them

@@ -21,6 +21,9 @@ struct BookEntry {
     var label: String
     /// how many members, for a group
     var count = 0
+    /// a key that can encrypt is in use for one of its addresses, and whether one of those is verified: the list's mark
+    var hasKey = false
+    var keyVerified = false
     var isGroup: Bool { group != 0 }
     /// what a list shows for it
     var title: String { name.isEmpty ? address : name }
@@ -63,7 +66,8 @@ extension Core {
         guard let list else { return [] }
         defer { pe_card_list_free(list) }
         return (0..<pe_card_list_count(list)).compactMap { pe_card_list_get(list, $0)?.pointee }.map {
-            BookEntry(card: $0.id, name: text($0.name), address: text($0.address), phone: text($0.phone), label: text($0.label))
+            BookEntry(card: $0.id, name: text($0.name), address: text($0.address), phone: text($0.phone), label: text($0.label),
+                      hasKey: $0.has_key, keyVerified: $0.key_verified)
         }
     }
 
@@ -415,8 +419,25 @@ final class AddressBookWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         groupScroll.drawsBackground = false
 
         let peopleScroll = bookTable(people, id: "book.people", columns: [
-            ("name", Text.uiColName.text, 190), ("email", Text.uiColEmail.text, 220), ("phone", Text.uiColPhone.text, 110),
+            ("key", "", 24), ("name", Text.uiColName.text, 190), ("email", Text.uiColEmail.text, 220),
+            ("phone", Text.uiColPhone.text, 110),
         ])
+        // the key marks: a narrow column of its own, headed by a key, as Mail heads its flag column with the flag
+        if let keyColumn = people.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier("key")) {
+            keyColumn.minWidth = 24
+            keyColumn.maxWidth = 24
+            keyColumn.resizingMask = []
+            // a header cell draws its title, not an image: the symbol goes in as the title's one character
+            let key = NSTextAttachment()
+            key.image = NSImage(systemSymbolName: "key", accessibilityDescription: nil)?
+                .withSymbolConfiguration(.init(pointSize: 11, weight: .regular))
+            let title = NSMutableAttributedString(attachment: key)
+            let centred = NSMutableParagraphStyle()
+            centred.alignment = .center
+            title.addAttributes([.foregroundColor: NSColor.secondaryLabelColor, .paragraphStyle: centred],
+                                range: NSRange(location: 0, length: title.length))
+            keyColumn.headerCell.attributedStringValue = title
+        }
         people.allowsMultipleSelection = true
         people.dataSource = self
         people.delegate = self
@@ -537,10 +558,40 @@ final class AddressBookWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         }
         let entry = rows[row]
         switch column?.identifier.rawValue {
+        case "key": return keyMark(tableView, entry)
         case "name": return listCell(tableView, entry.title, secondary: entry.card == 0)
         case "email": return listCell(tableView, entry.address)
         default: return listCell(tableView, entry.phone)
         }
+    }
+
+    /// the key mark of a row: a verified key's green shield, another key's grey key, nothing without a key that can
+    /// encrypt; its tooltip and accessible name say which
+    private func keyMark(_ table: NSTableView, _ entry: BookEntry) -> NSView {
+        let id = NSUserInterfaceItemIdentifier("book.key")
+        let cell = table.makeView(withIdentifier: id, owner: nil) as? NSTableCellView ?? {
+            let made = NSTableCellView()
+            made.identifier = id
+            let picture = NSImageView()
+            picture.translatesAutoresizingMaskIntoConstraints = false
+            picture.symbolConfiguration = .init(pointSize: 11, weight: .regular)
+            made.addSubview(picture)
+            made.imageView = picture
+            NSLayoutConstraint.activate([
+                picture.centerXAnchor.constraint(equalTo: made.centerXAnchor),
+                picture.centerYAnchor.constraint(equalTo: made.centerYAnchor),
+            ])
+            return made
+        }()
+        let words = !entry.hasKey ? "" : entry.keyVerified ? Text.uiBookKeyVerified.text : Text.uiBookKeyKnown.text
+        let symbol = !entry.hasKey ? nil : entry.keyVerified ? "checkmark.shield.fill" : "key.fill"
+        cell.imageView?.image = symbol.flatMap { NSImage(systemSymbolName: $0, accessibilityDescription: words) }
+        cell.imageView?.contentTintColor = entry.keyVerified ? .systemGreen : .secondaryLabelColor
+        cell.imageView?.setAccessibilityLabel(words.isEmpty ? nil : words)
+        cell.toolTip = words.isEmpty ? nil : words
+        cell.setAccessibilityElement(entry.hasKey)
+        cell.setAccessibilityLabel(words.isEmpty ? nil : words)
+        return cell
     }
 
     /// the selected group drawn by its row, as the folder tree has it
@@ -904,6 +955,7 @@ final class ContactSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
         phoneKind.setAccessibilityIdentifier("contact.phone.kind")
         window.contentView = layout()
         window.initialFirstResponder = first
+        keys.card = editing.id
         keys.show(self.card.addresses)
         keys.resized = { [weak self] in self?.fitContent() }
         showStoredPicture()
@@ -1280,6 +1332,7 @@ final class ContactSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
     /// the id saved, 0 when cancelled
     func run(on parent: NSWindow?) -> Int64 {
         runSheet(window, on: parent)
+        keys.closed()
         return saved
     }
 }

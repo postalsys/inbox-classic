@@ -547,16 +547,55 @@ extension Core {
         return .failure(Refusal(taken(error) ?? Text.uiUnknownReason.text))
     }
 
-    /// the keys of a file's bytes imported, private ones unlocked with `passphrase`; how it ended and the core's words
-    func pgpImport(_ data: Data, passphrase: String?) -> (outcome: PeImportOutcome, message: String) {
+    /// the keys of a file's bytes (or the clipboard's text, `source` PASTE) imported, private ones unlocked with
+    /// `passphrase`; how it ended and the core's words
+    func pgpImport(_ data: Data, passphrase: String?, source: PeKeySource = PE_KEY_SOURCE_FILE)
+        -> (outcome: PeImportOutcome, message: String) {
         var message: UnsafeMutablePointer<CChar>?
         let strings = CStrings()
         defer { strings.wipe() }
         let outcome = data.withUnsafeBytes { bytes in
             pe_pgp_import(handle, bytes.bindMemory(to: UInt8.self).baseAddress, data.count, passphrase.map(strings.add),
-                          PE_KEY_SOURCE_FILE, &message)
+                          source, &message)
         }
         return (outcome, taken(message) ?? "")
+    }
+
+    /// Import Key on attachment `index` of a message of the store, or (`file`) of a message file a window shows:
+    /// public keys only, never a passphrase asked. Reads (and decrypts) the message on the calling thread.
+    func pgpImportAttachment(folder: Int64, uid: UInt64, file: String?, index: Int) -> (outcome: PeImportOutcome, message: String) {
+        var message: UnsafeMutablePointer<CChar>?
+        let outcome = file.map { path in path.withCString { pe_pgp_import_file_attachment(handle, $0, index, &message) } }
+            ?? pe_pgp_import_attachment(handle, folder, uid, index, &message)
+        return (outcome, taken(message) ?? "")
+    }
+
+    /// Publish: the own key's public part uploaded to keys.openpgp.org; KeyPublished follows with the request, 0 when
+    /// it could not start
+    func pgpPublish(_ fingerprint: String) -> UInt64 {
+        fingerprint.withCString { pe_pgp_publish(handle, $0) }
+    }
+
+    /// what a publish did, after its KeyPublished: the words, and false for a failure; nil for another's request
+    func pgpPublishResult(_ request: UInt64) -> (text: String, ok: Bool)? {
+        var ok = false
+        return taken(pe_pgp_publish_result(handle, request, &ok)).map { ($0, ok) }
+    }
+
+    /// Find Key on the label of a part signed by a key not known here (the link clicked): KeysFound follows with the
+    /// request, 0 when it could not start
+    func pgpFindHandle(_ link: String) -> UInt64 {
+        link.withCString { pe_pgp_find_handle(handle, $0) }
+    }
+
+    /// Find Key in a contact's window: the keys of the card's addresses looked up; 0 when there is nothing to ask
+    func contactFindKeys(_ card: Int64) -> UInt64 {
+        pe_contact_find_keys(handle, card)
+    }
+
+    /// what a lookup this window started found, after its KeysFound (the keys taken in now): the words to show
+    func pgpFindResult(_ request: UInt64) -> String? {
+        taken(pe_pgp_find_result(handle, request))
     }
 
     /// the public key, armored
@@ -1088,7 +1127,7 @@ final class MessageView {
         return Attachment(name: text(attachment.filename), size: attachment.size, sizeText: text(attachment.size_text),
                           kind: attachment.kind, canOpen: attachment.can_open, tooltip: text(attachment.tooltip),
                           refusal: text(attachment.refusal), part: Int(attachment.part),
-                          protection: attachment.protection, partText: text(attachment.part_text))
+                          protection: attachment.protection, partText: text(attachment.part_text), isKey: attachment.is_key)
     }
 
     /// what the strip menu's Show in Message says of file `index`: no item, checked, unchecked or greyed
@@ -1118,6 +1157,8 @@ struct Attachment: Equatable {
     var part = 0
     var protection = PE_PROTECTION_NONE
     var partText = ""
+    /// it holds OpenPGP public keys: its menu offers Import Key
+    var isKey = false
 }
 
 /// A draft of the core (a reply, a forward, a saved draft, a mailto: link); freed with it

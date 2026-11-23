@@ -339,8 +339,12 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         case PE_EVENT_KIND_ADDRESS_BOOK_CHANGED:
             AddressBookWindow.refresh()
         case PE_EVENT_KIND_KEYS_CHANGED:
-            // what a message shown says of its signature and encryption
+            // what a message shown says of its signature and encryption, a contact's keys, the book's key marks
             reloadMessagesShown()
+            ContactKeys.keysFound(0)
+            AddressBookWindow.refresh()
+        case PE_EVENT_KIND_KEY_PUBLISHED:
+            KeyActions.published(core: core, event.uid)
         case PE_EVENT_KIND_FAILED:
             failing.insert(event.account)
             setSyncStatus(Text.macAccountSaid.text(["account": mailbox.accountName(event.account), "message": event.message]), over: true)
@@ -356,6 +360,12 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         MessageWindow.onEvent(event)
         // the compose windows: the recipients' keys looked up, or changed
         ComposeWindow.onEvent(event)
+        // keys looked up: a contact window's Find Key taken in, then what every window took in shown in the contact
+        // windows and the book's key marks
+        if event.kind == PE_EVENT_KIND_KEYS_FOUND {
+            ContactKeys.keysFound(event.uid)
+            AddressBookWindow.refresh()
+        }
         // the Dock: what is unread in the Inboxes, when a folder changed
         if event.kind == PE_EVENT_KIND_FOLDER_CHANGED || event.kind == PE_EVENT_KIND_SYNC_FINISHED {
             showUnread()

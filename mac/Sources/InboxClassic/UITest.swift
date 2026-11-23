@@ -673,6 +673,7 @@ final class UITest {
         try await encryptedAttachment()
         try await securePreviews()
         try await composeKeys()
+        try await findingKeys()
         try await outboxAndDrafts()
         try await draftsSavedAutomatically()
         try await textSize()
