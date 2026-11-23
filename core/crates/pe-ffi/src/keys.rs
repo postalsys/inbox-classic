@@ -77,6 +77,8 @@ pub struct PeKey {
     pub address_lines: *const c_char,
     /// What Remove asks first
     pub remove_question: *const c_char,
+    /// What Publish asks first, naming the addresses keys.openpgp.org writes to; empty for a contact's key
+    pub publish_question: *const c_char,
     /// What Verify Key says They Match marks: every address the key holds
     pub verify_marks: *const c_char,
     /// When it was made and until when it is valid ("Never"), in the user's way of writing a day
@@ -115,6 +117,7 @@ fn key_list(keys: &[KeyInfo]) -> *mut PeKeyList {
         can_verify: key.can_verify,
         address_lines: strings.add(&key.address_lines.join("\n")),
         remove_question: strings.add(&key.remove_question),
+        publish_question: strings.add(&key.publish_question),
         verify_marks: strings.add(&key.verify_marks),
         created_text: strings.add(&key.created_text),
         expires_text: strings.add(&key.expires_text),
@@ -225,10 +228,10 @@ pub enum PeImportOutcome {
 /// Imports the keys in `data` (`len` bytes, armored or binary): private ones unlocked with `passphrase` (NULL when
 /// none was asked yet) and kept protected, public ones used for their addresses unless another key is (that one
 /// waits for the user's decision). `message` gets what happened or why not, in words (free it with `pe_string_free`).
-/// Import from Clipboard is this with the clipboard's text as UTF-8 and `PE_KEY_SOURCE_PASTE`: text that holds no key
-/// comes back `PE_IMPORT_OUTCOME_INVALID` (say `ui-keys-paste-none` for an empty clipboard or one without a key
-/// block). With `PE_KEY_SOURCE_ATTACHMENT` private keys are refused (`INVALID`, the words say why): a key from mail is
-/// taken as a public key only.
+/// Import from Clipboard is this with the clipboard's text as UTF-8 (empty for a clipboard without text) and
+/// `PE_KEY_SOURCE_PASTE`: text without an armored OpenPGP block comes back `PE_IMPORT_OUTCOME_INVALID` with the words
+/// for that (`ui-keys-paste-none`), so the app shows `message` whatever it holds. With `PE_KEY_SOURCE_ATTACHMENT`
+/// private keys are refused (`INVALID`, the words say why): a key from mail is taken as a public key only.
 ///
 /// # Safety
 /// `core` must be a live handle, `data` `len` readable bytes, `passphrase` NULL or a NUL-terminated string, `message`
@@ -291,52 +294,30 @@ unsafe fn import_outcome(
 }
 
 /// Import Key on an attachment of a message (its `PeAttachment.is_key`): the `index`th attachment of the message as
-/// `pe_message_view` lists it, imported as `pe_pgp_import` imports a file's keys (a different key for an address that
-/// has one waits for the user's decision), public keys only. Reads (and, for an encrypted message, decrypts) the
-/// message on the calling thread, as `pe_message_view` does; `pe_attachment_data_start` and `pe_pgp_import` with
-/// `PE_KEY_SOURCE_ATTACHMENT` do the same off the window thread. `message` gets the words (free with
+/// `pe_message_view` lists it, of the message file a window shows (`path`, UTF-8, as `pe_file_view` reads it) or, with
+/// `path` NULL, of message `uid` of `folder`; imported as `pe_pgp_import` imports a file's keys (a different key for an
+/// address that has one waits for the user's decision), public keys only. Reads (and, for an encrypted message,
+/// decrypts) the message on the calling thread: call it off the window thread. `message` gets the words (free with
 /// `pe_string_free`); the outcome is never `NEEDS_PASSPHRASE`. Afterwards the app asks `pe_pgp_unclaimed_question` as
 /// after any import, and a reading pane showing a message signed by that key builds its view again.
 ///
 /// # Safety
-/// `core` must be a live handle, `message` NULL or a valid pointer.
+/// `core` must be a live handle, `path` NULL or a NUL-terminated string, `message` NULL or a valid pointer.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_pgp_import_attachment(
     core: *const PeCore,
+    path: *const c_char,
     folder: i64,
     uid: u64,
     index: usize,
     message: *mut *mut c_char,
 ) -> PeImportOutcome {
     // SAFETY: as the caller guarantees
-    let result = unsafe {
-        with(core, Err(ImportError::Invalid(String::new())), |core| {
-            core.pgp_import_attachment(folder, uid, index)
-        })
-    };
-    // SAFETY: as the caller guarantees
-    unsafe { import_outcome(result, message) }
-}
-
-/// `pe_pgp_import_attachment` for a message file a window shows (`pe_file_view`, `path` UTF-8)
-///
-/// # Safety
-/// `core` must be a live handle, `path` a NUL-terminated string, `message` NULL or a valid pointer.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_pgp_import_file_attachment(
-    core: *const PeCore,
-    path: *const c_char,
-    index: usize,
-    message: *mut *mut c_char,
-) -> PeImportOutcome {
-    // SAFETY: as the caller guarantees
-    let Some(path) = (unsafe { arg(path) }).map(std::path::PathBuf::from) else {
-        return PeImportOutcome::Invalid;
-    };
+    let path = (unsafe { arg(path) }).map(std::path::PathBuf::from);
     // SAFETY: as the caller guarantees
     let result = unsafe {
         with(core, Err(ImportError::Invalid(String::new())), |core| {
-            core.pgp_import_file_attachment(&path, index)
+            core.pgp_import_attachment(path.as_deref(), folder, uid, index)
         })
     };
     // SAFETY: as the caller guarantees
@@ -346,8 +327,8 @@ pub unsafe extern "C" fn pe_pgp_import_file_attachment(
 /// Find Key beside the label of a part signed by a key not known here: looks the key up on keys.openpgp.org by its
 /// fingerprint or key id (which tells the server no address). `handle` is the link clicked
 /// (`inboxclassic:find-key?<handle>`, when `pe_reader_link` says `PE_READER_LINK_FIND_KEY`) or the bare handle;
-/// anything but 16, 40 or 64 hex digits is refused. `KeysFound` follows with the request in `uid`: `pe_pgp_find_result`
-/// then takes what was found into the key book and gives the words for the status bar, and the reading pane builds the
+/// anything but 16, 40 or 64 hex digits is refused. `KeysFound` follows with the request in `uid`, what was found in
+/// the key book by then: `pe_pgp_find_result` gives the words for the status bar, and the reading pane builds the
 /// message's view again (`pe_message_view_start`; a message window or a file's, `pe_file_view`), whose label then
 /// says who signed it. 0 when it could not start: not a handle, or lookups on keys.openpgp.org are turned off (the
 /// page offers no Find Key then).
@@ -360,20 +341,15 @@ pub unsafe extern "C" fn pe_pgp_find_handle(core: *const PeCore, handle: *const 
     let Some(handle) = (unsafe { arg(handle) }) else {
         return 0;
     };
-    let handle = pe_html::find_key_link(handle).or_else(|| pe_html::key_handle(handle));
     // SAFETY: as the caller guarantees
-    unsafe {
-        with(core, 0, |core| {
-            handle.and_then(|h| core.pgp_find_handle(&h).ok()).unwrap_or(0)
-        })
-    }
+    unsafe { with(core, 0, |core| core.pgp_find_handle(handle).unwrap_or(0)) }
 }
 
 /// Find Key in a contact's window: looks up the keys of the card's addresses that have none, or one that can no
 /// longer encrypt, in each domain's Web Key Directory and then on keys.openpgp.org (unless Settings turns that off),
-/// as the compose window's Find Key does. `KeysFound` follows with the request in `uid`: `pe_pgp_find_result` takes
-/// the keys found into the key book (a different key for an address that has one waits, as `pe_pgp_peer` then
-/// says) and gives the words for the window; then the window reads its key rows again (`pe_pgp_peer` and
+/// as the compose window's Find Key does. `KeysFound` follows with the request in `uid`, the keys found in the key
+/// book by then (a different key for an address that has one waits, as `pe_pgp_peer` then says):
+/// `pe_pgp_find_result` gives the words for the window; then the window reads its key rows again (`pe_pgp_peer` and
 /// `pe_pgp_key` for each address) and the Address Book its list (`pe_cards`, for the key marks). 0 when there is
 /// nothing to ask: every address has a usable key, was asked in the last minute or is being looked up.
 ///
@@ -383,6 +359,17 @@ pub unsafe extern "C" fn pe_pgp_find_handle(core: *const PeCore, handle: *const 
 pub unsafe extern "C" fn pe_contact_find_keys(core: *const PeCore, card: i64) -> u64 {
     // SAFETY: as the caller guarantees
     unsafe { with(core, 0, |core| core.contact_find_keys(card).ok().flatten().unwrap_or(0)) }
+}
+
+/// Whether a contact's Find Key has anything to ask now (`pe_contact_find_keys` would start a lookup): the window
+/// enables Find Key by it, after a lookup ends and whenever it shows its keys again. False for a card not saved.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_contact_can_find_keys(core: *const PeCore, card: i64) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.contact_can_find_keys(card)) }
 }
 
 /// The public key, armored, to save or attach; NULL when there is no such key. Free with `pe_string_free`.

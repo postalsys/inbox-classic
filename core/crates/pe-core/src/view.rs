@@ -55,7 +55,7 @@ impl AttachmentView {
         let size = attachment.content.len() as u64;
         let size_text = crate::format_size(size);
         let kind = crate::opening::file_kind_of(&safe_filename, &attachment.mime_type, &attachment.content);
-        let is_key = crate::keys::holds_public_key(&safe_filename, &attachment.mime_type, &attachment.content);
+        let is_key = kind == crate::opening::FileKind::Key && crate::keys::holds_public_key(&attachment.content);
         AttachmentView {
             tooltip: crate::opening::tooltip(&filename, &size_text, kind),
             refusal: crate::opening::refusal(&filename, kind),

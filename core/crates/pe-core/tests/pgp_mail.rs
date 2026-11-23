@@ -1060,31 +1060,32 @@ fn keys_attached_to_a_message() {
             ("carol.asc", true),
             ("signature.asc", false),
             ("backup.asc", false),
-            ("dave.key", true),
+            // a .key file is a presentation (Keynote): offered by its type only, not its name
+            ("dave.key", false),
             ("notes.asc", false),
             ("dave.txt", false),
             ("alice.asc", true),
         ]
     );
 
-    let imported = w.core.pgp_import_file_attachment(&path, 0).unwrap();
+    let imported = w.core.pgp_import_attachment(Some(&path), 0, 0, 0).unwrap();
     assert_eq!(imported.keys, [carol.fingerprint()]);
     assert_eq!(
         w.core.pgp_peer("carol@example.org").unwrap().in_use.unwrap(),
         carol.fingerprint()
     );
     // a private key is never taken from mail, even without a passphrase asked
-    match w.core.pgp_import_file_attachment(&path, 2) {
+    match w.core.pgp_import_attachment(Some(&path), 0, 0, 2) {
         Err(pe_core::keys::ImportError::Invalid(why)) => {
             assert_eq!(why, tr(Text::PgpErrorAttachedPrivate))
         }
         other => panic!("{other:?}"),
     }
     assert!(w.core.pgp_peer("dave@example.org").unwrap().in_use.is_none());
-    assert!(w.core.pgp_import_file_attachment(&path, 1).is_err());
-    assert!(w.core.pgp_import_file_attachment(&path, 99).is_err());
+    assert!(w.core.pgp_import_attachment(Some(&path), 0, 0, 1).is_err());
+    assert!(w.core.pgp_import_attachment(Some(&path), 0, 0, 99).is_err());
     // a different key for an address that has one waits for the user's decision
-    let imported = w.core.pgp_import_file_attachment(&path, 6).unwrap();
+    let imported = w.core.pgp_import_attachment(Some(&path), 0, 0, 6).unwrap();
     assert!(
         imported.summary().contains("alice@example.org"),
         "{}",

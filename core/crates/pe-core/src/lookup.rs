@@ -3,12 +3,14 @@
 //! domain's Web Key Directory is asked first; keys.openpgp.org, unless Options turns it off. A miss is not asked again
 //! for a day. What is found is learned as any key is (keys.rs): a different key for an address that has one waits.
 //!
-//! The network part runs in the background; the result is learned when the window takes it
-//! ([`Core::pgp_find_result`]), on its thread, with the store.
+//! The network part runs in the background, and what it found is learned there too, on a store connection of its
+//! own, before [`Event::KeysFound`] tells the windows: a lookup whose window closed loses nothing. The window that
+//! asked takes the words ([`Core::pgp_find_result`]).
 
 use pe_i18n::{Text, tr, tr_args};
 
-use crate::keys::{KeySource, Learned};
+use crate::keys::{Book, CertCache, KeySource, Learned};
+use crate::secrets::Secrets;
 use crate::worker::unix_now;
 use crate::{Core, Event, Result};
 
@@ -27,12 +29,6 @@ pub(crate) enum Wanted {
     Handle(String),
 }
 
-/// What the background part found, before it is learned
-#[derive(Debug, Clone)]
-pub(crate) struct Fetched {
-    found: Vec<(String, pe_keys::Found)>,
-}
-
 /// What a lookup came to, for the window: per address what became of it, and the words to say
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FindOutcome {
@@ -40,6 +36,8 @@ pub struct FindOutcome {
     pub addresses: Vec<(String, bool)>,
     /// What to tell the user
     pub text: String,
+    /// How many addresses got a key, used or waiting for the user's decision ([`Event::KeysFound`]'s `learned`)
+    pub learned: usize,
 }
 
 /// What publishing came to
@@ -94,6 +92,12 @@ impl Core {
             .is_some_and(|(at, _)| now - at < ASKED_KEPT))
     }
 
+    /// Whether the user may ask for the key of `address` again (Find Key): not while it is looked up, nor within a
+    /// minute of the last time
+    pub(crate) fn may_ask_again(&self, address: &str, now: i64) -> Result<bool> {
+        Ok(!self.looking_for(address) && !self.asked_lately(address, now)?)
+    }
+
     /// Whether the key of `address` is being looked up now
     pub(crate) fn looking_for(&self, address: &str) -> bool {
         let mut looking = self.pgp_looking.lock().unwrap_or_else(|e| e.into_inner());
@@ -103,6 +107,20 @@ impl Core {
     }
 
     fn find_addresses(&self, addresses: &[String], miss_kept: i64, unusable_too: bool) -> Result<Option<u64>> {
+        let wanted = self.wanted(addresses, miss_kept, unusable_too)?;
+        if wanted.is_empty() {
+            return Ok(None);
+        }
+        let use_keyserver = self.store().pgp_keyserver()?;
+        let request = self.start_lookup(Wanted::Addresses(wanted.clone()), use_keyserver)?;
+        let mut looking = self.pgp_looking.lock().unwrap_or_else(|e| e.into_inner());
+        looking.extend(wanted.into_iter().map(|address| (address, request)));
+        Ok(Some(request))
+    }
+
+    /// The addresses of `addresses` a lookup asks for: not the user's own, without a key (or, `unusable_too`, with one
+    /// that can no longer encrypt), not missed in the last `miss_kept` seconds
+    fn wanted(&self, addresses: &[String], miss_kept: i64, unusable_too: bool) -> Result<Vec<String>> {
         let now = unix_now();
         let store = self.store();
         // the user's own addresses are never asked about: their keys are their own
@@ -137,23 +155,18 @@ impl Core {
                 wanted.push(address);
             }
         }
-        let use_keyserver = store.pgp_keyserver()?;
-        drop(store);
-        if wanted.is_empty() {
-            return Ok(None);
-        }
-        let request = self.start_lookup(Wanted::Addresses(wanted.clone()), use_keyserver)?;
-        let mut looking = self.pgp_looking.lock().unwrap_or_else(|e| e.into_inner());
-        looking.extend(wanted.into_iter().map(|address| (address, request)));
-        Ok(Some(request))
+        Ok(wanted)
     }
 
-    /// Looks up the key with `handle` (a fingerprint or key id) on keys.openpgp.org: for a signature by a key not
-    /// known here (Find Key beside its label). Asking by fingerprint tells the server no address. [`Event::KeysFound`]
-    /// follows; the view built again then checks the signature with the key found. Refused while the user turned the
-    /// key server off, and for a handle that is not 16, 40 or 64 hex digits ([`pe_html::key_handle`]).
+    /// Looks up the key with `handle` on keys.openpgp.org: for a signature by a key not known here (Find Key beside its
+    /// label). `handle` is the link clicked (`inboxclassic:find-key?<handle>`, [`pe_html::find_key_link`]) or the bare
+    /// fingerprint or key id; anything but 16, 40 or 64 hex digits is refused ([`pe_html::key_handle`]). Asking by
+    /// fingerprint tells the server no address. [`Event::KeysFound`] follows; the view built again then checks the
+    /// signature with the key found. Refused while the user turned the key server off.
     pub fn pgp_find_handle(&self, handle: &str) -> Result<u64> {
-        let handle = pe_html::key_handle(handle).ok_or_else(|| crate::Error::Invalid(tr(Text::PgpFoundNoKey)))?;
+        let handle = pe_html::find_key_link(handle)
+            .or_else(|| pe_html::key_handle(handle))
+            .ok_or_else(|| crate::Error::Invalid(tr(Text::PgpFoundNoKey)))?;
         if !self.store().pgp_keyserver()? {
             return Err(crate::Error::Unavailable(keyserver_off()));
         }
@@ -164,8 +177,21 @@ impl Core {
     /// encrypt, from each domain's Web Key Directory, then keys.openpgp.org (unless Settings turns it off), as the
     /// compose window's Find Key asks: an address asked in the last minute, or being looked up, is not asked again.
     /// What is found is learned as any key is (a different key for an address that has one waits for the user's
-    /// decision). [`Event::KeysFound`] follows with the request; None when there is nothing to ask.
+    /// decision). [`Event::KeysFound`] follows with the request; None when there is nothing to ask
+    /// ([`Core::contact_can_find_keys`]).
     pub fn contact_find_keys(&self, card: pe_store::CardId) -> Result<Option<u64>> {
+        let wanted = self.contact_wanted(card)?;
+        self.pgp_find_again(&wanted)
+    }
+
+    /// Whether a contact's Find Key has anything to ask now ([`Core::contact_find_keys`]): its window enables the
+    /// button by it. False for a card not saved yet.
+    pub fn contact_can_find_keys(&self, card: pe_store::CardId) -> bool {
+        self.contact_wanted(card).is_ok_and(|wanted| !wanted.is_empty())
+    }
+
+    /// The addresses of a card that Find Key asks for
+    fn contact_wanted(&self, card: pe_store::CardId) -> Result<Vec<String>> {
         let Some(card) = self.store().card(card)? else {
             return Err(crate::Error::NotFound);
         };
@@ -173,17 +199,22 @@ impl Core {
         let mut addresses = Vec::new();
         for address in &card.addresses {
             let address = pe_store::normal_address(address);
-            if !self.looking_for(&address) && !self.asked_lately(&address, now)? {
+            if self.may_ask_again(&address, now)? {
                 addresses.push(address);
             }
         }
-        self.pgp_find_again(&addresses)
+        self.wanted(&addresses, ASKED_KEPT, true)
     }
 
     fn start_lookup(&self, wanted: Wanted, use_keyserver: bool) -> Result<u64> {
         let request = self.next_request.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         let servers = self.key_servers();
         let now = unix_now();
+        let learner = Learner {
+            path: self.path.clone(),
+            secrets: self.secrets.clone(),
+            certs: self.pgp_certs.clone(),
+        };
         let work = async move {
             let found = match wanted {
                 // the addresses at once (each still asks its domain's directory before the key server), in order
@@ -205,91 +236,32 @@ impl Core {
                 }
                 Wanted::Handle(handle) => vec![(String::new(), pe_keys::by_fingerprint(&handle, &servers).await)],
             };
-            Fetched { found }
+            // learned here, before the windows hear of it: one whose window closed meanwhile loses nothing
+            tokio::task::spawn_blocking(move || learner.learn(found))
+                .await
+                .unwrap_or_else(|error| FindOutcome {
+                    addresses: Vec::new(),
+                    text: tr_args(Text::PgpFindUnavailable, &[("error", (&error.to_string()).into())]),
+                    learned: 0,
+                })
         };
-        self.pgp_lookups
-            .start(self.runtime()?, request, work, self.events.clone(), |request| {
-                Event::KeysFound { request }
-            });
+        self.pgp_lookups.start_with(
+            self.runtime()?,
+            request,
+            work,
+            self.events.clone(),
+            |request, outcome| Event::KeysFound {
+                request,
+                learned: outcome.learned,
+            },
+        );
         Ok(request)
     }
 
-    /// What a lookup found, learned now (once): None for a lookup still running or an unknown request
+    /// The words of what a lookup found, for the window that asked (once): None for a lookup still running or an
+    /// unknown request. The keys are in the key book already.
     pub fn pgp_find_result(&self, request: u64) -> Option<FindOutcome> {
-        let fetched = self.pgp_lookups.take(request)?;
-        let now = unix_now();
-        let mut addresses = Vec::new();
-        let mut used = Vec::new();
-        let mut waiting = Vec::new();
-        let mut unavailable = None;
-        let mut learned_any = false;
-        for (address, found) in fetched.found {
-            let mut has_key = false;
-            match found {
-                pe_keys::Found::Key(bytes, source) => {
-                    let source = match source {
-                        pe_keys::Source::Wkd => KeySource::Wkd,
-                        pe_keys::Source::Keyserver => KeySource::Keyserver,
-                    };
-                    let certs = pe_pgp::read_certs(&bytes).unwrap_or_default();
-                    for cert in &certs {
-                        let learned = self.book(|book| book.learn(cert, source)).unwrap_or_default();
-                        learned_any = true;
-                        for (held, what) in learned {
-                            match what {
-                                Learned::Used | Learned::Same => used.push(held.clone()),
-                                Learned::Pending => waiting.push(held.clone()),
-                                Learned::Own => {}
-                            }
-                            if held == address {
-                                has_key = matches!(what, Learned::Used | Learned::Same);
-                            }
-                        }
-                    }
-                    if !address.is_empty() {
-                        let _ = self.store().set_pgp_lookup(&address, now, true);
-                    }
-                }
-                pe_keys::Found::NotFound => {
-                    if !address.is_empty() {
-                        let _ = self.store().set_pgp_lookup(&address, now, false);
-                    }
-                }
-                pe_keys::Found::Unavailable(why) => unavailable = Some(why),
-            }
-            if !address.is_empty() {
-                addresses.push((address, has_key));
-            }
-        }
-        let missing: Vec<&str> = addresses
-            .iter()
-            .filter(|(_, has)| !has)
-            .map(|(address, _)| address.as_str())
-            .collect();
-        let mut text = Vec::new();
-        if !used.is_empty() {
-            text.push(tr_args(Text::PgpFoundKeys, &[("addresses", (&used.join(", ")).into())]));
-        }
-        if !waiting.is_empty() {
-            text.push(tr_args(
-                Text::PgpImportedPending,
-                &[("addresses", (&waiting.join(", ")).into())],
-            ));
-        }
-        if let Some(why) = unavailable {
-            text.push(tr_args(Text::PgpFindUnavailable, &[("error", (&why).into())]));
-        } else if !missing.is_empty() {
-            text.push(tr_args(
-                Text::PgpFoundNone,
-                &[("addresses", (&missing.join(", ")).into())],
-            ));
-        } else if !learned_any && addresses.is_empty() {
-            text.push(tr(Text::PgpFoundNoKey));
-        }
-        Some(FindOutcome {
-            addresses,
-            text: text.join(" "),
-        })
+        self.pgp_lookups.take(request)
     }
 
     /// Publishes an own key's public part on keys.openpgp.org, asking the server to send its confirmation mail to the
@@ -368,4 +340,112 @@ impl Core {
 pub(crate) fn keyserver_off() -> String {
     let settings = pe_html::settings_words("reading", pe_html::Platform::current(), pe_i18n::language());
     pe_i18n::tr_args(pe_i18n::Text::PgpKeyserverOff, &[("settings", (&settings).into())])
+}
+
+/// What learns a lookup's keys off the window thread: the store's file, the password store and the certificates read
+struct Learner {
+    path: std::path::PathBuf,
+    secrets: Secrets,
+    certs: std::sync::Arc<CertCache>,
+}
+
+impl Learner {
+    /// What was found, learned on a store connection of its own as any key is (a different key for an address that
+    /// has one waits), each address's lookup remembered; what it came to
+    fn learn(self, found: Vec<(String, pe_keys::Found)>) -> FindOutcome {
+        match pe_store::Store::open(&self.path) {
+            Ok(store) => learn_found(&store, &self.secrets, &self.certs, found, unix_now()),
+            Err(error) => FindOutcome {
+                addresses: Vec::new(),
+                text: tr_args(Text::PgpFindUnavailable, &[("error", (&error.to_string()).into())]),
+                learned: 0,
+            },
+        }
+    }
+}
+
+fn learn_found(
+    store: &pe_store::Store,
+    secrets: &Secrets,
+    certs: &CertCache,
+    found: Vec<(String, pe_keys::Found)>,
+    now: i64,
+) -> FindOutcome {
+    let book = Book::new(store, secrets, certs).ok();
+    let mut addresses = Vec::new();
+    let mut used = Vec::new();
+    let mut waiting = Vec::new();
+    let mut unavailable = None;
+    let mut learned_any = false;
+    for (address, found) in found {
+        let mut has_key = false;
+        match found {
+            pe_keys::Found::Key(bytes, source) => {
+                let source = match source {
+                    pe_keys::Source::Wkd => KeySource::Wkd,
+                    pe_keys::Source::Keyserver => KeySource::Keyserver,
+                };
+                let certs = pe_pgp::read_certs(&bytes).unwrap_or_default();
+                for cert in &certs {
+                    let learned = book
+                        .as_ref()
+                        .and_then(|book| book.learn(cert, source).ok())
+                        .unwrap_or_default();
+                    learned_any = true;
+                    for (held, what) in learned {
+                        match what {
+                            Learned::Used | Learned::Same => used.push(held.clone()),
+                            Learned::Pending => waiting.push(held.clone()),
+                            Learned::Own => {}
+                        }
+                        if held == address {
+                            has_key = matches!(what, Learned::Used | Learned::Same);
+                        }
+                    }
+                }
+                if !address.is_empty() {
+                    let _ = store.set_pgp_lookup(&address, now, true);
+                }
+            }
+            pe_keys::Found::NotFound => {
+                if !address.is_empty() {
+                    let _ = store.set_pgp_lookup(&address, now, false);
+                }
+            }
+            pe_keys::Found::Unavailable(why) => unavailable = Some(why),
+        }
+        if !address.is_empty() {
+            addresses.push((address, has_key));
+        }
+    }
+    let missing: Vec<&str> = addresses
+        .iter()
+        .filter(|(_, has)| !has)
+        .map(|(address, _)| address.as_str())
+        .collect();
+    let mut text = Vec::new();
+    if !used.is_empty() {
+        text.push(tr_args(Text::PgpFoundKeys, &[("addresses", (&used.join(", ")).into())]));
+    }
+    if !waiting.is_empty() {
+        text.push(tr_args(
+            Text::PgpImportedPending,
+            &[("addresses", (&waiting.join(", ")).into())],
+        ));
+    }
+    if let Some(why) = unavailable {
+        text.push(tr_args(Text::PgpFindUnavailable, &[("error", (&why).into())]));
+    } else if !missing.is_empty() {
+        text.push(tr_args(
+            Text::PgpFoundNone,
+            &[("addresses", (&missing.join(", ")).into())],
+        ));
+    } else if !learned_any && addresses.is_empty() {
+        text.push(tr(Text::PgpFoundNoKey));
+    }
+    FindOutcome {
+        text: text.join(" "),
+        learned: used.len() + waiting.len(),
+        addresses,
+    }
 }

@@ -209,7 +209,7 @@ fn the_keys_of_finding_read_as_the_ui_tests_expect() {
         .collect();
     assert_eq!(files, [("Erin Example public key.asc", true)]);
     let imported = core
-        .pgp_import_file_attachment(&fixtures().join("key-attached.eml"), 0)
+        .pgp_import_attachment(Some(&fixtures().join("key-attached.eml")), 0, 0, 0)
         .unwrap();
     assert_eq!(imported.addresses, [("erin@example.org".to_string(), Learned::Used)]);
     let erin = core.pgp_key(&imported.keys[0]).unwrap();

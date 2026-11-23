@@ -7,6 +7,8 @@ use std::net::TcpListener;
 use std::sync::mpsc::{Receiver, channel};
 use std::sync::{Arc, Mutex};
 
+use pe_core::book::KeyMark;
+use pe_core::i18n::{Text, tr};
 use pe_core::keys::KeySource;
 use pe_core::{Core, Event, Options, PasswordStore};
 
@@ -93,13 +95,23 @@ fn world(name: &str) -> World {
 }
 
 impl World {
-    fn result(&self, request: u64) -> pe_core::FindOutcome {
+    /// Waits for the lookup's KeysFound, its result not taken: how many addresses got a key
+    fn ended(&self, request: u64) -> usize {
         loop {
             let event = self.events.recv_timeout(pe_testkit::patience()).expect("KeysFound");
-            if event == (Event::KeysFound { request }) {
-                return self.core.pgp_find_result(request).unwrap();
+            if let Event::KeysFound { request: done, learned } = event
+                && done == request
+            {
+                return learned;
             }
         }
+    }
+
+    fn result(&self, request: u64) -> pe_core::FindOutcome {
+        let learned = self.ended(request);
+        let outcome = self.core.pgp_find_result(request).unwrap();
+        assert_eq!(learned, outcome.learned);
+        outcome
     }
 }
 
@@ -116,7 +128,15 @@ fn found_used_and_a_miss_remembered() {
         .pgp_find(&["Bob@Example.org".into(), "nobody@example.org".into()])
         .unwrap()
         .unwrap();
-    let outcome = w.result(request);
+    // learned once it ended, whether a window takes its words or not
+    assert_eq!(w.ended(request), 1);
+    assert_eq!(
+        w.core.pgp_peer("bob@example.org").unwrap().in_use.unwrap(),
+        bob.fingerprint()
+    );
+    let outcome = w.core.pgp_find_result(request).unwrap();
+    assert_eq!(outcome.learned, 1);
+    assert_eq!(w.core.pgp_find_result(request), None, "taken once");
     assert_eq!(
         outcome.addresses,
         [
@@ -320,7 +340,11 @@ fn find_key_on_a_signature_by_an_unknown_key() {
     assert_eq!(find_key_of(&w.core.file_view(&path, false).unwrap()), None);
     w.core.set_pgp_keyserver(true).unwrap();
 
-    let request = w.core.pgp_find_handle(&handle).unwrap();
+    // the link clicked, as the page writes it
+    let request = w
+        .core
+        .pgp_find_handle(&format!("{}{handle}", pe_html::FIND_KEY_LINK))
+        .unwrap();
     let outcome = w.result(request);
     assert!(outcome.text.contains("bob@example.org"), "{}", outcome.text);
     // the view built again: the signature is Bob's now, and Find Key is gone
@@ -341,6 +365,9 @@ fn find_key_takes_only_a_fingerprint_or_key_id() {
         "0123456789ABCDEFG",
         "0123456789ABCDEF?x",
         "ZZ23456789ABCDEF",
+        "inboxclassic:find-key?0123456789ABCDE",
+        "inboxclassic:find-key?0123456789ABCDEF&x",
+        "https://example.org/?0123456789ABCDEF",
     ] {
         assert!(w.core.pgp_find_handle(bad).is_err(), "{bad}");
     }
@@ -375,20 +402,24 @@ fn find_key_for_a_contact_and_the_book_marks() {
             ..Default::default()
         })
         .unwrap();
-    let marks = |w: &World| -> Vec<(i64, bool, bool)> {
+    let marks = |w: &World| -> Vec<(i64, KeyMark, String)> {
         let mut rows: Vec<_> = w
             .core
             .card_rows("")
             .unwrap()
             .iter()
-            .map(|row| (row.card, row.has_key, row.key_verified))
+            .map(|row| (row.card, row.key_mark, row.key_mark_text.clone()))
             .collect();
-        rows.sort();
+        rows.sort_by_key(|row| row.0);
         rows
     };
-    assert_eq!(marks(&w), [(card, false, false), (other, false, false)]);
+    let none = |card| (card, KeyMark::None, String::new());
+    assert_eq!(marks(&w), [none(card), none(other)]);
 
+    assert!(w.core.contact_can_find_keys(card));
     let request = w.core.contact_find_keys(card).unwrap().unwrap();
+    // nothing more to ask while it is looked up
+    assert!(!w.core.contact_can_find_keys(card));
     let outcome = w.result(request);
     assert_eq!(
         outcome.addresses,
@@ -409,9 +440,17 @@ fn find_key_for_a_contact_and_the_book_marks() {
     );
     // asked again at once: the key server allows one lookup a minute, Bob's key is there
     assert_eq!(w.core.contact_find_keys(card).unwrap(), None);
+    assert!(!w.core.contact_can_find_keys(card));
     assert!(w.core.contact_find_keys(0).is_err());
+    assert!(!w.core.contact_can_find_keys(0));
 
-    assert_eq!(marks(&w), [(card, true, false), (other, false, false)]);
+    assert_eq!(
+        marks(&w),
+        [(card, KeyMark::Known, tr(Text::UiBookKeyKnown)), none(other)]
+    );
     w.core.pgp_set_key_verified(&bob.fingerprint(), true).unwrap();
-    assert_eq!(marks(&w), [(card, true, true), (other, false, false)]);
+    assert_eq!(
+        marks(&w),
+        [(card, KeyMark::Verified, tr(Text::UiBookKeyVerified)), none(other)]
+    );
 }

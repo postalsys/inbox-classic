@@ -1,6 +1,7 @@
 //! The key book: own keys made and imported, kept wrapped under the master key, backed up; correspondents' keys
 //! learned with the changed key rule; keys in vCards.
 
+use pe_core::i18n::{Text, tr, tr_args};
 use pe_core::keys::{ImportError, KeySource, KeyState, Learned};
 use pe_core::{Core, Options, PasswordStore};
 use pe_store::{AccountSettings, Auth, Security, Store};
@@ -274,8 +275,22 @@ fn a_public_key_for_an_own_address_does_not_take_it() {
 fn not_keys_are_refused_in_words() {
     let dir = pe_testkit::TempDir::new("core-keys-junk");
     let (core, _) = open_core(&dir);
-    match core.pgp_import(b"hello, not a key", None, KeySource::Paste) {
-        Err(ImportError::Invalid(words)) => assert!(!words.is_empty()),
+    // pasted text without an armored block, or nothing: the clipboard's own words
+    for pasted in [&b"hello, not a key"[..], b""] {
+        match core.pgp_import(pasted, None, KeySource::Paste) {
+            Err(ImportError::Invalid(words)) => assert_eq!(words, tr(Text::UiKeysPasteNone)),
+            other => panic!("{other:?}"),
+        }
+    }
+    // a block that is not a key says what is wrong with it
+    let broken = "-----BEGIN PGP PUBLIC KEY BLOCK-----\n\nnot one\n-----END PGP PUBLIC KEY BLOCK-----\n";
+    match core.pgp_import(broken.as_bytes(), None, KeySource::Paste) {
+        Err(ImportError::Invalid(words)) => assert!(!words.is_empty() && words != tr(Text::UiKeysPasteNone)),
+        other => panic!("{other:?}"),
+    }
+    // a file is read as it is
+    match core.pgp_import(b"hello, not a key", None, KeySource::File) {
+        Err(ImportError::Invalid(words)) => assert_ne!(words, tr(Text::UiKeysPasteNone)),
         other => panic!("{other:?}"),
     }
 }
@@ -358,6 +373,14 @@ fn the_words_of_a_key_come_from_the_core() {
     assert!(mine.can_back_up && !mine.can_verify);
     assert_eq!(mine.address_lines, ["a@work.example", "alice@example.org"]);
     assert!(mine.remove_question.contains(&mine.grouped), "{}", mine.remove_question);
+    // Publish asks naming the addresses the server writes to; a contact's key is not published
+    assert_eq!(
+        mine.publish_question,
+        tr_args(
+            Text::UiKeysPublishAsk,
+            &[("addresses", "a@work.example, alice@example.org".into())]
+        )
+    );
     let groups: Vec<&str> = mine.grouped.split(' ').collect();
     assert_eq!(
         mine.choice,
@@ -377,6 +400,7 @@ fn the_words_of_a_key_come_from_the_core() {
     assert!(key.can_verify && !key.can_back_up);
     assert_eq!(key.address_lines, ["bob@example.net (not verified)"]);
     assert!(key.remove_question.contains("bob@example.net"));
+    assert!(key.publish_question.is_empty());
     assert!(key.verify_marks.contains("bob@example.net"), "{}", key.verify_marks);
     core.pgp_set_key_verified(&bob.fingerprint(), true).unwrap();
     let key = core.pgp_key(&bob.fingerprint()).unwrap();

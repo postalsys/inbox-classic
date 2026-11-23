@@ -5,7 +5,7 @@
 use std::ffi::c_char;
 use std::ptr::{null, null_mut};
 
-use pe_core::book::BookRow;
+use pe_core::book::{BookRow, KeyMark};
 use pe_store::{Card, Group, Member};
 
 use crate::core::{PeCore, Rows, Strings, arg, handed, refused, take_back, with};
@@ -57,10 +57,32 @@ pub struct PeCardRow {
     /// As it goes in an address field (`Name <address>`, the name quoted where it needs it), empty without an address:
     /// what Write To and Select Recipients put in To, Cc or Bcc
     pub label: *const c_char,
-    /// A key that can encrypt now is in use for one of its addresses (the list's key mark)
-    pub has_key: bool,
+    /// The list's key mark before the name
+    pub key_mark: PeKeyMark,
+    /// What the mark says, its tooltip and what a screen reader says of it; empty for none
+    pub key_mark_text: *const c_char,
+}
+
+/// The Address Book list's key mark of a person
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeKeyMark {
+    /// No key that can encrypt now: no mark
+    None = 0,
+    /// A key that can encrypt is in use for one of the person's addresses
+    Known = 1,
     /// One of those keys is verified (compared by the user, or the user's own): the stronger mark
-    pub key_verified: bool,
+    Verified = 2,
+}
+
+impl From<KeyMark> for PeKeyMark {
+    fn from(mark: KeyMark) -> Self {
+        match mark {
+            KeyMark::None => PeKeyMark::None,
+            KeyMark::Known => PeKeyMark::Known,
+            KeyMark::Verified => PeKeyMark::Verified,
+        }
+    }
 }
 
 /// The people of the address book; free with `pe_card_list_free`
@@ -74,8 +96,8 @@ fn card_list(rows: &[BookRow]) -> *mut PeCardList {
         phone: strings.add(&row.phone),
         company: strings.add(&row.company),
         label: strings.add(&row.label),
-        has_key: row.has_key,
-        key_verified: row.key_verified,
+        key_mark: row.key_mark.into(),
+        key_mark_text: strings.add(&row.key_mark_text),
     })))
 }
 

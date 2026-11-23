@@ -226,9 +226,12 @@ pub enum Event {
     AutoconfigDone {
         request: u64,
     },
-    /// OpenPGP keys were looked up: [`Core::pgp_find_result`]
+    /// OpenPGP keys were looked up, and what was found is in the key book already: [`Core::pgp_find_result`] gives
+    /// the words to the window that asked. `learned` addresses got a key (used, or waiting for the user's decision):
+    /// the windows that show keys read them again
     KeysFound {
         request: u64,
+        learned: usize,
     },
     /// An own key was published: [`Core::pgp_publish_result`]
     KeyPublished {
@@ -552,6 +555,8 @@ pub struct Core {
     secrets: Secrets,
     /// The OpenPGP certificates read from the store, each read once (keys.rs)
     pgp_certs: Arc<keys::CertCache>,
+    /// Whether each key in use can encrypt, for the Address Book's key marks (keys.rs)
+    pgp_marks: keys::MarkCache,
     trust: Trust,
     events: EventSink,
     /// Set when closing: no event is delivered after
@@ -568,8 +573,8 @@ pub struct Core {
     attachment_files: Arc<opening::Files>,
     /// Lookups of servers; None when the address has no domain
     autoconfig: Requests<Option<pe_autoconfig::Settings>>,
-    /// Lookups of OpenPGP keys and their result, learned when taken (lookup.rs)
-    pgp_lookups: Requests<lookup::Fetched>,
+    /// Lookups of OpenPGP keys and what they came to, learned once they end (lookup.rs)
+    pgp_lookups: Requests<lookup::FindOutcome>,
     pgp_publishes: Requests<lookup::PublishOutcome>,
     /// The addresses whose keys are being looked up, each with its lookup: the compose window's "Looking for a key"
     pgp_looking: Mutex<HashMap<String, u64>>,
@@ -680,6 +685,7 @@ impl Core {
             timings: timing::Timings::default(),
             secrets,
             pgp_certs: Default::default(),
+            pgp_marks: Default::default(),
             trust,
             events: Arc::new(move |event| {
                 tracked.saw(&event);

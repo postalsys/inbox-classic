@@ -36,10 +36,33 @@ pub struct BookRow {
     pub company: String,
     /// As it goes in an address field ([`card_label`]), empty without an address
     pub label: String,
-    /// A key that can encrypt now is in use for one of its addresses: the list's key mark
-    pub has_key: bool,
+    /// The list's key mark: whether a key that can encrypt now is in use for one of its addresses, and verified
+    pub key_mark: KeyMark,
+    /// What the mark says, on hover and to a screen reader; empty for none
+    pub key_mark_text: String,
+}
+
+/// The Address Book list's key mark of a person
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum KeyMark {
+    /// No key that can encrypt now
+    #[default]
+    None,
+    /// A key that can encrypt is in use for one of the person's addresses
+    Known,
     /// One of those keys is verified (the user compared it, or it is the user's own): the stronger mark
-    pub key_verified: bool,
+    Verified,
+}
+
+impl KeyMark {
+    /// What the mark says, empty for none
+    pub fn text(self) -> String {
+        match self {
+            KeyMark::None => String::new(),
+            KeyMark::Known => tr(Text::UiBookKeyKnown),
+            KeyMark::Verified => tr(Text::UiBookKeyVerified),
+        }
+    }
 }
 
 impl BookRow {
@@ -51,19 +74,21 @@ impl BookRow {
             phone: phone.to_string(),
             company: company.to_string(),
             label: label_of(name, address),
-            has_key: false,
-            key_verified: false,
+            key_mark: KeyMark::None,
+            key_mark_text: String::new(),
         }
     }
 
-    /// Its key marks from the addresses it has ([`Core::pgp_key_marks`])
+    /// Its key mark from the addresses it has ([`Core::pgp_key_marks`]): the strongest of theirs
     fn marked<'a>(mut self, addresses: impl IntoIterator<Item = &'a String>, marks: &HashMap<String, bool>) -> Self {
         for address in addresses {
-            if let Some(verified) = marks.get(&pe_store::normal_address(address)) {
-                self.has_key = true;
-                self.key_verified |= verified;
+            match marks.get(&pe_store::normal_address(address)) {
+                Some(true) => self.key_mark = KeyMark::Verified,
+                Some(false) if self.key_mark == KeyMark::None => self.key_mark = KeyMark::Known,
+                _ => {}
             }
         }
+        self.key_mark_text = self.key_mark.text();
         self
     }
 
@@ -687,8 +712,8 @@ mod tests {
                 phone: "+1 555 0100".into(),
                 company: "Acme".into(),
                 label: "Mary Smith <mary@example.com>".into(),
-                has_key: false,
-                key_verified: false,
+                key_mark: KeyMark::None,
+                key_mark_text: String::new(),
             }]
         );
 

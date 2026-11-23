@@ -53,6 +53,21 @@ pub struct PgpIdentity {
     pub autocrypt: bool,
 }
 
+/// A key in use for an address, as the Address Book's key marks need it ([`Store::pgp_key_marks`])
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PgpKeyMark {
+    pub address: String,
+    pub fingerprint: String,
+    /// When the key was stored last, and the size of its certificate: a key changed since it was judged is judged
+    /// again
+    pub changed: i64,
+    pub size: i64,
+    /// The user verified it for the address, or it is the user's own
+    pub verified: bool,
+    /// The address is the user's own
+    pub own: bool,
+}
+
 fn key_row(row: &rusqlite::Row<'_>) -> rusqlite::Result<StoredKey> {
     Ok(StoredKey {
         fingerprint: row.get(0)?,
@@ -214,25 +229,26 @@ impl Store {
         statement.query_map([], |row| Ok((row.get(0)?, row.get(1)?)))?.collect()
     }
 
-    /// Every correspondent's key in use with whether the user verified it for that address, in one query: the
-    /// Address Book's key marks
-    pub fn pgp_keys_in_use_marked(&self) -> Result<Vec<(String, StoredKey, bool)>> {
+    /// What the Address Book's key marks need, in one query without the keys themselves: each correspondent's key in
+    /// use with whether the user verified it for that address, and each own address's key
+    pub fn pgp_key_marks(&self) -> Result<Vec<PgpKeyMark>> {
         let mut statement = self.db.prepare(
-            "SELECT p.address, k.fingerprint, k.cert, k.secret, k.source, k.added, k.changed, \
-             coalesce(a.verified, 0) FROM pgp_peers p JOIN pgp_keys k ON k.fingerprint = p.fingerprint \
-             LEFT JOIN pgp_key_addresses a ON a.fingerprint = p.fingerprint AND a.address = p.address",
+            "SELECT p.address, k.fingerprint, k.changed, length(k.cert), coalesce(a.verified, 0), 0 FROM pgp_peers p \
+             JOIN pgp_keys k ON k.fingerprint = p.fingerprint \
+             LEFT JOIN pgp_key_addresses a ON a.fingerprint = p.fingerprint AND a.address = p.address \
+             UNION ALL SELECT i.address, k.fingerprint, k.changed, length(k.cert), 1, 1 FROM pgp_identities i \
+             JOIN pgp_keys k ON k.fingerprint = i.fingerprint",
         )?;
         statement
             .query_map([], |row| {
-                let key = StoredKey {
+                Ok(PgpKeyMark {
+                    address: row.get(0)?,
                     fingerprint: row.get(1)?,
-                    cert: row.get(2)?,
-                    secret: row.get(3)?,
-                    source: row.get(4)?,
-                    added: row.get(5)?,
-                    changed: row.get(6)?,
-                };
-                Ok((row.get(0)?, key, row.get(7)?))
+                    changed: row.get(2)?,
+                    size: row.get(3)?,
+                    verified: row.get(4)?,
+                    own: row.get(5)?,
+                })
             })?
             .collect()
     }
@@ -413,6 +429,55 @@ mod tests {
         assert_eq!(
             store.pgp_key("BB").unwrap().unwrap().secret.as_deref(),
             Some(&b"wrapped"[..])
+        );
+    }
+
+    #[test]
+    fn key_marks_without_the_keys() {
+        let store = Store::open_in_memory().unwrap();
+        store
+            .save_pgp_key(
+                &key("AA", None),
+                &["bob@example.org".into(), "carol@example.org".into()],
+            )
+            .unwrap();
+        store
+            .save_pgp_key(&key("CC", Some(b"w")), &["me@example.org".into()])
+            .unwrap();
+        for address in ["bob@example.org", "carol@example.org"] {
+            store
+                .set_pgp_peer(&PgpPeer {
+                    address: address.into(),
+                    fingerprint: Some("AA".into()),
+                    ..Default::default()
+                })
+                .unwrap();
+        }
+        store.set_pgp_verified("AA", "carol@example.org", true).unwrap();
+        store
+            .set_pgp_identity(&PgpIdentity {
+                address: "me@example.org".into(),
+                fingerprint: "CC".into(),
+                autocrypt: true,
+            })
+            .unwrap();
+        let mut marks = store.pgp_key_marks().unwrap();
+        marks.sort_by(|a, b| a.address.cmp(&b.address));
+        let mark = |address: &str, fingerprint: &str, verified, own| PgpKeyMark {
+            address: address.into(),
+            fingerprint: fingerprint.into(),
+            changed: 100,
+            size: 3,
+            verified,
+            own,
+        };
+        assert_eq!(
+            marks,
+            [
+                mark("bob@example.org", "AA", false, false),
+                mark("carol@example.org", "AA", true, false),
+                mark("me@example.org", "CC", true, true),
+            ]
         );
     }
 

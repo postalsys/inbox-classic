@@ -780,9 +780,23 @@ fn parse_keys(bytes: &[u8]) -> Result<Vec<PublicOrSecret>, Error> {
 /// public part. Certificates the policy refuses outright (a 1024 bit RSA primary key) are left out; broken data is an
 /// error.
 pub fn read_certs(bytes: &[u8]) -> Result<Vec<Cert>, Error> {
+    certs_of(parse_keys(bytes)?)
+}
+
+/// [`read_certs`] for data that must hold public keys only (a key attached to a message): `WrongKind` when a private
+/// key is among them, in the same one pass over the data.
+pub fn read_public_certs(bytes: &[u8]) -> Result<Vec<Cert>, Error> {
+    let items = parse_keys(bytes)?;
+    if items.iter().any(|item| matches!(item, PublicOrSecret::Secret(_))) {
+        return Err(Error::WrongKind);
+    }
+    certs_of(items)
+}
+
+fn certs_of(items: Vec<PublicOrSecret>) -> Result<Vec<Cert>, Error> {
     let mut out = Vec::new();
     let mut refused = None;
-    for item in parse_keys(bytes)? {
+    for item in items {
         let key = match item {
             PublicOrSecret::Public(key) => key,
             PublicOrSecret::Secret(key) => key.to_public_key(),
@@ -961,6 +975,21 @@ pub fn read_secret_keys(bytes: &[u8], passphrase: &str) -> Result<Vec<SecretKey>
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn public_certs_only_refuse_a_private_key() {
+        let made = crate::generate("Alice", &["alice@example.org".into()], 1_794_700_800).unwrap();
+        let public = made.cert().to_bytes();
+        assert_eq!(read_public_certs(&public).unwrap()[0].fingerprint(), made.fingerprint());
+        assert_eq!(read_public_certs(&made.to_bytes()).unwrap_err(), Error::WrongKind);
+        // a ring with a private key among public ones is refused too
+        let mut ring = public.clone();
+        ring.extend_from_slice(&made.to_bytes());
+        assert_eq!(read_public_certs(&ring).unwrap_err(), Error::WrongKind);
+        assert!(read_public_certs(b"not a key").is_err());
+        // read_certs still reads the private key's public part
+        assert_eq!(read_certs(&made.to_bytes()).unwrap().len(), 1);
+    }
 
     #[test]
     fn secret_parts_that_do_not_belong_are_refused() {

@@ -142,7 +142,9 @@ pub enum PeEventKind {
     /// The message rules sorted `count` messages of `account`'s new mail, or of its Inbox when one was applied there
     RulesApplied = 24,
     /// OpenPGP keys were looked up (`pe_compose_find_keys`, `pe_compose_find_key`, `pe_pgp_find_handle`,
-    /// `pe_contact_find_keys`): `pe_pgp_find_result` with the request in `uid`
+    /// `pe_contact_find_keys`) and what was found is in the key book already: the window that asked takes the words
+    /// with `pe_pgp_find_result` (the request in `uid`); with `count` above 0 (that many addresses got a key) the
+    /// windows that show keys read them again (the Address Book's marks, a contact's keys)
     KeysFound = 25,
     /// An own key was published (`pe_pgp_publish`): `pe_pgp_publish_result` with the request in `uid`
     KeyPublished = 26,
@@ -238,8 +240,8 @@ pub struct PeEvent {
     /// UTF-8: the Message-ID of the draft, for `DraftSaved`; the notification's text, for `NewMail`; the view's
     /// `preview_token`, for `PreviewsPrepared`. NULL otherwise
     pub detail: *const c_char,
-    /// How many messages, for `NewMail`, `RulesApplied` and `ActionUndone`; the seconds left, for `SendWaiting`; 0
-    /// otherwise
+    /// How many messages, for `NewMail`, `RulesApplied` and `ActionUndone`; the seconds left, for `SendWaiting`; how
+    /// many addresses got a key, for `KeysFound`; 0 otherwise
     pub count: u64,
 }
 
@@ -272,7 +274,7 @@ impl Callback {
             Event::RulesApplied { account, .. } => (PeEventKind::RulesApplied, *account, 0, 0),
             Event::DraftSaved { account, .. } => (PeEventKind::DraftSaved, *account, 0, 0),
             Event::AutoconfigDone { request } => (PeEventKind::AutoconfigDone, 0, 0, *request),
-            Event::KeysFound { request } => (PeEventKind::KeysFound, 0, 0, *request),
+            Event::KeysFound { request, .. } => (PeEventKind::KeysFound, 0, 0, *request),
             Event::KeyPublished { request } => (PeEventKind::KeyPublished, 0, 0, *request),
             Event::SignInDone { request } => (PeEventKind::SignInDone, 0, 0, *request),
             Event::SignInAppChecked { request } => (PeEventKind::SignInAppChecked, 0, 0, *request),
@@ -311,6 +313,7 @@ impl Callback {
             Event::SendWaiting { seconds, .. } => *seconds,
             Event::RulesApplied { count, .. } => *count as u64,
             Event::ActionUndone { count, .. } => *count,
+            Event::KeysFound { learned, .. } => *learned as u64,
             _ => 0,
         };
         let (failure, message, detail) = match event {
@@ -2153,8 +2156,8 @@ pub struct PeAttachment {
     /// What the strip says of that part ("From part 2: Encrypted. Signed by ..."), for the accessible description;
     /// `tooltip` ends with it already. Empty in any other message
     pub part_text: *const c_char,
-    /// It holds OpenPGP public keys (`application/pgp-keys`, or a `.asc`, `.key`, `.gpg` or `.pgp` file that pe-pgp
-    /// reads as public keys): the strip offers Import Key (`pe_pgp_import_attachment`)
+    /// It holds OpenPGP public keys (a key file by its type or name, `kind` `KEY`, that pe-pgp reads as public keys
+    /// only): the strip offers Import Key (`pe_pgp_import_attachment`)
     pub is_key: bool,
 }
 
