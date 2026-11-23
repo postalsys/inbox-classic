@@ -8,6 +8,7 @@
 
 use adw::prelude::*;
 use gtk::{gio, glib};
+use pe_core::keys::ImportError;
 use pe_core::{Event, MessageRef, MessageView};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -96,6 +97,8 @@ pub struct Reader {
     /// Without a logo, the sender's picture from the Address Book being drawn; 0 for none
     picture_request: Cell<u64>,
     unsubscribe_request: Cell<u64>,
+    /// Find Key on a part's label being looked up; 0 for none
+    find_request: Cell<u64>,
     /// The printout of a message with previews being made, and the window it prints over; 0 for none
     print_request: Cell<u64>,
     print_window: RefCell<Option<gtk::Window>>,
@@ -297,6 +300,7 @@ impl Reader {
             logo_request: Cell::new(0),
             picture_request: Cell::new(0),
             unsubscribe_request: Cell::new(0),
+            find_request: Cell::new(0),
             print_request: Cell::new(0),
             print_window: RefCell::default(),
         };
@@ -367,7 +371,19 @@ impl Reader {
             };
             spawn(async move { this.open_attachment(index).await });
         };
+        // Find Key beside the label of a part signed by a key not known here: the core reads the fingerprint from the
+        // link and looks it up; nothing is opened
+        let this = Rc::downgrade(self);
+        let find_key = move |link: &str| {
+            if let Some(this) = this.upgrade() {
+                this.find_key(link);
+            }
+        };
         self.preview.set_links(move |uri| {
+            if pe_html::find_key_link(uri).is_some() {
+                find_key(uri);
+                return true;
+            }
             if pe_html::is_preview_link(uri) {
                 preview(uri);
                 return true;
@@ -413,6 +429,14 @@ impl Reader {
                 spawn(async move { this.open_attachment(index as usize).await });
             }
         });
+        let import = gio::SimpleAction::new("import-key", Some(glib::VariantTy::UINT32));
+        let this = Rc::downgrade(self);
+        import.connect_activate(move |_, index| {
+            if let (Some(this), Some(index)) = (this.upgrade(), index.and_then(|i| i.get::<u32>())) {
+                spawn(async move { this.import_key(index as usize).await });
+            }
+        });
+        group.add_action(&import);
         // the greyed Open of a file that can run programs
         let refused = gio::SimpleAction::new("open-refused", Some(glib::VariantTy::UINT32));
         refused.set_enabled(false);
@@ -651,6 +675,10 @@ impl Reader {
             }
             Event::PrintReady { request } if self.print_request.get() != 0 && *request == self.print_request.get() => {
                 self.print_ready(*request);
+                None
+            }
+            Event::KeysFound { request, .. } if self.find_request.get() != 0 && *request == self.find_request.get() => {
+                self.keys_found(*request);
                 None
             }
             Event::PictureReady { request }
@@ -1452,6 +1480,63 @@ impl Reader {
                 ui::open_externally(&url, Some(&window));
                 let _ = shell().core.unsubscribe_opened(folder, uid);
             }
+        }
+    }
+
+    /// Find Key on a part's label: the key the link names looked up on keys.openpgp.org, said in the status bar
+    fn find_key(&self, link: &str) {
+        match shell().core.pgp_find_handle(link) {
+            Ok(request) => {
+                self.find_request.set(request);
+                self.say(&t!(PgpRecipientLooking));
+            }
+            Err(error) => self.say(&error.to_string()),
+        }
+    }
+
+    /// Find Key's lookup ended (the core learned what it found): what it found said, and the message shown again, its
+    /// label then naming who signed it
+    fn keys_found(&self, request: u64) {
+        self.find_request.set(0);
+        let outcome = shell().core.pgp_find_result(request);
+        if let Some(outcome) = outcome {
+            self.say(&outcome.text);
+        }
+        if self.shows_message() && self.has_view() {
+            self.view_again();
+        }
+    }
+
+    /// Import Key on a key attached to the message shown: the core reads (and decrypts) it from the message (the file
+    /// shown, or the folder's message) off the window thread and takes its public keys; what it did said, and the
+    /// message shown again for a signature by it
+    async fn import_key(&self, index: usize) {
+        let Some(window) = self.window() else { return };
+        let core = shell().core.clone();
+        let path = self.file.borrow().clone();
+        let (folder, uid) = (self.folder.get(), self.uid.get());
+        let outcome = gio::spawn_blocking(move || core.pgp_import_attachment(path.as_deref(), folder, uid, index))
+            .await
+            .unwrap_or_else(|_| Err(ImportError::Invalid(t!(UiUnknownReason))));
+        let imported = outcome.is_ok();
+        crate::keys::imported_attachment(&window, outcome).await;
+        if imported && self.shows_message() && self.has_view() {
+            self.view_again();
+        }
+    }
+
+    /// Words for the user about the message shown: the main window's status bar, or a message window's toast
+    fn say(&self, text: &str) {
+        if text.is_empty() {
+            return;
+        }
+        match self
+            .widget
+            .ancestor(adw::ToastOverlay::static_type())
+            .and_downcast::<adw::ToastOverlay>()
+        {
+            Some(toasts) => toasts.add_toast(adw::Toast::builder().title(text).use_markup(false).build()),
+            None => shell().main().set_status(text),
         }
     }
 

@@ -15,7 +15,9 @@ mod produce;
 pub mod sealed;
 mod verify;
 
-pub use cert::{Cert, CertProblem, SecretKey, UserId, address_of, needs_passphrase, read_certs, read_secret_keys};
+pub use cert::{
+    Cert, CertProblem, SecretKey, UserId, address_of, needs_passphrase, read_certs, read_public_certs, read_secret_keys,
+};
 pub use decrypt::{DecryptError, Decrypted, decrypt, decrypt_within, recipients};
 pub use inline::armored_kind;
 pub use produce::{Signed, encrypt, generate, sign_detached};

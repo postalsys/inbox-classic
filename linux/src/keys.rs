@@ -194,40 +194,69 @@ pub async fn backup(parent: &impl IsA<gtk::Widget>, fingerprint: &str) {
 // ---- Import ----
 
 /// Import: a key file chosen and its bytes handed to the core, a passphrase asked for when it wants one, what it did
-/// said, and a private key offered for the user's addresses it holds
-async fn import(parent: &impl IsA<gtk::Widget>) {
+/// said, and a private key offered for the user's addresses it holds; the first key imported
+async fn import(parent: &impl IsA<gtk::Widget>) -> Option<String> {
     let title = t!(UiKeysImportTitle);
     let filter = t!(UiKeysFileFilter);
-    let Some(path) = ui::open_file(&window(parent), &title, Some((&filter, &KEY_FILES))).await else {
-        return;
-    };
+    let path = ui::open_file(&window(parent), &title, Some((&filter, &KEY_FILES))).await?;
     let bytes = match std::fs::read(&path) {
         Ok(bytes) => bytes,
         Err(error) => {
             ui::alert(parent, &title, &error.to_string()).await;
-            return;
+            return None;
         }
     };
-    let outcome = match shell().core.pgp_import(&bytes, None, KeySource::File) {
+    import_bytes(parent, &title, &bytes, KeySource::File).await
+}
+
+/// Import from Clipboard: the clipboard's text (empty without any) handed to the core as a file's bytes are, the same
+/// questions asked; the core says when it holds no key. The first key imported
+async fn paste(parent: &impl IsA<gtk::Widget>) -> Option<String> {
+    let title = words::title(Text::UiKeysPaste);
+    let text = parent
+        .as_ref()
+        .clipboard()
+        .read_text_future()
+        .await
+        .ok()
+        .flatten()
+        .map(|text| text.to_string())
+        .unwrap_or_default();
+    import_bytes(parent, &title, text.as_bytes(), KeySource::Paste).await
+}
+
+/// The keys in `bytes` imported: a passphrase asked for when the core wants one, what it did said under `title`, and
+/// a private key offered for the user's addresses it holds; the first key imported
+async fn import_bytes(parent: &impl IsA<gtk::Widget>, title: &str, bytes: &[u8], source: KeySource) -> Option<String> {
+    let outcome = match shell().core.pgp_import(bytes, None, source) {
         Err(ImportError::NeedsPassphrase | ImportError::WrongPassphrase) => {
-            match import_with_passphrase(parent, &bytes).await {
+            match import_with_passphrase(parent, bytes, source).await {
                 Some(outcome) => outcome,
-                None => return,
+                None => return None,
             }
         }
         outcome => outcome,
     };
     match outcome {
         Ok(imported) => {
-            ui::alert(parent, &title, &imported.summary()).await;
+            learned();
+            ui::alert(parent, title, &imported.summary()).await;
             offer_unclaimed(parent).await;
+            imported.keys.into_iter().next()
         }
-        Err(error) => ui::alert(parent, &title, &error.text()).await,
+        Err(error) => {
+            ui::alert(parent, title, &error.text()).await;
+            None
+        }
     }
 }
 
 /// The passphrase of a protected key asked for until it opens it or Cancel; what the import with it did
-async fn import_with_passphrase(parent: &impl IsA<gtk::Widget>, bytes: &[u8]) -> Option<Result<Imported, ImportError>> {
+async fn import_with_passphrase(
+    parent: &impl IsA<gtk::Widget>,
+    bytes: &[u8],
+    source: KeySource,
+) -> Option<Result<Imported, ImportError>> {
     let bytes = bytes.to_vec();
     ui::ask_passphrase(
         parent,
@@ -235,7 +264,7 @@ async fn import_with_passphrase(parent: &impl IsA<gtk::Widget>, bytes: &[u8]) ->
         &t!(UiKeysImportPassphrase),
         "key-import",
         move |core, typed| {
-            let tried = core.pgp_import(&bytes, Some(&typed), KeySource::File);
+            let tried = core.pgp_import(&bytes, Some(&typed), source);
             ui::wipe(typed);
             match tried {
                 Err(wrong @ (ImportError::WrongPassphrase | ImportError::NeedsPassphrase)) => {
@@ -246,6 +275,27 @@ async fn import_with_passphrase(parent: &impl IsA<gtk::Widget>, bytes: &[u8]) ->
         },
     )
     .await
+}
+
+/// Keys were taken into the key book here (an import, a lookup): the windows that show them read them again, the
+/// Address Book its key marks and every compose window its locks
+pub fn learned() {
+    crate::address_book::refresh();
+    crate::compose_keys::refresh_all();
+}
+
+/// Import Key on a key attached to a message: what the core did said, and a private key offered as after any import
+/// (none comes from mail, but the question is the same)
+pub async fn imported_attachment(parent: &impl IsA<gtk::Widget>, outcome: Result<Imported, ImportError>) {
+    let title = words::title(Text::UiAttachmentImportKey);
+    match outcome {
+        Ok(imported) => {
+            learned();
+            ui::alert(parent, &title, &imported.summary()).await;
+            offer_unclaimed(parent).await;
+        }
+        Err(error) => ui::alert(parent, &title, &error.text()).await,
+    }
 }
 
 /// "Use this key for ...?" for the user's addresses an own key holds that use no key yet
@@ -287,6 +337,41 @@ async fn export(parent: &impl IsA<gtk::Widget>, key: &KeyInfo) {
         }
         Err(error) => ui::alert(parent, &title, &error.to_string()).await,
     }
+}
+
+// ---- Publish ----
+
+/// Publish: what it does asked first (the key's addresses named), then the public key sent to keys.openpgp.org, and
+/// what the server did said once it answered (over the main window when Encryption Keys closed meanwhile)
+async fn publish(parent: &gtk::Widget, key: &KeyInfo, button: &gtk::Button, closed: &std::cell::Cell<bool>) {
+    let title = words::title(Text::UiKeysPublish);
+    let question = &key.publish_question;
+    let (cancel, now) = (t!(UiCancel), plain(Text::UiKeysPublishNow));
+    let answers = [("cancel", cancel.as_str()), ("publish", now.as_str())];
+    if ui::ask(parent, &title, question, &answers, "publish", "cancel", None).await != "publish" {
+        return;
+    }
+    let core = &shell().core;
+    // greyed while the server is asked
+    button.set_sensitive(false);
+    let request = match core.pgp_publish(&key.fingerprint) {
+        Ok(request) => request,
+        Err(error) => {
+            ui::alert(parent, &title, &error.to_string()).await;
+            return;
+        }
+    };
+    if !ui::wait_read(parent, request).await {
+        return;
+    }
+    let Some(outcome) = core.pgp_publish_result(request) else {
+        return;
+    };
+    let main: gtk::Widget = shell().main().window().clone().upcast();
+    let over = if closed.get() { &main } else { parent };
+    // as the core wrote it: it starts with the server's name, in lower case
+    let ok = t!(UiOk);
+    ui::ask(over, &title, &outcome.text, &[("ok", ok.as_str())], "ok", "ok", None).await;
 }
 
 // ---- Key Properties and Verify Key ----
@@ -434,6 +519,7 @@ struct KeysWindow {
     list: gtk::ListBox,
     keys: RefCell<Vec<KeyInfo>>,
     export: gtk::Button,
+    publish: gtk::Button,
     backup: gtk::Button,
     verify: gtk::Button,
     properties: gtk::Button,
@@ -450,6 +536,8 @@ impl KeysWindow {
     fn show_selected(&self) {
         let key = self.selected();
         self.export.set_sensitive(key.is_some());
+        // only the user's own key: a contact's is theirs to publish
+        self.publish.set_sensitive(key.as_ref().is_some_and(|k| k.own));
         self.backup.set_sensitive(key.as_ref().is_some_and(|k| k.can_back_up));
         self.verify.set_sensitive(key.as_ref().is_some_and(|k| k.can_verify));
         self.properties.set_sensitive(key.is_some());
@@ -543,7 +631,9 @@ pub async fn keys_dialog(parent: &impl IsA<gtk::Widget>) {
     };
     let new = button(Text::UiKeysNew, "new");
     let import_button = button(Text::UiKeysImport, "import");
+    let paste_button = button(Text::UiKeysPaste, "paste");
     let export_button = button(Text::UiKeysExport, "export");
+    let publish_button = button(Text::UiKeysPublish, "publish");
     let backup_button = button(Text::UiKeysBackup, "backup");
     let verify_button = button(Text::UiKeysVerify, "verify");
     let properties_button = button(Text::UiProperties, "properties");
@@ -551,6 +641,7 @@ pub async fn keys_dialog(parent: &impl IsA<gtk::Widget>) {
     let buttons = gtk::Box::new(gtk::Orientation::Vertical, 6);
     buttons.append(&new);
     buttons.append(&import_button);
+    buttons.append(&paste_button);
     // the buttons of the key selected apart from the two that add one
     let apart = gtk::Separator::new(gtk::Orientation::Horizontal);
     apart.add_css_class("spacer");
@@ -559,6 +650,7 @@ pub async fn keys_dialog(parent: &impl IsA<gtk::Widget>) {
     buttons.append(&apart);
     for button in [
         &export_button,
+        &publish_button,
         &backup_button,
         &verify_button,
         &properties_button,
@@ -570,6 +662,7 @@ pub async fn keys_dialog(parent: &impl IsA<gtk::Widget>) {
         list: list.clone(),
         keys: RefCell::default(),
         export: export_button,
+        publish: publish_button,
         backup: backup_button,
         verify: verify_button,
         properties: properties_button,
@@ -643,11 +736,20 @@ pub async fn keys_dialog(parent: &impl IsA<gtk::Widget>) {
                     offer_backup(&host, &made).await;
                 }
             }
+            // the key imported selected, so the user sees it in the list
             ("import", _) => {
-                import(&host).await;
-                window.fill(fingerprint.as_deref(), at);
+                let imported = import(&host).await;
+                window.fill(imported.as_deref().or(fingerprint.as_deref()), at);
+            }
+            ("paste", _) => {
+                let imported = paste(&host).await;
+                window.fill(imported.as_deref().or(fingerprint.as_deref()), at);
             }
             ("export", Some(key)) => export(&host, &key).await,
+            ("publish", Some(key)) if key.own => {
+                publish(&host, &key, &window.publish, &closed).await;
+                window.show_selected();
+            }
             ("backup", Some(key)) if key.can_back_up => {
                 backup(&host, &key.fingerprint).await;
             }
@@ -775,10 +877,22 @@ impl AccountSecurity {
 
 // ---- a contact's key ----
 
+/// The keys section of Contact Properties: its rows, the addresses they are of, and Find Key (a saved card's only).
+/// The group keeps it (its `destroy` handler), it holds the group and the button weakly
+struct ContactKeys {
+    group: glib::WeakRef<adw::PreferencesGroup>,
+    rows: RefCell<Vec<gtk::Widget>>,
+    card: pe_store::CardId,
+    addresses: Vec<String>,
+    find: glib::WeakRef<gtk::Button>,
+    /// A lookup of Find Key is under way
+    looking: std::cell::Cell<bool>,
+}
+
 /// The keys of a contact's addresses in Contact Properties: each address with a key in use, its fingerprint and
-/// state, Verify; a newer key waiting with Use the New Key and Keep the Current One. None for a card without an
-/// address
-pub fn contact_keys(addresses: &[String]) -> Option<adw::PreferencesGroup> {
+/// state, Verify; a newer key waiting with Use the New Key and Keep the Current One; Find Key in the section's header
+/// for a saved card (`card` not 0), what it found said under the title. None for a card without an address
+pub fn contact_keys(card: pe_store::CardId, addresses: &[String]) -> Option<adw::PreferencesGroup> {
     if addresses.is_empty() {
         return None;
     }
@@ -786,71 +900,156 @@ pub fn contact_keys(addresses: &[String]) -> Option<adw::PreferencesGroup> {
         .title(field_title(Text::UiContactKey))
         .build();
     group.set_widget_name("contact-keys");
-    let rows: Rc<RefCell<Vec<gtk::Widget>>> = Rc::default();
-    fill_contact_keys(&group, &rows, addresses);
+    let find = (card != 0).then(|| {
+        let button = gtk::Button::with_mnemonic(&pe_core::i18n::gtk_mnemonic(&t!(UiContactFindKey)));
+        button.set_valign(gtk::Align::Center);
+        button.set_widget_name("contact-find-key");
+        group.set_header_suffix(Some(&button));
+        button
+    });
+    let keys = Rc::new(ContactKeys {
+        group: group.downgrade(),
+        rows: RefCell::default(),
+        card,
+        addresses: addresses.to_vec(),
+        find: glib::WeakRef::new(),
+        looking: std::cell::Cell::new(false),
+    });
+    if let Some(find) = &find {
+        keys.find.set(Some(find));
+        let weak = Rc::downgrade(&keys);
+        find.connect_clicked(move |_| {
+            if let Some(keys) = weak.upgrade() {
+                keys.find_keys();
+            }
+        });
+    }
+    keys.fill();
+    // kept for as long as its group is
+    let kept = RefCell::new(Some(keys));
+    group.connect_destroy(move |_| drop(kept.take()));
     Some(group)
 }
 
-fn fill_contact_keys(group: &adw::PreferencesGroup, rows: &Rc<RefCell<Vec<gtk::Widget>>>, addresses: &[String]) {
-    for row in rows.borrow_mut().drain(..) {
-        group.remove(&row);
-    }
-    let core = &shell().core;
-    let mut added: Vec<gtk::Widget> = Vec::new();
-    for (index, address) in addresses.iter().enumerate() {
-        let peer = core.pgp_peer(address).unwrap_or_default();
-        let Some(key) = peer.in_use.as_deref().and_then(|fp| core.pgp_key(fp).ok()) else {
-            continue;
+impl ContactKeys {
+    /// The rows made again from what the core has now
+    fn fill(self: &Rc<Self>) {
+        let Some(group) = self.group.upgrade() else {
+            return;
         };
-        let row = adw::ActionRow::builder()
-            .title(glib::markup_escape_text(&format!("{address} ({})", key.status)))
-            .subtitle(glib::markup_escape_text(&key.grouped))
-            .subtitle_selectable(true)
-            .build();
-        row.add_css_class("fingerprint");
-        row.set_widget_name(&format!("contact-key-{index}"));
-        let verify_button = gtk::Button::with_label(&plain(Text::UiKeysVerify));
-        verify_button.set_valign(gtk::Align::Center);
-        verify_button.set_widget_name(&format!("contact-key-verify-{index}"));
-        row.add_suffix(&verify_button);
-        let redo = refill(group, rows, addresses);
-        verify_button.connect_clicked(move |button| {
-            let (button, key, redo) = (button.clone(), key.clone(), redo.clone());
-            glib::spawn_future_local(async move {
-                if verify(&button, &key).await {
-                    redo();
+        for row in self.rows.borrow_mut().drain(..) {
+            group.remove(&row);
+        }
+        let core = &shell().core;
+        let mut added: Vec<gtk::Widget> = Vec::new();
+        let mut first_verify: Option<gtk::Button> = None;
+        for (index, address) in self.addresses.iter().enumerate() {
+            let peer = core.pgp_peer(address).unwrap_or_default();
+            let Some(key) = peer.in_use.as_deref().and_then(|fp| core.pgp_key(fp).ok()) else {
+                continue;
+            };
+            let row = adw::ActionRow::builder()
+                .title(glib::markup_escape_text(&format!("{address} ({})", key.status)))
+                .subtitle(glib::markup_escape_text(&key.grouped))
+                .subtitle_selectable(true)
+                .build();
+            row.add_css_class("fingerprint");
+            row.set_widget_name(&format!("contact-key-{index}"));
+            let verify_button = gtk::Button::with_label(&plain(Text::UiKeysVerify));
+            verify_button.set_valign(gtk::Align::Center);
+            verify_button.set_widget_name(&format!("contact-key-verify-{index}"));
+            row.add_suffix(&verify_button);
+            first_verify.get_or_insert_with(|| verify_button.clone());
+            let redo = self.refill();
+            verify_button.connect_clicked(move |button| {
+                let (button, key, redo) = (button.clone(), key.clone(), redo.clone());
+                glib::spawn_future_local(async move {
+                    if verify(&button, &key).await {
+                        redo();
+                    }
+                });
+            });
+            added.push(row.clone().upcast());
+            if let Some(text) = &peer.pending_text {
+                added.push(pending_row(index, address, text, self.refill()).upcast());
+            }
+        }
+        if added.is_empty() {
+            let none = adw::ActionRow::builder().title(t!(UiContactKeyNone)).build();
+            none.add_css_class("dim-label");
+            none.set_widget_name("contact-key-none");
+            added.push(none.upcast());
+        }
+        for row in &added {
+            group.add(row);
+        }
+        *self.rows.borrow_mut() = added;
+        if let Some(find) = self.find.upgrade() {
+            // greyed with nothing to ask (the core's rule): the keyboard focus, when it was on it, goes to the key found
+            // rather than to the top of the window
+            let can_find = core.contact_can_find_keys(self.card);
+            if !can_find
+                && find.has_focus()
+                && let Some(verify) = &first_verify
+            {
+                verify.grab_focus();
+            }
+            find.set_sensitive(can_find);
+        }
+    }
+
+    /// Words under the section's title (what a lookup is doing or found); none for empty
+    fn say(&self, text: &str) {
+        if let Some(group) = self.group.upgrade() {
+            group.set_description((!text.is_empty()).then(|| glib::markup_escape_text(text)).as_deref());
+        }
+    }
+
+    /// The rows made again, as a closure for the buttons in them
+    fn refill(self: &Rc<Self>) -> Rc<dyn Fn()> {
+        let weak = Rc::downgrade(self);
+        Rc::new(move || {
+            let weak = weak.clone();
+            // after the click's own handler is done with the row it is in
+            glib::idle_add_local_once(move || {
+                if let Some(keys) = weak.upgrade() {
+                    keys.fill();
                 }
             });
-        });
-        added.push(row.clone().upcast());
-        if let Some(text) = &peer.pending_text {
-            added.push(pending_row(index, address, text, refill(group, rows, addresses)).upcast());
-        }
+        })
     }
-    if added.is_empty() {
-        let none = adw::ActionRow::builder().title(t!(UiContactKeyNone)).build();
-        none.add_css_class("dim-label");
-        none.set_widget_name("contact-key-none");
-        added.push(none.upcast());
-    }
-    for row in &added {
-        group.add(row);
-    }
-    *rows.borrow_mut() = added;
-}
 
-/// The rows of a contact's keys made again, as a closure for the buttons in them
-fn refill(group: &adw::PreferencesGroup, rows: &Rc<RefCell<Vec<gtk::Widget>>>, addresses: &[String]) -> Rc<dyn Fn()> {
-    let (group, rows, addresses) = (group.downgrade(), Rc::downgrade(rows), addresses.to_vec());
-    Rc::new(move || {
-        if let (Some(group), Some(rows)) = (group.upgrade(), rows.upgrade()) {
-            // after the click's own handler is done with the row it is in
-            glib::idle_add_local_once({
-                let addresses = addresses.clone();
-                move || fill_contact_keys(&group, &rows, &addresses)
-            });
+    /// Find Key: the keys of the card's addresses looked up, "Looking for a key..." under the title meanwhile, then
+    /// what was found said there and the rows read again. The core learns the keys found whether the window is still
+    /// open or not
+    fn find_keys(self: &Rc<Self>) {
+        if self.looking.get() {
+            return;
         }
-    })
+        let core = shell().core.clone();
+        let request = match core.contact_find_keys(self.card) {
+            Ok(Some(request)) => request,
+            Ok(None) => return,
+            Err(error) => {
+                self.say(&error.to_string());
+                return;
+            }
+        };
+        // the button stays where the focus is while it looks; another click meanwhile asks nothing
+        self.looking.set(true);
+        self.say(&t!(PgpRecipientLooking));
+        let (send, done) = async_channel::bounded::<bool>(2);
+        shell().watch_request(request, send);
+        let weak = Rc::downgrade(self);
+        glib::spawn_future_local(async move {
+            let _ = done.recv().await;
+            let outcome = core.pgp_find_result(request);
+            let Some(keys) = weak.upgrade() else { return };
+            keys.looking.set(false);
+            keys.say(&outcome.map(|o| o.text).unwrap_or_default());
+            keys.fill();
+        });
+    }
 }
 
 /// A newer key waiting for `address`: what the core says of it, Use the New Key and Keep the Current One

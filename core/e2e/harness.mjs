@@ -16,7 +16,9 @@ import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { createServer } from 'node:http';
 import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import imapkit from 'imapkit';
+import * as openpgp from 'openpgp';
 import { check } from './pgp.mjs';
 
 // Every plugin that loads together with the others, as imapflow's tests use them
@@ -118,27 +120,99 @@ const { server, imap } = await start(main);
 const other = second ? await start(second) : null;
 
 // POST /pgp/check with a JSON body: { raw (base64), key, passphrase, signer, recipients }; the answer as JSON.
-// The same server plays keys.openpgp.org and every domain's Web Key Directory for the app (`--key-server`), so no
-// lookup of a UI test leaves the computer: GET /vks/v1/by-email/<address> gives a key put there with
-// POST /pgp/keys { address, key (armored) }, everything else 404.
+// The same server plays keys.openpgp.org and every domain's Web Key Directory for the app (`--key-server`, which
+// pe-core uses as the key server and as the base of every domain's directory), so no lookup of a UI test leaves the
+// computer. A key is put there with POST /pgp/keys { key (armored), address, wkd }:
+// - always by its fingerprint and key id, and its subkeys' (upper case hex): GET /vks/v1/by-fingerprint/<FPR> and
+//   GET /vks/v1/by-keyid/<ID>, as Find Key asks for the key of a signature;
+// - with `address`, by that address: GET /vks/v1/by-email/<address>;
+// - with `address` and `wkd: true`, also in the address's domain's Web Key Directory, as pe-keys asks it with a
+//   test base: GET /advanced/.well-known/openpgpkey/<domain>/hu/<hash>?l=<local> (and /direct/.well-known/openpgpkey/
+//   hu/<hash>, which pe-keys asks only when the advanced host can not be reached), the key binary.
+// Everything else is 404. GET /pgp/lookups lists each key lookup asked ({ kind: "email" | "fingerprint" | "keyid" |
+// "wkd", value: the address (a directory's: its `l` and domain), fingerprint or key id, found }), for the tests to see
+// what was asked.
+// Publishing as keys.openpgp.org answers it: POST /vks/v1/upload { keytext } gives a token and each address of the key
+// "unpublished", POST /vks/v1/request-verify { token, addresses } makes those "pending" (the confirmation mail the real
+// one sends); GET /pgp/uploads lists what was uploaded ({ fingerprint, addresses, asked }) for the tests to check.
 const served = new Map();
+const byHandle = new Map();
+const directory = new Map();
+const lookups = [];
+const uploads = [];
+
+// The Web Key Directory's name for a local part: z-base-32 of the SHA-1 of it in lower case (pe-keys `wkd_hash`)
+function wkdHash(local) {
+    const alphabet = 'ybndrfg8ejkmcpqxot1uwisza345h769';
+    const digest = createHash('sha1').update(local.toLowerCase()).digest();
+    let out = '';
+    let buffer = 0;
+    let bits = 0;
+    for (const byte of digest) {
+        buffer = (buffer << 8) | byte;
+        bits += 8;
+        while (bits >= 5) {
+            bits -= 5;
+            out += alphabet[(buffer >> bits) & 31];
+        }
+        buffer &= (1 << bits) - 1;
+    }
+    return bits > 0 ? out + alphabet[(buffer << (5 - bits)) & 31] : out;
+}
+
+// What a GET asks the key server or a directory for: { kind, value, key } (key undefined when there is none)
+function lookup(path, query) {
+    const local = (query.get('l') || '').toLowerCase();
+    const vks = /^\/vks\/v1\/(by-email|by-fingerprint|by-keyid)\/(.+)$/.exec(path);
+    if (vks) {
+        const value = decodeURIComponent(vks[2]);
+        if (vks[1] === 'by-email') {
+            return { kind: 'email', value: value.toLowerCase(), key: served.get(value.toLowerCase()) };
+        }
+        const handle = value.toUpperCase();
+        return { kind: vks[1].slice(3), value: handle, key: byHandle.get(handle) };
+    }
+    const advanced = /^\/advanced\/\.well-known\/openpgpkey\/([^/]+)\/hu\/([^/]+)$/.exec(path);
+    if (advanced) {
+        const [hash, domain] = [advanced[2], advanced[1].toLowerCase()];
+        return { kind: 'wkd', value: `${local}@${domain}`, key: directory.get(`${hash}@${domain}`) };
+    }
+    const direct = /^\/direct\/\.well-known\/openpgpkey\/hu\/([^/]+)$/.exec(path);
+    if (direct) {
+        const found = [...directory].find(([name]) => name.startsWith(`${direct[1]}@`));
+        return { kind: 'wkd', value: `${local}@`, key: found && found[1] };
+    }
+    return null;
+}
+
 const pgp = createServer((req, res) => {
     const answer = (status, body) => {
         res.writeHead(status, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(body));
     };
-    const path = req.url.split('?')[0];
+    const url = new URL(req.url, 'http://127.0.0.1');
+    const path = url.pathname;
+    if (req.method === 'GET' && path === '/pgp/uploads') {
+        return answer(200, uploads);
+    }
+    if (req.method === 'GET' && path === '/pgp/lookups') {
+        return answer(200, lookups);
+    }
     if (req.method === 'GET') {
-        const address = path.startsWith('/vks/v1/by-email/') ? decodeURIComponent(path.slice(17)).toLowerCase() : null;
-        if (address && served.has(address)) {
-            res.writeHead(200, { 'Content-Type': 'application/pgp-keys' });
-            return res.end(served.get(address));
+        const asked = lookup(path, url.searchParams);
+        if (asked) {
+            lookups.push({ kind: asked.kind, value: asked.value, found: Boolean(asked.key) });
+        }
+        if (asked && asked.key) {
+            res.writeHead(200, { 'Content-Type': asked.kind === 'wkd' ? 'application/octet-stream' : 'application/pgp-keys' });
+            return res.end(asked.key);
         }
         res.writeHead(404, { 'Content-Type': 'text/plain' });
         return res.end('not found');
     }
-    if (req.method !== 'POST' || (path !== '/pgp/check' && path !== '/pgp/keys')) {
-        return answer(404, { error: 'POST /pgp/check or /pgp/keys' });
+    const publishing = path === '/vks/v1/upload' || path === '/vks/v1/request-verify';
+    if (req.method !== 'POST' || (path !== '/pgp/check' && path !== '/pgp/keys' && !publishing)) {
+        return answer(404, { error: 'POST /pgp/check, /pgp/keys or a keys.openpgp.org publish' });
     }
     const chunks = [];
     req.on('data', chunk => chunks.push(chunk));
@@ -146,8 +220,39 @@ const pgp = createServer((req, res) => {
         try {
             const body = JSON.parse(Buffer.concat(chunks).toString('utf8'));
             if (path === '/pgp/keys') {
-                served.set(String(body.address).toLowerCase(), String(body.key));
-                return answer(200, { ok: true });
+                const armored = String(body.key);
+                const key = await openpgp.readKey({ armoredKey: armored });
+                const handles = [key, ...key.subkeys].flatMap(k => [k.getFingerprint(), k.getKeyID().toHex()]);
+                for (const handle of handles) {
+                    byHandle.set(handle.toUpperCase(), armored);
+                }
+                if (body.address) {
+                    const address = String(body.address).toLowerCase();
+                    served.set(address, armored);
+                    if (body.wkd) {
+                        const at = address.lastIndexOf('@');
+                        directory.set(`${wkdHash(address.slice(0, at))}@${address.slice(at + 1)}`, Buffer.from(key.write()));
+                    }
+                }
+                return answer(200, { ok: true, fingerprint: key.getFingerprint().toUpperCase() });
+            }
+            if (path === '/vks/v1/upload') {
+                const key = await openpgp.readKey({ armoredKey: String(body.keytext) });
+                const addresses = key.users
+                    .map(user => user.userID && user.userID.email)
+                    .filter(Boolean)
+                    .map(address => address.toLowerCase());
+                const token = `t${uploads.length}`;
+                uploads.push({ token, fingerprint: key.getFingerprint().toUpperCase(), addresses, asked: [] });
+                const status = Object.fromEntries(addresses.map(address => [address, 'unpublished']));
+                return answer(200, { key_fpr: key.getFingerprint().toUpperCase(), token, status });
+            }
+            if (path === '/vks/v1/request-verify') {
+                const upload = uploads.find(u => u.token === body.token);
+                if (!upload) return answer(400, { error: 'unknown token' });
+                upload.asked = (body.addresses || []).map(a => String(a).toLowerCase());
+                const status = Object.fromEntries(upload.addresses.map(a => [a, upload.asked.includes(a) ? 'pending' : 'unpublished']));
+                return answer(200, { key_fpr: upload.fingerprint, token: upload.token, status });
             }
             answer(200, await check(body));
         } catch (error) {

@@ -89,6 +89,7 @@ enum ListIcon : int {
     LIST_SPEAKER_MUTE = 7,
     LIST_LOCK_CLOSED = 8,
     LIST_RIBBON = 9,
+    LIST_SHIELD_CHECKMARK = 10,
 };
 
 enum FileIcon : int {

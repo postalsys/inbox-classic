@@ -31,6 +31,9 @@ pub struct AttachmentView {
     /// What the strip says of that part, in the tooltip's last line and for screen readers ("From part 2: Encrypted.
     /// Signed by alice@example.org (key not verified)"); empty in any other message
     pub part_text: String,
+    /// It holds OpenPGP public keys (read as such, not judged by its name): the strip offers Import Key
+    /// ([`Core::pgp_import_attachment`](crate::Core::pgp_import_attachment))
+    pub is_key: bool,
 }
 
 /// How the part a file came from was protected: the strip marks a file of an encrypted part with a lock
@@ -52,6 +55,7 @@ impl AttachmentView {
         let size = attachment.content.len() as u64;
         let size_text = crate::format_size(size);
         let kind = crate::opening::file_kind_of(&safe_filename, &attachment.mime_type, &attachment.content);
+        let is_key = kind == crate::opening::FileKind::Key && crate::keys::holds_public_key(&attachment.content);
         AttachmentView {
             tooltip: crate::opening::tooltip(&filename, &size_text, kind),
             refusal: crate::opening::refusal(&filename, kind),
@@ -65,6 +69,7 @@ impl AttachmentView {
             part: None,
             protection: Protection::None,
             part_text: String::new(),
+            is_key,
         }
     }
 
@@ -212,6 +217,9 @@ pub struct PartView {
     pub encrypted: bool,
     /// Its signature was confirmed: signed by the sender's key, verified or not
     pub signed: bool,
+    /// The fingerprint or key id of the key that signed it, not known here, while keys may be looked up on
+    /// keys.openpgp.org: its label offers Find Key (`inboxclassic:find-key?<handle>`); None otherwise
+    pub find_key: Option<String>,
 }
 
 impl PartView {
@@ -718,6 +726,11 @@ fn protected_view(
                 .verdict
                 .as_ref()
                 .is_some_and(crate::protect::Verdict::signature_confirmed),
+            find_key: section
+                .verdict
+                .as_ref()
+                .filter(|_| trust.ring.is_some_and(|ring| ring.find_keys))
+                .and_then(crate::protect::Verdict::unknown_key),
         };
         // each file of the part says where it came from, the strip marking an encrypted part's
         for attachment in &mut attachments[first..] {
@@ -725,6 +738,7 @@ fn protected_view(
         }
         parts.push(part);
     }
+    let find_key = pe_i18n::tr(pe_i18n::Text::PgpPartFindKey);
     let page_parts: Vec<pe_html::SecurePart> = parts
         .iter()
         .zip(&documents)
@@ -732,6 +746,7 @@ fn protected_view(
             tone: part.tone,
             label: &part.label,
             shown: document.is_some(),
+            find_key: part.find_key.as_deref().map(|handle| (handle, find_key.as_str())),
         })
         .collect();
     let document = pe_html::secure_page(&page_parts, clicked || allow_remote_images);
@@ -1167,6 +1182,7 @@ mod tests {
                 part: None,
                 protection: Protection::None,
                 part_text: String::new(),
+                is_key: false,
             }]
         );
         assert_eq!(attachment(MESSAGE, 0), Some(("report.pdf".into(), b"%PDF".to_vec())));
@@ -1196,6 +1212,7 @@ mod tests {
             details: Vec::new(),
             encrypted,
             signed,
+            find_key: None,
         };
         let parts = [
             part(Tone::Good, true, true),

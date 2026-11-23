@@ -7,6 +7,8 @@ use std::net::TcpListener;
 use std::sync::mpsc::{Receiver, channel};
 use std::sync::{Arc, Mutex};
 
+use pe_core::book::KeyMark;
+use pe_core::i18n::{Text, tr};
 use pe_core::keys::KeySource;
 use pe_core::{Core, Event, Options, PasswordStore};
 
@@ -93,13 +95,23 @@ fn world(name: &str) -> World {
 }
 
 impl World {
-    fn result(&self, request: u64) -> pe_core::FindOutcome {
+    /// Waits for the lookup's KeysFound, its result not taken: how many addresses got a key
+    fn ended(&self, request: u64) -> usize {
         loop {
             let event = self.events.recv_timeout(pe_testkit::patience()).expect("KeysFound");
-            if event == (Event::KeysFound { request }) {
-                return self.core.pgp_find_result(request).unwrap();
+            if let Event::KeysFound { request: done, learned } = event
+                && done == request
+            {
+                return learned;
             }
         }
+    }
+
+    fn result(&self, request: u64) -> pe_core::FindOutcome {
+        let learned = self.ended(request);
+        let outcome = self.core.pgp_find_result(request).unwrap();
+        assert_eq!(learned, outcome.learned);
+        outcome
     }
 }
 
@@ -116,7 +128,15 @@ fn found_used_and_a_miss_remembered() {
         .pgp_find(&["Bob@Example.org".into(), "nobody@example.org".into()])
         .unwrap()
         .unwrap();
-    let outcome = w.result(request);
+    // learned once it ended, whether a window takes its words or not
+    assert_eq!(w.ended(request), 1);
+    assert_eq!(
+        w.core.pgp_peer("bob@example.org").unwrap().in_use.unwrap(),
+        bob.fingerprint()
+    );
+    let outcome = w.core.pgp_find_result(request).unwrap();
+    assert_eq!(outcome.learned, 1);
+    assert_eq!(w.core.pgp_find_result(request), None, "taken once");
     assert_eq!(
         outcome.addresses,
         [
@@ -238,4 +258,199 @@ fn publishing() {
     }
     let outcome = w.core.pgp_publish_result(request).unwrap();
     assert!(outcome.ok && outcome.text.contains("me@example.org"), "{outcome:?}");
+    // taken once
+    assert_eq!(w.core.pgp_publish_result(request), None);
+    let asked = w.asked.lock().unwrap().clone();
+    assert_eq!(asked, ["/vks/v1/upload", "/vks/v1/request-verify"]);
+
+    // the server refuses: said, not published
+    w.routes
+        .lock()
+        .unwrap()
+        .insert("/vks/v1/upload".into(), (500, b"broken".to_vec()));
+    let request = w.core.pgp_publish(&me.fingerprint()).unwrap();
+    loop {
+        let event = w.events.recv_timeout(pe_testkit::patience()).unwrap();
+        if event == (Event::KeyPublished { request }) {
+            break;
+        }
+    }
+    let outcome = w.core.pgp_publish_result(request).unwrap();
+    assert!(!outcome.ok && !outcome.text.is_empty(), "{outcome:?}");
+    // only an own key is published
+    let bob = pe_pgp::generate("Bob", &["bob@example.org".into()], now() - 60).unwrap();
+    w.core
+        .pgp_import(bob.cert().armored().as_bytes(), None, KeySource::Paste)
+        .unwrap();
+    assert!(w.core.pgp_publish(&bob.fingerprint()).is_err());
+    assert!(w.core.pgp_publish("0123456789ABCDEF0123456789ABCDEF01234567").is_err());
+}
+
+/// A message from `from` signed by `key`, written where `file_view` reads it
+fn signed_file(w: &World, from: &str, key: &pe_pgp::SecretKey) -> std::path::PathBuf {
+    let content = "Content-Type: text/plain; charset=utf-8\r\n\r\nHello";
+    let signature = pe_pgp::sign_detached(content.as_bytes(), key, now()).unwrap();
+    let raw = format!(
+        "From: {from}\r\nTo: me@example.org\r\nSubject: Signed\r\nDate: Sun, 15 Nov 2026 10:00:00 +0000\r\n\
+         MIME-Version: 1.0\r\nContent-Type: multipart/signed; micalg={}; \
+         protocol=\"application/pgp-signature\"; boundary=\"s\"\r\n\r\n--s\r\n{content}\r\n--s\r\n\
+         Content-Type: application/pgp-signature\r\n\r\n{}\r\n--s--\r\n",
+        signature.micalg, signature.signature
+    );
+    let path = w._dir.path().join("signed.eml");
+    std::fs::write(&path, raw).unwrap();
+    path
+}
+
+/// The handle Find Key beside the only part's label asks for, from the page's own link
+fn find_key_of(view: &pe_core::MessageView) -> Option<String> {
+    let part = view.protection.as_ref().unwrap().parts[0].find_key.clone();
+    let start = view.document.find(pe_html::FIND_KEY_LINK);
+    assert_eq!(part.is_some(), start.is_some(), "{}", view.document);
+    let link = &view.document[start?..];
+    let link = &link[..link.find('"').unwrap()];
+    assert_eq!(pe_html::find_key_link(link), part);
+    part
+}
+
+#[test]
+fn find_key_on_a_signature_by_an_unknown_key() {
+    let w = world("lookup-find-key");
+    let bob = pe_pgp::generate("Bob", &["bob@example.org".into()], now() - 60).unwrap();
+    for handle in [bob.fingerprint(), bob.cert().key_id()] {
+        let kind = if handle.len() == 16 {
+            "by-keyid"
+        } else {
+            "by-fingerprint"
+        };
+        w.routes
+            .lock()
+            .unwrap()
+            .insert(format!("/vks/v1/{kind}/{handle}"), (200, bob.cert().to_bytes()));
+    }
+    let path = signed_file(&w, "bob@example.org", &bob);
+    let view = w.core.file_view(&path, false).unwrap();
+    let protection = view.protection.as_ref().unwrap();
+    assert_eq!(protection.tone, pe_core::protect::Tone::Neutral);
+    let handle = find_key_of(&view).expect("Find Key");
+    assert!(bob.cert().handles().contains(&handle), "{handle}");
+
+    // with lookups on keys.openpgp.org off, no Find Key
+    w.core.set_pgp_keyserver(false).unwrap();
+    assert_eq!(find_key_of(&w.core.file_view(&path, false).unwrap()), None);
+    w.core.set_pgp_keyserver(true).unwrap();
+
+    // the link clicked, as the page writes it
+    let request = w
+        .core
+        .pgp_find_handle(&format!("{}{handle}", pe_html::FIND_KEY_LINK))
+        .unwrap();
+    let outcome = w.result(request);
+    assert!(outcome.text.contains("bob@example.org"), "{}", outcome.text);
+    // the view built again: the signature is Bob's now, and Find Key is gone
+    let view = w.core.file_view(&path, false).unwrap();
+    let part = &view.protection.as_ref().unwrap().parts[0];
+    assert_eq!(part.tone, pe_core::protect::Tone::Good, "{}", part.label);
+    assert!(part.label.contains("bob@example.org"), "{}", part.label);
+    assert_eq!(find_key_of(&view), None);
+}
+
+#[test]
+fn find_key_takes_only_a_fingerprint_or_key_id() {
+    let w = world("lookup-find-key-strict");
+    for bad in [
+        "",
+        "../../upload",
+        "0123456789ABCDE",
+        "0123456789ABCDEFG",
+        "0123456789ABCDEF?x",
+        "ZZ23456789ABCDEF",
+        "inboxclassic:find-key?0123456789ABCDE",
+        "inboxclassic:find-key?0123456789ABCDEF&x",
+        "https://example.org/?0123456789ABCDEF",
+    ] {
+        assert!(w.core.pgp_find_handle(bad).is_err(), "{bad}");
+    }
+    assert!(w.asked.lock().unwrap().is_empty());
+    // a key id in lower case is asked in upper case
+    let request = w.core.pgp_find_handle("0123456789abcdef").unwrap();
+    w.result(request);
+    assert_eq!(*w.asked.lock().unwrap(), ["/vks/v1/by-keyid/0123456789ABCDEF"]);
+}
+
+#[test]
+fn find_key_for_a_contact_and_the_book_marks() {
+    let w = world("lookup-contact");
+    let bob = pe_pgp::generate("Bob", &["bob@example.org".into()], now() - 60).unwrap();
+    w.routes.lock().unwrap().insert(
+        "/vks/v1/by-email/bob%40example.org".into(),
+        (200, bob.cert().to_bytes()),
+    );
+    let card = w
+        .core
+        .save_card(&pe_store::Card {
+            name: "Bob".into(),
+            addresses: vec!["Bob@Example.org".into(), "bob@work.example".into()],
+            ..Default::default()
+        })
+        .unwrap();
+    let other = w
+        .core
+        .save_card(&pe_store::Card {
+            name: "Carol".into(),
+            addresses: vec!["carol@example.org".into()],
+            ..Default::default()
+        })
+        .unwrap();
+    let marks = |w: &World| -> Vec<(i64, KeyMark, String)> {
+        let mut rows: Vec<_> = w
+            .core
+            .card_rows("")
+            .unwrap()
+            .iter()
+            .map(|row| (row.card, row.key_mark, row.key_mark_text.clone()))
+            .collect();
+        rows.sort_by_key(|row| row.0);
+        rows
+    };
+    let none = |card| (card, KeyMark::None, String::new());
+    assert_eq!(marks(&w), [none(card), none(other)]);
+
+    assert!(w.core.contact_can_find_keys(card));
+    let request = w.core.contact_find_keys(card).unwrap().unwrap();
+    // nothing more to ask while it is looked up
+    assert!(!w.core.contact_can_find_keys(card));
+    let outcome = w.result(request);
+    assert_eq!(
+        outcome.addresses,
+        [
+            ("bob@example.org".to_string(), true),
+            ("bob@work.example".to_string(), false)
+        ]
+    );
+    // each domain's directory was asked first, then the key server
+    let asked = w.asked.lock().unwrap().clone();
+    assert!(
+        asked.iter().any(|path| path.contains("/.well-known/openpgpkey/")),
+        "{asked:?}"
+    );
+    assert_eq!(
+        w.core.pgp_peer("bob@example.org").unwrap().in_use.unwrap(),
+        bob.fingerprint()
+    );
+    // asked again at once: the key server allows one lookup a minute, Bob's key is there
+    assert_eq!(w.core.contact_find_keys(card).unwrap(), None);
+    assert!(!w.core.contact_can_find_keys(card));
+    assert!(w.core.contact_find_keys(0).is_err());
+    assert!(!w.core.contact_can_find_keys(0));
+
+    assert_eq!(
+        marks(&w),
+        [(card, KeyMark::Known, tr(Text::UiBookKeyKnown)), none(other)]
+    );
+    w.core.pgp_set_key_verified(&bob.fingerprint(), true).unwrap();
+    assert_eq!(
+        marks(&w),
+        [(card, KeyMark::Verified, tr(Text::UiBookKeyVerified)), none(other)]
+    );
 }

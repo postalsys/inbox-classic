@@ -270,6 +270,8 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     reader_.Create(parent, core);
     reader_.onShown = [this] { OnMessageShown(); };
     reader_.onFound = [this](const std::wstring& said) { Say(said); };
+    // Find Key of a signature: while it is looked up, and what was found, in the status bar
+    reader_.onKeyLookup = [this](const std::wstring& said, bool) { Say(said); };
     reader_.onBouncedMessage = [this](int64_t folder, uint64_t uid) { ShowMessage(folder, uid); };
     // the keys for reading also while the message has the keyboard, sent as the accelerators send them
     reader_.SetKeys([parent](UINT key) {

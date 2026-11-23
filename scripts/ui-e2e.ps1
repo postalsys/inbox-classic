@@ -3339,6 +3339,395 @@ public static class Dragger {
         TakeAway $sent
     }
 
+    # ---- finding, publishing and passing on keys (SCENARIO 19k) ----
+
+    Step 'finding, publishing and passing on keys'
+    # app.h: Publish and Import from Clipboard of Encryption Keys, Find Key of Contact Properties and its words
+    $IDC_KEYS_PUBLISH = 879; $IDC_KEYS_PASTE = 920; $IDC_CONTACT_FIND_KEY = 745; $IDC_CONTACT_KEY_SAID = 746
+    $IDC_CONTACT_KEY_VERIFY = 786; $IDC_CONTACT_KEY_PENDING = 787; $IDC_CONTACT_KEY_USE_NEW = 788; $IDC_CONTACT_KEY_KEEP = 789
+    $pgpBase = "http://127.0.0.1:$($ports.pgp)"
+    # a key file of scripts/ui-e2e/pgp put on the harness's key server (by its address too, and in its Web Key
+    # Directory, when asked): the harness's answer, with the key's fingerprint
+    function ServeKey([string]$file, [string]$address = $null, [bool]$wkd = $false) {
+        $body = @{ key = [IO.File]::ReadAllText((Join-Path $pgpFiles $file)) }
+        if ($address) { $body.address = $address }
+        if ($wkd) { $body.wkd = $true }
+        Invoke-RestMethod -Method Post -ContentType 'application/json' "$pgpBase/pgp/keys" -Body ($body | ConvertTo-Json)
+    }
+    # the pane's look at Find Key: the middle of it on the screen, 0 when the page has none, -1 before it answered
+    function FindKeyLook { $v = WaitFor { $a = [Native.Win]::SendText($main, $kTestPreviews, 'findkey'); if ($a -ge 0) { "$a" } } 5; if ($v) { [int64]$v } else { -1 } }
+    # the key lookups the harness was asked, in order, and those after the first $from
+    function Lookups { $r = Invoke-RestMethod "$pgpBase/pgp/lookups"; @($r | ForEach-Object { $_ }) }
+    function LookupsSince([int]$from) { @(Lookups | Select-Object -Skip $from) }
+    function LookupText($l) { @($l | ForEach-Object { "$($_.kind) $($_.value) $($_.found)" }) -join '; ' }
+    # a key's row of Encryption Keys by its name, as its columns say it; '' when it is not listed
+    function KeyRowNamed([IntPtr]$keys, [string]$name) {
+        $l = [Native.Win]::GetDlgItem($keys, $IDC_KEYS_LIST)
+        for ($i = 0; $i -lt (ListCount $l); $i++) { if ([Native.Win]::RemoteListText($l, $i, 0) -eq $name) { return KeyRow $keys $i } }
+        ''
+    }
+    # the Properties of the key named $name: where it came from; closed after
+    function KeySource([IntPtr]$keys, [string]$name) {
+        if ((SelectKey $keys $name) -lt 0) { return '(not listed)' }
+        Click $keys $IDC_KEYS_PROPERTIES
+        $p = WaitShown 'InboxClassicKeyProperties'
+        if (-not $p) { return '(no Properties)' }
+        $source = GetText $p $IDC_KEY_SOURCE
+        Click $p 2
+        [void](WaitFor { -not [Native.Win]::IsWindow($p) } 5)
+        $source
+    }
+    # Encryption Keys opened, $name's row and source read, closed again
+    function KeyListed([string]$name) {
+        $k = OpenKeys
+        if (-not $k) { return [pscustomobject]@{ Row = '(no window)'; Source = '' } }
+        $found = [pscustomobject]@{ Row = (KeyRowNamed $k $name); Source = (KeySource $k $name) }
+        CloseKeys $k
+        $found
+    }
+    # a message of scripts/ui-e2e/pgp put in the Inbox and shown in the reading pane; whether it is
+    function ShowPlain([string]$file, [string]$subject) {
+        AddMessage ([IO.File]::ReadAllText((Join-Path $pgpFiles $file))) @('\Seen')
+        Command $main $IDM_SYNC
+        SelectFolder 0
+        SelectSubject $subject
+    }
+    # the labels of the strip's menu of item $item of the main window's strip (closed again, or $choose chosen by its
+    # label), '|' between them
+    $keyStrip = [Native.Win]::GetDlgItem([Native.Win]::GetDlgItem($main, 243), 242)
+    function KeyStripMenu([int]$item, [string]$choose = $null) {
+        [void](WaitFor { (ListCount $keyStrip) -gt $item } 10)
+        Key $keyStrip 0x24
+        for ($i = 0; $i -lt $item; $i++) { Key $keyStrip $VK_DOWN }
+        Start-Sleep -Milliseconds 300
+        [void][Native.Win]::PostMessage($keyStrip, 0x007B, $keyStrip, [IntPtr](-1))
+        $menu = WaitWindow '#32768' $null 10
+        if (-not $menu) { return '(no menu)' }
+        $labels = @([Native.Win]::MenuLabels([Native.Win]::SendMessage($menu, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero)))
+        $at = if ($choose) { [array]::IndexOf($labels, $choose) } else { -1 }
+        if ($at -ge 0) {
+            Key $menu $VK_HOME
+            for ($i = 0; $i -lt @($labels[0..$at] | Where-Object { $_ }).Count - 1; $i++) { Key $menu $VK_DOWN }
+            Key $menu $VK_RETURN
+        } else {
+            Key $menu $VK_ESCAPE
+        }
+        [void](WaitFor { [Native.Win]::FindWindow('#32768', [NullString]::Value) -eq [IntPtr]::Zero } 5)
+        $labels -join '|'
+    }
+    # the Address Book's cards: one added with a name and an address, a card's row by its name, its Properties
+    function OpenBook { Command $main $IDM_ADDRESS_BOOK; WaitShown 'InboxClassicAddressBook' 10 }
+    function CloseBook([IntPtr]$b) {
+        [void][Native.Win]::PostMessage($b, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        [void](WaitFor { -not [Native.Win]::IsWindow($b) } 10)
+    }
+    function BookRow([IntPtr]$b, [string]$name) {
+        $l = [Native.Win]::GetDlgItem($b, $IDC_BOOK_LIST)
+        for ($i = 0; $i -lt (ListCount $l); $i++) { if ([Native.Win]::RemoteListText($l, $i, 0) -eq $name) { return $i } }
+        -1
+    }
+    function AddCard([IntPtr]$b, [string]$first, [string]$last, [string]$address) {
+        if ((BookRow $b "$first $last") -ge 0) { return }
+        Click $b $IDC_BOOK_NEW_CONTACT
+        $c = WaitShown 'InboxClassicContact' 10
+        if (-not $c) { return }
+        SetText $c $IDC_CONTACT_FIRST $first
+        SetText $c $IDC_CONTACT_LAST $last
+        SetText $c $IDC_CONTACT_ADDRESS $address
+        Click $c $IDC_CONTACT_ADD
+        [void](WaitFor { (ListBoxCount ([Native.Win]::GetDlgItem($c, $IDC_CONTACT_ADDRESSES))) -eq 1 } 5)
+        Click $c 1
+        [void](WaitFor { -not [Native.Win]::IsWindow($c) } 10)
+        [void](WaitFor { (BookRow $b "$first $last") -ge 0 } 10)
+    }
+    function CardProperties([IntPtr]$b, [string]$name) {
+        $row = BookRow $b $name
+        if ($row -lt 0) { return $null }
+        $l = [Native.Win]::GetDlgItem($b, $IDC_BOOK_LIST)
+        Key $l $VK_HOME
+        for ($i = 0; $i -lt $row; $i++) { Key $l $VK_DOWN }
+        Start-Sleep -Milliseconds 300
+        Click $b $IDC_BOOK_PROPERTIES
+        WaitShown 'InboxClassicContact' 10
+    }
+    function CloseContact([IntPtr]$c) {
+        Click $c 2
+        [void](WaitFor { -not [Native.Win]::IsWindow($c) } 5)
+    }
+    # me.asc's fingerprint without spaces, as Properties of the "Alex Morgan" key imported from a file says it; that key
+    # selected
+    function SelectFixtureKey([IntPtr]$keys) {
+        $l = [Native.Win]::GetDlgItem($keys, $IDC_KEYS_LIST)
+        for ($i = 0; $i -lt (ListCount $l); $i++) {
+            if ([Native.Win]::RemoteListText($l, $i, 0) -ne 'Alex Morgan') { continue }
+            Key $l $VK_HOME
+            for ($j = 0; $j -lt $i; $j++) { Key $l $VK_DOWN }
+            Start-Sleep -Milliseconds 300
+            Click $keys $IDC_KEYS_PROPERTIES
+            $p = WaitShown 'InboxClassicKeyProperties'
+            if (-not $p) { continue }
+            $fromFile = (GetText $p $IDC_KEY_SOURCE) -match 'file'
+            $fpr = (GetText $p $IDC_KEY_FINGERPRINT) -replace ' ', ''
+            Click $p 2
+            [void](WaitFor { -not [Native.Win]::IsWindow($p) } 5)
+            if ($fromFile) { return $fpr }
+        }
+        $null
+    }
+
+    # Publish: greyed for a contact's key; the account's key asks first, then keys.openpgp.org has it
+    $keys = OpenKeys
+    if ($keys) {
+        Check ((SelectKey $keys 'Alice Example') -ge 0 -and -not (Enabled $keys $IDC_KEYS_PUBLISH)) "Publish is greyed for Alice's key, a contact's ($(GetText $keys $IDC_KEYS_PUBLISH))"
+        $fixtureFpr = SelectFixtureKey $keys
+        Check ($null -ne $fixtureFpr -and (Enabled $keys $IDC_KEYS_PUBLISH)) "and can be used for the account's key ($fixtureFpr)"
+        Check ((GetText $keys $IDC_KEYS_PUBLISH) -eq 'P&ublish...') "its label has its access key ($(GetText $keys $IDC_KEYS_PUBLISH))"
+        Click $keys $IDC_KEYS_PUBLISH
+        $ask = WaitWindow '#32770' 'Publish' 10
+        $question = if ($ask) { WaitFor { $t = Statics $ask; if ($t -match 'keys\.openpgp\.org') { $t } } 5 }
+        Check ($question -match [regex]::Escape('Publish your public key on keys.openpgp.org so that others can find it by your address? The server sends a confirmation link to testuser@inboxclassic.test; each address is listed only after you open its link.')) "it asks first, naming the address ($question)"
+        Check ($ask -and (GetText $ask 6) -match 'Yes' -and (GetText $ask 7) -match 'No') "with Yes and No ($(if ($ask) { "$(GetText $ask 6) / $(GetText $ask 7)" }))"
+        if ($ask) {
+            Shot $keys 'keys-12-publish' $ask
+            Click $ask 6
+            [void](WaitFor { -not [Native.Win]::IsWindow($ask) } 5)
+        }
+        $said = (Told 'Publish' 'confirmation link').Trim()
+        Check ($said -match [regex]::Escape('keys.openpgp.org sent a confirmation link to these addresses: testuser@inboxclassic.test. Confirm each address so your key can be found using that address.')) "Yes publishes it and says what the server did ($said)"
+        $uploads = @((Invoke-RestMethod "$pgpBase/pgp/uploads") | ForEach-Object { $_ })
+        $upload = $uploads | Select-Object -First 1
+        Check ($uploads.Count -eq 1 -and $upload.fingerprint -eq $fixtureFpr -and (@($upload.addresses) -join ',') -eq 'testuser@inboxclassic.test' -and (@($upload.asked) -join ',') -eq 'testuser@inboxclassic.test') "the server got me.asc's key and was asked to confirm its address ($(($uploads | ConvertTo-Json -Compress)))"
+
+        # Import from Clipboard: plain text is no key; Judy's key is imported as Pasted
+        Set-Clipboard -Value 'not a key'
+        Check ((GetText $keys $IDC_KEYS_PASTE) -eq 'Import from C&lipboard') "Import from Clipboard is there ($(GetText $keys $IDC_KEYS_PASTE))"
+        Click $keys $IDC_KEYS_PASTE
+        $said = (Told 'Import Key' 'clipboard').Trim()
+        Check ($said -eq 'The clipboard holds no OpenPGP key.') "plain text on the clipboard: it says there is no key ($said)"
+        Check ((KeyRowNamed $keys 'Judy Example') -eq '') 'and imports nothing'
+        $judyText = [IO.File]::ReadAllText((Join-Path $pgpFiles 'judy.asc'))
+        Set-Clipboard -Value $judyText
+        Check ([bool](WaitFor { (Get-Clipboard -Raw) -match 'BEGIN PGP PUBLIC KEY BLOCK' } 5)) "the test put Judy's key on the clipboard ($(((Get-Clipboard -Raw) + '').Length) characters)"
+        Click $keys $IDC_KEYS_PASTE
+        $said = (Told 'Import Key' 'imported').Trim()
+        Check ($said -eq 'One key was imported.') "Judy's key on the clipboard is imported ($said)"
+        $row = WaitFor { $r = KeyRowNamed $keys 'Judy Example'; if ($r) { $r } } 5
+        Check ($row -eq 'Judy Example | judy@example.net | Contact | Valid') "and listed as a contact's, Valid ($row)"
+        [void](SelectKey $keys 'Judy Example')
+        Shot $keys 'keys-13-paste'
+        $source = KeySource $keys 'Judy Example'
+        Check ($source -eq 'Pasted') "her Properties say Pasted ($source)"
+        Set-Clipboard -Value ' '
+        CloseKeys $keys
+    }
+
+    # Find Key beside the label of a part signed by a key not known here: asked by its fingerprint alone
+    $daveKey = ServeKey 'dave.asc'
+    $words = ShowSecure 'secure-no-key.eml' 'A key you do not have'
+    Check ($words -eq 'Signed, but the key is not known') "Dave's signature: the key is not known ($words)"
+    $from = (Lookups).Count
+    [void][Native.Win]::SetForegroundWindow($main)
+    Start-Sleep -Milliseconds 300
+    [void](FindKeyLook)
+    Start-Sleep -Milliseconds 300
+    $p = WaitFor { $v = [Native.Win]::SendText($main, $kTestPreviews, 'findkey'); if ($v -gt 0) { "$v" } } 5
+    Check ($null -ne $p) 'the label has Find Key beside it'
+    Shot $main 'keys-14a-find-key-offered'
+    if ($p) {
+        $p = [int64]$p
+        [Native.Win]::MouseClick([int][Math]::Floor($p / 100000), [int]($p % 100000))
+    }
+    $words = WaitFor { $t = WindowText $securityBar; if ($t -match '^Signed by dave') { $t } } 20
+    Check ($words -eq 'Signed by dave@example.com (key not verified)') "found, the bar names the signer ($(WindowText $securityBar))"
+    Check ((BarFill) -eq $fills.good) "and is blue ($(BarFill))"
+    $asked = @(LookupsSince $from)
+    Check ($asked.Count -eq 1 -and $asked[0].kind -eq 'fingerprint' -and $asked[0].value -eq $daveKey.fingerprint -and $asked[0].found) "it was asked by the fingerprint alone, no address ($(LookupText $asked))"
+    Check ([bool](WaitFor { (FindKeyLook) -eq 0 } 10)) 'and the label has no Find Key any more'
+    $status = StatusPart $secureStatus 0
+    Write-Host "   the status bar: $status"
+    Shot $main 'keys-14-find-signer'
+    $dave = KeyListed 'Dave'
+    Check ($dave.Row -eq 'Dave | dave@example.com | Contact | Valid' -and $dave.Source -eq 'From keys.openpgp.org') "Encryption Keys lists Dave's key, from keys.openpgp.org ($($dave.Row); $($dave.Source))"
+    RemoveSecure 'secure-no-key.eml' 'A key you do not have'
+
+    # Find Key in a contact's Properties: her provider's directory answers, the key server is not asked
+    [void](ServeKey 'grace.asc' 'grace@example.net' $true)
+    $book = OpenBook
+    if ($book) {
+        AddCard $book 'Grace' 'Example' 'grace@example.net'
+        $contact = CardProperties $book 'Grace Example'
+        Check ($null -ne $contact) "Grace's card opens"
+        if ($contact) {
+            Check ((GetText $contact $IDC_CONTACT_KEY) -eq 'No key' -and (Enabled $contact $IDC_CONTACT_FIND_KEY)) "her Properties say No key, with Find Key ($(GetText $contact $IDC_CONTACT_KEY))"
+            Check ((GetText $contact $IDC_CONTACT_FIND_KEY) -eq '&Find Key') "Find Key has its access key ($(GetText $contact $IDC_CONTACT_FIND_KEY))"
+            $from = (Lookups).Count
+            Click $contact $IDC_CONTACT_FIND_KEY
+            $line = WaitFor { $t = GetText $contact $IDC_CONTACT_KEY; if ($t -match '([0-9A-F]{4} ){9}[0-9A-F]{4}') { $t } } 20
+            Check ($line -match '^grace@example\.net:\s+([0-9A-F]{4} ){9}[0-9A-F]{4} \(Valid\)$') "found, the key's fingerprint and Valid ($($line -replace "`r`n", ' / '))"
+            Check ((Visible $contact $IDC_CONTACT_KEY_VERIFY)) 'with Verify beside it'
+            Write-Host "   what it says: $(GetText $contact $IDC_CONTACT_KEY_SAID)"
+            $asked = @(LookupsSince $from)
+            Check ($asked.Count -eq 1 -and $asked[0].kind -eq 'wkd' -and $asked[0].value -eq 'grace@example.net' -and $asked[0].found) "her provider's directory answered alone ($(LookupText $asked))"
+            Shot $contact 'keys-15-contact-find'
+            CloseContact $contact
+        }
+        CloseBook $book
+    }
+    $grace = KeyListed 'Grace Example'
+    Check ($grace.Row -eq 'Grace Example | grace@example.net | Contact | Valid' -and $grace.Source -match 'mail provider') "Encryption Keys lists Grace's key, from her mail provider ($($grace.Row); $($grace.Source))"
+
+    # a key attached to a message: Import Key in its menu, which a picture does not have
+    $words = ShowSecure 'secure-previews.eml' 'Two pictures, one sealed'
+    $labels = KeyStripMenu 0
+    Check ($labels -ne '(no menu)' -and $labels -notmatch 'Import Key') "a picture's menu has no Import Key ($labels)"
+    RemoveSecure 'secure-previews.eml' 'Two pictures, one sealed'
+    Check (ShowPlain 'key-attached.eml' 'My public key') "Erin's message is shown"
+    $files = WaitFor { if ((ListCount $keyStrip) -ge 1) { [Native.Win]::RemoteListText($keyStrip, 0, 0) } } 10
+    Check ($files -like 'Erin Example public key.asc (*') "the strip shows her key ($files)"
+    # the menu open for the picture, then the menu chosen from
+    [void](WaitFor { (ListCount $keyStrip) -ge 1 } 5)
+    Key $keyStrip 0x24
+    Start-Sleep -Milliseconds 300
+    [void][Native.Win]::PostMessage($keyStrip, 0x007B, $keyStrip, [IntPtr](-1))
+    $menu = WaitWindow '#32768' $null 10
+    if ($menu) {
+        $labels = @([Native.Win]::MenuLabels([Native.Win]::SendMessage($menu, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero))) -join '|'
+        Check ($labels -eq 'Open|Save As...||Save All...||Import Key...') "its menu has Import Key... ($labels)"
+        Shot $main 'keys-16-attached-key' $menu
+        Key $menu $VK_UP
+        Key $menu $VK_RETURN
+        $said = (Told 'Import Key' 'imported').Trim()
+        Check ($said -eq 'One key was imported.') "chosen, it imports her key ($said)"
+    } else {
+        Check $false "the key's menu opens"
+    }
+    $erin = KeyListed 'Erin Example'
+    Check ($erin.Row -eq 'Erin Example | erin@example.org | Contact | Valid' -and $erin.Source -eq 'From a message') "Encryption Keys lists Erin's key, from a message ($($erin.Row); $($erin.Source))"
+    RemoveSecure 'key-attached.eml' 'My public key'
+
+    # the Address Book's key marks: Alice's verified, Grace's found, Bob's none
+    $book = OpenBook
+    if ($book) {
+        AddCard $book 'Alice' 'Example' 'alice@example.org'
+        AddCard $book 'Bob' 'Example' 'bob@example.net'
+        $bookList = [Native.Win]::GetDlgItem($book, $IDC_BOOK_LIST)
+        $mark = { param($name) $r = BookRow $book $name; if ($r -ge 0) { "$([AccLook]::Description($bookList, $r + 1))" } else { '(no row)' } }
+        Check ((& $mark 'Alice Example') -eq 'Has a verified encryption key') "Alice's row has the verified key mark ($(& $mark 'Alice Example'))"
+        Check ((& $mark 'Grace Example') -eq 'Has an encryption key') "Grace's the key mark ($(& $mark 'Grace Example'))"
+        Check ((& $mark 'Bob Example') -eq '') "Bob's none ($(& $mark 'Bob Example'))"
+        # drawn apart: the dark pixels before each name differ, and Bob's row has none
+        $iconOf = {
+            param($name)
+            $r = BookRow $book $name
+            $rect = [Native.Win]::RemoteRect($bookList, 0x100E, [IntPtr]$r, 1)
+            [void][Native.Win]::SetWindowPos($book, [IntPtr](-1), 0, 0, 0, 0, 0x13)
+            [void][Native.Win]::SetForegroundWindow($book)
+            Start-Sleep -Milliseconds 400
+            $w = $rect.Right - $rect.Left; $h = $rect.Bottom - $rect.Top
+            $dark = @()
+            if ($w -gt 0 -and $h -gt 0) {
+                $picture = New-Object System.Drawing.Bitmap $w, $h
+                CopyScreen $picture $rect.Left $rect.Top
+                for ($x = 0; $x -lt $w; $x++) { for ($y = 0; $y -lt $h; $y++) { $q = $picture.GetPixel($x, $y); if ($q.R -lt 120 -and $q.G -lt 120 -and $q.B -lt 120) { $dark += "$x,$y" } } }
+            }
+            [void][Native.Win]::SetWindowPos($book, [IntPtr](-2), 0, 0, 0, 0, 0x13)
+            $dark -join ' '
+        }
+        $aliceIcon = & $iconOf 'Alice Example'; $graceIcon = & $iconOf 'Grace Example'; $bobIcon = & $iconOf 'Bob Example'
+        Check ($aliceIcon -ne '' -and $graceIcon -ne '' -and $aliceIcon -ne $graceIcon -and $bobIcon -eq '') 'the two marks are drawn differently, Bob has none'
+        Shot $book 'keys-17-book-marks'
+        CloseBook $book
+    }
+
+    # a key learned from a message's Autocrypt header, without a question
+    Check (ShowPlain 'autocrypt-frank-1.eml' 'Hello from Frank') "Frank's message is shown"
+    $frank = WaitFor { $f = KeyListed 'Frank Example'; if ($f.Row) { $f } } 20
+    Check ($frank -and $frank.Row -eq 'Frank Example | frank@example.org | Contact | Valid' -and $frank.Source -eq "From a message's Autocrypt header") "opened, his key is learned from its Autocrypt header ($(if ($frank) { "$($frank.Row); $($frank.Source)" }))"
+    $frankLine = $null
+    $book = OpenBook
+    if ($book) {
+        AddCard $book 'Frank' 'Example' 'frank@example.org'
+        $contact = CardProperties $book 'Frank Example'
+        if ($contact) {
+            $frankLine = GetText $contact $IDC_CONTACT_KEY
+            Check ($frankLine -match '^frank@example\.org:\s+([0-9A-F]{4} ){9}[0-9A-F]{4} \(Valid\)$') "his Properties show the key and Valid ($($frankLine -replace "`r`n", ' / '))"
+            Shot $contact 'keys-18-learned'
+            CloseContact $contact
+        }
+        CloseBook $book
+    }
+    RemoveSecure 'autocrypt-frank-1.eml' 'Hello from Frank'
+
+    # another key of his: nothing asked in the reading pane, it waits in his Properties; Keep keeps the one in use
+    Check (ShowPlain 'autocrypt-frank-2.eml' "Frank's new computer") "Frank's second message is shown"
+    Check ($null -eq (WaitWindow 'InboxClassicAsk' $null 2) -and $null -eq (OwnBox $main)) 'nothing is asked in the reading pane'
+    $book = OpenBook
+    if ($book) {
+        $contact = CardProperties $book 'Frank Example'
+        if ($contact) {
+            $pending = WaitFor { if (Visible $contact $IDC_CONTACT_KEY_PENDING) { GetText $contact $IDC_CONTACT_KEY_PENDING } } 10
+            Check ((GetText $contact $IDC_CONTACT_KEY) -eq $frankLine) "the key noted is still in use ($((GetText $contact $IDC_CONTACT_KEY) -replace "`r`n", ' / '))"
+            Check ($pending -match '^A different key for frank@example\.org was found on .+\.$') "a different key waits ($pending)"
+            Check ((GetText $contact $IDC_CONTACT_KEY_USE_NEW) -eq 'Use the &New Key' -and (GetText $contact $IDC_CONTACT_KEY_KEEP) -eq '&Keep the Current One') 'with Use the New Key and Keep the Current One'
+            Shot $contact 'keys-19-changed-key'
+            Click $contact $IDC_CONTACT_KEY_KEEP
+            Check ([bool](WaitFor { -not (Visible $contact $IDC_CONTACT_KEY_PENDING) -and -not (Visible $contact $IDC_CONTACT_KEY_KEEP) } 5)) 'Keep the Current One takes the note and its buttons away'
+            CloseContact $contact
+        }
+        $contact = CardProperties $book 'Frank Example'
+        if ($contact) {
+            Check ((GetText $contact $IDC_CONTACT_KEY) -eq $frankLine -and [Native.Win]::GetDlgItem($contact, $IDC_CONTACT_KEY_PENDING) -eq [IntPtr]::Zero) 'opened again, his key is the one noted, nothing waits'
+            CloseContact $contact
+        }
+        # the cards of this step go again: the Address Book's steps start with an empty book
+        $bookList = [Native.Win]::GetDlgItem($book, $IDC_BOOK_LIST)
+        while ((ListCount $bookList) -gt 0) {
+            $n = ListCount $bookList
+            Key $bookList $VK_HOME
+            Start-Sleep -Milliseconds 200
+            Click $book $IDC_BOOK_DELETE
+            $ask = BoxOf $book 10
+            if ($ask) { Click $ask 6 }
+            if (-not (WaitFor { (ListCount $bookList) -lt $n } 5)) { break }
+        }
+        Check ((ListCount $bookList) -eq 0) 'the cards of the step are deleted again'
+        CloseBook $book
+    }
+    RemoveSecure 'autocrypt-frank-2.eml' "Frank's new computer"
+
+    # with Encrypt on, a recipient without a key is looked up at once, and the message goes encrypted to the key found
+    [void](ServeKey 'heidi.asc' 'heidi@example.net')
+    $heidiKey = [IO.File]::ReadAllText((Join-Path $pgpFiles 'heidi.asc'))
+    $compose = NewMessageTo 'Heidi Example <heidi@example.net>' 'Found as you write' 'For Heidi only.'
+    if ($compose) {
+        $from = (Lookups).Count
+        Command $compose $IDM_COMPOSE_ENCRYPT
+        # (the harness answers at once: the grey look is seen when it is caught)
+        $looking = WaitFor { $t = KeysRow $compose; if ($t -match 'Looking for a key') { $t } } 2
+        Write-Host "   while it is looked up: $(if ($looking) { $looking } else { '(answered before it was seen)' })"
+        $row = WaitFor { $t = KeysRow $compose; if ($t -match 'Heidi Example, Key not verified') { $t } } 20
+        Check ($null -ne $row) "found, Heidi's lock says Key not verified ($(KeysRow $compose))"
+        $line = WaitFor { $t = SecurityLine $compose; if ($t -match '^Will be encrypted') { $t } } 10
+        Check ($line -eq 'Will be encrypted and signed for you and Heidi Example.') "the line says it will be encrypted to her ($line)"
+        Check ((LineFill $compose) -eq $fills.good) "in blue ($(LineFill $compose))"
+        $asked = @(LookupsSince $from)
+        Check ($asked.Count -eq 2 -and $asked[0].kind -eq 'wkd' -and $asked[0].value -eq 'heidi@example.net' -and -not $asked[0].found -and
+            $asked[1].kind -eq 'email' -and $asked[1].value -eq 'heidi@example.net' -and $asked[1].found) "her provider's directory first, then the key server ($(LookupText $asked))"
+        Shot $compose 'write-36-found-on-encrypt'
+        $before = NewestUid
+        Command $compose $IDC_SEND
+        Check ($null -eq (WaitShown 'InboxClassicRecipientKeys' 3)) "Send sends it at once, without Recipients' Keys"
+        $sent = SentSince $before
+        $body = if ($sent) { @{ raw = $sent.raw; key = $ownKey; passphrase = $ownPassphrase; recipients = @($heidiKey) } | ConvertTo-Json }
+        $said = if ($body) {
+            try { Invoke-RestMethod -Method Post -ContentType 'application/json' "$pgpBase/pgp/check" -Body $body } catch { [pscustomobject]@{ kind = 'unreadable'; error = "$_" } }
+        }
+        Check ($said -and $said.kind -eq 'encrypted' -and $said.signed -and $said.valid -and (@($said.to) -join ',') -eq 'True') "OpenPGP.js finds it encrypted to Heidi's key and signed ($(if ($said) { "$($said.kind) $($said.signed) $($said.valid) $($said.to) $($said.error)" }))"
+        TakeAway $sent
+    }
+    $heidi = KeyListed 'Heidi Example'
+    Check ($heidi.Row -eq 'Heidi Example | heidi@example.net | Contact | Valid' -and $heidi.Source -eq 'From keys.openpgp.org') "Encryption Keys lists Heidi's key, from keys.openpgp.org ($($heidi.Row); $($heidi.Source))"
+
     # ---- opening attachments ----
 
     Step 'opening an attachment'

@@ -75,7 +75,7 @@ fn fingerprint_of(name: &str) -> Option<pe_core::keys::KeyInfo> {
 }
 
 /// The scrolled window of a form or a page scrolled to show `widget`
-fn scroll_to(widget: &gtk::Widget) {
+pub(super) fn scroll_to(widget: &gtk::Widget) {
     let Some(scrolled) = widget
         .ancestor(gtk::ScrolledWindow::static_type())
         .and_downcast::<gtk::ScrolledWindow>()

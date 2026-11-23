@@ -465,6 +465,9 @@ int64_t Preview::TestPreviews(const std::wstring& query) {
     } else if (query == L"overflow") {
         // how far the page is wider than the pane, 0 when it fits
         script = L"Math.max(0,document.documentElement.scrollWidth-document.documentElement.clientWidth)";
+    } else if (query == L"findkey") {
+        // Find Key beside a part's label, 0 when the page has none
+        script = PreviewsPoint(L"document.querySelector('a.pe-f')");
     } else if (query == L"more") {
         script = PreviewsPoint(L"document.querySelector('section[class^=\"pe-att-\"] a.m')");
     } else if (query == L"tiles") {

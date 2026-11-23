@@ -411,9 +411,10 @@ pub unsafe extern "C" fn pe_compose_find_key(core: *const PeCore, address: *cons
     }
 }
 
-/// What a lookup (`pe_compose_find_keys`, `pe_compose_find_key`) found, after its `KeysFound`: the keys are taken
-/// into the key book now, once, by the window that started it. What to tell the user (the status bar), NULL for
-/// another window's request or one still running. Free with `pe_string_free`.
+/// What a lookup (`pe_compose_find_keys`, `pe_compose_find_key`, `pe_pgp_find_handle`, `pe_contact_find_keys`)
+/// found, after its `KeysFound`, for the window that started it, once: what to tell the user (the status bar, or the
+/// window's own line). The keys are in the key book already, whether a window takes this or not. NULL for another
+/// window's request or one still running. Free with `pe_string_free`.
 ///
 /// # Safety
 /// `core` must be a live handle.

@@ -460,7 +460,7 @@ impl Core {
         now: i64,
     ) -> Result<Recipient> {
         let (key, text, pending) = self.recipient_key(&address, from, now)?;
-        let can_find = !key.usable() && key != RecipientKey::Looking && !self.asked_lately(&address, now)?;
+        let can_find = !key.usable() && self.may_ask_again(&address, now)?;
         Ok(Recipient {
             address,
             label,
@@ -623,7 +623,7 @@ impl Core {
     /// longer be used (not within a minute of the last time, which the key server allows once). `KeysFound` follows.
     pub fn compose_find_key(&self, address: &str) -> Result<Option<u64>> {
         let address = normal_address(address);
-        if self.looking_for(&address) || self.asked_lately(&address, unix_now())? {
+        if !self.may_ask_again(&address, unix_now())? {
             return Ok(None);
         }
         self.pgp_find_again(&[address])

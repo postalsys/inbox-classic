@@ -251,10 +251,7 @@ async fn by_fingerprint_and_key_id() {
     let server = serve(routes).await;
     let s = servers(&server.base);
     assert!(matches!(by_fingerprint(&fingerprint, &s).await, Found::Key(..)));
-    assert!(matches!(
-        by_fingerprint(&key_id.to_lowercase(), &s).await,
-        Found::Key(..)
-    ));
+    assert!(matches!(by_fingerprint(&key_id, &s).await, Found::Key(..)));
     assert_eq!(by_fingerprint("12", &s).await, Found::NotFound);
 }
 

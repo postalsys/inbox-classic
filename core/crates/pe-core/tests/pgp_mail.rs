@@ -1010,3 +1010,92 @@ fn the_list_shows_the_protected_subject_once_opened() {
 fn signed_by(text: Text, signer: &str) -> String {
     tr_args(text, &[("signer", signer.into())])
 }
+
+/// An attachment of a multipart/mixed: its type, name and content as they are
+fn attached(content_type: &str, name: &str, content: &str) -> String {
+    format!(
+        "Content-Type: {content_type}; name=\"{name}\"\r\nContent-Disposition: attachment; filename=\"{name}\"\r\n\r\n{content}"
+    )
+}
+
+#[test]
+fn keys_attached_to_a_message() {
+    let w = world("pgp-attached-keys");
+    let carol = pe_pgp::generate("Carol", &["carol@example.org".into()], now() - 60).unwrap();
+    let dave = pe_pgp::generate("Dave", &["dave@example.org".into()], now() - 60).unwrap();
+    let other_alice = pe_pgp::generate("Alice", &["alice@example.org".into()], now() - 60).unwrap();
+    let signature = pe_pgp::sign_detached(b"x", &w.mallory, now()).unwrap().signature;
+    let raw = message(
+        "alice@example.org",
+        &mixed(&[
+            text("Keys attached"),
+            attached("application/pgp-keys", "carol.asc", &carol.cert().armored()),
+            attached("application/pgp-signature", "signature.asc", &signature),
+            attached(
+                "application/octet-stream",
+                "backup.asc",
+                &dave.backup("passphrase!").unwrap(),
+            ),
+            attached("text/plain", "dave.key", &dave.cert().armored()),
+            attached(
+                "text/plain",
+                "notes.asc",
+                "-----BEGIN PGP PUBLIC KEY BLOCK-----\r\nnot one\r\n",
+            ),
+            attached("text/plain", "dave.txt", &dave.cert().armored()),
+            attached("application/pgp-keys", "alice.asc", &other_alice.cert().armored()),
+        ]),
+    );
+    let path = w.dir.path().join("keys.eml");
+    std::fs::write(&path, &raw).unwrap();
+    let view = w.core.file_view(&path, false).unwrap();
+    let keys: Vec<(&str, bool)> = view
+        .attachments
+        .iter()
+        .map(|a| (a.filename.as_str(), a.is_key))
+        .collect();
+    assert_eq!(
+        keys,
+        [
+            ("carol.asc", true),
+            ("signature.asc", false),
+            ("backup.asc", false),
+            // a .key file is a presentation (Keynote): offered by its type only, not its name
+            ("dave.key", false),
+            ("notes.asc", false),
+            ("dave.txt", false),
+            ("alice.asc", true),
+        ]
+    );
+
+    let imported = w.core.pgp_import_attachment(Some(&path), 0, 0, 0).unwrap();
+    assert_eq!(imported.keys, [carol.fingerprint()]);
+    assert_eq!(
+        w.core.pgp_peer("carol@example.org").unwrap().in_use.unwrap(),
+        carol.fingerprint()
+    );
+    // a private key is never taken from mail, even without a passphrase asked
+    match w.core.pgp_import_attachment(Some(&path), 0, 0, 2) {
+        Err(pe_core::keys::ImportError::Invalid(why)) => {
+            assert_eq!(why, tr(Text::PgpErrorAttachedPrivate))
+        }
+        other => panic!("{other:?}"),
+    }
+    assert!(w.core.pgp_peer("dave@example.org").unwrap().in_use.is_none());
+    assert!(w.core.pgp_import_attachment(Some(&path), 0, 0, 1).is_err());
+    assert!(w.core.pgp_import_attachment(Some(&path), 0, 0, 99).is_err());
+    // a different key for an address that has one waits for the user's decision
+    let imported = w.core.pgp_import_attachment(Some(&path), 0, 0, 6).unwrap();
+    assert!(
+        imported.summary().contains("alice@example.org"),
+        "{}",
+        imported.summary()
+    );
+    let peer = w.core.pgp_peer("alice@example.org").unwrap();
+    assert_eq!(
+        (peer.in_use.unwrap(), peer.pending.unwrap()),
+        (w.alice.fingerprint(), other_alice.fingerprint())
+    );
+    let key = w.core.pgp_key(&carol.fingerprint()).unwrap();
+    assert_eq!(key.source, tr(Text::PgpSourceAttachment));
+}

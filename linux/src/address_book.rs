@@ -8,7 +8,7 @@ use std::rc::Rc;
 
 use adw::prelude::*;
 use gtk::{gdk, gio, glib};
-use pe_core::book::{BookRow, group_label};
+use pe_core::book::{BookRow, KeyMark, group_label};
 use pe_store::{CardId, GroupId};
 
 use crate::app::{shell, spawn};
@@ -101,6 +101,52 @@ fn text_column(title: &str, width: i32, expand: bool, text: fn(&BookRow) -> &str
     column
 }
 
+/// The picture of a person's key mark (the core's): the shield with a check, in the verified tone, for a key the user
+/// verified (or their own); a key for one that is not verified; none without a key. And whether it is the verified one
+fn key_icon(mark: KeyMark) -> (Option<&'static str>, bool) {
+    match mark {
+        KeyMark::Verified => (Some("ic-shield-checkmark-symbolic"), true),
+        KeyMark::Known => (Some("ic-key-symbolic"), false),
+        KeyMark::None => (None, false),
+    }
+}
+
+/// The column of the key marks, without a title, before the name
+fn key_column() -> gtk::ColumnViewColumn {
+    let factory = gtk::SignalListItemFactory::new();
+    factory.connect_setup(|_, item| {
+        if let Some(item) = item.downcast_ref::<gtk::ListItem>() {
+            let image = gtk::Image::new();
+            image.set_widget_name("book-key-mark");
+            add_menu(&image, item);
+            item.set_child(Some(&image));
+        }
+    });
+    factory.connect_bind(|_, item| {
+        let Some(item) = item.downcast_ref::<gtk::ListItem>() else {
+            return;
+        };
+        let (Some(image), Some(row)) = (
+            item.child().and_downcast::<gtk::Image>(),
+            item.item().and_downcast::<glib::BoxedAnyObject>(),
+        ) else {
+            return;
+        };
+        let row = row.borrow::<BookRow>();
+        let (icon, verified) = key_icon(row.key_mark);
+        crate::icons::set(&image, icon);
+        let words = &row.key_mark_text;
+        image.set_tooltip_text((!words.is_empty()).then_some(words.as_str()));
+        image.update_property(&[gtk::accessible::Property::Label(words)]);
+        crate::ui::set_class(&image, "security-verified", verified);
+        crate::ui::set_class(&image, "security-tint", verified);
+    });
+    let column = gtk::ColumnViewColumn::new(None, Some(factory));
+    column.set_fixed_width(30);
+    column.set_resizable(false);
+    column
+}
+
 /// A right click on a person: the row selected, unless it is one of those selected, and the menu of the selection
 fn add_menu(widget: &impl IsA<gtk::Widget>, item: &gtk::ListItem) {
     let click = gtk::GestureClick::new();
@@ -156,6 +202,9 @@ impl Book {
         // Tab goes on to the next control, not through every row (the arrow keys move between them)
         view.set_tab_behavior(gtk::ListTabBehavior::Item);
         view.add_css_class("message-list");
+        // the verified mark in its dark colour while the windows are dark
+        crate::security::follow_dark(&view);
+        view.append_column(&key_column());
         view.append_column(&text_column(&t!(UiColName), 220, true, |p| &p.name));
         view.append_column(&text_column(&t!(UiColEmail), 240, true, |p| &p.address));
         view.append_column(&text_column(&t!(UiColPhone), 150, false, |p| &p.phone));

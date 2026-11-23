@@ -17,6 +17,8 @@ const wchar_t* kMessageClass = L"InboxClassicMessage";
 const wchar_t* kTitle = L"Inbox Classic";
 // a find in the message found nothing: said in a message box, outside the WebView2 event
 constexpr UINT WM_NOT_FOUND = WM_APP + 70;
+// what Find Key of a signature found, said once the event that told it is over
+constexpr UINT WM_KEY_FOUND = WM_APP + 71;
 
 struct MessageWindow {
     HWND hwnd = nullptr;
@@ -44,6 +46,8 @@ struct MessageWindow {
     std::wstring nextTip;
     // what a find that found nothing says (WM_NOT_FOUND)
     std::wstring notFound;
+    // what Find Key of a signature found (WM_KEY_FOUND)
+    std::wstring keyFound;
     Reader reader;
 };
 
@@ -380,6 +384,12 @@ LRESULT CALLBACK MessageProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
                         MB_OK | MB_ICONINFORMATION);
         }
         return 0;
+    case WM_KEY_FOUND:
+        if (!state->keyFound.empty()) {
+            MessageBoxApp(hwnd, std::exchange(state->keyFound, {}).c_str(), core::Plain(PE_TEXT_UI_KEYS_TITLE).c_str(),
+                          MB_OK | MB_ICONINFORMATION);
+        }
+        return 0;
     case WM_DRAWITEM:
         if (state->reader.OnDrawItem(*reinterpret_cast<const DRAWITEMSTRUCT*>(lParam))) {
             return TRUE;
@@ -519,6 +529,14 @@ MessageWindow* CreateMessageWindow(HWND main, PeCore* core, Mailbox* mailbox, co
         state->notFound = said;
         if (!said.empty()) {
             PostMessageW(state->hwnd, WM_NOT_FOUND, 0, 0);
+        }
+    };
+    // Find Key of a signature: what was found said once it is done, as the window has no status bar (the label names
+    // the signer by then)
+    state->reader.onKeyLookup = [state](const std::wstring& said, bool done) {
+        state->keyFound = said;
+        if (done && !said.empty()) {
+            PostMessageW(state->hwnd, WM_KEY_FOUND, 0, 0);
         }
     };
     // the message a bounce names: selected in the main window, which comes to the front

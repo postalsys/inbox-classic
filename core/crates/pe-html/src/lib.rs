@@ -49,7 +49,8 @@ pub use previews::{
     scroll_to_script,
 };
 pub use secure::{
-    MEASURE_SCRIPT, PART_DOCUMENT, PART_LINK, PartTone, SecurePart, part_document, part_link, secure_page,
+    FIND_KEY_LINK, MEASURE_SCRIPT, PART_DOCUMENT, PART_LINK, PartTone, SecurePart, find_key_link, key_handle,
+    part_document, part_link, secure_page,
 };
 pub use visible::visible_html;
 

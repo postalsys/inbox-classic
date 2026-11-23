@@ -44,6 +44,8 @@ final class Reader: NSObject {
     /// without a logo, the sender's picture from the Address Book drawn for the logo's place
     private var pictureRequest: UInt64 = 0
     private var unsubscribeRequest: UInt64 = 0
+    /// Find Key on the label of a part signed by a key not known here: its lookup, 0 for none
+    private var findRequest: UInt64 = 0
     /// the printout with the pictures being made (`pe_print_start`), and what says so meanwhile
     private var printRequest: UInt64 = 0
     private var printIdle: () -> Void = {}
@@ -628,6 +630,16 @@ final class Reader: NSObject {
             if showsPrepared(event.detail) {
                 rebuild()
             }
+        case PE_EVENT_KIND_KEYS_FOUND:
+            // Find Key's lookup: the keys found taken in, what was found said, and the message made again, its label
+            // now naming who signed it
+            if findRequest != 0 && event.uid == findRequest {
+                findRequest = 0
+                if let said = core.pgpFindResult(event.uid) {
+                    status(said)
+                }
+                rebuild()
+            }
         case PE_EVENT_KIND_SYNC_FINISHED:
             // the account is back: a message it could not give is tried again
             if event.failure == PE_FAILURE_KIND_NONE, showsFailure, account == event.account {
@@ -660,6 +672,15 @@ final class Reader: NSObject {
         case PE_READER_LINK_PART:
             // after the web view's question is answered: the window runs modally
             onMain { [weak self] in self?.showSecurityDetails() }
+            return true
+        case PE_READER_LINK_FIND_KEY:
+            // the core reads the handle from the link and asks keys.openpgp.org by it; the page offers no Find Key
+            // while lookups there are turned off
+            guard showsMessage, findRequest == 0 else { return true }
+            findRequest = core.pgpFindHandle(link)
+            if findRequest != 0 {
+                status(Text.pgpRecipientLooking.text)
+            }
             return true
         case PE_READER_LINK_ATTACHMENT:
             // a preview after the text: its file opened as a double-click in the strip opens it; only a link of the
@@ -934,6 +955,13 @@ final class Reader: NSObject {
         menu.addItem(.separator())
         menu.addItem(withTitle: Text.uiAttachmentSaveAs.opens, action: #selector(saveAttachment(_:)), keyEquivalent: "")
         menu.addItem(withTitle: Text.uiAttachmentSaveAll.opens, action: #selector(saveAllAttachments), keyEquivalent: "")
+        // a file that holds a public key: imported into Encryption Keys
+        if attachment.isKey {
+            menu.addItem(.separator())
+            let importKey = menu.addItem(withTitle: Text.uiAttachmentImportKey.opens, action: #selector(importKeyChosen(_:)),
+                                         keyEquivalent: "")
+            importKey.identifier = NSUserInterfaceItemIdentifier("attachment.importKey")
+        }
         // a picture or PDF file: drawn after the text (checked), not drawn (unchecked), or one that can not be (greyed)
         let state = messageView?.showInMessage(index) ?? PE_SHOW_IN_MESSAGE_NONE
         if state != PE_SHOW_IN_MESSAGE_NONE {
@@ -965,6 +993,32 @@ final class Reader: NSObject {
         if token.withCString({ pe_preview_show(core.handle, $0, index, state != PE_SHOW_IN_MESSAGE_ON) }) {
             rebuild()
         }
+    }
+
+    @objc private func importKeyChosen(_ sender: NSMenuItem) {
+        importKey(sender.tag)
+    }
+
+    /// Import Key of a file that holds a public key: the core reads (and decrypts) the message off the window thread and
+    /// imports the file as a key file is, public keys only; then what it took in, and the messages shown made again
+    func importKey(_ index: Int) {
+        guard showsMessage, messageView?.attachment(index)?.isKey == true else { return }
+        let (core, file, folder, uid) = (core, file, folder, uid)
+        let idle = Pending.busy(status)
+        inBackground({
+            core.pgpImportAttachment(folder: folder, uid: uid, file: file, index: index)
+        }, then: { result in
+            idle()
+            let title = Text.uiKeysImportTitle.text
+            guard result.outcome == PE_IMPORT_OUTCOME_IMPORTED else {
+                inform(result.message, title: title, style: .warning)
+                return
+            }
+            KeyActions.imported(core: core, result.message, title: title)
+            // a message signed by that key names its signer now, and the Address Book marks its owner
+            AppDelegate.shared?.main?.reloadMessagesShown()
+            AddressBookWindow.refresh()
+        })
     }
 
     @objc private func openChosen(_ sender: NSMenuItem) {

@@ -20,6 +20,7 @@
 
 struct UiEvent;
 struct StripOpened;
+struct StripImported;
 
 class Reader {
 public:
@@ -80,6 +81,8 @@ public:
     std::function<void()> onShown;
     // called once a find is done: what to say, empty when the words were found
     std::function<void(const std::wstring& said)> onFound;
+    // Find Key of a signature whose key is not known: what to say while it is looked up, and (`done`) what was found
+    std::function<void(const std::wstring& said, bool done)> onKeyLookup;
     // a link clicked in the message: true when it is one of the document's own cards, which this follows
     bool FollowLink(const wchar_t* uri);
     // called when the bounce card's "Show the message that bounced" is clicked, with the message it names
@@ -162,6 +165,14 @@ private:
     void StripMenu(POINT screen);
     // Show in Message chosen for file `index`: drawn in the message (`show`) or taken out, the view built again
     void ShowInMessage(size_t index, bool show);
+    // Import Key chosen for file `index`, a key someone attached: imported as a key file's are, off the window thread;
+    // ImportDone says what was imported and builds the view again (a signature by that key now names its signer)
+    void ImportAttachedKey(size_t index);
+    void ImportDone(StripImported* imported);
+    // Find Key on the label of a part signed by a key not known here (`uri` the link): looked up by its fingerprint;
+    // KeysFound takes what was found and builds the view again
+    void FindSignerKey(const wchar_t* uri);
+    void SignerKeyFound(uint64_t request);
     // PreviewsPrepared of the view with this `preview_token`: built again, when it is the one shown
     void PreviewsPrepared(const std::string& token);
     // the printout started by Print is made (PrintReady): printed in the Print window, when it is this reader's
@@ -188,6 +199,9 @@ private:
     // the open under way and its item, -1 for none: a message file's on a thread of its own, a folder's message's a
     // read of the core (pe_attachment_open_start)
     std::thread opener_;
+    // Import Key's thread, and whether it runs
+    std::thread importer_;
+    bool importing_ = false;
     int openingItem_ = -1;
     uint64_t openRequest_ = 0;
     // the reads of the core waited for (ReadDone): a reply or forward and what takes it, a file to save
@@ -252,6 +266,8 @@ private:
     HWND printOwner_ = nullptr;
     // the words of the last Find in This Message
     std::wstring findWords_;
+    // the lookup Find Key started, 0 for none
+    uint64_t keyLookup_ = 0;
     // what the last find answered (TestFound)
     int testFound_ = -1;
 };

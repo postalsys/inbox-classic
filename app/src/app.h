@@ -206,6 +206,8 @@ bool SetLinkCursor(HWND hwnd, WPARAM wParam);
 // what a screen reader says about a control besides its name (the reason a button is turned off); of one of its items
 // with `child` (a list view's item from 1)
 void SetAccessibleDescription(HWND control, const std::wstring& text, long child = CHILDID_SELF);
+// the same of every item of a list view at once, `texts` in the order of its items
+void SetItemDescriptions(HWND list, const std::vector<std::wstring>& texts);
 // the name a screen reader gives a control that has no label of its own
 void SetAccessibleName(HWND control, const std::wstring& text);
 // a dialog window centered on the window of `owner`, owned by it, with this client size; RunModal shows it, runs it
@@ -372,6 +374,12 @@ bool Ask(HWND owner, const std::wstring& title, const std::wstring& text, const 
          bool safeDefault = false);
 // New Key for `account` (chosen in it), and a backup offered once it is made: its fingerprint, empty when cancelled
 std::string NewKeyFor(HWND owner, PeCore* core, int64_t account);
+// after keys were imported: own addresses of an imported private key that have no key yet, used for it when the user
+// says so
+void OfferUnclaimed(HWND owner, PeCore* core);
+// an own key was published (the KeyPublished event, `request` its uid): what keys.openpgp.org did, said over the
+// Encryption Keys window that asked (or the main window, once it is closed)
+void KeyPublished(PeCore* core, uint64_t request);
 
 // ---- setup.cpp ----
 
@@ -544,6 +552,11 @@ bool ChooseLanguage(HWND owner, const std::wstring& code);
 void OpenAddressBook(PeCore* core);
 // the book changed outside the window (Add Sender, an import): an open Address Book shows it again
 void AddressBookChanged();
+// keys were found, imported or decided: an open Address Book shows its people's key marks again, the selection kept
+void AddressBookKeysChanged();
+// a lookup of keys ended (the KeysFound event, `request` its uid, the core learned what it found): an open Contact
+// Properties that asked says what was found; one that shows keys (`learned`) shows its key rows again
+void ContactKeysFound(uint64_t request, bool learned);
 // the Address Book window, gone, before the core it uses is
 void DestroyAddressBook();
 // Select Recipients of a compose window: the book's people and groups put into To, Cc and Bcc (`fields`, their texts,
@@ -686,7 +699,7 @@ struct UiEvent {
     std::wstring message;
     // the Message-ID of a draft, for DraftSaved; the notification's text, for NewMail (`message` its title)
     std::string detail;
-    // how many messages, for NewMail and RulesApplied
+    // how many messages, for NewMail and RulesApplied; how many addresses got a key, for KeysFound
     uint64_t count = 0;
 };
 
@@ -1690,6 +1703,10 @@ enum BookControlId : WORD {
     IDC_CONTACT_KEY_PENDING,
     IDC_CONTACT_KEY_USE_NEW,
     IDC_CONTACT_KEY_KEEP,
+    // Contact Properties: Find Key beside the keys' label, and what the lookup it started says under the keys (free
+    // numbers after the card's picture, as the key rows take every number up to 800)
+    IDC_CONTACT_FIND_KEY = 745,
+    IDC_CONTACT_KEY_SAID,
 };
 
 // the controls of the help window (help.cpp), which the UI test finds by them
@@ -1771,6 +1788,8 @@ enum KeysControlId : WORD {
     IDC_KEYS_PROPERTIES,
     IDC_KEYS_REMOVE,
     IDC_KEYS_CLOSE,
+    // Publish (an own key on keys.openpgp.org)
+    IDC_KEYS_PUBLISH,
     // New Key: the account, and the note under it (no account, or passwords in memory only)
     IDC_KEY_ACCOUNT = 880,
     IDC_KEY_NOTE,
@@ -1796,6 +1815,8 @@ enum KeysControlId : WORD {
     IDC_ACCOUNT_KEY,
     IDC_ACCOUNT_KEY_NEW,
     IDC_ACCOUNT_AUTOCRYPT,
+    // Encryption Keys: Import from Clipboard (a free number, as 900 and on are the menus')
+    IDC_KEYS_PASTE = 920,
 };
 
 // the controls of Export and Import Settings and Accounts (setup.cpp), which the UI test finds by them

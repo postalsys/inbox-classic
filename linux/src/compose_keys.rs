@@ -104,7 +104,18 @@ pub struct Protection {
     /// While the window shows what the core said, a switch's change is not the user's
     updating: Cell<bool>,
     recipients_timer: RefCell<Option<glib::SourceId>>,
+    /// Each state the window showed, in order: every recipient's key and its words, and the line (the UI test reads
+    /// a state that lasts only as long as a lookup)
+    #[cfg(feature = "e2e")]
+    pub shown_states: RefCell<Vec<ShownState>>,
 }
+
+/// A state the window showed: each recipient's address, key and words, and the line's words, tone and pictures
+#[cfg(feature = "e2e")]
+pub type ShownState = (
+    Vec<(String, pe_core::compose_keys::RecipientKey, String)>,
+    (String, String, Vec<String>),
+);
 
 /// The name of a compose command's action in the window's `compose` group
 fn action_name(command: Command) -> String {
@@ -186,6 +197,8 @@ impl Protection {
             keys_dialog: RefCell::default(),
             updating: Cell::new(false),
             recipients_timer: RefCell::default(),
+            #[cfg(feature = "e2e")]
+            shown_states: RefCell::default(),
         }
     }
 
@@ -229,6 +242,15 @@ impl Protection {
         if let Some(dialog) = self.keys_dialog.borrow().as_ref() {
             dialog.fill(security);
         }
+        #[cfg(feature = "e2e")]
+        self.shown_states.borrow_mut().push((
+            security
+                .recipients
+                .iter()
+                .map(|r| (r.address.clone(), r.key, r.text.clone()))
+                .collect(),
+            self.line.shown().unwrap_or_default(),
+        ));
     }
 
     /// The Keys row: a chip per recipient with their lock, the last ones as "+3"

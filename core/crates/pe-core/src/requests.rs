@@ -33,11 +33,24 @@ impl<T: Send + 'static> Requests<T> {
         events: EventSink,
         done: impl FnOnce(u64) -> Event + Send + 'static,
     ) {
+        self.start_with(runtime, request, work, events, move |request, _| done(request));
+    }
+
+    /// [`Requests::start`] whose event says something of the result too
+    pub(crate) fn start_with(
+        &self,
+        runtime: &tokio::runtime::Runtime,
+        request: u64,
+        work: impl Future<Output = T> + Send + 'static,
+        events: EventSink,
+        done: impl FnOnce(u64, &T) -> Event + Send + 'static,
+    ) {
         let results = self.0.clone();
         // held while the work starts, so it can not finish before it is listed as running
         let mut map = self.map();
         let task = runtime.spawn(async move {
             let result = work.await;
+            let event = done(request, &result);
             // only for a request still listed: one cancelled while it finished is not kept (nobody takes it)
             let kept = match results.lock().unwrap_or_else(|p| p.into_inner()).get_mut(&request) {
                 Some(entry) => {
@@ -47,7 +60,7 @@ impl<T: Send + 'static> Requests<T> {
                 None => false,
             };
             if kept {
-                events(done(request));
+                events(event);
             }
         });
         map.insert(request, State::Running(task.abort_handle()));

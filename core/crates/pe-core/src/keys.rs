@@ -123,6 +123,9 @@ pub struct KeyInfo {
     pub address_lines: Vec<String>,
     /// What Remove asks first
     pub remove_question: String,
+    /// What Publish asks first, naming the addresses the server writes to; empty for a contact's key (only an own
+    /// key is published)
+    pub publish_question: String,
     /// What Verify Key says They Match marks: every address it holds, so one that is not the person's is seen
     pub verify_marks: String,
     /// When it was made, and until when it is valid ("Never"), as the user's locale writes a day
@@ -286,6 +289,15 @@ fn locked_text() -> String {
     tr_args(Text::PgpKeyLocked, &[("store", (&store_name()).into())])
 }
 
+/// Whether an attachment the strip calls a key file ([`crate::opening::FileKind::Key`]) holds OpenPGP public keys that
+/// Import takes: read by pe-pgp as certificates, in one pass, with no private key among them (a detached signature, a
+/// private key or anything else named so is none), no larger than a certificate may be
+pub(crate) fn holds_public_key(content: &[u8]) -> bool {
+    !content.is_empty()
+        && content.len() <= pe_pgp::MAX_CERT_BYTES
+        && pe_pgp::read_public_certs(content).is_ok_and(|certs| !certs.is_empty())
+}
+
 /// The master key: the one in the system's store, or a new one kept there. None when there is none and `create`
 /// is false.
 fn master(secrets: &Secrets, create: bool) -> Result<Option<Zeroizing<[u8; 32]>>> {
@@ -391,6 +403,53 @@ impl CertCache {
         let cert = pe_pgp::read_certs(&key.cert).ok()?.into_iter().next()?;
         cache.insert(key.fingerprint.clone(), (key.cert.clone(), cert.clone()));
         Some(cert)
+    }
+}
+
+/// How long the Address Book's verdict on a key is kept at most: a key can expire, or stop encrypting, meanwhile
+const MARK_KEPT: i64 = 60 * 60;
+
+/// Whether a key can encrypt, as the Address Book's key marks ask it for every key in use each time the book is shown:
+/// judged once per stored copy of the key (its `changed` and size), again once it expires and at least every
+/// [`MARK_KEPT`]
+#[derive(Default)]
+pub(crate) struct MarkCache(Mutex<HashMap<String, Judged>>);
+
+struct Judged {
+    changed: i64,
+    size: i64,
+    until: i64,
+    usable: bool,
+}
+
+impl MarkCache {
+    fn usable(&self, store: &Store, certs: &CertCache, mark: &pe_store::PgpKeyMark, now: i64) -> bool {
+        let mut judged = self.0.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+        if let Some(kept) = judged.get(&mark.fingerprint)
+            && kept.changed == mark.changed
+            && kept.size == mark.size
+            && now < kept.until
+        {
+            return kept.usable;
+        }
+        let cert = store
+            .pgp_key(&mark.fingerprint)
+            .ok()
+            .flatten()
+            .and_then(|key| certs.get(&key));
+        let usable = cert.as_ref().is_some_and(|cert| cert.can_encrypt(now).is_ok());
+        let expires = cert.and_then(|cert| cert.expires(now)).filter(|_| usable);
+        let until = expires.map_or(now + MARK_KEPT, |at| at.min(now + MARK_KEPT));
+        judged.insert(
+            mark.fingerprint.clone(),
+            Judged {
+                changed: mark.changed,
+                size: mark.size,
+                until,
+                usable,
+            },
+        );
+        usable
     }
 }
 
@@ -539,6 +598,11 @@ impl<'a> Book<'a> {
         } else {
             tr_args(Text::UiKeysRemoveContact, &[("name", (&name).into())])
         };
+        let publish_question = if own {
+            tr_args(Text::UiKeysPublishAsk, &[("addresses", (&held.join(", ")).into())])
+        } else {
+            String::new()
+        };
         Some(KeyInfo {
             fingerprint_lines: two_lines(&grouped),
             fingerprint: key.fingerprint.clone(),
@@ -559,6 +623,7 @@ impl<'a> Book<'a> {
             choice,
             address_lines,
             remove_question,
+            publish_question,
             verify_marks,
             created_text: date(cert.created()),
             expires_text: expires.map_or_else(|| tr(Text::UiKeyNever), date),
@@ -708,12 +773,19 @@ impl<'a> Book<'a> {
         passphrase: Option<&str>,
         source: KeySource,
     ) -> std::result::Result<Imported, ImportError> {
+        // text pasted without an armored block in it: what was copied was something else, as Import from Clipboard
+        // words it (with a block, what is wrong with the key is said)
+        if source == KeySource::Paste && pe_pgp::armored_kind(bytes).is_none() {
+            return Err(ImportError::Invalid(tr(Text::UiKeysPasteNone)));
+        }
         let locked = match pe_pgp::needs_passphrase(bytes) {
             Ok(locked) => Some(locked),
             Err(pe_pgp::Error::WrongKind) => None,
             Err(error) => return Err(ImportError::Invalid(words(&error))),
         };
         match locked {
+            // a private key is never taken from mail: anyone can attach one
+            Some(_) if source == KeySource::Attachment => Err(ImportError::Invalid(tr(Text::PgpErrorAttachedPrivate))),
             Some(true) if passphrase.is_none() => Err(ImportError::NeedsPassphrase),
             Some(_) => self.import_secret(bytes, passphrase.unwrap_or(""), source),
             None => self.import_public(bytes, source),
@@ -855,7 +927,10 @@ impl<'a> Book<'a> {
     /// The keys a message is read with: every own key that opens, every certificate, and what the user verified
     pub fn ring(&self) -> Result<crate::protect::KeyRing> {
         let master = master(self.secrets, false)?;
-        let mut ring = crate::protect::KeyRing::default();
+        let mut ring = crate::protect::KeyRing {
+            find_keys: self.store.pgp_keyserver()?,
+            ..Default::default()
+        };
         for key in self.store.pgp_keys()? {
             if let Some(cert) = self.certs.get(&key) {
                 ring.certs.push(cert);
@@ -986,6 +1061,27 @@ impl Core {
         Ok(key.as_ref().and_then(|key| self.pgp_certs.get(key)))
     }
 
+    /// The Address Book's key marks: each address whose key in use can encrypt now, with whether it is verified
+    /// (the user compared it, or it is the user's own key). One query for the whole book, without the keys
+    /// themselves; each key judged once ([`MarkCache`]).
+    pub(crate) fn pgp_key_marks(&self) -> Result<HashMap<String, bool>> {
+        let now = unix_now();
+        let store = self.store();
+        let mut marks = HashMap::new();
+        for mark in store.pgp_key_marks()? {
+            if !self.pgp_marks.usable(&store, &self.pgp_certs, &mark, now) {
+                continue;
+            }
+            // an own address's key is the user's own, whatever a correspondent's row for it says
+            if mark.own {
+                marks.insert(mark.address, true);
+            } else {
+                marks.entry(mark.address).or_insert(mark.verified);
+            }
+        }
+        Ok(marks)
+    }
+
     /// Every key, own keys first
     pub fn pgp_keys(&self) -> Result<Vec<KeyInfo>> {
         self.book(|book| book.list())
@@ -1019,6 +1115,27 @@ impl Core {
         source: KeySource,
     ) -> std::result::Result<Imported, ImportError> {
         self.book(|book| book.import(bytes, passphrase, source))
+    }
+
+    /// Import Key on a key attached to a message (its [`crate::view::AttachmentView::is_key`]): the `index`th listed
+    /// attachment of the message as it is shown, of the message file a window shows (`file`, as `file_view` reads it)
+    /// or else of message `uid` of `folder`, imported as a file's keys are (a different key for an address that has
+    /// one waits for the user's decision), public keys only
+    pub fn pgp_import_attachment(
+        &self,
+        file: Option<&std::path::Path>,
+        folder: crate::FolderId,
+        uid: u64,
+        index: usize,
+    ) -> std::result::Result<Imported, ImportError> {
+        let attachment = match file {
+            Some(path) => self.file_attachment(path, index)?,
+            None => self.attachment(folder, uid, index)?,
+        };
+        let Some((_, bytes)) = attachment else {
+            return Err(ImportError::Invalid(tr(Text::PgpErrorNotAKey)));
+        };
+        self.pgp_import(&bytes, None, KeySource::Attachment)
     }
 
     /// The public key, armored

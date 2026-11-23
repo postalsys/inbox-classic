@@ -163,14 +163,10 @@ pub async fn by_email(address: &str, servers: &Servers, now: i64) -> Found {
     answer(get(&url).await, |body| trimmed(body, address, now), Source::Keyserver)
 }
 
-/// The key keys.openpgp.org has with this fingerprint or key id (upper case hex), for a signature by a key not
-/// known here: asking by fingerprint tells the server no address
+/// The key keys.openpgp.org has with this fingerprint or key id, for a signature by a key not known here: asking by
+/// fingerprint tells the server no address. `handle` is upper case hex as the core checked it (`pe_html::key_handle`,
+/// the one check of a handle); its length says which it is.
 pub async fn by_fingerprint(handle: &str, servers: &Servers) -> Found {
-    let handle: String = handle
-        .chars()
-        .filter(char::is_ascii_hexdigit)
-        .collect::<String>()
-        .to_ascii_uppercase();
     let kind = match handle.len() {
         16 => "by-keyid",
         40 | 64 => "by-fingerprint",
@@ -181,7 +177,7 @@ pub async fn by_fingerprint(handle: &str, servers: &Servers) -> Found {
         let cert = pe_pgp::read_certs(body)
             .ok()?
             .into_iter()
-            .find(|cert| cert.handles().contains(&handle))?;
+            .find(|cert| cert.handles().iter().any(|held| held == handle))?;
         Some(cert.to_bytes())
     };
     answer(get(&url).await, accept, Source::Keyserver)
