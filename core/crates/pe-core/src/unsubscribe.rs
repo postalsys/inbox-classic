@@ -29,7 +29,7 @@ impl Unsubscribe {
     }
 }
 
-use crate::authres::{headers as header, passes, tag, verdict};
+use crate::authres::{Verdict, Verifiers, headers as header, tag};
 
 /// Asks a list to take the address off the one-click way: a POST of `List-Unsubscribe=One-Click` to `url`, without
 /// cookies, redirects not followed. None when the list said yes, else why not, in words.
@@ -60,24 +60,14 @@ fn addresses(value: &str) -> Vec<&str> {
 }
 
 /// The domains the provider says signed the message: its `dkim=pass` results
-pub(crate) fn passed_domains(headers: &[Header], trusted: &[String]) -> Vec<String> {
-    verdict(headers, trusted)
+pub(crate) fn passed_domains(headers: &[Header], trusted: &Verifiers) -> Vec<String> {
+    Verdict::of(headers, trusted)
+        .map(|verdict| verdict.signers())
         .unwrap_or_default()
-        .into_iter()
-        .filter(|result| passes(result, "dkim"))
-        .filter_map(|result| {
-            tag(result, "header.d").map(str::to_string).or_else(|| {
-                tag(result, "header.i")
-                    .and_then(|i| i.rsplit('@').next())
-                    .map(str::to_string)
-            })
-        })
-        .map(|domain| domain.to_ascii_lowercase())
-        .collect()
 }
 
 /// The domain that passed whose signature covers both List-Unsubscribe headers, None when no such signature is there
-pub(crate) fn signer(headers: &[Header], trusted: &[String]) -> Option<String> {
+pub(crate) fn signer(headers: &[Header], trusted: &Verifiers) -> Option<String> {
     let passed = passed_domains(headers, trusted);
     header(headers, "dkim-signature").find_map(|signature| {
         let compact: String = signature.chars().filter(|c| !c.is_whitespace()).collect();
@@ -87,7 +77,9 @@ pub(crate) fn signer(headers: &[Header], trusted: &[String]) -> Option<String> {
             .split(':')
             .map(|h| h.to_ascii_lowercase())
             .collect();
-        (passed.contains(&domain)
+        // the signature's domain, or one under it (`header.i=@news.list.example` of `d=list.example`)
+        let signed = passed.iter().any(|p| crate::authres::under(p, &domain));
+        (signed
             && covered.iter().any(|h| h == "list-unsubscribe")
             && covered.iter().any(|h| h == "list-unsubscribe-post"))
         .then_some(domain)
@@ -96,7 +88,7 @@ pub(crate) fn signer(headers: &[Header], trusted: &[String]) -> Option<String> {
 
 /// How the message lets its reader leave its list, the one-click way first (when the provider of the account, whose
 /// verdicts `trusted` names, says the signature passed), then a message, then a page; None when it does not say
-pub fn of(headers: &[Header], trusted: &[String]) -> Option<Unsubscribe> {
+pub fn of(headers: &[Header], trusted: &Verifiers) -> Option<Unsubscribe> {
     let list = header(headers, "list-unsubscribe").next()?;
     let addresses = addresses(list);
     // what this client goes to: https, or http to the loopback address (test servers)
@@ -125,7 +117,7 @@ mod tests {
 
     /// As the account whose provider names its verdicts mx.example.net has it
     fn of(headers: &[Header]) -> Option<Unsubscribe> {
-        super::of(headers, &["example.net".to_string()])
+        super::of(headers, &Verifiers::named(&["example.net"]))
     }
 
     fn headers(text: &str) -> Vec<Header> {

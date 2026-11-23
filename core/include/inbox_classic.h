@@ -3536,6 +3536,25 @@ bool pe_set_account_addresses(const struct PeCore *core,
                               const char *text,
                               char **error);
 
+// The names whose verdicts on its mail an account trusts (Account Properties' "Trust verdicts from"): its own, or its
+// provider's, comma separated. Free with `pe_string_free`.
+//
+// # Safety
+// `core` must be a live handle.
+char *pe_account_verifiers(const struct PeCore *core,
+                           int64_t account);
+
+// Sets the names whose verdicts an account trusts, separated by commas or spaces; empty, or the provider's own, goes
+// back to the provider's. Every message's verdict is read again in the background. False with the reason in `error`
+// (free it with `pe_string_free`) when it could not be saved.
+//
+// # Safety
+// `core` must be a live handle, `text` a valid string, `error` NULL or a valid pointer.
+bool pe_set_account_verifiers(const struct PeCore *core,
+                              int64_t account,
+                              const char *text,
+                              char **error);
+
 // Sends a message from an account: it goes into the Outbox (`OutboxChanged`), and from there to the server now.
 // `MessageSent` when the server took it; `Failed` with the server's answer
 // when it did not, the message waiting in the Outbox. A recipient that is no address or a file that is not there

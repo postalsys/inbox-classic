@@ -199,6 +199,9 @@ pub(crate) struct AccountEntry {
     pub signature: String,
     #[serde(default)]
     pub addresses: Vec<AddressEntry>,
+    /// The names whose verdicts it trusts ("Trust verdicts from"), when not its provider's
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub verifiers: Option<String>,
     /// The password or the refresh token: only in a file sealed with a passphrase
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub secret: Option<String>,
@@ -372,6 +375,7 @@ pub(crate) struct FileAccount {
     pub account_name: String,
     pub signature: String,
     pub addresses: Vec<(String, String)>,
+    pub verifiers: Option<String>,
     pub secret: Option<Zeroizing<String>>,
 }
 
@@ -838,6 +842,8 @@ fn checked_account(entry: &AccountEntry, encrypted: bool) -> Result<FileAccount,
         account_name: text(&entry.account_name),
         signature,
         addresses,
+        // read as the field reads them when the account is added
+        verifiers: entry.verifiers.clone(),
         secret: secret(&entry.secret, encrypted),
     })
 }

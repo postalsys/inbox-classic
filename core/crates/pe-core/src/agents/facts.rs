@@ -11,8 +11,8 @@ use crate::protect::{KeyRing, Signature};
 /// What the core needs to know of a message's place to tell an agent about it
 #[derive(Default)]
 pub struct Context<'a> {
-    /// The domains whose Authentication-Results the account's provider gives
-    pub trusted: &'a [String],
+    /// Whose Authentication-Results the account believes (authres.rs)
+    pub trusted: &'a crate::authres::Verifiers,
     /// The user's own addresses, to find their answer to an invitation
     pub own: &'a [String],
     /// The keys to check a signature with; None for a message that has no signature
@@ -97,8 +97,8 @@ pub struct Facts {
 }
 
 /// Whether the provider confirmed the sender of `message`: None without a verdict of its own
-pub(crate) fn sender_verified(message: &Message, trusted: &[String]) -> Option<bool> {
-    crate::authres::verdict(&message.headers, trusted)?;
+pub(crate) fn sender_verified(message: &Message, trusted: &crate::authres::Verifiers) -> Option<bool> {
+    crate::authres::Verdict::of(&message.headers, trusted)?;
     Some(crate::pictures::sender(message, trusted).is_some_and(|sender| sender.verified))
 }
 
@@ -230,7 +230,7 @@ mod tests {
 
     #[test]
     fn the_sender_is_confirmed_by_the_providers_verdict_only() {
-        let trusted = ["example.com".to_string()];
+        let trusted = crate::authres::Verifiers::named(&["example.com"]);
         let confirmed = b"Authentication-Results: mx.example.com; dmarc=pass header.from=shop.example\r\n\
             From: Shop <news@shop.example>\r\nSubject: x\r\n\r\nx\r\n";
         assert_eq!(sender_verified(&parsed(confirmed), &trusted), Some(true));

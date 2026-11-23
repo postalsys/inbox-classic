@@ -1,15 +1,16 @@
 //! BIMI logos (draft-brand-indicators-for-message-identification): the brand's logo shown beside the sender of a
 //! message whose domain passed DMARC and whose logo the receiving server checked. The client can not check DMARC
-//! itself (it has no SPF data), so the verdict is the receiving server's: the topmost Authentication-Results header
-//! (a sender can add one, but only below the servers') must say `bimi=pass` and `dmarc=pass`. The logo then comes
-//! from the server's BIMI-Indicator header (the SVG itself, no request) or else from the https URL of BIMI-Location.
+//! itself (it has no SPF data), so the verdict is the receiving server's ([`Verdict`]: the newest block, in a name the
+//! account trusts): `bimi=pass` for the From domain, `dmarc=pass` aligned with it, and the mark certified where the
+//! server says (`policy.authority=pass`). The logo then comes from the server's BIMI-Indicator header (the SVG itself,
+//! no request) or else from the https URL of BIMI-Location, only those the server wrote above the end of its verdict.
 //! An SVG is checked (size, no scripts, nothing loaded from elsewhere) and turned into pixels here, so the window
 //! gets a picture and never an SVG.
 
 use base64::Engine;
-use pe_mime::parser::Header;
+use pe_mime::parser::{Header, Message, ParsedAddress};
 
-use crate::authres::{self, passes, tag, verdict};
+use crate::authres::{Verdict, Verifiers, tag};
 
 /// The most an SVG logo may be, as BIMI asks of them
 pub const MAX_SVG: usize = 32 * 1024;
@@ -23,24 +24,32 @@ pub enum Logo {
     Location(String),
 }
 
-/// The logo of a message, when the account's provider (whose verdicts `trusted` names) says the brand's domain
-/// passed DMARC and its logo passed BIMI; None otherwise. A BIMI-Location is used only over https (http to the
-/// loopback address only in a debug build, for the tests).
-pub fn of(headers: &[Header], trusted: &[String]) -> Option<Logo> {
-    let results = verdict(headers, trusted)?;
-    if !results.iter().any(|r| passes(r, "bimi")) || !results.iter().any(|r| passes(r, "dmarc")) {
+/// The logo of a message from `from` (its address or domain), when the account's provider (whose verdicts
+/// `trusted` names) says the brand's domain passed DMARC and its logo passed BIMI; None otherwise. A BIMI-Location is
+/// used only over https (http to the loopback address only in a debug build, for the tests).
+pub fn of(headers: &[Header], trusted: &Verifiers, from: &str) -> Option<Logo> {
+    let verdict = Verdict::of(headers, trusted)?;
+    if !verdict.logo(from) {
         return None;
     }
-    if let Some(indicator) = authres::headers(headers, "bimi-indicator").next() {
+    if let Some(indicator) = verdict.provider_headers(headers, "bimi-indicator").next() {
         let compact: String = indicator.chars().filter(|c| !c.is_whitespace()).collect();
         let svg = base64::engine::general_purpose::STANDARD.decode(compact).ok()?;
         return (svg.len() <= MAX_SVG).then_some(Logo::Indicator(svg));
     }
-    let location = authres::headers(headers, "bimi-location").next()?;
+    let location = verdict.provider_headers(headers, "bimi-location").next()?;
     let url = tag(location, "l")?.to_string();
     let parsed = pe_net::http::parse_url(&url)?;
     (parsed.https || cfg!(debug_assertions) || LOOPBACK.load(std::sync::atomic::Ordering::Relaxed))
         .then_some(Logo::Location(url))
+}
+
+/// The logo of `message`, from its From address ([`of`])
+pub fn of_message(message: &Message, trusted: &Verifiers) -> Option<Logo> {
+    let Some(ParsedAddress::Mailbox(from)) = &message.from else {
+        return None;
+    };
+    of(&message.headers, trusted, &from.address)
 }
 
 /// Whether a BIMI-Location on the loopback address over plain http counts: only the apps' UI tests turn it on, so a
@@ -118,7 +127,7 @@ mod tests {
 
     /// As the account whose provider names its verdicts mx.example.net has it
     fn of(headers: &[Header]) -> Option<Logo> {
-        super::of(headers, &["example.net".to_string()])
+        super::of(headers, &Verifiers::named(&["example.net"]), "news@brand.example")
     }
 
     const SVG: &str = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.2\" baseProfile=\"tiny-ps\" viewBox=\"0 0 100 100\">\
@@ -149,7 +158,7 @@ mod tests {
         // a verdict of anyone but the provider counts for nothing
         assert_eq!(of(&headers(&passed.replace("mx.example.net", "forged.example"))), None);
         // the location instead: https only (or a test server on the loopback address)
-        let location = "Authentication-Results: mx.example.net; dmarc=pass; bimi=pass\r\nBIMI-Location: v=BIMI1; l=https://brand.example/logo.svg";
+        let location = "Authentication-Results: mx.example.net; dmarc=pass header.from=brand.example; bimi=pass\r\nBIMI-Location: v=BIMI1; l=https://brand.example/logo.svg";
         assert_eq!(
             of(&headers(location)),
             Some(Logo::Location("https://brand.example/logo.svg".into()))

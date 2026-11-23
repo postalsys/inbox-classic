@@ -389,6 +389,10 @@ impl Core {
             store.set_signature(id, &account.signature)?;
             store.set_account_addresses(id, &account.addresses)?;
         }
+        // as Properties saves them: the provider's own names keep following the provider table
+        if let Some(names) = &account.verifiers {
+            self.set_account_verifiers_text(id, names)?;
+        }
         let note = secret.is_none().then(|| {
             let text = match with {
                 Some(_) => Text::SetupSignsInAgain,

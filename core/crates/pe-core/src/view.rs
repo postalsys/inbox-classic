@@ -225,11 +225,11 @@ impl PartView {
     }
 }
 
-/// Whose word counts for a message: the domains whose Authentication-Results verdicts the account's provider gives,
+/// Whose word counts for a message: whose Authentication-Results the account believes (authres.rs [`Verifiers`]),
 /// and whether its folder may show the card of a one-time code (not Junk E-mail, Sent Items or Drafts)
 #[derive(Default)]
 pub(crate) struct Trust<'a> {
-    pub domains: &'a [String],
+    pub verifiers: &'a crate::authres::Verifiers,
     pub codes: bool,
     /// Whether pictures load without the user's click (pictures.rs)
     pub pictures: crate::pictures::Rules<'a>,
@@ -340,7 +340,7 @@ pub(crate) fn build_unless(
         }
     };
     // a trusted sender the provider confirmed, or every message's when the user said so: the pictures load
-    let sender = crate::pictures::sender(&message, trust.domains);
+    let sender = crate::pictures::sender(&message, trust.verifiers);
     let clicked = allow_remote_images;
     let allow_remote_images = allow_remote_images || crate::pictures::load(&trust.pictures, sender.as_ref());
     if let Some(ring) = trust.ring {
@@ -420,7 +420,7 @@ pub(crate) fn build_unless(
         .as_ref()
         .map(|b| crate::bounce::card(b, bounced_message.is_some()));
     // a one-time code the domain it is for signed, above the message
-    let code = trust.codes.then(|| crate::otp::of(&message, trust.domains)).flatten();
+    let code = trust.codes.then(|| crate::otp::of(&message, trust.verifiers)).flatten();
     let otp_card = code
         .as_ref()
         .map(|code| crate::otp::card(code, message.timestamp, crate::worker::unix_now()));
@@ -475,9 +475,9 @@ pub(crate) fn build_unless(
         pictures_loaded: allow_remote_images,
         sender,
         attachments,
-        list: crate::list_bar::List::of(&message, trust.domains),
+        list: crate::list_bar::List::of(&message, trust.verifiers),
         list_bar: None,
-        has_logo: crate::bimi::of(&message.headers, trust.domains).is_some(),
+        has_logo: crate::bimi::of_message(&message, trust.verifiers).is_some(),
         picture: 0,
         invitation,
         bounce: bounce.is_some(),
@@ -780,9 +780,9 @@ fn protected_view(
         // pictures of encrypted mail load on a click only, never remembered: the bar offers no "always"
         sender: if any_encrypted { None } else { sender },
         attachments,
-        list: crate::list_bar::List::of(message, trust.domains),
+        list: crate::list_bar::List::of(message, trust.verifiers),
         list_bar: None,
-        has_logo: crate::bimi::of(&message.headers, trust.domains).is_some(),
+        has_logo: crate::bimi::of_message(message, trust.verifiers).is_some(),
         part_documents: documents.into_iter().map(Option::unwrap_or_default).collect(),
         print_document: Some(print_document),
         preview_print: preview_token.is_some().then_some(print),

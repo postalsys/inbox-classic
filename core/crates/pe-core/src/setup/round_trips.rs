@@ -116,6 +116,7 @@ fn fill_with(core: &Core, issuer: &str) -> Filled {
     core.set_signature(ann, "<p>Ann <b>Example</b></p>").unwrap();
     core.set_account_addresses_text(ann, "Ann Two <ann2@example.com>")
         .unwrap();
+    core.set_account_verifiers_text(ann, "mx.mail.example, lms").unwrap();
     {
         let store = core.store();
         let bob = AccountSettings {
@@ -330,6 +331,7 @@ fn every_part_round_trips_without_a_passphrase() {
         b.store().account_addresses(ann.id).unwrap(),
         [("ann2@example.com".to_string(), "Ann Two".to_string())]
     );
+    assert_eq!(b.account_verifiers_text(ann.id).unwrap(), "mx.mail.example, lms");
     assert_eq!(b.secrets.get(ann.id), None, "no password without a passphrase");
     let bob = account_of(&b, "bob@gmail.example");
     assert_eq!(bob.settings.auth, Auth::OAuth2("google".into()));
@@ -849,4 +851,34 @@ fn an_import_tells_the_windows_what_changed() {
     };
     b.import_setup(&file, &choice).unwrap();
     assert_eq!(b.accounts().unwrap().len(), 1);
+}
+
+/// Account Properties' "Trust verdicts from": the provider's names until the user writes others; empty, or the
+/// provider's own, goes back to following the provider table
+#[test]
+fn trust_verdicts_from_shows_and_keeps_the_names() {
+    let dir = TempDir::new("verifiers");
+    let core = opened(&dir);
+    let gmail = AccountSettings {
+        imap_host: "imap.gmail.com".into(),
+        ..settings("ann@gmail.com")
+    };
+    let ann = core.add_account(&gmail, "pw").unwrap();
+    assert_eq!(core.account_verifiers_text(ann).unwrap(), "mx.google.com");
+    core.set_account_verifiers_text(ann, "MX.Google.com.  relay.example.net;bad/name")
+        .unwrap();
+    assert_eq!(
+        core.account_verifiers_text(ann).unwrap(),
+        "mx.google.com, relay.example.net"
+    );
+    assert_eq!(
+        core.store().verifiers(ann).unwrap().as_deref(),
+        Some("mx.google.com, relay.example.net")
+    );
+    core.set_account_verifiers_text(ann, "mx.google.com").unwrap();
+    assert_eq!(core.store().verifiers(ann).unwrap(), None, "the provider's own");
+    core.set_account_verifiers_text(ann, "relay.example.net").unwrap();
+    core.set_account_verifiers_text(ann, " ").unwrap();
+    assert_eq!(core.store().verifiers(ann).unwrap(), None, "empty");
+    assert_eq!(core.account_verifiers_text(ann).unwrap(), "mx.google.com");
 }

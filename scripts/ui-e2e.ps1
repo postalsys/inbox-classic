@@ -2063,22 +2063,27 @@ public static class Dragger {
 
     Step 'sending from another address'
     # the other addresses of the account set in Properties (its last field), empty to have none
-    function SetOtherAddresses([string]$text, [string]$shot = $null) {
+    # a field of the account's Properties (100 + its place, accounts.cpp Field) set to $text, shown as $shot, and OK;
+    # what the field showed before
+    function SetAccountField([int]$id, [string]$text, [string]$shot = $null) {
         Command $main $IDM_ACCOUNTS
         $accountsList = WaitWindow 'InboxClassicAccounts' 'Accounts'
         Click $accountsList 402
         $form = WaitFor {
             $f = PropertiesForm
-            if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 111) -ne [IntPtr]::Zero) { $f }
+            if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, $id) -ne [IntPtr]::Zero) { $f }
         }
-        if (-not $form) { Check $false 'Properties has the other addresses'; return }
-        SetText $form 111 $text
+        if (-not $form) { Check $false "Properties has the field $id"; return '' }
+        $shown = GetText $form $id
+        SetText $form $id $text
         if ($shot) { Shot $form $shot }
         Click $form 1
         [void](WaitFor { -not [Native.Win]::IsWindow($form) } 10)
         [void][Native.Win]::PostMessage($accountsList, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
         [void](WaitFor { -not [Native.Win]::IsWindow($accountsList) } 10)
+        return $shown
     }
+    function SetOtherAddresses([string]$text, [string]$shot = $null) { [void](SetAccountField 111 $text $shot) }
     SetOtherAddresses 'Sales Desk <sales@inboxclassic.test>' 'account-12-other-addresses'
     $compose = WaitCompose { Command $main $IDM_NEW_MAIL }
     $fromBox = [Native.Win]::GetDlgItem($compose, $IDC_FROM)
@@ -2113,6 +2118,16 @@ public static class Dragger {
     }
     SelectFolder 0
     SetOtherAddresses ''
+
+    Step 'trusting sender checks'
+    # Account Properties' Trust sender checks from (field 112): the account's domain until others are written; those
+    # kept; emptied, the account's domain again
+    $provider = SetAccountField 112 'mx.inboxclassic.test, relay.example.net' 'account-13-sender-checks'
+    Check ($provider -eq 'inboxclassic.test') "Trust sender checks from shows the account's domain ($provider)"
+    $written = SetAccountField 112 ''
+    Check ($written -eq 'mx.inboxclassic.test, relay.example.net') "Properties keeps the servers whose sender checks are trusted ($written)"
+    $back = SetAccountField 112 $provider
+    Check ($back -eq 'inboxclassic.test') "emptied, the provider's names are back ($back)"
 
     Step 'message rules'
     # Tools > Message Rules and the rule editor (rules.cpp, RulesControlId in app.h)

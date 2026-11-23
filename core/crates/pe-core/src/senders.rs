@@ -25,21 +25,21 @@ pub(crate) struct Judged {
 
 /// Reads the verdict fields `headers` (as the server gave them) of a message from `from_address`, for an account whose
 /// provider's authserv-ids are `trusted`
-pub(crate) fn judge(headers: &str, from_address: &str, trusted: &[String]) -> Judged {
+pub(crate) fn judge(headers: &str, from_address: &str, trusted: &crate::authres::Verifiers) -> Judged {
     let mut block = headers.to_string();
     block.push_str("\r\n");
     let parsed = pe_mime::parser::parse(block.as_bytes())
         .map(|m| m.headers)
         .unwrap_or_default();
     let mut bits = 0;
-    if authres::verdict(&parsed, trusted).is_none() {
+    if authres::Verdict::of(&parsed, trusted).is_none() {
         bits |= NO_VERDICT;
     }
     if pictures::sender_of(from_address, &parsed, trusted).is_some_and(|sender| sender.verified) {
         bits |= VERIFIED;
     }
     // the logo's address only: the logo itself (BIMI-Indicator) is not fetched with the summary
-    let logo_url = match bimi::of(&parsed, trusted) {
+    let logo_url = match bimi::of(&parsed, trusted, from_address) {
         Some(bimi::Logo::Location(url)) => Some(url),
         _ => None,
     };
@@ -115,8 +115,8 @@ pub fn contact_card(key: u64) -> Option<i64> {
 mod tests {
     use super::*;
 
-    fn trusted() -> Vec<String> {
-        vec!["example.com".into()]
+    fn trusted() -> crate::authres::Verifiers {
+        crate::authres::Verifiers::named(&["example.com"])
     }
 
     const LOCATION: &str = "BIMI-Location: v=BIMI1; l=https://shop.example/logo.svg\r\n";

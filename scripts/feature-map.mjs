@@ -1643,6 +1643,13 @@ const sections = [
                 checked: ['Properties keeps the other addresses']
             },
             {
+                shot: 'account-13-sender-checks',
+                name: 'Trust sender checks from',
+                what: 'Which servers\' sender checks (Authentication-Results) the account believes: its provider\'s, filled in from a table of providers, or names the user writes for a server of their own. Only the newest checks on top of a message count, so a sender cannot write their own.',
+                how: 'File > Accounts > Properties (or the account\'s right-click menu).',
+                checked: ['The account\'s domain is shown', 'Names written there are kept', 'Emptied, the provider\'s names are back']
+            },
+            {
                 shot: 'write-26-from-alias',
                 name: 'Send from another address',
                 what: 'From lists each account with its other addresses after it; a message goes from the one chosen, with its name. An address that is not the account\'s is refused.',

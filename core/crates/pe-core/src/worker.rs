@@ -1917,7 +1917,7 @@ impl Worker {
         if newest.info.size.is_some_and(|size| size > CODE_SOURCE_LIMIT) {
             return None;
         }
-        let trusted = crate::authres::trusted(&store.account(self.account).ok()?.settings);
+        let trusted = crate::authres::verifiers(store, self.account).ok()?;
         let uid = newest.info.uid;
         let client = self.client(store).await.ok()?;
         // never cut short once it is coming, which would leave the rest of the answer on the connection; a server that

@@ -835,6 +835,15 @@ UPDATE messages SET sort_from = fold(CASE from_name WHEN '' THEN from_address EL
     OR sort_from IS NOT fold(CASE from_name WHEN '' THEN from_address ELSE from_name END));
 DROP TABLE segmented;
 "#,
+    // the names an account trusts the verdicts of (Account Properties' "Trust sender checks from"), NULL for its
+    // provider's (pe-core authres.rs); and the verdicts of the last 90 days' mail read again under the newest-block
+    // rule, fetched again (newest first) with Received, which ends the provider's block. Older mail keeps its marks.
+    r#"
+ALTER TABLE accounts ADD COLUMN verifiers TEXT;
+UPDATE messages SET sender_auth = NULL, logo_id = NULL, auth_headers = NULL
+    WHERE (sender_auth IS NOT NULL OR auth_headers IS NOT NULL)
+    AND COALESCE(date, internal_date) > CAST(strftime('%s', 'now') AS INTEGER) - 90 * 86400;
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

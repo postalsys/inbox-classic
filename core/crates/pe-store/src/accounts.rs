@@ -206,6 +206,33 @@ impl Store {
         Ok(())
     }
 
+    /// The names whose verdicts the account trusts, as the user wrote them; None for its provider's
+    pub fn verifiers(&self, id: AccountId) -> Result<Option<String>> {
+        self.db
+            .prepare_cached("SELECT verifiers FROM accounts WHERE id = ?1")?
+            .query_row([id], |row| row.get(0))
+    }
+
+    /// Sets the names whose verdicts the account trusts (None for its provider's), and has every message's verdict
+    /// read again under them: fetched again, as the fields were left after they were read
+    pub fn set_verifiers(&mut self, id: AccountId, names: Option<&str>) -> Result<()> {
+        self.transaction(|store| {
+            let changed = store
+                .db
+                .execute("UPDATE accounts SET verifiers = ?2 WHERE id = ?1", params![id, names])?;
+            if changed == 0 {
+                return Err(rusqlite::Error::QueryReturnedNoRows);
+            }
+            store.db.execute(
+                "UPDATE messages SET sender_auth = NULL, logo_id = NULL, auth_headers = NULL \
+                 WHERE folder_id IN (SELECT id FROM folders WHERE account_id = ?1) \
+                 AND (sender_auth IS NOT NULL OR auth_headers IS NOT NULL)",
+                [id],
+            )?;
+            Ok(())
+        })
+    }
+
     /// Puts the account `id` at `index` in the accounts' order (0 first; past the end, last), the others keeping
     /// theirs around it
     pub fn move_account(&mut self, id: AccountId, index: usize) -> Result<()> {

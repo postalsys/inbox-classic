@@ -32,6 +32,8 @@ image = { version = "0.25", default-features = false, features = ["png", "jpeg"]
 tokio = { version = "1.54.1", features = ["rt-multi-thread", "sync", "macros"] }
 # folder names found whatever their accents (the Move and Copy window's filter)
 unicode-normalization = "0.1.26"
+# organizational domains for the alignment of the provider's verdicts with From (authres.rs), as mailauth does
+psl = "2"
 # the wrapping of private OpenPGP keys under the master key (keys.rs)
 ring = "0.17.14"
 zeroize = "1.8"

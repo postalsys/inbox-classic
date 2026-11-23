@@ -342,13 +342,14 @@ Screenshot: `folder-1-reopen`
 
 ## 19f. Sending from another address
 
-Screenshots: `account-12-other-addresses`, `write-26-from-alias`, `write-27-reply-from-alias`
+Screenshots: `account-12-other-addresses`, `write-26-from-alias`, `write-27-reply-from-alias`, `account-13-sender-checks`
 
 - Properties keeps the other addresses the account sends from (`Sales Desk <sales@inboxclassic.test>`)
 - From offers the other address, after the account
 - a message sent from it goes from that address, with its name
 - a reply to a message sent to it (in Archive, so the Inbox's rows stay as they are) goes from it
 - the other address is taken away again for the steps after
+- Properties' Trust sender checks from shows the account's domain (`inboxclassic.test`, as the test's provider is in no table); `mx.inboxclassic.test, relay.example.net` written there is kept (`account-13-sender-checks`); emptied, the account's domain is back
 
 ## 19g. Message rules
 

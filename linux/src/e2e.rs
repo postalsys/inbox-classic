@@ -1188,6 +1188,7 @@ async fn scenario(d: Rc<Driver>) {
     undo_send(&d).await;
     attachment_reminder(&d).await;
     other_addresses(&d).await;
+    sender_checks(&d).await;
     rules::message_rules(&d).await;
     keys::encryption_keys(&d).await;
     secure::signed_and_encrypted(&d).await;
@@ -2204,18 +2205,29 @@ async fn text_size(d: &Driver) {
 
 /// The other addresses of the account set in Properties (its field 11), empty to have none
 async fn set_other_addresses(d: &Driver, text: &str, shot: Option<&str>) {
+    set_account_field(d, "form-11", text, shot).await;
+}
+
+/// The field `field` of the current account's Properties set to `text`, the form shown as `shot`, and OK; the value
+/// the field showed before
+async fn set_account_field(d: &Driver, field: &str, text: &str, shot: Option<&str>) -> String {
     command(Command::Accounts);
     let Some(accounts) = wait_dialog(10, "accounts-dialog").await else {
         d.check(false, "File > Accounts opens");
-        return;
+        return String::new();
     };
     let accounts = accounts.upcast::<gtk::Widget>();
     click(&accounts, "accounts-properties");
     let Some(form) = wait_dialog(10, "account-properties").await else {
         d.check(false, "Properties opens");
-        return;
+        return String::new();
     };
-    set_text(form.upcast_ref(), "form-11", text);
+    let shown = text_of(form.upcast_ref(), field);
+    set_text(form.upcast_ref(), field, text);
+    // the field in view for the screenshot: the form scrolls
+    if let Some(row) = named_in(form.upcast_ref(), field) {
+        row.grab_focus();
+    }
     if let Some(shot) = shot {
         pause(500).await;
         d.shot(&form, shot).await;
@@ -2229,6 +2241,41 @@ async fn set_other_addresses(d: &Driver, text: &str, shot: Option<&str>) {
         dialog.close();
     }
     wait_gone(10, "accounts-dialog").await;
+    shown
+}
+
+/// Account Properties' Trust sender checks from: the provider's names (the test account's domain) until others are
+/// written; those kept; emptied, the provider's again
+async fn sender_checks(d: &Driver) {
+    d.step("trusting sender checks");
+    let account = shell().main().current_account();
+    let names = || shell().core.account_verifiers_text(account).unwrap_or_default();
+    let provider = names();
+    d.check(
+        provider == "inboxclassic.test",
+        &format!("Trust sender checks from shows the account's domain ({provider})"),
+    );
+    let shown = set_account_field(
+        d,
+        "form-12",
+        "mx.inboxclassic.test, relay.example.net",
+        Some("account-13-sender-checks"),
+    )
+    .await;
+    d.check(
+        shown == provider,
+        &format!("the field shows the names in use ({shown})"),
+    );
+    d.check(
+        names() == "mx.inboxclassic.test, relay.example.net",
+        "Properties keeps the servers whose sender checks are trusted",
+    );
+    let shown = set_account_field(d, "form-12", "", None).await;
+    d.check(
+        shown == "mx.inboxclassic.test, relay.example.net",
+        "the field shows the names written",
+    );
+    d.check(names() == provider, "emptied, the provider's names are back");
 }
 
 async fn other_addresses(d: &Driver) {
