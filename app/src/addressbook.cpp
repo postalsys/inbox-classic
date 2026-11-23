@@ -40,6 +40,9 @@ struct Entry {
     size_t members = 0;
     // as it goes in an address field (the core's), empty for a person without an address
     std::wstring label;
+    // a key that can encrypt is in use for one of its addresses, and one of those is verified (the book's key marks)
+    bool hasKey = false;
+    bool keyVerified = false;
 };
 
 // rows of the core's list of people: the book's (pe_cards) or a group's (pe_group_people)
@@ -53,6 +56,8 @@ std::vector<Entry> People(PeCardList* list) {
         entry.address = Text(row->address);
         entry.phone = Text(row->phone);
         entry.label = Text(row->label);
+        entry.hasKey = row->has_key;
+        entry.keyVerified = row->key_verified;
         entries.push_back(std::move(entry));
     }
     return entries;
@@ -455,9 +460,22 @@ struct ContactState {
         std::wstring pending;
     };
     std::vector<Key> keys;
+    // Find Key: the lookup it started (0 for none), what the last one said, whether it can be asked now; the keys'
+    // part of the window (its label, Find Key, the rows and those words), made again once a lookup found keys, and its
+    // top
+    uint64_t lookup = 0;
+    std::wstring said;
+    bool canFind = false;
+    std::vector<HWND> keyControls;
+    int keysTop = 0;
     int64_t saved = 0;
     bool done = false;
 };
+
+// Contact Properties while it is open (it is modal: one at a time), and the lookups of one closed before they ended,
+// whose keys are taken all the same once they do
+HWND g_contact = nullptr;
+std::vector<std::pair<uint64_t, PeCore*>> g_droppedLookups;
 
 // the most addresses whose keys Contact Properties shows, and the ids of each one's controls
 constexpr size_t kMostKeyRows = 3;
@@ -476,6 +494,32 @@ std::wstring KeyLine(PeCore* core, const ContactState::Key& key) {
     const PeKey* row = pe_pgp_key_list_get(found.get(), 0);
     std::wstring address = core::Widen(key.address);
     return row ? address + L":\r\n" + Text(row->grouped) + L" (" + Text(row->status) + L")" : address;
+}
+
+// the key in use for each of the card's addresses as the core has them now (three at most), and whether Find Key has
+// something to look up: a saved card with an address that has no key, or one that can not be used
+void LoadKeys(ContactState& state) {
+    state.keys.clear();
+    state.canFind = false;
+    for (const std::wstring& address : state.addresses) {
+        std::string utf8 = core::Narrow(address);
+        core::PeerKeys peer(pe_pgp_peer(state.core, utf8.c_str()));
+        if (!peer || !peer->in_use) {
+            state.canFind = true;
+            continue;
+        }
+        core::KeyList found(pe_pgp_key(state.core, peer->in_use));
+        const PeKey* row = pe_pgp_key_list_get(found.get(), 0);
+        state.canFind = state.canFind || !row || row->state != PE_KEY_STATE_VALID;
+        if (state.keys.size() == kMostKeyRows) {
+            continue;
+        }
+        ContactState::Key key{utf8, peer->in_use};
+        key.pending = peer->pending_text ? Text(peer->pending_text) : L"";
+        key.line = KeyLine(state.core, key);
+        state.keys.push_back(std::move(key));
+    }
+    state.canFind = state.canFind && state.id != 0;
 }
 
 // card `id` into `state`; its id left 0 when there is none
@@ -500,24 +544,19 @@ void LoadContact(PeCore* core, int64_t id, ContactState& state) {
         state.phones.push_back({card->phones[i].kind, Text(card->phones[i].number)});
     }
     state.displayTyped = !state.display.empty() && state.display != DisplayName(state.first, state.last);
-    for (const std::wstring& address : state.addresses) {
-        if (state.keys.size() == kMostKeyRows) {
-            break;
-        }
-        std::string utf8 = core::Narrow(address);
-        core::PeerKeys peer(pe_pgp_peer(core, utf8.c_str()));
-        if (peer && peer->in_use) {
-            ContactState::Key key{utf8, peer->in_use};
-            key.pending = peer->pending_text ? Text(peer->pending_text) : L"";
-            key.line = KeyLine(core, key);
-            state.keys.push_back(std::move(key));
-        }
-    }
+    LoadKeys(state);
+}
+
+// the width of the keys' buttons (Verify, Find Key): one column at the right, as wide as the addresses' buttons above
+int KeyButtonWidth() {
+    return ButtonWidth({core::T(PE_TEXT_UI_KEYS_VERIFY), core::T(PE_TEXT_UI_CONTACT_FIND_KEY), core::T(PE_TEXT_UI_CONTACT_ADD),
+                        core::T(PE_TEXT_UI_CONTACT_SET_DEFAULT), core::T(PE_TEXT_UI_REMOVE)},
+                       90);
 }
 
 // the width of a key row's words: beside its Verify button
 int KeyTextWidth(int dialogWidth) {
-    return dialogWidth - 2 * Scale(10) - ButtonWidth({core::T(PE_TEXT_UI_KEYS_VERIFY)}) - Scale(6);
+    return dialogWidth - 2 * Scale(10) - KeyButtonWidth() - Scale(6);
 }
 
 void ShowAddresses(HWND dialog, const ContactState& state, int select) {
@@ -874,6 +913,8 @@ void OnNameChanged(HWND dialog, ContactState& state, WORD id) {
 
 // a key row's buttons (made with the rows under the notes)
 void OnKeyCommand(HWND dialog, ContactState& state, int id);
+// Find Key (made with the rows)
+void FindContactKeys(HWND dialog, ContactState& state);
 
 void OnContactCommand(HWND dialog, ContactState& state, WORD id, WORD code) {
     if (code == EN_CHANGE) {
@@ -914,6 +955,9 @@ void OnContactCommand(HWND dialog, ContactState& state, WORD id, WORD code) {
         return;
     case IDC_CONTACT_ADD:
         AddAddress(dialog, state);
+        return;
+    case IDC_CONTACT_FIND_KEY:
+        FindContactKeys(dialog, state);
         return;
     case IDC_CONTACT_DEFAULT:
         if (hasAddress && address > 0) {
@@ -1112,28 +1156,44 @@ int KeysHeight(const ContactState& state, const ContactLayout& at) {
     return height - at.gap;
 }
 
-// the key of each address with Verify beside it, a newer key's words and answers under it; "No key" for none
-void BuildKeys(HWND dialog, const ContactState& state, const ContactLayout& at, int y) {
-    MakeLabel(dialog, core::T(PE_TEXT_UI_CONTACT_KEY), {at.pad, y, at.width - at.pad, y + at.label});
-    y += at.label;
+// the height of what the last lookup said, under the rows; 0 when it said nothing
+int SaidHeight(const ContactState& state, const ContactLayout& at) {
+    return state.said.empty() ? 0 : at.gap + static_cast<int>(MeasureText(state.said, at.width - 2 * at.pad).cy);
+}
+
+// the keys' part under the label row (Find Key is as tall as a button, the label is not): at.keys of the layout
+int KeysPartHeight(const ContactState& state, const ContactLayout& at) {
+    return at.button - at.label + at.gap + KeysHeight(state, at) + SaidHeight(state, at);
+}
+
+// the label with Find Key at its right; the key of each address with Verify beside it, a newer key's words and answers
+// under it ("No key" for none); and what the last lookup said
+void BuildKeys(HWND dialog, ContactState& state, const ContactLayout& at, int y) {
+    std::vector<HWND>& made = state.keyControls;
+    int buttonWidth = KeyButtonWidth();
+    int right = at.width - at.pad;
+    made.push_back(MakeLabel(dialog, core::T(PE_TEXT_UI_CONTACT_KEY), {at.pad, y + (at.button - at.label) / 2, right - buttonWidth - at.gap,
+                                                                       y + (at.button + at.label) / 2}));
+    HWND find = MakeButton(dialog, PE_TEXT_UI_CONTACT_FIND_KEY, IDC_CONTACT_FIND_KEY, right - buttonWidth, y, buttonWidth);
+    EnableWindow(find, state.canFind && !state.lookup);
+    made.push_back(find);
+    y += at.button + at.gap;
     if (state.keys.empty()) {
-        CreateChild(dialog, L"STATIC", core::T(PE_TEXT_UI_CONTACT_KEY_NONE).c_str(), SS_LEFT | SS_NOPREFIX, IDC_CONTACT_KEY,
-                    {at.pad, y, at.width - at.pad, y + at.label});
-        return;
+        made.push_back(CreateChild(dialog, L"STATIC", core::T(PE_TEXT_UI_CONTACT_KEY_NONE).c_str(), SS_LEFT | SS_NOPREFIX, IDC_CONTACT_KEY,
+                                   {at.pad, y, right, y + at.label}));
+        y += at.label;
     }
     std::wstring verify = core::T(PE_TEXT_UI_KEYS_VERIFY);
-    int verifyWidth = ButtonWidth({verify});
     int textWidth = KeyTextWidth(at.width);
     for (size_t i = 0; i < state.keys.size(); i++) {
         const ContactState::Key& key = state.keys[i];
         int base = IDC_CONTACT_KEY + static_cast<int>(i) * kKeyRowIds;
         const std::wstring& line = key.line;
         int lineHeight = std::max(at.button, static_cast<int>(MeasureText(line, textWidth).cy));
-        CreateChild(dialog, L"STATIC", line.c_str(), SS_LEFT | SS_NOPREFIX, base, {at.pad, y, at.pad + textWidth, y + lineHeight});
+        made.push_back(CreateChild(dialog, L"STATIC", line.c_str(), SS_LEFT | SS_NOPREFIX, base, {at.pad, y, at.pad + textWidth, y + lineHeight}));
         // Verify in the middle of the row's height
         int verifyTop = y + (lineHeight - at.button) / 2;
-        CreateChild(dialog, L"BUTTON", verify.c_str(), WS_TABSTOP, base + 1,
-                    {at.width - at.pad - verifyWidth, verifyTop, at.width - at.pad, verifyTop + at.button});
+        made.push_back(CreateChild(dialog, L"BUTTON", verify.c_str(), WS_TABSTOP, base + 1, {right - buttonWidth, verifyTop, right, verifyTop + at.button}));
         y += lineHeight + at.gap;
         if (key.pending.empty()) {
             continue;
@@ -1141,15 +1201,84 @@ void BuildKeys(HWND dialog, const ContactState& state, const ContactLayout& at, 
         // in from the row it is about
         const std::wstring& pending = key.pending;
         int left = at.pad + Scale(16);
-        int textHeight = static_cast<int>(MeasureText(pending, at.width - at.pad - left).cy);
-        CreateChild(dialog, L"STATIC", pending.c_str(), SS_LEFT | SS_NOPREFIX, base + 2, {left, y, at.width - at.pad, y + textHeight});
+        int textHeight = static_cast<int>(MeasureText(pending, right - left).cy);
+        made.push_back(CreateChild(dialog, L"STATIC", pending.c_str(), SS_LEFT | SS_NOPREFIX, base + 2, {left, y, right, y + textHeight}));
         y += textHeight + at.gap;
         std::wstring useNew = core::T(PE_TEXT_UI_CONTACT_KEY_USE_NEW), keep = core::T(PE_TEXT_UI_CONTACT_KEY_KEEP);
         int useWidth = ButtonWidth({useNew}), keepWidth = ButtonWidth({keep});
-        CreateChild(dialog, L"BUTTON", useNew.c_str(), WS_TABSTOP, base + 3, {left, y, left + useWidth, y + at.button});
-        CreateChild(dialog, L"BUTTON", keep.c_str(), WS_TABSTOP, base + 4,
-                    {left + useWidth + at.gap, y, left + useWidth + at.gap + keepWidth, y + at.button});
+        made.push_back(CreateChild(dialog, L"BUTTON", useNew.c_str(), WS_TABSTOP, base + 3, {left, y, left + useWidth, y + at.button}));
+        made.push_back(CreateChild(dialog, L"BUTTON", keep.c_str(), WS_TABSTOP, base + 4,
+                                   {left + useWidth + at.gap, y, left + useWidth + at.gap + keepWidth, y + at.button}));
         y += at.button + at.gap;
+    }
+    if (!state.keys.empty()) {
+        y -= at.gap;
+    }
+    if (!state.said.empty()) {
+        y += at.gap;
+        int height = static_cast<int>(MeasureText(state.said, right - at.pad).cy);
+        made.push_back(CreateChild(dialog, L"STATIC", state.said.c_str(), SS_LEFT | SS_NOPREFIX, IDC_CONTACT_KEY_SAID, {at.pad, y, right, y + height}));
+    }
+}
+
+// the keys' part made again as the core has the keys now (after a lookup), the window as tall as it needs, OK and
+// Cancel under it and the part before them for Tab
+void RebuildKeys(HWND dialog, ContactState& state) {
+    HWND focus = GetFocus();
+    bool focusInside = std::find(state.keyControls.begin(), state.keyControls.end(), focus) != state.keyControls.end();
+    for (HWND control : state.keyControls) {
+        DestroyWindow(control);
+    }
+    state.keyControls.clear();
+    LoadKeys(state);
+    ContactLayout at;
+    at.keys = KeysPartHeight(state, at);
+    BuildKeys(dialog, state, at, state.keysTop);
+    // after the notes for Tab, as when the window was made
+    HWND after = GetDlgItem(dialog, IDC_CONTACT_NOTES);
+    for (HWND control : state.keyControls) {
+        SetWindowPos(control, after, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+        after = control;
+    }
+    int height = at.height();
+    RECT outer = {0, 0, at.width, height};
+    AdjustWindowRectEx(&outer, static_cast<DWORD>(GetWindowLongPtrW(dialog, GWL_STYLE)), FALSE,
+                       static_cast<DWORD>(GetWindowLongPtrW(dialog, GWL_EXSTYLE)));
+    SetWindowPos(dialog, nullptr, 0, 0, outer.right - outer.left, outer.bottom - outer.top, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+    for (int id : {IDOK, IDCANCEL}) {
+        HWND button = GetDlgItem(dialog, id);
+        RECT place;
+        GetWindowRect(button, &place);
+        MapWindowPoints(nullptr, dialog, reinterpret_cast<POINT*>(&place), 2);
+        SetWindowPos(button, nullptr, place.left, height - at.pad - at.button, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+    }
+    // the keyboard on what the lookup made, when it was on Find Key: the first key's Verify, else Find Key
+    if (focusInside || !IsWindow(focus)) {
+        HWND verify = GetDlgItem(dialog, IDC_CONTACT_KEY_VERIFY);
+        HWND find = GetDlgItem(dialog, IDC_CONTACT_FIND_KEY);
+        SetFocus(verify ? verify : IsWindowEnabled(find) ? find : GetDlgItem(dialog, IDOK));
+    }
+}
+
+// Find Key: the keys of the card's addresses looked up (their providers, then keys.openpgp.org); greyed while it is
+// asked, and when there is nothing to ask (looked up a moment ago)
+void FindContactKeys(HWND dialog, ContactState& state) {
+    if (state.lookup || !state.canFind) {
+        return;
+    }
+    state.lookup = pe_contact_find_keys(state.core, state.id);
+    if (!state.lookup) {
+        state.canFind = false;
+    }
+    HWND find = GetDlgItem(dialog, IDC_CONTACT_FIND_KEY);
+    // the keyboard off the button it greys (on what the lookup makes, once it is done)
+    if (GetFocus() == find) {
+        SetFocus(GetDlgItem(dialog, IDOK));
+    }
+    EnableWindow(find, FALSE);
+    if (state.lookup) {
+        state.said = core::T(PE_TEXT_PGP_RECIPIENT_LOOKING);
+        RebuildKeys(dialog, state);
     }
 }
 
@@ -1190,7 +1319,7 @@ int64_t ContactProperties(HWND owner, PeCore* core, int64_t id) {
     ContactState state;
     LoadContact(core, id, state);
     ContactLayout at;
-    at.keys = KeysHeight(state, at);
+    at.keys = KeysPartHeight(state, at);
     int height = at.height();
     std::wstring title = state.id ? core::T(PE_TEXT_UI_CONTACT_TITLE, {{"name", state.display}}) : core::Plain(PE_TEXT_UI_NEW_CONTACT_TITLE);
     HWND dialog = CreateModalWindow(owner, kContactClass, title.c_str(), at.width, height);
@@ -1200,12 +1329,19 @@ int64_t ContactProperties(HWND owner, PeCore* core, int64_t id) {
     y = BuildAddresses(dialog, at, y);
     y = BuildPhones(dialog, at, y);
     y = BuildNotes(dialog, state, at, y);
+    state.keysTop = y;
     BuildKeys(dialog, state, at, y);
     OkCancel(dialog, at.width, height - at.pad - at.button);
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
     ShowAddresses(dialog, state, 0);
     ShowPhones(dialog, state, 0);
+    HWND outer = std::exchange(g_contact, dialog);
     RunModal(dialog, GetDlgItem(dialog, IDC_CONTACT_FIRST), state.done);
+    g_contact = outer;
+    // a lookup not done yet is not this window's any more: its keys are taken all the same once it ends
+    if (state.lookup) {
+        g_droppedLookups.emplace_back(state.lookup, core);
+    }
     if (state.picture) {
         DeleteObject(state.picture);
     }
@@ -1446,12 +1582,64 @@ void UpdateButtons(Book* book) {
     }
 }
 
+// what a row's key mark says (its tooltip, and its row's description for a screen reader), empty for none
+std::wstring KeyMarkWords(const Entry& entry) {
+    if (!entry.hasKey) {
+        return L"";
+    }
+    return core::T(entry.keyVerified ? PE_TEXT_UI_BOOK_KEY_VERIFIED : PE_TEXT_UI_BOOK_KEY_KNOWN);
+}
+
+// the key marks of the rows, before their names: no picture of the list's own (DrawKeyMark draws them), and the words
+// of each for a screen reader
+void ShowKeyMarks(const Book* book) {
+    for (size_t i = 0; i < book->rows.size(); i++) {
+        LVITEMW item = {};
+        item.mask = LVIF_IMAGE;
+        item.iItem = static_cast<int>(i);
+        item.iImage = I_IMAGENONE;
+        ListView_SetItem(book->list, &item);
+        SetAccessibleDescription(book->list, KeyMarkWords(book->rows[i]), static_cast<long>(i) + 1);
+    }
+}
+
+// a row's key mark in the room the list keeps before its name: the lock of a key, the shield of a verified one, on the
+// row's highlight when it is selected, as the message list draws its marks
+void DrawKeyMark(const Book* book, HDC dc, int index) {
+    if (index < 0 || static_cast<size_t>(index) >= book->rows.size()) {
+        return;
+    }
+    RECT icon = {LVIR_ICON};
+    if (!SendMessageW(book->list, LVM_GETITEMRECT, index, reinterpret_cast<LPARAM>(&icon)) || icon.right <= icon.left) {
+        return;
+    }
+    // the room highlighted with the rest of a selected row, mark or not (the list highlights from the name on)
+    bool selected = (ListView_GetItemState(book->list, index, LVIS_SELECTED) & LVIS_SELECTED) != 0;
+    if (selected) {
+        RECT room = {LVIR_BOUNDS};
+        SendMessageW(book->list, LVM_GETITEMRECT, index, reinterpret_cast<LPARAM>(&room));
+        RECT label = {LVIR_LABEL};
+        SendMessageW(book->list, LVM_GETITEMRECT, index, reinterpret_cast<LPARAM>(&label));
+        room.right = std::max(icon.right, label.left);
+        FillRect(dc, &room, GetSysColorBrush(GetFocus() == book->list ? COLOR_HIGHLIGHT : COLOR_BTNFACE));
+    }
+    if (!book->rows[index].hasKey) {
+        return;
+    }
+    HIMAGELIST marks = IconList(IconSet::List);
+    int size = 0;
+    ImageList_GetIconSize(marks, &size, &size);
+    int left = icon.left + (icon.right - icon.left - size) / 2, top = icon.top + (icon.bottom - icon.top - size) / 2;
+    DrawListMark(dc, marks, book->rows[index].keyVerified ? LIST_SHIELD_CHECKMARK : LIST_LOCK_CLOSED, left, top, size, selected);
+}
+
 // the people of the group shown, or of the book, that the find box finds; `select` (a card) selected when it is there
 void FillPeople(Book* book, int64_t select = 0) {
     KillTimer(book->hwnd, kFindTimer);
     std::wstring filter = Trimmed(GetWindowString(book->find));
     book->rows = book->group ? GroupPeople(book->core, book->group, filter) : Cards(book->core, filter);
     FillList(book->list, book->rows);
+    ShowKeyMarks(book);
     for (size_t i = 0; select && i < book->rows.size(); i++) {
         if (book->rows[i].id == select) {
             SelectRow(book->list, static_cast<int>(i));
@@ -1515,6 +1703,9 @@ void Properties(Book* book) {
         if (!people.empty() && people.front().id) {
             if (int64_t saved = ContactProperties(book->hwnd, book->core, people.front().id)) {
                 Reload(book, book->group, saved);
+            } else {
+                // its keys may have been found, verified or decided there: the marks as they are now
+                FillPeople(book, people.front().id);
             }
             return;
         }
@@ -1671,9 +1862,22 @@ bool OnBookNotify(Book* book, NMHDR* header, LRESULT& result) {
             auto* draw = reinterpret_cast<NMLVCUSTOMDRAW*>(header);
             result = CDRF_DODEFAULT;
             if (draw->nmcd.dwDrawStage == CDDS_PREPAINT) {
+                result = CDRF_NOTIFYPOSTPAINT | CDRF_NOTIFYITEMDRAW;
+            } else if (draw->nmcd.dwDrawStage == CDDS_ITEMPREPAINT) {
                 result = CDRF_NOTIFYPOSTPAINT;
+            } else if (draw->nmcd.dwDrawStage == CDDS_ITEMPOSTPAINT) {
+                DrawKeyMark(book, draw->nmcd.hdc, static_cast<int>(draw->nmcd.dwItemSpec));
             } else if (draw->nmcd.dwDrawStage == CDDS_POSTPAINT && ListView_GetItemCount(book->list) == 0) {
                 DrawEmptyBook(book, draw->nmcd.hdc);
+            }
+            return true;
+        }
+        case LVN_GETINFOTIPW: {
+            // over a row with a key: what its mark says
+            auto* tip = reinterpret_cast<NMLVGETINFOTIPW*>(header);
+            std::wstring words = tip->iItem >= 0 && static_cast<size_t>(tip->iItem) < book->rows.size() ? KeyMarkWords(book->rows[tip->iItem]) : L"";
+            if (!words.empty() && tip->pszText && tip->cchTextMax > 0) {
+                wcsncpy_s(tip->pszText, static_cast<size_t>(tip->cchTextMax), words.c_str(), _TRUNCATE);
             }
             return true;
         }
@@ -1751,8 +1955,11 @@ void CreateBook(Book* book) {
     book->find = CreateChild(hwnd, L"EDIT", L"", WS_TABSTOP | ES_AUTOHSCROLL, IDC_BOOK_FIND, {}, WS_EX_CLIENTEDGE);
     book->tree = CreateChild(hwnd, WC_TREEVIEWW, nullptr, WS_TABSTOP | TVS_SHOWSELALWAYS, IDC_BOOK_TREE, {}, WS_EX_CLIENTEDGE);
     TreeView_SetImageList(book->tree, IconList(IconSet::Folders), TVSIL_NORMAL);
-    book->list = CreateChild(hwnd, WC_LISTVIEWW, nullptr, WS_TABSTOP | LVS_REPORT | LVS_SHOWSELALWAYS, IDC_BOOK_LIST, {}, WS_EX_CLIENTEDGE);
-    ListView_SetExtendedListViewStyle(book->list, LVS_EX_FULLROWSELECT);
+    book->list = CreateChild(hwnd, WC_LISTVIEWW, nullptr, WS_TABSTOP | LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SHAREIMAGELISTS, IDC_BOOK_LIST,
+                             {}, WS_EX_CLIENTEDGE);
+    ListView_SetExtendedListViewStyle(book->list, LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
+    // the room before each name for its key mark (drawn by DrawKeyMark)
+    ListView_SetImageList(book->list, IconList(IconSet::List), LVSIL_SMALL);
     AddColumn(book->list, 0, core::T(PE_TEXT_UI_COL_NAME).c_str(), 180);
     AddColumn(book->list, 1, core::T(PE_TEXT_UI_COL_EMAIL).c_str(), 200);
     AddColumn(book->list, 2, core::T(PE_TEXT_UI_COL_PHONE).c_str(), 120);
@@ -1862,6 +2069,35 @@ void AddressBookChanged() {
     if (Book* book = g_book ? BookOf(g_book) : nullptr) {
         Reload(book, book->group);
     }
+}
+
+void ContactKeysFound(uint64_t request) {
+    if (auto dropped = std::find_if(g_droppedLookups.begin(), g_droppedLookups.end(), [&](const auto& lookup) { return lookup.first == request; });
+        dropped != g_droppedLookups.end()) {
+        core::String taken(pe_pgp_find_result(dropped->second, request));
+        g_droppedLookups.erase(dropped);
+        return;
+    }
+    auto* state = g_contact ? reinterpret_cast<ContactState*>(GetWindowLongPtrW(g_contact, GWLP_USERDATA)) : nullptr;
+    if (!state || !state->lookup || state->lookup != request) {
+        return;
+    }
+    state->lookup = 0;
+    // the keys found taken into the key book, and what was found said under the rows
+    core::String said(pe_pgp_find_result(state->core, request));
+    state->said = said ? Text(said.get()) : L"";
+    RebuildKeys(g_contact, *state);
+}
+
+void AddressBookKeysChanged() {
+    Book* book = g_book ? BookOf(g_book) : nullptr;
+    if (!book) {
+        return;
+    }
+    // the person selected stays so
+    int selected = ListView_GetNextItem(book->list, -1, LVNI_SELECTED);
+    int64_t card = selected >= 0 && static_cast<size_t>(selected) < book->rows.size() ? book->rows[selected].id : 0;
+    FillPeople(book, card);
 }
 
 void DestroyAddressBook() {

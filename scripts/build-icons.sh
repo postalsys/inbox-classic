@@ -24,8 +24,9 @@ TOOLBAR=(mail_add arrow_reply arrow_reply_all arrow_forward print delete arrow_s
 # the folder tree: the account, then a folder of each kind; the address book's tree: all contacts, a group
 FOLDERS=(mailbox folder mail_inbox send drafts delete mail_prohibited archive flag mail_multiple book_contacts people)
 # the message list: attachment, flag, the search field, a bounce, a watched and an ignored conversation, and the
-# marks of an encrypted and a signed message (the security bar's own pictures)
-LIST=(attach flag search dismiss calendar_ltr mail_error glasses speaker_mute lock_closed ribbon)
+# marks of an encrypted and a signed message (the security bar's own pictures); the Address Book's marks of a key (the
+# lock) and of a verified key
+LIST=(attach flag search dismiss calendar_ltr mail_error glasses speaker_mute lock_closed ribbon shield_checkmark)
 # the security bar over a signed or encrypted message: the lock, then the pictures of its states (verified, signed,
 # a warning), each strip drawn in the words' color over the fill of one state (the INK and fill pairs below)
 SECURE=(lock_closed shield_checkmark ribbon warning)

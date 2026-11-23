@@ -5,6 +5,8 @@
 #include "app.h"
 
 #include <algorithm>
+#include <string_view>
+#include <vector>
 
 std::string ReadSecret(HWND edit) {
     int length = GetWindowTextLengthW(edit);
@@ -416,6 +418,8 @@ void OfferBackup(HWND owner, PeCore* core, const std::string& fingerprint) {
     }
 }
 
+}  // namespace
+
 // own addresses an imported private key holds that have no key yet: used for it when the user says so (a key file can
 // come from anyone, so it never takes them by itself)
 void OfferUnclaimed(HWND owner, PeCore* core) {
@@ -426,15 +430,11 @@ void OfferUnclaimed(HWND owner, PeCore* core) {
     }
 }
 
-// Import: a key file chosen and handed to the core, its passphrase asked for while the core wants one; what was
-// imported (or why nothing was) said. True when keys came in
-bool ImportKeys(HWND owner, PeCore* core) {
-    std::wstring filter = KeyFilter(true);
-    std::wstring path = OpenFileDialog(owner, core::Title(PE_TEXT_UI_KEYS_IMPORT).c_str(), filter.c_str());
-    if (path.empty()) {
-        return false;
-    }
-    std::vector<uint8_t> bytes = ReadKeyFile(path);
+namespace {
+
+// the keys in `bytes` (a file's, or the clipboard's text) handed to the core as from `source`, their passphrase asked
+// for while the core wants one; what was imported (or why nothing was) said. True when keys came in
+bool ImportKeyBytes(HWND owner, PeCore* core, std::vector<uint8_t>& bytes, PeKeySource source) {
     std::wstring title = core::Plain(PE_TEXT_UI_KEYS_IMPORT_TITLE);
     std::string passphrase;
     bool asked = false;
@@ -442,7 +442,7 @@ bool ImportKeys(HWND owner, PeCore* core) {
     std::wstring said;
     for (;;) {
         char* message = nullptr;
-        outcome = pe_pgp_import(core, bytes.data(), bytes.size(), asked ? passphrase.c_str() : nullptr, PE_KEY_SOURCE_FILE, &message);
+        outcome = pe_pgp_import(core, bytes.data(), bytes.size(), asked ? passphrase.c_str() : nullptr, source, &message);
         Wipe(passphrase);
         said = ReasonText(message, PE_TEXT_UI_UNKNOWN_REASON);
         if (outcome != PE_IMPORT_OUTCOME_NEEDS_PASSPHRASE && outcome != PE_IMPORT_OUTCOME_WRONG_PASSPHRASE) {
@@ -464,6 +464,52 @@ bool ImportKeys(HWND owner, PeCore* core) {
     MessageBoxApp(owner, said.c_str(), title.c_str(), MB_OK | MB_ICONINFORMATION);
     OfferUnclaimed(owner, core);
     return true;
+}
+
+// Import: a key file chosen and its keys imported. True when keys came in
+bool ImportKeys(HWND owner, PeCore* core) {
+    std::wstring filter = KeyFilter(true);
+    std::wstring path = OpenFileDialog(owner, core::Title(PE_TEXT_UI_KEYS_IMPORT).c_str(), filter.c_str());
+    if (path.empty()) {
+        return false;
+    }
+    std::vector<uint8_t> bytes = ReadKeyFile(path);
+    return ImportKeyBytes(owner, core, bytes, PE_KEY_SOURCE_FILE);
+}
+
+// the clipboard's text as UTF-8, empty when it holds none (or more than a key file could be)
+std::vector<uint8_t> ClipboardText(HWND owner) {
+    std::vector<uint8_t> bytes;
+    if (!IsClipboardFormatAvailable(CF_UNICODETEXT) || !OpenClipboard(owner)) {
+        return bytes;
+    }
+    if (HANDLE data = GetClipboardData(CF_UNICODETEXT)) {
+        if (const auto* text = static_cast<const wchar_t*>(GlobalLock(data))) {
+            size_t length = wcsnlen(text, GlobalSize(data) / sizeof(wchar_t));
+            if (length <= kMostKeyBytes) {
+                std::string utf8 = core::Narrow({text, length});
+                bytes.assign(utf8.begin(), utf8.end());
+                SecureZeroMemory(utf8.data(), utf8.size());
+            }
+            GlobalUnlock(data);
+        }
+    }
+    CloseClipboard();
+    return bytes;
+}
+
+// Import from Clipboard: a key copied as text (from a web page, say) imported as a file's is; a clipboard without an
+// armored key says so without asking the core. True when keys came in
+bool PasteKeys(HWND owner, PeCore* core) {
+    std::vector<uint8_t> bytes = ClipboardText(owner);
+    constexpr std::string_view kArmor = "-----BEGIN PGP ";
+    if (std::search(bytes.begin(), bytes.end(), kArmor.begin(), kArmor.end()) == bytes.end()) {
+        SecureZeroMemory(bytes.data(), bytes.size());
+        MessageBoxApp(owner, core::T(PE_TEXT_UI_KEYS_PASTE_NONE).c_str(), core::Plain(PE_TEXT_UI_KEYS_IMPORT_TITLE).c_str(),
+                      MB_OK | MB_ICONINFORMATION);
+        return false;
+    }
+    return ImportKeyBytes(owner, core, bytes, PE_KEY_SOURCE_PASTE);
 }
 
 // Export: the public key saved where the user chooses
@@ -719,6 +765,13 @@ struct KeysState {
     bool done = false;
 };
 
+// the Encryption Keys window while it is open and the window it is over; the publishing it started that
+// keys.openpgp.org has not answered, and the core asked
+HWND g_keysWindow = nullptr;
+HWND g_keysOwner = nullptr;
+std::vector<uint64_t> g_publishing;
+PeCore* g_publishCore = nullptr;
+
 const PeKey* KeyAt(const KeysState& state, int row) {
     return row >= 0 ? pe_pgp_key_list_get(state.keys.get(), static_cast<size_t>(row)) : nullptr;
 }
@@ -732,6 +785,8 @@ void ShowSelected(HWND hwnd, const KeysState& state) {
     const PeKey* key = KeyAt(state, SelectedIndex(state));
     EnableWindow(Item(hwnd, IDC_KEYS_EXPORT), key != nullptr);
     EnableWindow(Item(hwnd, IDC_KEYS_BACKUP), key && key->can_back_up);
+    // a contact's key is theirs to publish; one at a time
+    EnableWindow(Item(hwnd, IDC_KEYS_PUBLISH), key && key->own && g_publishing.empty());
     EnableWindow(Item(hwnd, IDC_KEYS_VERIFY), key && key->can_verify);
     EnableWindow(Item(hwnd, IDC_KEYS_PROPERTIES), key != nullptr);
     EnableWindow(Item(hwnd, IDC_KEYS_REMOVE), key != nullptr);
@@ -774,6 +829,29 @@ void DrawEmptyKeys(HWND list, HDC dc) {
     SelectObject(dc, old);
 }
 
+// Publish, asked first: the key's addresses get keys.openpgp.org's confirmation mail; KeyPublished tells the rest
+void PublishKey(HWND hwnd, KeysState& state, const PeKey& key) {
+    std::wstring addresses = Text(key.addresses);
+    for (size_t at = addresses.find(L'\n'); at != std::wstring::npos; at = addresses.find(L'\n', at)) {
+        addresses.replace(at, 1, L", ");
+    }
+    std::wstring question = core::T(PE_TEXT_UI_KEYS_PUBLISH_ASK, {{"addresses", addresses}});
+    std::wstring title = core::Title(PE_TEXT_UI_KEYS_PUBLISH);
+    if (MessageBoxApp(hwnd, question.c_str(), title.c_str(), MB_YESNO | MB_ICONQUESTION) != IDYES) {
+        return;
+    }
+    uint64_t request = pe_pgp_publish(state.core, key.fingerprint);
+    if (!request) {
+        std::wstring failed = core::T(PE_TEXT_PGP_PUBLISH_FAILED, {{"error", core::T(PE_TEXT_UI_UNKNOWN_REASON)}});
+        MessageBoxApp(hwnd, failed.c_str(), title.c_str(), MB_OK | MB_ICONWARNING);
+        return;
+    }
+    // greyed, with the busy pointer, until the server answered
+    g_publishing.push_back(request);
+    g_publishCore = state.core;
+    ShowSelected(hwnd, state);
+}
+
 // Remove, asked first in words that say what goes with the key
 void RemoveKey(HWND hwnd, KeysState& state, const PeKey& key, int index) {
     std::wstring question = Text(key.remove_question);
@@ -802,6 +880,16 @@ void OnKeysCommand(HWND hwnd, KeysState& state, WORD id) {
     case IDC_KEYS_IMPORT:
         if (ImportKeys(hwnd, state.core)) {
             FillKeys(hwnd, state, fingerprint, index);
+        }
+        return;
+    case IDC_KEYS_PASTE:
+        if (PasteKeys(hwnd, state.core)) {
+            FillKeys(hwnd, state, fingerprint, index);
+        }
+        return;
+    case IDC_KEYS_PUBLISH:
+        if (key && key->own && g_publishing.empty()) {
+            PublishKey(hwnd, state, *key);
         }
         return;
     case IDC_KEYS_EXPORT:
@@ -878,6 +966,13 @@ LRESULT CALLBACK KeysProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             state->done = true;
         }
         return 0;
+    case WM_SETCURSOR:
+        // while keys.openpgp.org is asked
+        if (!g_publishing.empty()) {
+            SetCursor(LoadCursorW(nullptr, IDC_APPSTARTING));
+            return TRUE;
+        }
+        break;
     case WM_CTLCOLORSTATIC:
         return ButtonFaceColor(reinterpret_cast<HDC>(wParam));
     }
@@ -989,14 +1084,16 @@ private:
 void EncryptionKeysDialog(HWND owner, PeCore* core) {
     HelpScope help("encryption-keys");
     RegisterDialogClass(kKeysClass, KeysProc);
-    int pad = Scale(10), width = Scale(640), height = Scale(360);
+    int pad = Scale(10), width = Scale(660), height = Scale(420);
     struct Button {
         WORD id;
         std::wstring text;
     };
     Button buttons[] = {{IDC_KEYS_NEW, core::T(PE_TEXT_UI_KEYS_NEW)},
                         {IDC_KEYS_IMPORT, core::T(PE_TEXT_UI_KEYS_IMPORT)},
+                        {IDC_KEYS_PASTE, core::T(PE_TEXT_UI_KEYS_PASTE)},
                         {IDC_KEYS_EXPORT, core::T(PE_TEXT_UI_KEYS_EXPORT)},
+                        {IDC_KEYS_PUBLISH, core::T(PE_TEXT_UI_KEYS_PUBLISH)},
                         {IDC_KEYS_BACKUP, core::T(PE_TEXT_UI_KEYS_BACKUP)},
                         {IDC_KEYS_VERIFY, core::T(PE_TEXT_UI_KEYS_VERIFY)},
                         {IDC_KEYS_PROPERTIES, core::T(PE_TEXT_WIN_PROPERTIES_BUTTON)},
@@ -1023,8 +1120,8 @@ void EncryptionKeysDialog(HWND owner, PeCore* core) {
     ListView_SetColumnWidth(state.list, KEYS_STATUS, LVSCW_AUTOSIZE_USEHEADER);
     int buttonTop = top;
     for (size_t i = 0; i < std::size(buttons); i++) {
-        // the buttons for the selected key apart from New Key and Import
-        if (i == 2) {
+        // the buttons for the selected key apart from New Key and the imports
+        if (i == 3) {
             buttonTop += Scale(12);
         }
         CreateChild(dialog, L"BUTTON", buttons[i].text.c_str(), WS_TABSTOP, buttons[i].id,
@@ -1035,7 +1132,30 @@ void EncryptionKeysDialog(HWND owner, PeCore* core) {
                 {width - pad - buttonWidth, height - pad - Scale(25), width - pad, height - pad});
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
     FillKeys(dialog, state);
+    g_keysWindow = dialog;
+    g_keysOwner = owner;
     RunModal(dialog, state.list, state.done);
+    g_keysWindow = nullptr;
+    // the Address Book's key marks as the keys are now
+    AddressBookKeysChanged();
+}
+
+void KeyPublished(uint64_t request) {
+    if (std::erase(g_publishing, request) == 0) {
+        return;
+    }
+    bool ok = false;
+    core::String said(pe_pgp_publish_result(g_publishCore, request, &ok));
+    if (!said) {
+        return;
+    }
+    HWND owner = g_keysWindow ? g_keysWindow : g_keysOwner;
+    if (g_keysWindow) {
+        if (auto* state = reinterpret_cast<KeysState*>(GetWindowLongPtrW(g_keysWindow, GWLP_USERDATA))) {
+            ShowSelected(g_keysWindow, *state);
+        }
+    }
+    MessageBoxApp(owner, Text(said.get()).c_str(), core::Title(PE_TEXT_UI_KEYS_PUBLISH).c_str(), MB_OK | (ok ? MB_ICONINFORMATION : MB_ICONWARNING));
 }
 
 std::unique_ptr<FormPart> AccountSecurityPart(PeCore* core, int64_t account) {

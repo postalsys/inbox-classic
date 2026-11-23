@@ -357,6 +357,9 @@ bool Reader::FollowLink(const wchar_t* uri) {
         }
         return true;
     }
+    case PE_READER_LINK_FIND_KEY:
+        FindSignerKey(uri);
+        return true;
     case PE_READER_LINK_COPY_CODE:
         if (const PeMessageInfo* info = Info(); info && info->otp_code && *info->otp_code &&
                                                 CopyText(parent_, core::Widen(info->otp_code)) && onFound) {
@@ -1001,7 +1004,7 @@ void Reader::StripMenu(POINT screen) {
     if (!attachment) {
         return;
     }
-    enum : UINT { kOpen = 1, kSaveAs, kSaveAll, kShowInMessage };
+    enum : UINT { kOpen = 1, kSaveAs, kSaveAll, kShowInMessage, kImportKey };
     HMENU menu = CreatePopupMenu();
     // greyed for a file that can run code, which is only saved
     AppendMenuW(menu, MF_STRING | (attachment->can_open ? 0 : MF_GRAYED), kOpen, core::T(PE_TEXT_UI_ATTACHMENT_OPEN).c_str());
@@ -1011,6 +1014,11 @@ void Reader::StripMenu(POINT screen) {
     AppendMenuW(menu, MF_STRING, kSaveAs, core::T(PE_TEXT_UI_ATTACHMENT_SAVE_AS).c_str());
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(menu, MF_STRING, kSaveAll, core::T(PE_TEXT_UI_ATTACHMENT_SAVE_ALL).c_str());
+    // a file the core read as public keys (not one merely named so): into Encryption Keys
+    if (attachment->is_key) {
+        AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+        AppendMenuW(menu, MF_STRING, kImportKey, core::T(PE_TEXT_UI_ATTACHMENT_IMPORT_KEY).c_str());
+    }
     // a picture or PDF file: drawn in the message or not (checked when it is), greyed for one that can not be
     PeShowInMessage shown = attachment->show_in_message;
     if (shown != PE_SHOW_IN_MESSAGE_NONE) {
@@ -1033,6 +1041,52 @@ void Reader::StripMenu(POINT screen) {
     case kShowInMessage:
         ShowInMessage(index, shown != PE_SHOW_IN_MESSAGE_ON);
         break;
+    case kImportKey:
+        ImportAttachedKey(index);
+        break;
+    }
+}
+
+void Reader::ImportAttachedKey(size_t index) {
+    char* message = nullptr;
+    PeImportOutcome outcome = file_.empty() ? pe_pgp_import_attachment(core_, folder_, uid_, index, &message)
+                                            : pe_pgp_import_file_attachment(core_, core::Narrow(file_).c_str(), index, &message);
+    std::wstring said = ReasonText(message, PE_TEXT_UI_UNKNOWN_REASON);
+    std::wstring title = core::Plain(PE_TEXT_UI_KEYS_IMPORT_TITLE);
+    bool imported = outcome == PE_IMPORT_OUTCOME_IMPORTED;
+    MessageBoxApp(parent_, said.c_str(), title.c_str(), MB_OK | (imported ? MB_ICONINFORMATION : MB_ICONWARNING));
+    if (!imported) {
+        return;
+    }
+    OfferUnclaimed(parent_, core_);
+    if (Info()) {
+        StartView();
+    }
+}
+
+void Reader::FindSignerKey(const wchar_t* uri) {
+    // one at a time: a second click while it is asked waits for the first
+    if (keyLookup_) {
+        return;
+    }
+    keyLookup_ = pe_pgp_find_handle(core_, core::Narrow(uri).c_str());
+    if (keyLookup_ && onKeyLookup) {
+        onKeyLookup(core::T(PE_TEXT_PGP_RECIPIENT_LOOKING), false);
+    }
+}
+
+void Reader::SignerKeyFound(uint64_t request) {
+    if (!keyLookup_ || request != keyLookup_) {
+        return;
+    }
+    keyLookup_ = 0;
+    core::String said(pe_pgp_find_result(core_, request));
+    // the label names the signer now, when the key was found
+    if (Info()) {
+        StartView();
+    }
+    if (said && onKeyLookup) {
+        onKeyLookup(Text(said.get()), true);
     }
 }
 
@@ -1592,6 +1646,9 @@ void Reader::OnEvent(const UiEvent& event) {
         break;
     case PE_EVENT_KIND_PRINT_READY:
         PrintReady(event.uid);
+        break;
+    case PE_EVENT_KIND_KEYS_FOUND:
+        SignerKeyFound(event.uid);
         break;
     case PE_EVENT_KIND_VIEW_READY:
         // a view for a message that is no longer shown was cancelled, its event is not this one
