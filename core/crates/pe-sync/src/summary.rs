@@ -129,15 +129,21 @@ pub fn list_id(value: &str) -> Option<String> {
 }
 
 /// The header fields of the provider's verdicts on the sender: Authentication-Results (DMARC, DKIM, BIMI), the ARC
-/// set's ARC-Authentication-Results and ARC-Seal (Microsoft's verdict, pe-core authres.rs), and BIMI-Location with the
-/// logo's address, which the receiving server adds (BIMI-Indicator, the logo itself, is left out: it is large)
-const AUTH_FIELDS: [&str; 5] = [
+/// set's ARC-Authentication-Results and ARC-Seal (Zoho's verdict, pe-core authres.rs), and BIMI-Location with the
+/// logo's address, which the receiving server adds (BIMI-Indicator, the logo itself, is left out: it is large). Then
+/// Received, which ends the provider's block of verdicts, kept by its name only ([`MARKER`]).
+const AUTH_FIELDS: [&str; 6] = [
     "Authentication-Results",
     "ARC-Authentication-Results",
     "ARC-Seal",
     "BIMI-Location",
     "BIMI-Selector",
+    MARKER,
 ];
+
+/// The field kept only as its place, once for a run of them: where the trace starts, the provider's verdict ends
+const MARKER: &str = "Received";
+const MARKER_LINE: &str = "Received: -\r\n";
 
 /// The most of those fields kept for a message: a provider's results fit in far less, its ARC sets with their seals
 /// (a few for mail that passed through several services) too
@@ -173,10 +179,15 @@ fn header_fields(header: &[u8]) -> Vec<(String, String)> {
 /// written) take the place of the provider's on top, so when the topmost alone is too large, none is kept
 pub fn auth_fields(header: &[u8]) -> String {
     let mut kept = String::new();
-    for (_, raw) in header_fields(header)
+    for (name, raw) in header_fields(header)
         .into_iter()
         .filter(|(name, _)| AUTH_FIELDS.iter().any(|known| name.eq_ignore_ascii_case(known)))
     {
+        let raw = match name.eq_ignore_ascii_case(MARKER) {
+            true if kept.ends_with(MARKER_LINE) => continue,
+            true => MARKER_LINE.to_string(),
+            false => raw,
+        };
         if kept.len() + raw.len() > AUTH_LIMIT {
             break;
         }
@@ -241,17 +252,24 @@ mod tests {
         assert_eq!(auth_fields(header.as_bytes()), "Authentication-Results: first\r\n");
     }
 
-    /// Microsoft's verdict is in its ARC set: its seal and results are kept, its signature of the message is not
+    /// Zoho's verdict is in its ARC set: its seal and results are kept, its signature of the message is not; the
+    /// trace after it only by its name, once for a run, where the provider's verdict ends
     #[test]
-    fn keeps_the_arc_verdict_fields() {
-        let header = b"ARC-Seal: i=1; a=rsa-sha256; d=microsoft.com; cv=none; b=x\r\n\
-                       ARC-Message-Signature: i=1; a=rsa-sha256; d=microsoft.com; b=y\r\n\
-                       ARC-Authentication-Results: i=1; mx.microsoft.com 1;\r\n dmarc=pass header.from=shop.example\r\n\
+    fn keeps_the_arc_verdict_fields_and_where_the_verdict_ends() {
+        let header = b"ARC-Seal: i=1; a=rsa-sha256; d=zohomail.eu; cv=none; b=x\r\n\
+                       ARC-Message-Signature: i=1; a=rsa-sha256; d=zohomail.eu; b=y\r\n\
+                       ARC-Authentication-Results: i=1; mx.zohomail.eu;\r\n dmarc=pass header.from=shop.example\r\n\
+                       Received: from mail.shop.example\r\n by mx.zoho.eu\r\n\
+                       Received: by mail.shop.example\r\n\
+                       Authentication-Results: mx.zohomail.eu; dkim=pass\r\n\
+                       Received: from sender.example\r\n\
+                       DKIM-Signature: v=1; d=shop.example;\r\n b=z\r\n\
                        Subject: hi\r\n\r\n";
         assert_eq!(
             auth_fields(header),
-            "ARC-Seal: i=1; a=rsa-sha256; d=microsoft.com; cv=none; b=x\r\n\
-             ARC-Authentication-Results: i=1; mx.microsoft.com 1;\r\n dmarc=pass header.from=shop.example\r\n"
+            "ARC-Seal: i=1; a=rsa-sha256; d=zohomail.eu; cv=none; b=x\r\n\
+             ARC-Authentication-Results: i=1; mx.zohomail.eu;\r\n dmarc=pass header.from=shop.example\r\n\
+             Received: -\r\nAuthentication-Results: mx.zohomail.eu; dkim=pass\r\nReceived: -\r\n"
         );
         assert!(
             with_auth_fields(Vec::new())

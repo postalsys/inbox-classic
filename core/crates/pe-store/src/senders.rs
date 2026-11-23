@@ -232,6 +232,23 @@ mod tests {
     }
 
     #[test]
+    fn new_verifiers_have_the_verdicts_read_again() {
+        let (mut store, account, inbox, _) = setup();
+        store.add_messages(inbox, &[message(1, 100, Some(""))]).unwrap();
+        let id = store.message(inbox, 1).unwrap().unwrap().id;
+        store.set_sender_auth(id, 1, Some("https://a.example/l.svg")).unwrap();
+        assert_eq!(store.verifiers(account).unwrap(), None);
+        store.set_verifiers(account, Some("mx.example.net")).unwrap();
+        assert_eq!(store.verifiers(account).unwrap().as_deref(), Some("mx.example.net"));
+        let again = store.message(inbox, 1).unwrap().unwrap();
+        assert_eq!((again.sender_auth, again.logo), (0, None), "read again");
+        assert_eq!(store.messages_without_auth(account, 10).unwrap(), [(id, inbox, 1)]);
+        store.set_verifiers(account, None).unwrap();
+        assert_eq!(store.verifiers(account).unwrap(), None);
+        assert!(store.set_verifiers(9999, None).is_err());
+    }
+
+    #[test]
     fn logos_downloaded_once_and_failures_rested() {
         let (store, _, inbox, _) = setup();
         store.add_messages(inbox, &[message(1, 100, Some(""))]).unwrap();

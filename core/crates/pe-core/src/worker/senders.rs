@@ -19,7 +19,7 @@ impl Worker {
         if pending.is_empty() {
             return Ok(0);
         }
-        let trusted = authres::trusted(&store.account(self.account)?.settings);
+        let trusted = authres::verifiers(store, self.account)?;
         let judged: Vec<(i64, senders::Judged)> = pending
             .iter()
             .map(|p| (p.message, senders::judge(&p.headers, &p.from_address, &trusted)))

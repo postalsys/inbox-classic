@@ -581,11 +581,13 @@ private func setAccountName(core: Core, account: Int64, _ name: String) {
     _ = name.trimmingCharacters(in: .whitespaces).withCString { pe_account_set_name(core.handle, account, $0) }
 }
 
-/// the other addresses of Properties saved, or why not said
+/// a text field of Properties saved with `save` (the other addresses, the servers whose sender checks the account
+/// trusts), or why not told
 @MainActor
-private func saveOtherAddresses(core: Core, account: Int64, _ text: String) -> Bool {
+private func saveField(core: Core, account: Int64, _ text: String,
+                       _ save: (OpaquePointer?, Int64, UnsafePointer<CChar>?, UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?) -> Bool) -> Bool {
     var reason: UnsafeMutablePointer<CChar>?
-    guard !text.withCString({ pe_set_account_addresses(core.handle, account, $0, &reason) }) else { return true }
+    guard !text.withCString({ save(core.handle, account, $0, &reason) }) else { return true }
     inform(taken(reason) ?? Text.uiAccountNotSaved.text, title: Text.uiProperties.text, style: .warning)
     return false
 }
@@ -608,16 +610,20 @@ private func accountProperties(core: Core, account: Int64, accountName: String, 
     var fields = serverFields(accountName: accountName, name: text(stored.name), email: text(stored.email), username: text(stored.username),
                               imapHost: text(stored.imap_host), imapPort: stored.imap_port, imapSecurity: stored.imap_security,
                               smtpHost: text(stored.smtp_host), smtpPort: stored.smtp_port, smtpSecurity: stored.smtp_security)
-    // last, the other addresses it sends from
+    // last, the other addresses it sends from and the servers whose sender checks it trusts
     let others = FormField(label: Text.uiFieldOtherAddresses.text, value: taken(pe_account_addresses(core.handle, account)) ?? "")
+    let verifiers = FormField(label: Text.uiFieldVerifiers.text, value: taken(pe_account_verifiers(core.handle, account)) ?? "")
     fields.append(others)
+    fields.append(verifiers)
     if !signsInWith.isEmpty {
-        // a browser sign-in account: the names and the other addresses only, the rest is the provider's
-        var shown = [fields[Field.accountName.rawValue], fields[Field.name.rawValue], others]
+        // a browser sign-in account: the names, the other addresses and the sender checks only, the rest is the
+        // provider's
+        var shown = [fields[Field.accountName.rawValue], fields[Field.name.rawValue], others, verifiers]
         while let names = formDialog(title: Text.uiProperties.text, intro: Text.uiSignsInWith.text(["app": signsInWith]),
                                      fields: shown, help: "account-properties") {
             shown = names
-            guard saveOtherAddresses(core: core, account: account, names[2].value) else { continue }
+            guard saveField(core: core, account: account, names[2].value, pe_set_account_addresses),
+                  saveField(core: core, account: account, names[3].value, pe_set_account_verifiers) else { continue }
             fields[Field.accountName.rawValue] = names[0]
             fields[Field.name.rawValue] = names[1]
             let strings = CStrings()
@@ -641,7 +647,8 @@ private func accountProperties(core: Core, account: Int64, accountName: String, 
         if warn && !acceptPlain(fields, title: Text.uiProperties.text) {
             continue
         }
-        guard saveOtherAddresses(core: core, account: account, fields[fields.count - 1].value) else { continue }
+        guard saveField(core: core, account: account, fields[fields.count - 2].value, pe_set_account_addresses),
+              saveField(core: core, account: account, fields[fields.count - 1].value, pe_set_account_verifiers) else { continue }
         let strings = CStrings()
         var settings = settingsOf(fields, strings)
         guard pe_account_update(core.handle, account, &settings) else {

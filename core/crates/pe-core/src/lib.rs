@@ -1299,7 +1299,7 @@ impl Core {
         if !sender_cards_shown(&info) {
             return Err(Error::NotFound);
         }
-        let trusted = authres::trusted(&store.account(account)?.settings);
+        let trusted = authres::verifiers(&store, account)?;
         // the header block is all it takes
         let start = store
             .source_start(folder, uid, view::MAX_HEADER_TEXT)?
@@ -1401,8 +1401,8 @@ impl Core {
             .store()
             .source_start(folder, uid, view::MAX_HEADER_TEXT)?
             .ok_or(Error::NotFound)?;
-        let headers = pe_mime::parser::parse(&start).map_err(|_| Error::NotFound)?.headers;
-        let logo = bimi::of(&headers, &self.trusted(folder)?).ok_or(Error::NotFound)?;
+        let message = pe_mime::parser::parse(&start).map_err(|_| Error::NotFound)?;
+        let logo = bimi::of_message(&message, &self.trusted(folder)?).ok_or(Error::NotFound)?;
         let request = self.next_request.fetch_add(1, Ordering::Relaxed);
         let logos = self.logo_source();
         let work = async move {
@@ -1671,7 +1671,7 @@ impl Core {
             .map_or((None, false), |m| (m.info.internal_date, m.info.bounce));
         // with the store at hand: trusted() takes it again
         let (account, place) = store.folder_info(folder)?;
-        let trusted = authres::trusted(&store.account(account)?.settings);
+        let trusted = authres::verifiers(&store, account)?;
         // a code in Junk E-mail may be bait, and one in Sent Items or Drafts is the user's own
         let codes = sender_cards_shown(&place);
         // pictures load by themselves for the senders the user trusts, or every message's; never in Junk E-mail
@@ -1717,13 +1717,10 @@ impl Core {
         }))
     }
 
-    /// The domains whose verdicts in a message's headers (Authentication-Results) the provider of the folder's
-    /// account gives
-    fn trusted(&self, folder: FolderId) -> Result<Vec<String>> {
+    /// Whose verdicts in a message's headers (Authentication-Results) the account of the folder believes
+    fn trusted(&self, folder: FolderId) -> Result<authres::Verifiers> {
         let store = self.store();
-        Ok(authres::trusted(
-            &store.account(store.folder(folder)?.account_id)?.settings,
-        ))
+        Ok(authres::verifiers(&store, store.folder(folder)?.account_id)?)
     }
 
     /// The message as the preview shows it, None when its source is not in the store yet. Built on the calling
@@ -2157,6 +2154,30 @@ impl Core {
             addresses.push((email.to_string(), mailbox.name.trim().to_string()));
         }
         Ok(self.store().set_account_addresses(account, &addresses)?)
+    }
+
+    /// The names whose verdicts on its mail the account trusts, as Account Properties' "Trust verdicts from" shows
+    /// them: its own, or its provider's ([`authres`])
+    pub fn account_verifiers_text(&self, account: AccountId) -> Result<String> {
+        Ok(authres::verifiers(&self.store(), account)?.text())
+    }
+
+    /// Sets the names whose verdicts the account trusts, separated by commas or spaces; empty, or its provider's,
+    /// goes back to its provider's (so it follows the provider table). Every message's verdict is read again under
+    /// them, in the background.
+    pub fn set_account_verifiers_text(&self, account: AccountId, text: &str) -> Result<()> {
+        let names = authres::parse_names(text);
+        let mut store = self.store();
+        let settings = store.account(account)?.settings;
+        let own = (!names.is_empty() && names != authres::defaults(&settings)).then(|| names.join(", "));
+        if store.verifiers(account)? == own {
+            return Ok(());
+        }
+        store.set_verifiers(account, own.as_deref())?;
+        drop(store);
+        // the background worker fetches the verdicts again after the sync; an account offline tries at its next one
+        let _ = self.sync(account);
+        Ok(())
     }
 
     /// What a message can go from, for the From list of a compose window: each account, with its other addresses
@@ -3087,7 +3108,7 @@ struct ViewSource {
     first: Option<Arc<pe_sync::TextFirst>>,
     received: Option<i64>,
     marked: bool,
-    trusted: Vec<String>,
+    trusted: authres::Verifiers,
     /// The folder may show the card of a one-time code
     codes: bool,
     /// The folder is Junk E-mail, where no pictures load by themselves
@@ -3258,7 +3279,7 @@ fn finish_view<S: std::ops::Deref<Target = Store>>(
             .filter(|at| (at.folder, at.uid) != (found.folder, found.uid))
     };
     let trust = view::Trust {
-        domains: &found.trusted,
+        verifiers: &found.trusted,
         codes: found.codes,
         pictures: pictures::Rules {
             always: found.always_pictures,

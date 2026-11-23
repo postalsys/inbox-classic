@@ -50,7 +50,7 @@ pub struct List {
 
 impl List {
     /// The list of `message`, whose provider's verdicts `trusted` names
-    pub(crate) fn of(message: &Message, trusted: &[String]) -> List {
+    pub(crate) fn of(message: &Message, trusted: &crate::authres::Verifiers) -> List {
         let how = unsubscribe::of(&message.headers, trusted);
         if how.is_none() {
             return List::default();
@@ -120,7 +120,7 @@ pub(crate) fn list_key(message: &Message) -> Option<String> {
 
 /// The domain the bar names: the confirmed signer of a one-click list, else List-Id's, else the sender's; None when the
 /// candidate does not read as a host name
-pub(crate) fn domain(message: &Message, trusted: &[String]) -> Option<String> {
+pub(crate) fn domain(message: &Message, trusted: &crate::authres::Verifiers) -> Option<String> {
     let candidate = unsubscribe::signer(&message.headers, trusted)
         .or_else(|| list_id(message))
         .or_else(|| sender(message).and_then(|address| address.rsplit_once('@').map(|(_, host)| host.to_string())))?;
@@ -156,10 +156,10 @@ mod tests {
         pe_mime::parser::parse(source.as_bytes()).unwrap()
     }
 
-    const TRUSTED: &[String] = &[];
+    static TRUSTED: &crate::authres::Verifiers = &crate::authres::NONE;
 
-    fn trusted() -> Vec<String> {
-        vec!["example.net".to_string()]
+    fn trusted() -> crate::authres::Verifiers {
+        crate::authres::Verifiers::named(&["example.net"])
     }
 
     const SIGNED: &str = "Authentication-Results: mx.example.net; dkim=pass header.d=mail.list.example.com\r\n\

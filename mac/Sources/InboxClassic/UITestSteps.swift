@@ -485,19 +485,44 @@ extension UITest {
 
     /// the other addresses of the account set in Properties (field 11), empty to have none
     func setOtherAddresses(_ text: String, shot: String? = nil) async throws {
+        _ = try await setAccountField(11, text, shot: shot)
+    }
+
+    /// the field `index` of the current account's Properties set to `text`, the form shown as `shot`, and OK; what
+    /// the field showed before
+    func setAccountField(_ index: Int, _ text: String, shot: String? = nil) async throws -> String {
         command(.accounts)
         guard let accounts = await waitWindow("accounts", 10) else { throw Failed(description: "no Accounts window") }
         press(find("accounts.properties", in: accounts))
         guard let form = await waitFor(10, { window("form").flatMap { $0.title == Text.uiProperties.text ? $0 : nil } }) else {
             throw Failed(description: "no Properties form")
         }
-        type(text, into: find("form.field.11", in: form))
+        let field: NSTextField? = find("form.field.\(index)", in: form)
+        let shown = field?.stringValue ?? ""
+        type(text, into: field)
         if let shot { await self.shot(form, shot) }
         press(find("form.ok", in: form))
         if let ask = await waitWindow("alert", 3) { answer(ask, Text.uiYes.text) }
         _ = await waitUntil(10) { !form.isVisible }
         press(find("accounts.close", in: accounts))
         _ = await waitUntil(10) { !accounts.isVisible }
+        return shown
+    }
+
+    /// Account Properties' Trust sender checks from: the provider's names (the test account's domain) until others are
+    /// written; those kept; emptied, the provider's again
+    func senderChecks() async throws {
+        step("trusting sender checks")
+        let account = main.mailbox.currentAccount
+        let names = { taken(pe_account_verifiers(self.main.core.handle, account)) ?? "" }
+        let provider = names()
+        check(provider == "inboxclassic.test", "Trust sender checks from shows the account's domain (\(provider))")
+        let shown = try await setAccountField(12, "mx.inboxclassic.test, relay.example.net", shot: "account-13-sender-checks")
+        check(shown == provider, "the field shows the names in use (\(shown))")
+        check(names() == "mx.inboxclassic.test, relay.example.net", "Properties keeps the servers whose sender checks are trusted")
+        let written = try await setAccountField(12, "")
+        check(written == "mx.inboxclassic.test, relay.example.net", "the field shows the names written (\(written))")
+        check(names() == provider, "emptied, the provider's names are back")
     }
 
     func otherAddresses() async throws {

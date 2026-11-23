@@ -3634,6 +3634,48 @@ pub unsafe extern "C" fn pe_set_account_addresses(
     unsafe { refused(error, result, "the addresses could not be saved") }.is_some()
 }
 
+/// The names whose verdicts on its mail an account trusts (Account Properties' "Trust verdicts from"): its own, or its
+/// provider's, comma separated. Free with `pe_string_free`.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_account_verifiers(core: *const PeCore, account: i64) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            core.account_verifiers_text(account).map_or(null_mut(), into_c_string)
+        })
+    }
+}
+
+/// Sets the names whose verdicts an account trusts, separated by commas or spaces; empty, or the provider's own, goes
+/// back to the provider's. Every message's verdict is read again in the background. False with the reason in `error`
+/// (free it with `pe_string_free`) when it could not be saved.
+///
+/// # Safety
+/// `core` must be a live handle, `text` a valid string, `error` NULL or a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_set_account_verifiers(
+    core: *const PeCore,
+    account: i64,
+    text: *const c_char,
+    error: *mut *mut c_char,
+) -> bool {
+    // SAFETY: as the caller guarantees
+    let Some(text) = (unsafe { arg(text) }) else {
+        return false;
+    };
+    // SAFETY: as the caller guarantees
+    let result = unsafe {
+        with(core, Err(None), |core| {
+            core.set_account_verifiers_text(account, text).map_err(Some)
+        })
+    };
+    // SAFETY: as the caller guarantees
+    unsafe { refused(error, result, "the names could not be saved") }.is_some()
+}
+
 /// Sends a message from an account: it goes into the Outbox (`OutboxChanged`), and from there to the server now.
 /// `MessageSent` when the server took it; `Failed` with the server's answer
 /// when it did not, the message waiting in the Outbox. A recipient that is no address or a file that is not there

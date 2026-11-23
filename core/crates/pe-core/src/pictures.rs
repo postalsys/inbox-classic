@@ -5,7 +5,7 @@
 use pe_mime::parser::{Message, ParsedAddress};
 use pe_store::TrustedSender;
 
-use crate::authres::{passes, tag, verdict};
+use crate::authres::{Verdict, Verifiers};
 
 /// What decides the pictures of a message of a folder
 #[derive(Default)]
@@ -27,7 +27,7 @@ pub struct Sender {
 }
 
 /// The sender of `message`, None for a From that is no single address
-pub(crate) fn sender(message: &Message, trusted: &[String]) -> Option<Sender> {
+pub(crate) fn sender(message: &Message, trusted: &Verifiers) -> Option<Sender> {
     let Some(ParsedAddress::Mailbox(from)) = &message.from else {
         return None;
     };
@@ -36,7 +36,7 @@ pub(crate) fn sender(message: &Message, trusted: &[String]) -> Option<Sender> {
 
 /// The sender at `address` of a message with `headers` (its Authentication-Results among them), None for an address
 /// without a user and a domain
-pub(crate) fn sender_of(address: &str, headers: &[pe_mime::parser::Header], trusted: &[String]) -> Option<Sender> {
+pub(crate) fn sender_of(address: &str, headers: &[pe_mime::parser::Header], trusted: &Verifiers) -> Option<Sender> {
     let address = address.trim().to_lowercase();
     let (_, domain) = address
         .rsplit_once('@')
@@ -50,34 +50,11 @@ pub(crate) fn sender_of(address: &str, headers: &[pe_mime::parser::Header], trus
     })
 }
 
-/// Whether the provider's Authentication-Results confirm `domain` sent the message: DMARC passed for it as the From
-/// domain, or DKIM passed for a signature of that domain or of a domain it is under (`news.shop.com` signed by
-/// `shop.com`; never a sibling, so `evil.me.uk` does not vouch for `shop.me.uk`). Only the topmost
-/// Authentication-Results counts, and only when it is the provider's (a `trusted` authserv-id): one the sender wrote
-/// into the message sits below the provider's, or is the only one where the provider adds none. Without it, the
-/// provider's own ARC set counts (authres.rs `arc_verdict`).
-pub(crate) fn from_verified(headers: &[pe_mime::parser::Header], trusted: &[String], domain: &str) -> bool {
-    let topmost = headers
-        .iter()
-        .find(|h| h.key.eq_ignore_ascii_case("authentication-results"));
-    // the topmost Authentication-Results when it is the provider's; else the provider's own ARC set (Microsoft's
-    // Authentication-Results names no authserv-id, its ARC-Authentication-Results does)
-    let results = topmost
-        .and_then(|topmost| verdict(std::slice::from_ref(topmost), trusted))
-        .or_else(|| crate::authres::arc_verdict(headers, trusted));
-    let Some(results) = results else {
-        return false;
-    };
-    let under = |signer: &str| {
-        let signer = signer.to_ascii_lowercase();
-        signer.contains('.') && (signer == domain || domain.ends_with(&format!(".{signer}")))
-    };
-    results.iter().any(|result| {
-        let dmarc =
-            passes(result, "dmarc") && tag(result, "header.from").is_some_and(|d| d.eq_ignore_ascii_case(domain));
-        let dkim = passes(result, "dkim") && tag(result, "header.d").is_some_and(under);
-        dmarc || dkim
-    })
+/// Whether the provider's verdict (authres.rs: the newest block, in a name the account trusts) confirms `domain`
+/// sent the message: DMARC passed for it, or DKIM for a signature aligned with it (the same organizational domain,
+/// never a sibling under a public suffix: `evil.me.uk` vouches for nobody at `shop.me.uk`)
+pub(crate) fn from_verified(headers: &[pe_mime::parser::Header], trusted: &Verifiers, domain: &str) -> bool {
+    Verdict::of(headers, trusted).is_some_and(|verdict| verdict.confirms(domain))
 }
 
 /// Whether the pictures load without asking
@@ -165,7 +142,7 @@ mod tests {
 
     #[test]
     fn a_trusted_sender_loads_only_when_confirmed() {
-        let providers = vec!["provider.example".to_string()];
+        let providers = Verifiers::named(&["provider.example"]);
         let dkim = message(
             "Shop <News@Shop.com>",
             "dkim=pass header.d=mail.shop.com; dmarc=pass header.from=shop.com",
@@ -184,7 +161,7 @@ mod tests {
         assert!(!forged.verified);
         let other_provider = message("news@shop.com", "dkim=pass header.d=shop.com");
         assert!(
-            !super::sender(&other_provider, &["someone.else".to_string()])
+            !super::sender(&other_provider, &Verifiers::named(&["someone.else"]))
                 .unwrap()
                 .verified,
             "a verdict of a provider not the account's"
@@ -201,13 +178,14 @@ mod tests {
         );
         let planted = pe_mime::parser::parse(
             b"Authentication-Results: mx.provider.example; dkim=fail header.d=shop.com\r\n\
+              Received: from mail.shop.com by mx.provider.example\r\n\
               Authentication-Results: mx.provider.example; dmarc=pass header.from=shop.com\r\n\
               From: news@shop.com\r\nSubject: hi\r\n\r\nbody",
         )
         .unwrap();
         assert!(
             !super::sender(&planted, &providers).unwrap().verified,
-            "only the topmost verdict counts"
+            "only the provider's block counts, not a verdict under its trace"
         );
         let other_signer = message("news@shop.com", "dkim=pass header.d=bulk-mailer.net");
         assert!(
@@ -239,32 +217,35 @@ mod tests {
         assert!(super::sender(&message("undisclosed-recipients:;", "dkim=pass"), &providers).is_none());
     }
 
-    /// Microsoft's verdict is in its ARC set: its Authentication-Results names no authserv-id
+    /// Microsoft's older mail: its verdict on top names no authserv-id, which counts on Microsoft's accounts only
     #[test]
-    fn a_sender_is_confirmed_by_the_providers_arc_set() {
-        let providers = vec!["microsoft.com".to_string()];
+    fn a_sender_is_confirmed_by_microsofts_nameless_verdict() {
+        let microsoft = Verifiers::of_host("ann@outlook.com", "outlook.office365.com");
         let parse = |text: &str| pe_mime::parser::parse(text.as_bytes()).unwrap();
-        let microsoft = parse(
-            "ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none; b=x\r\n\
-             ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass smtp.mailfrom=shop.com; dmarc=pass\r\n \
-             action=none header.from=shop.com; dkim=pass header.d=shop.com; arc=none\r\n\
-             Authentication-Results: spf=pass smtp.mailfrom=shop.com; dkim=pass header.d=shop.com;dmarc=pass\r\n \
+        let nameless = parse(
+            "Authentication-Results: spf=pass smtp.mailfrom=shop.com; dkim=pass header.d=shop.com;dmarc=pass\r\n \
              action=none header.from=shop.com;\r\n\
              From: news@shop.com\r\nSubject: hi\r\n\r\nbody",
         );
+        assert!(super::sender(&nameless, &microsoft).unwrap().verified);
         assert!(
-            super::sender(&microsoft, &providers).unwrap().verified,
-            "Microsoft's ARC set confirms it"
+            !super::sender(&nameless, &Verifiers::named(&["provider.example"]))
+                .unwrap()
+                .verified,
+            "nameless counts on Microsoft's accounts only"
         );
-        // the same set sealed in another name, as a sender could write it: nothing confirmed
-        let forged = parse(
-            "ARC-Seal: i=1; a=rsa-sha256; d=forged.example; cv=none; b=x\r\n\
-             ARC-Authentication-Results: i=1; mx.microsoft.com 1; dmarc=pass header.from=shop.com\r\n\
-             From: news@shop.com\r\nSubject: hi\r\n\r\nbody",
-        );
-        assert!(
-            !super::sender(&forged, &providers).unwrap().verified,
-            "a set the provider did not seal"
-        );
+    }
+
+    /// Gmail names the organizational domain in header.from and DKIM's only in header.i (a Sonos mail)
+    #[test]
+    fn a_sender_under_its_organizational_domain_is_confirmed() {
+        let gmail = Verifiers::of_host("ann@gmail.com", "imap.gmail.com");
+        let message = pe_mime::parser::parse(
+            b"Authentication-Results: mx.google.com; dkim=pass header.i=@con.shop.com header.s=s1; \
+              dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=shop.com\r\n\
+              From: Shop <no-reply@con.shop.com>\r\nSubject: hi\r\n\r\nbody",
+        )
+        .unwrap();
+        assert!(super::sender(&message, &gmail).unwrap().verified);
     }
 }

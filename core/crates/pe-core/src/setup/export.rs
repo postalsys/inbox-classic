@@ -175,6 +175,7 @@ impl Core {
                     .into_iter()
                     .map(|(email, name)| AddressEntry { email, name })
                     .collect(),
+                verifiers: store.verifiers(account.id)?,
                 secret: secrets.then(|| self.secrets.get(account.id)).flatten(),
             });
         }

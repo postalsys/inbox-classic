@@ -666,6 +666,7 @@ final class UITest {
         try await undoSend()
         try await attachmentReminder()
         try await otherAddresses()
+        try await senderChecks()
         try await messageRules()
         try await encryptionKeys()
         try await secureMail()

@@ -1362,7 +1362,7 @@ impl Core {
             let ring = self.ring_for(&store, &source);
             (
                 source,
-                crate::authres::trusted(&account.settings),
+                crate::authres::verifiers(&store, account.id)?,
                 crate::own_addresses(&store, account.id)?,
                 ring,
                 store.invitation_replies(account.id)?,

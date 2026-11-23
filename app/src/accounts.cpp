@@ -16,13 +16,15 @@ std::vector<std::wstring> SecurityChoices() {
 }
 
 // the fields of the server form and Properties, in their order (the UI test finds them by it: 100 + the field)
-// Properties ends with the other addresses the account sends from
-enum Field { ACCOUNT_NAME, NAME, EMAIL, USERNAME, PASSWORD, IMAP_HOST, IMAP_PORT, IMAP_SECURITY, SMTP_HOST, SMTP_PORT, SMTP_SECURITY, OTHER_ADDRESSES };
+// Properties ends with the other addresses the account sends from and the servers whose sender checks it trusts
+enum Field { ACCOUNT_NAME, NAME, EMAIL, USERNAME, PASSWORD, IMAP_HOST, IMAP_PORT, IMAP_SECURITY, SMTP_HOST, SMTP_PORT, SMTP_SECURITY, OTHER_ADDRESSES, VERIFIERS };
 
-// the other addresses of Properties saved, or why not
-bool SaveOtherAddresses(HWND owner, PeCore* core, int64_t account, const std::wstring& text) {
+// a text field of Properties saved with `save` (the other addresses, the servers whose sender checks the account
+// trusts), or why not said
+using SaveText = bool (*)(const PeCore*, int64_t, const char*, char**);
+bool SaveField(HWND owner, PeCore* core, int64_t account, const std::wstring& text, SaveText save) {
     char* reason = nullptr;
-    if (pe_set_account_addresses(core, account, core::Narrow(text).c_str(), &reason)) {
+    if (save(core, account, core::Narrow(text).c_str(), &reason)) {
         return true;
     }
     core::String why(reason);
@@ -892,14 +894,18 @@ bool AccountProperties(HWND owner, PeCore* core, int64_t account) {
     };
     core::String others(pe_account_addresses(core, account));
     fields.push_back({core::T(PE_TEXT_UI_FIELD_OTHER_ADDRESSES), others ? Text(others.get()) : L""});
+    core::String verifiers(pe_account_verifiers(core, account));
+    fields.push_back({core::T(PE_TEXT_UI_FIELD_VERIFIERS), verifiers ? Text(verifiers.get()) : L""});
     // Security under the fields: the key of the account's addresses, applied once the account is saved
     std::unique_ptr<FormPart> keyPart = AccountSecurityPart(core, account);
     if (!signsInWith.empty()) {
-        // a browser sign-in account: the names and the other addresses only, the rest is the provider's
-        std::vector<FormField> names = {fields[ACCOUNT_NAME], fields[NAME], fields[OTHER_ADDRESSES]};
+        // a browser sign-in account: the names, the other addresses and the sender checks only, the rest is the
+        // provider's
+        std::vector<FormField> names = {fields[ACCOUNT_NAME], fields[NAME], fields[OTHER_ADDRESSES], fields[VERIFIERS]};
         std::wstring intro = core::T(PE_TEXT_UI_SIGNS_IN_WITH, {{"app", signsInWith}});
         while (FormDialog(owner, title, intro, names, nullptr, nullptr, 0, keyPart.get())) {
-            if (!SaveOtherAddresses(owner, core, account, names[2].value)) {
+            if (!SaveField(owner, core, account, names[2].value, pe_set_account_addresses) ||
+                !SaveField(owner, core, account, names[3].value, pe_set_account_verifiers)) {
                 continue;
             }
             fields[NAME] = names[1];
@@ -930,7 +936,8 @@ bool AccountProperties(HWND owner, PeCore* core, int64_t account) {
         if (warn && !AcceptPlain(owner, fields, PE_TEXT_CMD_PROPERTIES)) {
             continue;
         }
-        if (!SaveOtherAddresses(owner, core, account, fields[OTHER_ADDRESSES].value)) {
+        if (!SaveField(owner, core, account, fields[OTHER_ADDRESSES].value, pe_set_account_addresses) ||
+            !SaveField(owner, core, account, fields[VERIFIERS].value, pe_set_account_verifiers)) {
             continue;
         }
         std::string utf8[5];

@@ -23,14 +23,14 @@ pub struct Code {
 }
 
 /// The code of `message`, when the provider says the domain it is for signed it; `trusted` names whose verdicts count
-pub(crate) fn of(message: &Message, trusted: &[String]) -> Option<Code> {
+pub(crate) fn of(message: &Message, trusted: &crate::authres::Verifiers) -> Option<Code> {
     let signed = passed_domains(&message.headers, trusted);
     // a signature of example.com covers example.com and the hosts under it (accounts.example.com), never a sibling: a
     // guess at registrable domains would make two sites under a shared suffix (me.uk, github.io) one
     let signer = |host: &str| {
         signed
             .iter()
-            .filter(|d| !d.is_empty() && (host == d.as_str() || host.ends_with(&format!(".{d}"))))
+            .filter(|d| crate::authres::under(host, d))
             .min_by_key(|d| d.len())
             .cloned()
     };
@@ -128,8 +128,8 @@ mod tests {
 
     const TRUSTED: &[&str] = &["mail.test"];
 
-    fn trusted() -> Vec<String> {
-        TRUSTED.iter().map(|d| d.to_string()).collect()
+    fn trusted() -> crate::authres::Verifiers {
+        crate::authres::Verifiers::named(TRUSTED)
     }
 
     /// A message from `from`, with the provider's verdict that `signed` passed DKIM (when given), and `extra` headers
@@ -158,24 +158,16 @@ mod tests {
         assert_eq!(code.domain, "accounts.example.com");
     }
 
-    /// Microsoft's verdict is in its ARC set: its Authentication-Results names no authserv-id
+    /// Microsoft's older mail: its verdict on top names no authserv-id, which counts on Microsoft's accounts only
     #[test]
-    fn a_code_of_mail_microsoft_confirmed_in_its_arc_set() {
-        let microsoft = ["microsoft.com".to_string()];
-        let arc = |seal: &str| {
-            format!(
-                "ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d={seal}; cv=none; b=x\r\n\
-                 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass smtp.mailfrom=example.com;\r\n \
-                 dmarc=pass action=none header.from=example.com; dkim=pass header.d=example.com; arc=none\r\n\
-                 Authentication-Results: spf=pass smtp.mailfrom=example.com; dkim=pass\r\n \
-                 header.d=example.com;dmarc=pass action=none header.from=example.com;\r\n"
-            )
-        };
-        let sealed = message("no-reply@example.com", None, &arc("microsoft.com"), BODY);
+    fn a_code_of_mail_microsoft_confirmed_without_a_name() {
+        let microsoft = crate::authres::Verifiers::of_host("ann@outlook.com", "outlook.office365.com");
+        let nameless = "Authentication-Results: spf=pass smtp.mailfrom=example.com; dkim=pass\r\n \
+             header.d=example.com;dmarc=pass action=none header.from=example.com;\r\n";
+        let sealed = message("no-reply@example.com", None, nameless, BODY);
         assert_eq!(of(&sealed, &microsoft).map(|c| c.code), Some("482913".into()));
-        // the same set sealed in another name, as a sender could write it: no code offered
-        let forged = message("no-reply@example.com", None, &arc("forged.example"), BODY);
-        assert_eq!(of(&forged, &microsoft), None);
+        // the same verdict where the provider is another: no code offered
+        assert_eq!(of(&sealed, &trusted()), None);
     }
 
     #[test]

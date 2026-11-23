@@ -646,11 +646,13 @@ async fn properties(parent: &gtk::Widget, account: i64, signs_in_with: Option<St
     let account_name = stored.account_name;
     let stored = stored.settings;
     let others = core.account_addresses_text(account).unwrap_or_default();
+    let verifiers = core.account_verifiers_text(account).unwrap_or_default();
     // the key of its addresses, after the rest
     let security = crate::keys::AccountSecurity::new(account);
     let more = Some(security.group.upcast_ref::<gtk::Widget>());
     if let Some(with) = signs_in_with {
-        // a browser sign-in account: the names and the other addresses only, the rest is the provider's
+        // a browser sign-in account: the names, the other addresses and the sender checks only, the rest is the
+        // provider's
         let intro = t!(UiSignsInWith, app = &with);
         let form = Form::with_more(
             parent,
@@ -660,6 +662,7 @@ async fn properties(parent: &gtk::Widget, account: i64, signs_in_with: Option<St
                 Field::text(&t!(UiFieldAccountName), &account_name),
                 Field::text(&t!(UiFieldName), &stored.name),
                 Field::text(&t!(UiFieldOtherAddresses), &others),
+                Field::text(&t!(UiFieldVerifiers), &verifiers),
             ],
             &t!(UiOk),
             0,
@@ -668,7 +671,9 @@ async fn properties(parent: &gtk::Widget, account: i64, signs_in_with: Option<St
         form.widget().set_widget_name("account-properties");
         let mut saved = false;
         while form.run().await {
-            if !save_other_addresses(form.widget(), account, &form.value(2)).await {
+            if !save_other_addresses(form.widget(), account, &form.value(2)).await
+                || !save_verifiers(form.widget(), account, &form.value(3)).await
+            {
                 continue;
             }
             let (named, name) = (form.value(0), form.value(1));
@@ -680,10 +685,11 @@ async fn properties(parent: &gtk::Widget, account: i64, signs_in_with: Option<St
         form.close();
         return saved;
     }
-    // last, the other addresses it sends from
+    // last, the other addresses it sends from and the servers whose sender checks it trusts
     let mut fields = server_fields(&stored, &account_name);
     let other_addresses = fields.len();
     fields.push(Field::text(&t!(UiFieldOtherAddresses), &others));
+    fields.push(Field::text(&t!(UiFieldVerifiers), &verifiers));
     let form = Form::with_more(
         parent,
         &crate::words::plain(crate::words::Text::UiProperties),
@@ -724,7 +730,9 @@ async fn properties(parent: &gtk::Widget, account: i64, signs_in_with: Option<St
         {
             continue;
         }
-        if !save_other_addresses(form.widget(), account, &form.value(other_addresses)).await {
+        if !save_other_addresses(form.widget(), account, &form.value(other_addresses)).await
+            || !save_verifiers(form.widget(), account, &form.value(other_addresses + 1)).await
+        {
             continue;
         }
         if core.update_account(account, &settings).is_err() {
@@ -751,7 +759,17 @@ async fn properties(parent: &gtk::Widget, account: i64, signs_in_with: Option<St
 
 /// The other addresses of Properties saved, or why not said
 async fn save_other_addresses(parent: &impl IsA<gtk::Widget>, account: i64, text: &str) -> bool {
-    match shell().core.set_account_addresses_text(account, text) {
+    saved_or_said(parent, shell().core.set_account_addresses_text(account, text)).await
+}
+
+/// The servers whose sender checks the account trusts, saved, or why not said
+async fn save_verifiers(parent: &impl IsA<gtk::Widget>, account: i64, text: &str) -> bool {
+    saved_or_said(parent, shell().core.set_account_verifiers_text(account, text)).await
+}
+
+/// Whether a field of Properties was saved; why not said when it was not
+async fn saved_or_said(parent: &impl IsA<gtk::Widget>, result: pe_core::Result<()>) -> bool {
+    match result {
         Ok(()) => true,
         Err(error) => {
             let title = crate::words::plain(crate::words::Text::UiProperties);
