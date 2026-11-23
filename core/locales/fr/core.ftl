@@ -1055,3 +1055,6 @@ preview-tile-timed-out = La préparation de l’aperçu a pris trop de temps
 preview-tile-crashed = Aperçu désactivé après une interruption de l’affichage
 preview-tile-off = Non affiché jusqu’au prochain démarrage d’Inbox Classic
 preview-not-printed = { $name } ({ $details }) n’est pas imprimé. Ouvrez-le pour l’imprimer.
+
+pgp-error-attached-private = Cette pièce jointe contient une clé privée. Seules les clés publiques peuvent être importées directement depuis un message. Pour restaurer votre propre clé privée, enregistrez la pièce jointe et importez son fichier dans Clés de chiffrement.
+pgp-part-find-key = Rechercher la clé

@@ -12,6 +12,7 @@
     <li>要保留原密码，请将<b data-text="ui-field-password"></b>留空。</li>
     <li>通过浏览器登录的帐户会显示它使用的登录应用。</li>
     <li><b data-text="ui-field-other-addresses"></b>列出您用此帐户发送邮件时使用的其他地址（例如别名），以逗号分隔：<code>Sales &lt;sales@example.com&gt;</code> 或只写地址。之后，<b data-text="ui-field-from"></b>会在该帐户下提供其中每个地址。</li>
+    <li><b data-text="ui-field-verifiers"></b>列出此帐户信任哪些服务器的发件人检查结果。邮件服务器会将这些检查结果记入每封邮件的标头。Inbox Classic 使用可信的结果检查发件域，并决定是否显示品牌徽标、一次性验证码、退订选项，或加载可信发件人的图片。默认值来自已知提供商的设置；其他情况下则使用收件服务器的域和您的电子邮件地址所属的域。如果提供商以其他名称记录检查结果，例如 <code>mx.example.net</code>，请在此处输入该名称。多个名称用逗号分隔。将此字段留空可恢复默认值。更改后，帐户完成同步时，程序会在后台重新检查已存储的邮件。</li>
 </ul>
 <p>同一窗口中的<!--os:windows--><b data-text="win-add"></b><!--/os--><!--os:mac--><b data-text="mac-add-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-add"></b><!--/os-->用于添加另一个帐户。</p>
 <h2>排列帐户</h2>

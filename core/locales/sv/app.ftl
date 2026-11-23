@@ -641,7 +641,7 @@ ui-row-messages = { $count ->
 ui-list-pictures = Vis&a avsändarnas bilder i meddelandelistan
 ui-list-pictures-note = I kolumnlayouten visas varumärkeslogotyper eller bilder från adressboken när avsändarens domän har verifierats, annars initialer. Logotyper sparas och återanvänds mellan körningar. De kan hämtas på nytt när den sparade kopian blir för gammal.
 ui-card-picture = Bild:
-ui-card-picture-choose = &Välj...
+ui-card-picture-choose = Väl&j...
 ui-picture-not-picture = Filen är inte en PNG- eller JPEG-bild.
 ui-picture-too-large = Bilden är för stor. Välj en som är högst 10 MB, med en bredd och höjd på högst 8000 pixlar.
 
@@ -741,3 +741,14 @@ ui-setup-from = Sparad av Inbox Classic { $version } den { $date }.
 ui-setup-import-button = &Importera
 ui-setup-done = Klart
 ui-setup-first-run = Importera inställningar och konton från en annan dator...
+
+ui-field-verifiers = Lita på avsändarkontroller från:
+ui-attachment-import-key = Importera nyckel...
+ui-book-key-known = Har en krypteringsnyckel
+ui-book-key-verified = Har en verifierad krypteringsnyckel
+ui-keys-publish = &Publicera...
+ui-keys-publish-ask = Vill du publicera din offentliga nyckel på keys.openpgp.org så att andra kan hitta den? Nyckelns adresser: { $addresses }. Varje adress måste bekräftas via en länk som skickas dit innan den kan hittas i en sökning.
+ui-keys-publish-now = Publicera
+ui-keys-paste = Importera från &urklipp
+ui-keys-paste-none = Urklipp innehåller ingen OpenPGP-nyckel.
+ui-contact-find-key = Sö&k nyckel

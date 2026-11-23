@@ -1043,3 +1043,6 @@ preview-tile-timed-out = Esikatselun valmistelu kesti liian kauan
 preview-tile-crashed = Ei esikatselua: Inbox Classic sulkeutui tai lakkasi vastaamasta edellisellä näyttökerralla
 preview-tile-off = Ei näytetä ennen kuin Inbox Classic käynnistetään uudelleen
 preview-not-printed = Tiedostoa { $name } ({ $details }) ei tulosteta. Avaa se tulostaaksesi sen.
+
+pgp-error-attached-private = Tämä liite sisältää yksityisen avaimen. Suoraan viestistä voi tuoda vain julkisia avaimia. Palauta oma yksityinen avaimesi tallentamalla liite ja tuomalla tiedosto Salausavaimet-ikkunassa.
+pgp-part-find-key = Etsi avain

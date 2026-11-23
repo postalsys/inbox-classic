@@ -1037,3 +1037,6 @@ preview-tile-timed-out = Det tok for lang tid å klargjøre forhåndsvisningen
 preview-tile-crashed = Vises ikke: Inbox Classic ble avsluttet under en tidligere forhåndsvisning av filen
 preview-tile-off = Vises ikke før Inbox Classic starter igjen
 preview-not-printed = { $name } ({ $details }) skrives ikke ut. Åpne filen for å skrive den ut.
+
+pgp-error-attached-private = Dette vedlegget inneholder en privat nøkkel. Bare offentlige nøkler kan importeres direkte fra e-post. For å gjenopprette din egen private nøkkel må du lagre vedlegget og importere filen under Krypteringsnøkler.
+pgp-part-find-key = Finn nøkkel

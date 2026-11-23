@@ -706,3 +706,14 @@ ui-setup-from = Inbox Classic { $version }で{ $date }に保存されました�
 ui-setup-import-button = インポート(&I)
 ui-setup-done = 完了
 ui-setup-first-run = 別のコンピューターから設定とアカウントをインポート...
+
+ui-field-verifiers = 送信者の確認結果を信頼するサーバー:
+ui-attachment-import-key = キーをインポート...
+ui-book-key-known = 暗号化キーあり
+ui-book-key-verified = 所有者を確認済みの暗号化キーあり
+ui-keys-publish = 公開(&U)...
+ui-keys-publish-ask = ほかの人が見つけられるように、公開キーをkeys.openpgp.orgで公開しますか？キーに含まれるアドレス：{ $addresses }。各アドレスは、そのアドレスに届くリンクで確認するまで掲載されません。
+ui-keys-publish-now = 公開
+ui-keys-paste = クリップボードからインポート(&L)
+ui-keys-paste-none = クリップボードにOpenPGPのキーがありません。
+ui-contact-find-key = キーを検索(&F)

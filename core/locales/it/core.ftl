@@ -1064,3 +1064,6 @@ preview-tile-timed-out = La preparazione dell’anteprima ha richiesto troppo te
 preview-tile-crashed = Anteprima non disponibile: in precedenza Inbox Classic si è chiuso o ha smesso di rispondere durante la visualizzazione
 preview-tile-off = Non mostrato fino al prossimo avvio di Inbox Classic
 preview-not-printed = { $name } ({ $details }) non viene stampato. Aprilo per stamparlo.
+
+pgp-error-attached-private = Questo allegato contiene una chiave privata. Dalla posta si possono importare direttamente solo chiavi pubbliche. Per ripristinare la tua chiave privata, salva l’allegato e importa il file in Chiavi di crittografia.
+pgp-part-find-key = Trova chiave

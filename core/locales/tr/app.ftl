@@ -742,3 +742,14 @@ ui-setup-from = Kaydeden: Inbox Classic { $version }, tarih: { $date }.
 ui-setup-import-button = İçe &Aktar
 ui-setup-done = Bitti
 ui-setup-first-run = Ayarları ve hesapları başka bir bilgisayardan içe aktar...
+
+ui-field-verifiers = Gönderen denetimleri güvenilir sayılan sunucular:
+ui-attachment-import-key = Anahtarı İçe Aktar...
+ui-book-key-known = Şifreleme anahtarı var
+ui-book-key-verified = Sahibi doğrulanmış şifreleme anahtarı var
+ui-keys-publish = Yayı&mla...
+ui-keys-publish-ask = Başkalarının bulabilmesi için ortak anahtarınızı keys.openpgp.org üzerinde yayımlamak istiyor musunuz? Anahtardaki adresler: { $addresses }. Her adresin listelenmeden önce o adrese gönderilen bağlantıyla onaylanması gerekir.
+ui-keys-publish-now = Yayımla
+ui-keys-paste = &Panodan İçe Aktar
+ui-keys-paste-none = Panoda OpenPGP anahtarı yok.
+ui-contact-find-key = Anahtar &Bul

@@ -881,3 +881,6 @@ preview-tile-off = Không hiển thị cho đến khi Inbox Classic khởi độ
 # in a printout, for a file shown in the message that is not printed (a PDF file, a tile): { $details } is its size,
 # or a PDF file's pages and size
 preview-not-printed = { $name } ({ $details }) không được in. Hãy mở tệp để in.
+
+pgp-error-attached-private = Tệp đính kèm này chứa khóa riêng tư. Chỉ có thể nhập khóa công khai trực tiếp từ thư. Để khôi phục khóa riêng tư của chính bạn, hãy lưu tệp đính kèm rồi nhập tệp đó trong Khóa mã hóa.
+pgp-part-find-key = Tìm khóa

@@ -742,3 +742,14 @@ ui-setup-from = Opgeslagen met Inbox Classic { $version } op { $date }.
 ui-setup-import-button = &Importeren
 ui-setup-done = Gereed
 ui-setup-first-run = Instellingen en accounts importeren van een andere computer...
+
+ui-field-verifiers = Afzendercontroles vertrouwen van:
+ui-attachment-import-key = Sleutel importeren...
+ui-book-key-known = Heeft een versleutelingssleutel
+ui-book-key-verified = Heeft een geverifieerde versleutelingssleutel
+ui-keys-publish = &Publiceren...
+ui-keys-publish-ask = Je openbare sleutel op keys.openpgp.org publiceren zodat anderen hem kunnen vinden? Adressen op de sleutel: { $addresses }. Elk adres moet worden bevestigd via een link die naar dat adres wordt gestuurd voordat het in zoekresultaten verschijnt.
+ui-keys-publish-now = Publiceren
+ui-keys-paste = Importeren van het &klembord
+ui-keys-paste-none = Het klembord bevat geen OpenPGP-sleutel.
+ui-contact-find-key = Sleutel &zoeken

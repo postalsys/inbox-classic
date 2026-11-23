@@ -1195,3 +1195,6 @@ preview-tile-timed-out = Priprava predogleda je trajala predolgo
 preview-tile-crashed = Prejšnji predogled je bil prekinjen ali je zastal
 preview-tile-off = Ni prikazano, dokler se Inbox Classic znova ne zažene
 preview-not-printed = Datoteka »{ $name }« ({ $details }) ni vključena v izpis. Za tiskanje jo odprite.
+
+pgp-error-attached-private = Ta priponka vsebuje zasebni ključ. Neposredno iz pošte lahko uvozite le javne ključe. Če želite obnoviti svoj zasebni ključ, priponko shranite in njeno datoteko uvozite v oknu Šifrirni ključi.
+pgp-part-find-key = Najdi ključ

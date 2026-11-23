@@ -741,3 +741,14 @@ ui-setup-from = Mentette: Inbox Classic { $version }, dátum: { $date }.
 ui-setup-import-button = &Importálás
 ui-setup-done = Kész
 ui-setup-first-run = Beállítások és fiókok importálása egy másik számítógépről...
+
+ui-field-verifiers = Megbízható feladóellenőrzési források:
+ui-attachment-import-key = Kulcs importálása...
+ui-book-key-known = Titkosítási kulccsal rendelkezik
+ui-book-key-verified = Ellenőrzött tulajdonosú titkosítási kulccsal rendelkezik
+ui-keys-publish = Kö&zzététel...
+ui-keys-publish-ask = Közzéteszi a nyilvános kulcsát a keys.openpgp.org oldalon, hogy mások megtalálhassák? A kulcshoz tartozó címek: { $addresses }. Minden címet meg kell erősíteni az oda küldött hivatkozással, mielőtt megjelenik a címtárban.
+ui-keys-publish-now = Közzététel
+ui-keys-paste = Importálás a &vágólapról
+ui-keys-paste-none = A vágólapon nincs OpenPGP-kulcs.
+ui-contact-find-key = Kulcs ke&resése

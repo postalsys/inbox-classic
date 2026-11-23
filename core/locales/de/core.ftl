@@ -1012,3 +1012,6 @@ preview-tile-timed-out = Die Vorschau konnte nicht rechtzeitig vorbereitet werde
 preview-tile-crashed = Keine Vorschau: Beim letzten Anzeigen wurde Inbox Classic beendet oder reagierte nicht mehr
 preview-tile-off = Nicht angezeigt, bis Inbox Classic neu gestartet wird
 preview-not-printed = { $name } ({ $details }) wird nicht gedruckt. Öffnen Sie die Datei, um sie zu drucken.
+
+pgp-error-attached-private = Dieser Anhang enthält einen privaten Schlüssel. Direkt aus E-Mails können nur öffentliche Schlüssel importiert werden. Um Ihren eigenen privaten Schlüssel wiederherzustellen, speichern Sie den Anhang und importieren Sie die Datei unter Verschlüsselungsschlüssel.
+pgp-part-find-key = Schlüssel suchen

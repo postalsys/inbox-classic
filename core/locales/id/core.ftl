@@ -881,3 +881,6 @@ preview-tile-off = Tidak ditampilkan sampai Inbox Classic dimulai lagi
 # in a printout, for a file shown in the message that is not printed (a PDF file, a tile): { $details } is its size,
 # or a PDF file's pages and size
 preview-not-printed = { $name } ({ $details }) tidak dicetak. Buka file untuk mencetaknya.
+
+pgp-error-attached-private = Lampiran ini berisi kunci privat. Hanya kunci publik yang dapat diimpor langsung dari email. Untuk memulihkan kunci privat Anda sendiri, simpan lampiran lalu impor file tersebut di Kunci Enkripsi.
+pgp-part-find-key = Cari Kunci

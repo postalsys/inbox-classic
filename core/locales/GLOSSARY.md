@@ -97,6 +97,56 @@ name or address rather than promising a prefix-only search.
 Keep bracketed CJK access keys and full-width field colons in catalogs. The help renderer removes those decorations
 when inserting control names into prose; translations must not compensate for rendering problems by changing labels.
 
+## Key publishing, lookup and sender checks
+
+Publishing uploads the public part of an own key. Uploading it and listing its email addresses are separate:
+unpublished addresses need confirmation links, while already-listed addresses do not need another confirmation.
+Keep an arbitrary address list after a label or colon where inflection would otherwise be required.
+
+Finding an unknown signing key sends its fingerprint or key ID and checks the signature again; it does not verify
+the key's owner. The Address Book's key marks require a currently usable encryption key. Later key expiry alone
+does not invalidate a signature made while the key was valid. Keep this distinct from revocation.
+
+Direct import from a message accepts public keys only. A private-key attachment is refused, not converted to a
+public key; restoring one's own private key requires saving and importing its file in Encryption Keys. Key loss
+may prevent decryption; avoid claiming that it erases or makes every existing copy of mail unreadable.
+
+The account's sender-check field names trusted checking servers, not trusted message senders. Defaults come from
+known providers or the incoming-server and email-address domains. Changing it rechecks stored mail after account
+synchronization. These results check sending domains; they do not establish a person's identity.
+
+Check Publish and Import from Clipboard together with every other Encryption Keys button. Contact Properties
+combines picture/address controls with Find Key, Verify, Use New and Keep Current. Recheck both scopes when moving
+an existing access key; plain Add/Remove instances and static field labels do not add mnemonic conflicts.
+
+### Round 7 shortcut adjustments
+
+These current placements supersede earlier shortcut notes for the same labels.
+
+| Language | Label | Current text |
+| --- | --- | --- |
+| bg | `ui-contact-set-default` | `По под&разбиране` |
+| cs | `ui-contact-key-keep` | `Ponechat &současný` |
+| da | `ui-contact-key-keep` | `Be&hold den nuværende` |
+| de | `ui-contact-key-keep` | `Bisheri&gen Schlüssel behalten` |
+| el | `ui-contact-set-default` | `Ορισμός ως προεπιλ&ογής` |
+| hr | `ui-contact-key-keep` | `Zadrži &trenutačni` |
+| lt | `ui-contact-key-keep` | `Palikti &dabartinį` |
+| lt | `ui-contact-key-use-new` | `Naudoti na&ująjį raktą` |
+| lv | `ui-contact-key-keep` | `Paturēt pašrei&zējo` |
+| lv | `ui-keys-verify` | `Pār&baudīt...` |
+| nb | `ui-contact-key-keep` | `Be&hold den nåværende` |
+| pl | `ui-contact-key-keep` | `Za&chowaj bieżący` |
+| ru | `ui-contact-key-keep` | `Оставить &текущий` |
+| sk | `ui-contact-key-keep` | `Ponechať &súčasný` |
+| sl | `ui-contact-key-keep` | `Obdrži &trenutnega` |
+| sr-Latn | `ui-contact-key-keep` | `Zadrži &trenutni` |
+| sv | `ui-card-picture-choose` | `Väl&j...` |
+| vi | `ui-contact-key-keep` | `Giữ khóa hiệ&n tại` |
+| vi | `ui-contact-set-default` | `Đặt &làm mặc định` |
+
+Use the established Address Book name in lookup prose: Danish Adressekartotek (Adressekartoteket in a sentence) and Finnish Osoitekirja.
+
 ## Fixed terms
 
 The terms of Outlook Express and Outlook in each language, kept the same everywhere.

@@ -7,13 +7,22 @@
     <li>选择帐户并单击<b data-text="ui-keys-new-make"></b>。该密钥将用于此帐户的地址及其其他地址。</li>
     <li>单击<b data-text="ui-keys-backup-now"></b>并选择一个密码短语。请将文件和密码短语分别保存在不同的安全位置。</li>
 </ol>
-<aside class="warning">如果没有备份，一旦这台计算机丢失或重置，您的密钥将无法恢复，用它加密的邮件也将无法再阅读。</aside>
+<aside class="warning">请保留私钥的备份。如果这台计算机丢失或重置，没有备份就无法恢复密钥，您也可能无法解密旧邮件。</aside>
 <h2>无需密码短语即可保护密钥</h2>
 <p>您的私钥由保存在<!--os:windows-->凭据管理器<!--/os--><!--os:mac-->钥匙串<!--/os--><!--os:linux-->系统密钥环<!--/os-->中的一个密钥保护，因此平时使用时无需键入密码短语。密码短语用于保护备份，导入时也可能需要。如果某个密钥被锁定，请先检查系统存储是否可用且已解锁。如果缺少它的保护密钥，请单击<b data-text="ui-keys-import"></b>并选择它的备份。</p>
 <h2>添加密钥</h2>
 <p>单击<b data-text="ui-keys-import"></b>可从文件添加密钥，例如联系人发给您的密钥或您自己的备份。受密码短语保护的私钥会要求输入一次密码短语。随后，Inbox Classic 会询问是否将导入的您自己的密钥用于您的地址。</p>
+<p>要添加复制为文本的密钥，请单击<b data-text="ui-keys-paste"></b>。要添加邮件附件中的公钥，请打开附件菜单并选择<b data-text="ui-attachment-import-key"></b>。只能从邮件直接导入公钥。要恢复您自己的私钥，请保存附件，然后在此处导入该文件。</p>
 <p>此后，联系人的密钥将用于其地址。如果以后出现了同一地址的另一个密钥，在您于联系人属性中选择新密钥之前，仍会继续使用当前密钥。</p>
 <p>要分享您的公钥，请选择它并单击<b data-text="ui-keys-export"></b>。您也可以在帐户属性的<b data-text="ui-account-security"></b>选项卡中选择帐户的密钥。</p>
-<p>缺少可用的收件人密钥时，Inbox Classic 会先询问该地址所属的域，如果启用了相应查询，再询问 keys.openpgp.org。您也可以按指纹或密钥 ID 搜索，这样发送的是该标识符而不是电子邮件地址。如果从不想询问 keys.openpgp.org，请在<b data-settings="reading"></b>下关闭<b data-text="ui-pgp-keyserver"></b>。</p>
+<h2>查找密钥</h2>
+<p>为没有密钥的收件人启用加密时，Inbox Classic 会先查询该地址所属的域；如果启用了相应查询，再查询 keys.openpgp.org。要自行查找联系人缺失或不可用的密钥，请在通讯簿中打开该联系人，然后单击<b data-text="ui-contact-find-key"></b>。通讯簿会标记有可用密钥的联系人，并用更醒目的标记表示密钥所有者已验证。</p>
+<p>如果邮件使用您尚未拥有的密钥签名，会显示密钥未知。单击该标签旁的<b data-text="pgp-part-find-key"></b>，即可在 keys.openpgp.org 上查找。这会发送签名中的密钥指纹或密钥 ID，而非电子邮件地址。找到密钥后，Inbox Classic 会重新检查签名并更新标签。找到密钥并不代表已验证其所有者。</p>
+<p>要停止在 keys.openpgp.org 查找密钥，请在<b data-settings="reading"></b>下关闭<b data-text="ui-pgp-keyserver"></b>。</p>
+<h2>发布您的密钥</h2>
+<p>要让他人能找到您的密钥，请选择一个您自己的密钥，然后单击<b data-text="ui-keys-publish"></b>。Inbox Classic 会将其公钥部分上传到 keys.openpgp.org，并为尚未列出的地址请求确认链接。打开各个链接后，即可通过相应地址搜索密钥。已列出的地址无需再次确认。</p>
+<h2>随邮件发送的密钥</h2>
 <p>密钥也会随邮件传递。启用 Autocrypt 后，从已选择密钥的地址发出的邮件会携带其公钥，能读取它的其他应用可以用它向您发送加密邮件。当您打开携带发件人密钥的邮件时，Inbox Classic 会保存该密钥，但标记为未验证；如果某个地址已有密钥，又出现了不同的密钥，则会等您来选择。要停止发送您的密钥，请在帐户的<b data-text="ui-account-security"></b>选项卡中关闭<b data-text="ui-account-autocrypt"></b>。</p>
+<h2>过期、吊销和删除的密钥</h2>
+<p>过期或被吊销的密钥会在列表中显示相应状态，并且不再用于新的加密操作。密钥后来过期，本身不会使有效期内生成的签名失效。要停止使用某个密钥，请选择它并单击<b data-text="ui-remove"></b>。删除您自己的密钥前，请保留备份，以后解密旧邮件时可能需要。</p>
 <nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav>

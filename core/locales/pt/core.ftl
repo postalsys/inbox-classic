@@ -1081,3 +1081,6 @@ preview-tile-timed-out = O tempo limite para criar a pré-visualização foi exc
 preview-tile-crashed = Pré-visualização bloqueada após uma falha ou interrupção
 preview-tile-off = Pré-visualização desativada até reiniciar o Inbox Classic
 preview-not-printed = O ficheiro { $name } ({ $details }) não está incluído nesta impressão. Abra o ficheiro para o imprimir.
+
+pgp-error-attached-private = Este anexo contém uma chave privada. Só é possível importar chaves públicas diretamente do correio. Para restaurar a sua própria chave privada, guarde o anexo e importe o ficheiro em Chaves de encriptação.
+pgp-part-find-key = Procurar chave

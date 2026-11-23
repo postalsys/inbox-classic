@@ -12,6 +12,7 @@
     <li>若要保留密碼，請將<b data-text="ui-field-password"></b>保持空白。</li>
     <li>透過瀏覽器登入的帳戶，會說明它使用哪個登入應用程式。</li>
     <li><b data-text="ui-field-other-addresses"></b>會列出您以這個帳戶寄信時使用的其他地址，例如別名，以逗號分隔：<code>Sales &lt;sales@example.com&gt;</code> 或只寫地址。之後<b data-text="ui-field-from"></b>就會在該帳戶下提供這些地址。</li>
+    <li><b data-text="ui-field-verifiers"></b>列出這個帳戶信任哪些伺服器的寄件者檢查結果。郵件伺服器會將這些檢查結果記錄在每封郵件的標頭中。Inbox Classic 使用可信任的結果檢查寄件網域，並決定是否顯示品牌標誌、一次性代碼、取消訂閱選項，或載入信任寄件者的圖片。預設值來自已知服務提供者的設定；其他情況則使用內送伺服器的網域與您電子郵件地址的網域。若服務提供者以其他名稱記錄檢查結果，例如 <code>mx.example.net</code>，請在此輸入該名稱。多個名稱請以逗號分隔。將此欄位留白可還原預設值。變更後，帳戶完成同步時，程式會在背景重新檢查已儲存的郵件。</li>
 </ul>
 <p>同一個視窗中的<!--os:windows--><b data-text="win-add"></b><!--/os--><!--os:mac--><b data-text="mac-add-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-add"></b><!--/os-->可新增另一個帳戶。</p>
 <h2>排列帳戶的順序</h2>

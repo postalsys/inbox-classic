@@ -745,7 +745,7 @@ pgp-imported-public = { $count ->
 pgp-imported-pending = Another key is already used for { $addresses }: the new one waits in the contact until you choose it.
 pgp-error-needs-passphrase = The private key is protected by a passphrase. Type it to import the key.
 # Import Key on a file attached to a message that holds a private key: keys from mail are taken as public keys only
-pgp-error-attached-private = This file holds a private key. To import it, save it and import the file in Encryption Keys.
+pgp-error-attached-private = This attachment contains a private key. Only public keys can be imported directly from mail. To restore your own private key, save the attachment and import its file in Encryption Keys.
 pgp-error-mismatch = The private key does not belong to its public key. It may have been altered.
 pgp-file-name-public = { $who } public key.asc
 pgp-file-name-private = { $who } private key backup.asc

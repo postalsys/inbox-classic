@@ -1118,3 +1118,6 @@ preview-tile-timed-out = Příprava náhledu trvala příliš dlouho
 preview-tile-crashed = Nezobrazeno: předchozí vytváření náhledu se přerušilo nebo přestalo reagovat
 preview-tile-off = Nezobrazeno do příštího spuštění Inbox Classic
 preview-not-printed = { $name } ({ $details }) se netiskne. Chcete-li jej vytisknout, otevřete jej.
+
+pgp-error-attached-private = Tato příloha obsahuje soukromý klíč. Přímo z pošty lze importovat pouze veřejné klíče. Chcete-li obnovit svůj soukromý klíč, uložte přílohu a importujte její soubor v okně Šifrovací klíče.
+pgp-part-find-key = Najít klíč

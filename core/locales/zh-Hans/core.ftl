@@ -878,3 +878,6 @@ preview-tile-off = 在 Inbox Classic 重新启动之前不显示
 # in a printout, for a file shown in the message that is not printed (a PDF file, a tile): { $details } is its size,
 # or a PDF file's pages and size
 preview-not-printed = { $name }（{ $details }）未打印。请打开它进行打印。
+
+pgp-error-attached-private = 此附件包含私钥。只能从邮件直接导入公钥。要恢复您自己的私钥，请保存附件，然后在“加密密钥”中导入该文件。
+pgp-part-find-key = 查找密钥

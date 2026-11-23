@@ -743,3 +743,14 @@ ui-setup-from = Tallentanut Inbox Classic { $version }, { $date }.
 ui-setup-import-button = &Tuo
 ui-setup-done = Valmis
 ui-setup-first-run = Tuo asetukset ja tilit toisesta tietokoneesta...
+
+ui-field-verifiers = Luota näiden palvelinten lähettäjätarkistuksiin:
+ui-attachment-import-key = Tuo avain...
+ui-book-key-known = Salausavain on saatavilla
+ui-book-key-verified = Salausavain on saatavilla ja sen haltija on vahvistettu
+ui-keys-publish = &Julkaise...
+ui-keys-publish-ask = Julkaistaanko julkinen avaimesi palvelussa keys.openpgp.org, jotta muut voivat löytää sen? Avaimen osoitteet: { $addresses }. Jokainen osoite on vahvistettava siihen lähetetyn linkin kautta ennen kuin se näkyy palvelussa.
+ui-keys-publish-now = Julkaise
+ui-keys-paste = Tuo &leikepöydältä
+ui-keys-paste-none = Leikepöydällä ei ole OpenPGP-avainta.
+ui-contact-find-key = &Etsi avain

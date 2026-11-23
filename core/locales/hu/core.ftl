@@ -1014,3 +1014,6 @@ preview-tile-timed-out = Az előnézet elkészítése túl sokáig tartott
 preview-tile-crashed = Nem jeleníthető meg: az Inbox Classic korábban leállt a fájl megjelenítése közben
 preview-tile-off = Az Inbox Classic újraindításáig nem jeleníthető meg
 preview-not-printed = A melléklet tartalma nem szerepel a nyomaton: { $name } ({ $details }). Nyomtatáshoz nyissa meg a fájlt.
+
+pgp-error-attached-private = Ez a melléklet titkos kulcsot tartalmaz. Közvetlenül levélből csak nyilvános kulcsok importálhatók. Saját titkos kulcsának visszaállításához mentse a mellékletet, majd importálja a fájlt a Titkosítási kulcsok ablakban.
+pgp-part-find-key = Kulcs keresése

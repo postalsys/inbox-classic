@@ -738,3 +738,14 @@ ui-setup-from = Guardado con Inbox Classic { $version } el { $date }.
 ui-setup-import-button = &Importar
 ui-setup-done = Listo
 ui-setup-first-run = Importar configuración y cuentas de otro equipo...
+
+ui-field-verifiers = Confiar en las comprobaciones del remitente realizadas por:
+ui-attachment-import-key = Importar clave...
+ui-book-key-known = Tiene una clave de cifrado
+ui-book-key-verified = Tiene una clave de cifrado verificada
+ui-keys-publish = P&ublicar...
+ui-keys-publish-ask = ¿Publicar su clave pública en keys.openpgp.org para que otras personas puedan encontrarla? Direcciones de la clave: { $addresses }. Cada dirección debe confirmarse mediante un enlace enviado a ella antes de que pueda buscarse.
+ui-keys-publish-now = Publicar
+ui-keys-paste = Importar del por&tapapeles
+ui-keys-paste-none = El portapapeles no contiene ninguna clave OpenPGP.
+ui-contact-find-key = &Buscar clave

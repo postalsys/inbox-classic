@@ -743,3 +743,14 @@ ui-setup-from = Desat per Inbox Classic { $version } el { $date }.
 ui-setup-import-button = &Importa
 ui-setup-done = Fet
 ui-setup-first-run = Importa la configuració i els comptes d’un altre ordinador...
+
+ui-field-verifiers = Confia en les comprovacions del remitent fetes per:
+ui-attachment-import-key = Importa una clau...
+ui-book-key-known = Té una clau de xifratge
+ui-book-key-verified = Té una clau de xifratge verificada
+ui-keys-publish = P&ublica...
+ui-keys-publish-ask = Voleu publicar la vostra clau pública a keys.openpgp.org perquè altres persones la puguin trobar? Adreces de la clau: { $addresses }. Perquè es pugui cercar una adreça, primer cal confirmar-la amb l’enllaç que s’hi envia.
+ui-keys-publish-now = Publica
+ui-keys-paste = Importa del porta-&retalls
+ui-keys-paste-none = El porta-retalls no conté cap clau OpenPGP.
+ui-contact-find-key = C&erca la clau

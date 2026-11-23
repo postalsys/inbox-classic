@@ -737,3 +737,14 @@ ui-setup-from = Enregistré avec Inbox Classic { $version } le { $date }.
 ui-setup-import-button = &Importer
 ui-setup-done = Terminé
 ui-setup-first-run = Importer les paramètres et comptes d’un autre ordinateur...
+
+ui-field-verifiers = Serveurs de confiance pour les vérifications d’expéditeur :
+ui-attachment-import-key = Importer une clé...
+ui-book-key-known = Possède une clé de chiffrement
+ui-book-key-verified = Possède une clé de chiffrement vérifiée
+ui-keys-publish = Pub&lier...
+ui-keys-publish-ask = Publier votre clé publique sur keys.openpgp.org pour que d’autres puissent la trouver ? Adresses associées à la clé : { $addresses }. Chaque adresse doit être confirmée à l’aide d’un lien envoyé à cette adresse avant de pouvoir être recherchée.
+ui-keys-publish-now = Publier
+ui-keys-paste = Importer depuis le pres&se-papiers
+ui-keys-paste-none = Le presse-papiers ne contient aucune clé OpenPGP.
+ui-contact-find-key = Recherch&er la clé

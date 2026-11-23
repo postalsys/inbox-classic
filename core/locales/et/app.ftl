@@ -738,3 +738,14 @@ ui-setup-from = Salvestatud { $date } rakendusega Inbox Classic { $version }.
 ui-setup-import-button = &Impordi
 ui-setup-done = Valmis
 ui-setup-first-run = Impordi seaded ja kontod teisest arvutist...
+
+ui-field-verifiers = Usalda saatja kontrolli tulemusi serveritelt:
+ui-attachment-import-key = Impordi võti...
+ui-book-key-known = Krüpteerimisvõti on olemas
+ui-book-key-verified = Krüpteerimisvõtme omanik on kinnitatud
+ui-keys-publish = Aval&da...
+ui-keys-publish-ask = Kas avaldada teie avalik võti serveris keys.openpgp.org, et teised selle leiaksid? Võtmega seotud aadressid: { $addresses }. Iga aadress tuleb enne selle avaldamist kinnitada sinna saadetud lingi kaudu.
+ui-keys-publish-now = Avalda
+ui-keys-paste = Impordi &lõikelaualt
+ui-keys-paste-none = Lõikelaual pole OpenPGP võtit.
+ui-contact-find-key = &Otsi võtit

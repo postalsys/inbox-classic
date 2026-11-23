@@ -1126,3 +1126,6 @@ preview-tile-timed-out = Pregătirea previzualizării a durat prea mult
 preview-tile-crashed = Previzualizarea anterioară a fost întreruptă sau s-a blocat
 preview-tile-off = Nu este afișat până la repornirea Inbox Classic
 preview-not-printed = Fișierul „{ $name }” ({ $details }) nu este inclus la imprimare. Deschideți-l pentru a-l imprima.
+
+pgp-error-attached-private = Această atașare conține o cheie privată. Direct din poștă pot fi importate numai chei publice. Pentru a vă restaura propria cheie privată, salvați atașarea și importați fișierul în fereastra „Chei de criptare”.
+pgp-part-find-key = Găsire cheie
