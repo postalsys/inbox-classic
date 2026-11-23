@@ -1124,3 +1124,6 @@ preview-tile-timed-out = Priprema pretpregleda trajala je predugo
 preview-tile-crashed = Ne prikazuje se: pri prethodnom pregledu Inbox Classic prestao je raditi ili odgovarati
 preview-tile-off = Nije prikazano dok se Inbox Classic ponovno ne pokrene
 preview-not-printed = { $name } ({ $details }) ne ispisuje se. Otvorite datoteku da biste je ispisali.
+
+pgp-error-attached-private = Ovaj privitak sadrži privatni ključ. Izravno iz pošte mogu se uvesti samo javni ključevi. Za vraćanje vlastitog privatnog ključa spremite privitak i uvezite njegovu datoteku u prozoru Ključevi za šifriranje.
+pgp-part-find-key = Pronađi ključ

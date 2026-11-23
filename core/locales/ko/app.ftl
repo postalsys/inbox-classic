@@ -727,3 +727,14 @@ ui-setup-from = Inbox Classic { $version }에서 { $date }에 저장함.
 ui-setup-import-button = 가져오기(&I)
 ui-setup-done = 완료
 ui-setup-first-run = 다른 컴퓨터에서 설정 및 계정 가져오기...
+
+ui-field-verifiers = 보낸 사람 확인 결과를 신뢰할 서버:
+ui-attachment-import-key = 키 가져오기...
+ui-book-key-known = 암호화 키 있음
+ui-book-key-verified = 소유자가 확인된 암호화 키 있음
+ui-keys-publish = 게시(&U)...
+ui-keys-publish-ask = 다른 사람이 찾을 수 있도록 공개 키를 keys.openpgp.org에 게시하시겠습니까? 키에 포함된 주소: { $addresses }. 각 주소는 해당 주소로 전송된 링크를 통해 확인해야 목록에 표시됩니다.
+ui-keys-publish-now = 게시
+ui-keys-paste = 클립보드에서 가져오기(&L)
+ui-keys-paste-none = 클립보드에 OpenPGP 키가 없습니다.
+ui-contact-find-key = 키 찾기(&F)

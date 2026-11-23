@@ -1000,3 +1000,6 @@ preview-tile-timed-out = Eelvaate ettevalmistamine võttis liiga kaua aega
 preview-tile-crashed = Eelvaadet ei näidata: eelmisel korral sulgus Inbox Classic või lakkas reageerimast
 preview-tile-off = Ei näidata enne, kui Inbox Classic uuesti käivitub
 preview-not-printed = Faili { $name } ({ $details }) ei prindita. Printimiseks avage see.
+
+pgp-error-attached-private = See manus sisaldab privaatvõtit. Otse kirjast saab importida ainult avalikke võtmeid. Oma privaatvõtme taastamiseks salvestage manus ja importige see fail aknas Krüpteerimisvõtmed.
+pgp-part-find-key = Otsi võtit

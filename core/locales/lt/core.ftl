@@ -1137,3 +1137,6 @@ preview-tile-timed-out = Peržiūros parengimas užtruko per ilgai
 preview-tile-crashed = Šio failo peržiūra išjungta po ankstesnio sutrikimo
 preview-tile-off = Peržiūra išjungta iki kito Inbox Classic paleidimo
 preview-not-printed = Failas „{ $name }“ ({ $details }) nespausdinamas kartu su laišku. Norėdami jį išspausdinti, atidarykite failą.
+
+pgp-error-attached-private = Šiame priede yra privatusis raktas. Tiesiai iš laiško galima importuoti tik viešuosius raktus. Norėdami atkurti savo privatųjį raktą, įrašykite priedą ir importuokite jo failą lange „Šifravimo raktai“.
+pgp-part-find-key = Rasti raktą

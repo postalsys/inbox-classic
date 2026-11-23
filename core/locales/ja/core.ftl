@@ -788,3 +788,6 @@ preview-tile-timed-out = プレビューの準備に時間がかかりすぎま�
 preview-tile-crashed = プレビューを利用できません。以前の試行が中断されました
 preview-tile-off = Inbox Classicを再起動するまで表示されません
 preview-not-printed = { $name }（{ $details }）は印刷されません。印刷するには開いてください。
+
+pgp-error-attached-private = この添付ファイルには秘密キーが含まれています。メールから直接インポートできるのは公開キーだけです。自分の秘密キーを復元するには、添付ファイルを保存し、［暗号化キー］でそのファイルをインポートしてください。
+pgp-part-find-key = キーを検索

@@ -682,7 +682,7 @@ ui-keys-verify = &Verify...
 # My Keys: publishes the selected own key on keys.openpgp.org; N, I, E, B, V, P and R are taken in this window
 ui-keys-publish = P&ublish...
 # the question before publishing; { $addresses } are the key's addresses, separated by commas
-ui-keys-publish-ask = Publish your public key on keys.openpgp.org so that others can find it by your address? The server sends a confirmation link to { $addresses }; each address is listed only after you open its link.
+ui-keys-publish-ask = Publish your public key on keys.openpgp.org so others can find it? Addresses on the key: { $addresses }. Each address must be confirmed through a link sent there before it is listed.
 # the button that confirms that question on the Mac and Linux
 ui-keys-publish-now = Publish
 # My Keys: imports a key copied as text; N, I, E, B, V, P, R and U are taken in this window

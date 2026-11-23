@@ -1031,3 +1031,6 @@ preview-tile-timed-out = Het voorbereiden van het voorbeeld duurde te lang
 preview-tile-crashed = Niet getoond: Inbox Classic werd bij een eerdere poging onderbroken of reageerde niet meer
 preview-tile-off = Niet getoond tot Inbox Classic opnieuw start
 preview-not-printed = { $name } ({ $details }) wordt niet afgedrukt. Open het om het af te drukken.
+
+pgp-error-attached-private = Deze bijlage bevat een privésleutel. Je kunt alleen openbare sleutels rechtstreeks uit berichten importeren. Om je eigen privésleutel te herstellen, sla je de bijlage op en importeer je het bestand in Versleutelingssleutels.
+pgp-part-find-key = Sleutel zoeken

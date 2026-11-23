@@ -1089,3 +1089,6 @@ preview-tile-timed-out = A preparação da visualização demorou demais
 preview-tile-crashed = Não mostrado: a preparação da visualização foi interrompida anteriormente
 preview-tile-off = Não mostrado até o Inbox Classic ser iniciado de novo
 preview-not-printed = { $name } ({ $details }) não é impresso. Abra-o para imprimi-lo.
+
+pgp-error-attached-private = Este anexo contém uma chave privada. Só é possível importar chaves públicas diretamente das mensagens. Para restaurar sua própria chave privada, salve o anexo e importe o arquivo em Chaves de criptografia.
+pgp-part-find-key = Procurar chave

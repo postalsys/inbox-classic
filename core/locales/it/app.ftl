@@ -742,3 +742,14 @@ ui-setup-from = Salvato da Inbox Classic { $version } il { $date }.
 ui-setup-import-button = &Importa
 ui-setup-done = Fatto
 ui-setup-first-run = Importa impostazioni e account da un altro computer...
+
+ui-field-verifiers = Considera attendibili i controlli sul mittente eseguiti da:
+ui-attachment-import-key = Importa chiave...
+ui-book-key-known = Ha una chiave di crittografia
+ui-book-key-verified = Ha una chiave di crittografia verificata
+ui-keys-publish = P&ubblica...
+ui-keys-publish-ask = Vuoi pubblicare la tua chiave pubblica su keys.openpgp.org perché gli altri possano trovarla? Indirizzi della chiave: { $addresses }. Ogni indirizzo deve essere confermato tramite un link inviato a quell’indirizzo prima di poter essere trovato nelle ricerche.
+ui-keys-publish-now = Pubblica
+ui-keys-paste = Importa da&gli appunti
+ui-keys-paste-none = Gli appunti non contengono alcuna chiave OpenPGP.
+ui-contact-find-key = &Trova chiave

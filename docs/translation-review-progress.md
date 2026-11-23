@@ -1,17 +1,18 @@
-# Translation review, round 6
+# Translation review, round 7
 
 ## Completed review
 
-- Authoritative checkout: `/Users/andris/Projects/PostalExpress/build/i18n-pr244-review-20261122`, branch `i18n/pr244-review-20261122`.
-- PR #244 merged at `d42951a569eaf1313da6312ae5127da0bda1a2dd`; local master was synced. Latest audited upstream is `f66af7cb6e9a0ba65a008f1885179a4b8a8ebdef`.
-- Linguistic review is finished. English and affected strings/help in the original 28 translations were reviewed against app callers. Japanese, Simplified Chinese, Traditional Chinese, Korean, Indonesian and Vietnamese received full reviews: 8,940 catalog entries and 318 help topics.
-- Current inventory: 35 languages including English, each with 1,490 catalog entries and 53 help topics. No review marks or unresolved language passages remain.
-- Final replay accounts for all 2,065 catalog/help files, including 499 changed catalog values and 415 changed help topics compared with the latest upstream. Historical review hashes remain preserved; the state records final hashes and superseding followups.
-- Corrections cover mailing-list request/history wording, agent permissions, plaintext/TLS/DNS scope, CJK search, key ownership versus signature integrity, forwarding prefixes and account import. Context-menu Unsubscribe has its own access key. Help strips complete CJK mnemonic suffixes and full-width field colons.
-- Validation: 210 Fluent catalogs parse; 34 language checkers have zero structural findings after accounting for 52,462 expected removed-mark diagnostics; all 35 × 67 modeled mnemonic scopes are clear. All 5,565 platform help documents are balanced and references valid. Offline pe-ffi/help-export builds and all three platform exports passed. Generated installer and Linux metadata are included.
-- Round 6 is complete and archived. `REVIEWED` is `cc96034650ebb623dad6fb4f5b7a806971d75e52`. The final check reports zero pending messages, zero pending help passages and zero unmarked changes. Latest audited upstream is integrated. Published in [PR #252](https://github.com/postalsys/inbox-classic/pull/252); there is no remaining language-review queue.
-- Evidence: `/Users/andris/Projects/PostalExpress/build/i18n-pr244-monitor`. Full new-language ledgers and exact followup ledgers are retained there; final coverage and quality reports reconcile them.
+- Authoritative checkout: `/Users/andris/Projects/PostalExpress`, branch `master`.
+- Started at `f5470316c0aa06cf1a4b53d7e9be16432026df4b`; previous reviewed baseline `cc96034650ebb623dad6fb4f5b7a806971d75e52`. Round 6 remains archived.
+- English and all 34 translations are reviewed. Added 408 translations for the English-only PGP/sender-check features, corrected 19 neighboring shortcut labels, and reviewed 68 target help pages. English received 10 copy corrections across two catalog values and two full help topics.
+- Corrections distinguish public-key upload from confirmed address listing, key lookup from verified ownership, private-key attachment rejection from import, and later key expiry from signature validity. Sender-check help names both default domains and background rechecking after synchronization.
+- Final provenance covers all 2,065 catalog/help files and all 476 target queue items: 429 changed catalog values and 70 changed help topics including English; zero uncovered changes or pending items.
+- Current inventory: 35 languages including English, each with 1,502 catalog entries and 53 help topics.
+- Static checks: all 210 catalogs parse; all 34 language checkers have zero structural findings after accounting for 52,870 expected removed-mark diagnostics. All 2,345 modeled mnemonic scope instances are clear; all 5,565 platform help variants are balanced and references valid. Historical contextual literal/reference differences are preserved and documented.
+- Offline pe-ffi/help-export builds and Windows/macOS/Linux help exports passed. Final generated-output and rendered-label evidence is kept with the review records.
+- Round 7 is complete and archived. Content commit and `REVIEWED`: `af31d1c03fc18cd3df8ed7e7ce708dfb148a2be8`. The baseline check reports zero pending messages, zero pending help passages and zero unmarked changes. All changes are local on master; do not push or create a PR.
+- Evidence: `/Users/andris/Projects/PostalExpress/build/i18n-round7-20261123`. Frozen language ledgers, original snapshots, source followups, final hashes and independent coverage reports are preserved there.
 
 ## Validation policy
 
-No local test suites, CI queries or manually triggered workflows. Static checks, caller inspection and offline builds only. No native-speaker certification, native GUI fit check or Windows keyboard-runtime certification is claimed.
+No local test suites, CI queries or manually triggered workflows. Static checks, caller inspection and offline builds only. No native-speaker or native GUI certification is claimed.

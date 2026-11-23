@@ -3485,7 +3485,7 @@ public static class Dragger {
         Click $keys $IDC_KEYS_PUBLISH
         $ask = WaitWindow '#32770' 'Publish' 10
         $question = if ($ask) { WaitFor { $t = Statics $ask; if ($t -match 'keys\.openpgp\.org') { $t } } 5 }
-        Check ($question -match [regex]::Escape('Publish your public key on keys.openpgp.org so that others can find it by your address? The server sends a confirmation link to testuser@inboxclassic.test; each address is listed only after you open its link.')) "it asks first, naming the address ($question)"
+        Check ($question -match [regex]::Escape('Publish your public key on keys.openpgp.org so others can find it? Addresses on the key: testuser@inboxclassic.test. Each address must be confirmed through a link sent there before it is listed.')) "it asks first, naming the address ($question)"
         Check ($ask -and (GetText $ask 6) -match 'Yes' -and (GetText $ask 7) -match 'No') "with Yes and No ($(if ($ask) { "$(GetText $ask 6) / $(GetText $ask 7)" }))"
         if ($ask) {
             Shot $keys 'keys-12-publish' $ask

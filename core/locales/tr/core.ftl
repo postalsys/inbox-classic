@@ -1027,3 +1027,6 @@ preview-tile-timed-out = Önizleme zaman aşımına uğradı
 preview-tile-crashed = Önceki önizleme yarıda kaldığı veya takıldığı için gösterilmiyor
 preview-tile-off = Inbox Classic yeniden başlayana kadar gösterilmiyor
 preview-not-printed = { $name } ({ $details }) yazdırılmaz. Yazdırmak için açın.
+
+pgp-error-attached-private = Bu ekte gizli anahtar var. Postadan doğrudan yalnızca ortak anahtarlar içe aktarılabilir. Kendi gizli anahtarınızı geri yüklemek için eki kaydedin ve dosyayı Şifreleme Anahtarları penceresinden içe aktarın.
+pgp-part-find-key = Anahtar Bul

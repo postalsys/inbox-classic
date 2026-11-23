@@ -1145,3 +1145,6 @@ preview-tile-timed-out = Priekšskatījuma sagatavošana aizņēma pārāk ilgu 
 preview-tile-crashed = Iepriekšējais priekšskatījums tika pārtraukts vai iestrēga
 preview-tile-off = Netiek rādīts, līdz Inbox Classic tiks palaists no jauna
 preview-not-printed = Fails „{ $name }” ({ $details }) netiek drukāts. Atveriet to, lai izdrukātu.
+
+pgp-error-attached-private = Šis pielikums satur privāto atslēgu. Tieši no pasta var importēt tikai publiskās atslēgas. Lai atjaunotu savu privāto atslēgu, saglabājiet pielikumu un importējiet tā failu logā „Šifrēšanas atslēgas”.
+pgp-part-find-key = Meklēt atslēgu

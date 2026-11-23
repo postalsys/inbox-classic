@@ -722,3 +722,14 @@ ui-setup-from = 由 Inbox Classic { $version }於{ $date }儲存。
 ui-setup-import-button = 匯入(&I)
 ui-setup-done = 完成
 ui-setup-first-run = 從另一部電腦匯入設定與帳戶...
+
+ui-field-verifiers = 信任下列伺服器的寄件者檢查結果：
+ui-attachment-import-key = 匯入金鑰...
+ui-book-key-known = 有加密金鑰
+ui-book-key-verified = 有已驗證擁有者的加密金鑰
+ui-keys-publish = 發佈(&U)...
+ui-keys-publish-ask = 要將您的公開金鑰發佈到 keys.openpgp.org，讓其他人能找到嗎？金鑰中的地址：{ $addresses }。每個地址都必須透過寄送到該地址的連結確認後，才會列出。
+ui-keys-publish-now = 發佈
+ui-keys-paste = 從剪貼簿匯入(&L)
+ui-keys-paste-none = 剪貼簿中沒有 OpenPGP 金鑰。
+ui-contact-find-key = 尋找金鑰(&F)

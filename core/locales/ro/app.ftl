@@ -753,3 +753,14 @@ ui-setup-from = Salvat de Inbox Classic { $version } pe { $date }.
 ui-setup-import-button = &Import
 ui-setup-done = Gata
 ui-setup-first-run = Import setări și conturi de pe alt computer...
+
+ui-field-verifiers = Surse de încredere pentru verificarea expeditorului:
+ui-attachment-import-key = Import cheie...
+ui-book-key-known = Are o cheie de criptare
+ui-book-key-verified = Are o cheie de criptare cu proprietarul confirmat
+ui-keys-publish = P&ublicare...
+ui-keys-publish-ask = Publicați cheia publică pe keys.openpgp.org pentru ca alții să o poată găsi? Adresele din cheie: { $addresses }. Fiecare adresă trebuie confirmată printr-un link trimis la acea adresă înainte de a fi inclusă în catalog.
+ui-keys-publish-now = Publicare
+ui-keys-paste = Import din clip&board
+ui-keys-paste-none = Clipboardul nu conține nicio cheie OpenPGP.
+ui-contact-find-key = &Găsire cheie

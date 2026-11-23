@@ -755,3 +755,14 @@ ui-setup-from = Збережено програмою Inbox Classic { $version }
 ui-setup-import-button = &Імпортувати
 ui-setup-done = Готово
 ui-setup-first-run = Імпортувати параметри й облікові записи з іншого комп’ютера...
+
+ui-field-verifiers = Довірені джерела перевірки відправника:
+ui-attachment-import-key = Імпортувати ключ...
+ui-book-key-known = Є ключ шифрування
+ui-book-key-verified = Є ключ шифрування з підтвердженим власником
+ui-keys-publish = Опу&блікувати...
+ui-keys-publish-ask = Опублікувати ваш відкритий ключ на keys.openpgp.org, щоб інші могли його знайти? Адреси в ключі: { $addresses }. Перш ніж адресу буде додано до каталогу, її потрібно підтвердити за посиланням, надісланим на цю адресу.
+ui-keys-publish-now = Опублікувати
+ui-keys-paste = Імпортувати з бу&фера обміну
+ui-keys-paste-none = У буфері обміну немає ключа OpenPGP.
+ui-contact-find-key = Знайти &ключ

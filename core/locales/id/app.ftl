@@ -722,3 +722,14 @@ ui-setup-from = Disimpan oleh Inbox Classic { $version } pada { $date }.
 ui-setup-import-button = &Impor
 ui-setup-done = Selesai
 ui-setup-first-run = Impor pengaturan dan akun dari komputer lain...
+
+ui-field-verifiers = Percayai hasil pemeriksaan pengirim dari:
+ui-attachment-import-key = Impor Kunci...
+ui-book-key-known = Memiliki kunci enkripsi
+ui-book-key-verified = Memiliki kunci enkripsi dengan pemilik terverifikasi
+ui-keys-publish = Publi&kasikan...
+ui-keys-publish-ask = Publikasikan kunci publik Anda di keys.openpgp.org agar orang lain dapat menemukannya? Alamat pada kunci: { $addresses }. Setiap alamat harus dikonfirmasi melalui tautan yang dikirim ke alamat tersebut sebelum dicantumkan.
+ui-keys-publish-now = Publikasikan
+ui-keys-paste = Impor dari K&lipboard
+ui-keys-paste-none = Klipboard tidak berisi kunci OpenPGP.
+ui-contact-find-key = &Cari Kunci

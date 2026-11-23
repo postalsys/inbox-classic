@@ -1056,3 +1056,6 @@ preview-tile-timed-out = La preparació de la previsualització ha trigat massa
 preview-tile-crashed = Previsualització desactivada després d’una interrupció
 preview-tile-off = No es mostra fins que Inbox Classic es torni a iniciar
 preview-not-printed = { $name } ({ $details }) no s’imprimeix. Obriu-lo per imprimir-lo.
+
+pgp-error-attached-private = Aquest fitxer adjunt conté una clau privada. Només es poden importar claus públiques directament del correu. Per restaurar la vostra clau privada, deseu el fitxer adjunt i importeu-lo a Claus de xifratge.
+pgp-part-find-key = Cerca la clau
