@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.21.0](https://github.com/postalsys/inbox-classic/compare/v0.20.1...v0.21.0) (2026-11-23)
+
+
+### Features
+
+* **linux:** Publish, Import from Clipboard, Find Key, Import Key and the book's key marks ([d66b1b9](https://github.com/postalsys/inbox-classic/commit/d66b1b9d5650c9857e746ef26f725651b7654cb4))
+* **mac:** Publish, Import from Clipboard, Find Key, attached keys and the book's key marks ([3a0e609](https://github.com/postalsys/inbox-classic/commit/3a0e6094e1d5cdd6ed43bf228b546a38e413e9df))
+* **pgp:** Publish, Find Key, attached and pasted keys and the book's key marks in the core and the C API ([ea5b577](https://github.com/postalsys/inbox-classic/commit/ea5b577ab4d6b15dc947544c5b798cd6efcba01a))
+* **verification:** believe only the provider's newest verdict on a sender ([c86f6b5](https://github.com/postalsys/inbox-classic/commit/c86f6b501a0574993672564c92e17cbdf55cf5fa))
+* **windows:** Publish, Import from Clipboard, Find Key, attached keys and the book's key marks ([29b6157](https://github.com/postalsys/inbox-classic/commit/29b6157127968b66d811043814f04ea5a551bd3d))
+
+
+### Bug Fixes
+
+* **i18n:** translate key actions and review sender-check help ([af31d1c](https://github.com/postalsys/inbox-classic/commit/af31d1c03fc18cd3df8ed7e7ce708dfb148a2be8))
+* **pgp:** a lookup whose window closed is learned; the Mac Status column fits Valid, verified ([8041ade](https://github.com/postalsys/inbox-classic/commit/8041adec97c2767dfcb91ab3ce3b26d3d2dbd298))
+* **verification:** a sender's verdict under the provider's adds no check ([46e107c](https://github.com/postalsys/inbox-classic/commit/46e107c9d6d0857e45b1ff3e2283ee8cb8d56da4))
+
 ## [0.20.1](https://github.com/postalsys/inbox-classic/compare/v0.20.0...v0.20.1) (2026-11-22)
 
 
