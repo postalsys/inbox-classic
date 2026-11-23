@@ -60,6 +60,9 @@ mod encrypted_list;
 /// Step 19j: signing and encrypting what is written
 mod compose_keys;
 
+/// Step 19k: finding, publishing and passing on keys
+mod finding;
+
 /// Step 8a: opening attachments (after 19i, for the account's key)
 mod attach;
 /// Step 4, continued: the pictures in a message's text drawn by the core
@@ -1193,6 +1196,8 @@ async fn scenario(d: Rc<Driver>) {
     keys::encryption_keys(&d).await;
     secure::signed_and_encrypted(&d).await;
     compose_keys::signing_and_encrypting(&d).await;
+    finding::finding_and_publishing(&d).await;
+    compose_keys::found_on_encrypt(&d).await;
     attach::opening_attachments(&d).await;
     previews::previews(&d).await;
     secure::attachment_previews(&d).await;

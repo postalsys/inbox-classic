@@ -636,7 +636,7 @@ pub async fn contact(parent: &impl IsA<gtk::Widget>, id: CardId) -> Option<CardI
     let phones = phones_section(&card);
     let (notes_group, notes) = notes_section(&card);
     // the keys of the addresses saved, after them
-    let keys = crate::keys::contact_keys(&card.addresses);
+    let keys = crate::keys::contact_keys(id, &card.addresses);
     let mut groups = vec![&picture.group, &names.group, &addresses.group];
     groups.extend(keys.as_ref());
     groups.extend([&phones.group, &notes_group]);

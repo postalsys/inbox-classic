@@ -444,7 +444,14 @@ impl Shell {
                 main.reader.reload();
                 crate::compose_keys::refresh_all();
             }
-            Event::KeysFound { request } => crate::compose_keys::keys_found(*request),
+            // a lookup a window waits for (a contact's Find Key) hears it; a compose window takes its own; a reader's
+            // Find Key is the reader's (main.on_event below)
+            Event::KeysFound { request } => {
+                self.request_done(*request);
+                crate::compose_keys::keys_found(*request);
+            }
+            // My Keys > Publish waits for it
+            Event::KeyPublished { request } => self.request_done(*request),
             // a PDF file ended the app last time: the documents say so, Preferences shows the switch off
             Event::PdfPreviewsOff => crate::preferences::pdf_previews_off(),
             Event::RulesApplied { count, .. } => {

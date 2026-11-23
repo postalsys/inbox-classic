@@ -36,11 +36,16 @@ async fn arrived_after(d: &Driver, uid: u64) -> Option<Value> {
 
 /// What OpenPGP.js makes of a message: the account's key to decrypt it, Alice's to see whether it is encrypted to her
 fn pgp_check(d: &Driver, message: &Value) -> Value {
+    pgp_check_for(d, message, "alice.asc")
+}
+
+/// [`pgp_check`] with the key file of the recipient to see whether it is encrypted to them
+fn pgp_check_for(d: &Driver, message: &Value, recipient: &str) -> Value {
     let body = serde_json::json!({
         "raw": message["raw"].as_str().unwrap_or_default().replace(['\r', '\n'], ""),
         "key": read_fixture("me.asc"),
         "passphrase": read_fixture("me.passphrase").trim(),
-        "recipients": [read_fixture("alice.asc")],
+        "recipients": [read_fixture(recipient)],
     })
     .to_string();
     http(d.ports.pgp, "POST", "/pgp/check", Some(&body))
@@ -271,7 +276,7 @@ async fn encrypting(d: &Driver) {
 }
 
 /// A shot of `window` in dark mode, for the review of the tones there
-async fn in_dark(d: &Driver, window: &impl IsA<gtk::Widget>, name: &str) {
+pub(super) async fn in_dark(d: &Driver, window: &impl IsA<gtk::Widget>, name: &str) {
     let styles = adw::StyleManager::default();
     styles.set_color_scheme(adw::ColorScheme::ForceDark);
     wait_until(5, || styles.is_dark()).await;
@@ -615,4 +620,132 @@ async fn long_languages(d: &Driver) {
         close_compose(&c).await;
     }
     in_language("en").await;
+}
+
+/// Step 19k, at its end: Encrypt on a message to Heidi, whose key only keys.openpgp.org (the harness) has: her lock grey
+/// while it is looked up (her provider's directory first), then blue; Send sends it encrypted to her at once
+pub(super) async fn found_on_encrypt(d: &Driver) {
+    d.step("a recipient's key found as the message is written");
+    let inbox_from = highest_uid(d, "INBOX");
+    let sent_from = highest_uid(d, "Sent");
+    let body = serde_json::json!({ "key": read_fixture("heidi.asc"), "address": "heidi@example.net" }).to_string();
+    let served = http(d.ports.pgp, "POST", "/pgp/keys", Some(&body)).is_ok();
+    d.check(served, "the harness serves Heidi's key at keys.openpgp.org only");
+    let lookups = || {
+        http(d.ports.pgp, "GET", "/pgp/lookups", None)
+            .ok()
+            .and_then(|answer| serde_json::from_str::<Value>(&answer).ok())
+            .and_then(|list| list.as_array().cloned())
+            .unwrap_or_default()
+    };
+    let Some(c) = new_message("Heidi Example <heidi@example.net>", "Found as I wrote", ENCRYPTED_TEXT).await else {
+        d.check(false, "Create Mail opens a compose window");
+        return;
+    };
+    let p = &c.protection;
+    let before = lookups().len();
+    p.shown_states.borrow_mut().clear();
+    let _ = WidgetExt::activate_action(&c.window, "compose.compose-encrypt", None);
+    wait_until(10, || p.encrypt_button.is_active()).await;
+    // the first state shown with Encrypt on: the harness answers within moments, so it is read from what the window
+    // showed in order
+    let first_shown = wait_for(10, || {
+        p.shown_states
+            .borrow()
+            .iter()
+            .find(|(_, line)| !line.0.is_empty())
+            .cloned()
+    })
+    .await
+    .unwrap_or_default();
+    let first = first_shown
+        .0
+        .iter()
+        .find(|(address, _, _)| address == "heidi@example.net")
+        .map(|(_, key, words)| (*key, words.clone()));
+    let (text, tone, _) = first_shown.1;
+    let looking = pe_core::i18n::tr_args(
+        pe_core::i18n::Text::PgpComposeLooking,
+        &[("addresses", "Heidi Example".into())],
+    );
+    d.check(
+        first.as_ref().is_some_and(|(key, words)| {
+            *key == RecipientKey::Looking && *words == pe_core::i18n::tr(pe_core::i18n::Text::PgpRecipientLooking)
+        }) && tone == "neutral"
+            && text == looking,
+        &format!(
+            "Encrypt on: Heidi's lock is grey, \"Looking for a key...\", the line grey ({first:?}; {tone}: {text})"
+        ),
+    );
+    let found = wait_until(20, || {
+        recipient_key(&c, "heidi@example.net").is_some_and(|k| k.0 == RecipientKey::Found)
+    })
+    .await;
+    let chips = p.chips();
+    d.check(
+        found
+            && chips
+                .first()
+                .is_some_and(|chip| chip.1 == "good" && chip.2 == "ic-lock-closed-symbolic"),
+        &format!(
+            "then her lock is blue, Key not verified ({:?}; {chips:?})",
+            recipient_key(&c, "heidi@example.net")
+        ),
+    );
+    let (text, tone, icon) = line(&c);
+    d.check(
+        text == "Will be encrypted and signed for you and Heidi Example."
+            && tone == "good"
+            && icon.first().is_some_and(|i| i == "ic-lock-closed-symbolic"),
+        &format!("and the line blue: who can read it, with the lock ({tone}, {icon:?}: {text})"),
+    );
+    let asked: Vec<Value> = lookups().into_iter().skip(before).collect();
+    d.check(
+        asked
+            == [
+                serde_json::json!({ "kind": "wkd", "value": "heidi@example.net", "found": false }),
+                serde_json::json!({ "kind": "email", "value": "heidi@example.net", "found": true }),
+            ],
+        &format!("her provider's directory was asked first, then keys.openpgp.org ({asked:?})"),
+    );
+    d.shot(&c.window, "write-36-found-on-encrypt").await;
+    let before_send = highest_uid(d, "INBOX");
+    click(c.window.upcast_ref(), "compose-send");
+    let sent = wait_until(15, || !c.window.is_visible()).await;
+    d.check(
+        sent && dialog_named(DIALOG_NAME).is_none(),
+        "Send sends it at once, without Recipients' Keys",
+    );
+    match arrived_after(d, before_send).await {
+        Some(message) => {
+            let checked = pgp_check_for(d, &message, "heidi.asc");
+            d.check(
+                checked["kind"] == "encrypted"
+                    && checked["signed"] == true
+                    && checked["valid"] == true
+                    && checked["to"] == serde_json::json!([true]),
+                &format!("OpenPGP.js finds it encrypted to Heidi's key, signed, the signature good ({checked})"),
+            );
+        }
+        None => d.check(false, "the message to Heidi arrived"),
+    }
+    let heidi = shell()
+        .core
+        .pgp_keys()
+        .unwrap_or_default()
+        .into_iter()
+        .find(|key| key.name == "Heidi Example");
+    d.check(
+        heidi.as_ref().is_some_and(|key| {
+            !key.own
+                && key.status == "Valid"
+                && key.source == pe_core::i18n::tr(pe_core::i18n::Text::PgpSourceKeyserver)
+        }),
+        &format!(
+            "My Keys has Heidi Example, Contact, Valid, \"From keys.openpgp.org\" ({:?})",
+            heidi.map(|k| (k.status, k.source))
+        ),
+    );
+    take_away(d, "INBOX", inbox_from).await;
+    take_away(d, "Sent", sent_from).await;
 }

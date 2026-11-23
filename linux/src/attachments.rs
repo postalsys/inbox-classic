@@ -1,11 +1,11 @@
-//! The strip of a message's files under its header, in the reading pane and in a message's own window: one item a
-//! file, its icon by the kind the core gave it, its name and its size. Double-click or Enter opens a file (the reader
-//! asks the core for it and opens what the core wrote with the system's program); a right-click or the menu key offers
-//! Open, Save As... and Save All... through the reader's actions. A file that can run programs looks the same, says so
-//! in its tooltip, and its Open is greyed. A file of an encrypted part of a message whose parts differ has a small lock
-//! on its icon, in the colour of its part's label (the file came from there, decrypted to be shown), and says its part
-//! in its tooltip and to screen readers. Nothing here reads mail data: the names, sizes, kinds, tooltips, the words
-//! refusing a file and the part a file came from are the core's.
+//! The strip of a message's files under its header, in the reading pane and in a message's own window: one item a file,
+//! its icon by the kind the core gave it, its name and its size. Double-click or Enter opens a file (the reader asks
+//! the core for it and opens what the core wrote with the system's program); a right-click or the menu key offers Open,
+//! Save As..., Import Key... (a file of public keys) and Save All... through the reader's actions. A file that can run
+//! programs looks the same, says so in its tooltip, and its Open is greyed. A file of an encrypted part of a message
+//! whose parts differ has a small lock on its icon, in the colour of its part's label (the file came from there,
+//! decrypted to be shown), and says its part in its tooltip and to screen readers. Nothing here reads mail data: the
+//! names, sizes, kinds, tooltips, the words refusing a file and the part a file came from are the core's.
 
 use std::cell::RefCell;
 use std::path::Path;
@@ -223,8 +223,8 @@ impl Strip {
         self.flow.add_controller(keys);
     }
 
-    /// The menu of the file of `child`: Open (greyed for a file that can run programs), Save As..., Save All...,
-    /// and for a picture or PDF file Show in Message (ticked while it is in the message, greyed when it can not be);
+    /// The menu of the file of `child`: Open (greyed for a file that can run programs), Save As..., Import Key... for
+    /// a file of public keys, Save All..., and for a picture or PDF file Show in Message (ticked while it is in the message, greyed when it can not be);
     /// where the click was, or under the file
     pub fn popup_menu(&self, child: &gtk::FlowBoxChild, at: Option<(f64, f64)>) {
         let Some((index, attachment)) = usize::try_from(child.index())
@@ -248,6 +248,12 @@ impl Strip {
         let save = gio::MenuItem::new(Some(&t!(UiAttachmentSaveAs)), None);
         save.set_action_and_target_value(Some("reader.save-attachment"), Some(&target));
         file.append_item(&save);
+        // a file the core read as public keys: into Encryption Keys
+        if attachment.is_key {
+            let import = gio::MenuItem::new(Some(&t!(UiAttachmentImportKey)), None);
+            import.set_action_and_target_value(Some("reader.import-key"), Some(&target));
+            file.append_item(&import);
+        }
         menu.append_section(None, &file);
         let all = gio::Menu::new();
         all.append(Some(&t!(UiAttachmentSaveAll)), Some("reader.save-all"));
@@ -575,6 +581,7 @@ mod tests {
             tooltip: String::new(),
             refusal: None,
             show_in_message: ShowInMessage::None,
+            is_key: false,
         }
     }
 
@@ -585,6 +592,7 @@ mod tests {
             details: Vec::new(),
             encrypted: true,
             signed: tone == Tone::Verified,
+            find_key: None,
         }
     }
 
