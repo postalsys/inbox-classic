@@ -21,9 +21,9 @@ struct BookEntry {
     var label: String
     /// how many members, for a group
     var count = 0
-    /// a key that can encrypt is in use for one of its addresses, and whether one of those is verified: the list's mark
-    var hasKey = false
-    var keyVerified = false
+    /// the list's key mark (the core's), and what it says
+    var keyMark = PE_KEY_MARK_NONE
+    var keyMarkText = ""
     var isGroup: Bool { group != 0 }
     /// what a list shows for it
     var title: String { name.isEmpty ? address : name }
@@ -67,7 +67,7 @@ extension Core {
         defer { pe_card_list_free(list) }
         return (0..<pe_card_list_count(list)).compactMap { pe_card_list_get(list, $0)?.pointee }.map {
             BookEntry(card: $0.id, name: text($0.name), address: text($0.address), phone: text($0.phone), label: text($0.label),
-                      hasKey: $0.has_key, keyVerified: $0.key_verified)
+                      keyMark: $0.key_mark, keyMarkText: text($0.key_mark_text))
         }
     }
 
@@ -583,13 +583,17 @@ final class AddressBookWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
             ])
             return made
         }()
-        let words = !entry.hasKey ? "" : entry.keyVerified ? Text.uiBookKeyVerified.text : Text.uiBookKeyKnown.text
-        let symbol = !entry.hasKey ? nil : entry.keyVerified ? "checkmark.shield.fill" : "key.fill"
+        let words = entry.keyMarkText
+        let (symbol, tint): (String?, NSColor) = switch entry.keyMark {
+        case PE_KEY_MARK_VERIFIED: ("checkmark.shield.fill", .systemGreen)
+        case PE_KEY_MARK_KNOWN: ("key.fill", .secondaryLabelColor)
+        default: (nil, .secondaryLabelColor)
+        }
         cell.imageView?.image = symbol.flatMap { NSImage(systemSymbolName: $0, accessibilityDescription: words) }
-        cell.imageView?.contentTintColor = entry.keyVerified ? .systemGreen : .secondaryLabelColor
+        cell.imageView?.contentTintColor = tint
         cell.imageView?.setAccessibilityLabel(words.isEmpty ? nil : words)
         cell.toolTip = words.isEmpty ? nil : words
-        cell.setAccessibilityElement(entry.hasKey)
+        cell.setAccessibilityElement(symbol != nil)
         cell.setAccessibilityLabel(words.isEmpty ? nil : words)
         return cell
     }

@@ -189,6 +189,8 @@ std::wstring StripLabel(HDC dc, const PeAttachment& attachment, int width) {
 }
 
 constexpr UINT WM_STRIP_OPENED = WM_APP + 80;
+// on the strip: what Import Key did, from its thread
+constexpr UINT WM_STRIP_IMPORTED = WM_APP + 81;
 // on the strip: an open that takes a while shows on its item
 constexpr UINT_PTR TIMER_STRIP_BUSY = 1;
 
@@ -218,6 +220,12 @@ struct StripOpened {
     std::wstring path;
     std::wstring note;
     std::wstring refused;
+};
+
+// what the thread of Import Key hands back to the strip (WM_STRIP_IMPORTED): how it ended and the core's words
+struct StripImported {
+    PeImportOutcome outcome = PE_IMPORT_OUTCOME_INVALID;
+    std::wstring said;
 };
 
 void SetOpenedFilesLog(const std::wstring& path) {
@@ -975,10 +983,16 @@ void Reader::StopOpening() {
     if (opener_.joinable()) {
         opener_.join();
     }
-    // the result it posted, which the strip would never take
+    if (importer_.joinable()) {
+        importer_.join();
+    }
+    // the results they posted, which the strip would never take (an import's keys are in the key book all the same)
     MSG posted;
     while (PeekMessageW(&posted, strip_, WM_STRIP_OPENED, WM_STRIP_OPENED, PM_REMOVE)) {
         delete reinterpret_cast<StripOpened*>(posted.lParam);
+    }
+    while (PeekMessageW(&posted, strip_, WM_STRIP_IMPORTED, WM_STRIP_IMPORTED, PM_REMOVE)) {
+        delete reinterpret_cast<StripImported*>(posted.lParam);
     }
 }
 
@@ -1048,17 +1062,38 @@ void Reader::StripMenu(POINT screen) {
 }
 
 void Reader::ImportAttachedKey(size_t index) {
-    char* message = nullptr;
-    PeImportOutcome outcome = file_.empty() ? pe_pgp_import_attachment(core_, folder_, uid_, index, &message)
-                                            : pe_pgp_import_file_attachment(core_, core::Narrow(file_).c_str(), index, &message);
-    std::wstring said = ReasonText(message, PE_TEXT_UI_UNKNOWN_REASON);
+    // one at a time: the core reads (and decrypts) the message on a thread of its own, the busy pointer over the strip
+    if (importing_) {
+        return;
+    }
+    if (importer_.joinable()) {
+        importer_.join();
+    }
+    importing_ = true;
+    std::string file = file_.empty() ? std::string() : core::Narrow(file_);
+    importer_ = std::thread([strip = strip_, core = core_, file, folder = folder_, uid = uid_, index] {
+        char* message = nullptr;
+        PeImportOutcome outcome = pe_pgp_import_attachment(core, file.empty() ? nullptr : file.c_str(), folder, uid, index, &message);
+        core::String words(message);
+        auto* imported = new StripImported{outcome, words ? Text(words.get()) : L""};
+        if (!PostMessageW(strip, WM_STRIP_IMPORTED, 0, reinterpret_cast<LPARAM>(imported))) {
+            delete imported;
+        }
+    });
+}
+
+void Reader::ImportDone(StripImported* imported) {
+    std::unique_ptr<StripImported> done(imported);
+    importing_ = false;
+    std::wstring said = done->said.empty() ? core::T(PE_TEXT_UI_UNKNOWN_REASON) : done->said;
     std::wstring title = core::Plain(PE_TEXT_UI_KEYS_IMPORT_TITLE);
-    bool imported = outcome == PE_IMPORT_OUTCOME_IMPORTED;
-    MessageBoxApp(parent_, said.c_str(), title.c_str(), MB_OK | (imported ? MB_ICONINFORMATION : MB_ICONWARNING));
-    if (!imported) {
+    bool ok = done->outcome == PE_IMPORT_OUTCOME_IMPORTED;
+    MessageBoxApp(parent_, said.c_str(), title.c_str(), MB_OK | (ok ? MB_ICONINFORMATION : MB_ICONWARNING));
+    if (!ok) {
         return;
     }
     OfferUnclaimed(parent_, core_);
+    // a signature by that key names its signer now
     if (Info()) {
         StartView();
     }
@@ -1148,6 +1183,9 @@ LRESULT CALLBACK Reader::StripProc(HWND hwnd, UINT message, WPARAM wParam, LPARA
     case WM_STRIP_OPENED:
         reader->OpenDone(reinterpret_cast<StripOpened*>(lParam));
         return 0;
+    case WM_STRIP_IMPORTED:
+        reader->ImportDone(reinterpret_cast<StripImported*>(lParam));
+        return 0;
     case WM_TIMER:
         if (wParam == TIMER_STRIP_BUSY) {
             // still opening: its icon dimmed and the busy pointer over the strip until it is done
@@ -1158,7 +1196,8 @@ LRESULT CALLBACK Reader::StripProc(HWND hwnd, UINT message, WPARAM wParam, LPARA
         }
         break;
     case WM_SETCURSOR:
-        if (reader->openingItem_ >= 0 && (ListView_GetItemState(hwnd, reader->openingItem_, LVIS_CUT) & LVIS_CUT)) {
+        if (reader->importing_ ||
+            (reader->openingItem_ >= 0 && (ListView_GetItemState(hwnd, reader->openingItem_, LVIS_CUT) & LVIS_CUT))) {
             SetCursor(LoadCursorW(nullptr, IDC_APPSTARTING));
             return TRUE;
         }

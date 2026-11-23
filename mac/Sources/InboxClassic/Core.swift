@@ -487,6 +487,8 @@ struct PgpKey {
     /// each address, a contact's with whether it is verified
     let addressLines: String
     let removeQuestion: String
+    /// what Publish asks first, naming the key's addresses; empty for a contact's key
+    let publishQuestion: String
     /// what They Match marks: every address of the key
     let verifyMarks: String
     let createdText: String
@@ -513,6 +515,7 @@ struct PgpKey {
         canVerify = key.can_verify
         addressLines = text(key.address_lines)
         removeQuestion = text(key.remove_question)
+        publishQuestion = text(key.publish_question)
         verifyMarks = text(key.verify_marks)
         createdText = text(key.created_text)
         expiresText = text(key.expires_text)
@@ -565,8 +568,8 @@ extension Core {
     /// public keys only, never a passphrase asked. Reads (and decrypts) the message on the calling thread.
     func pgpImportAttachment(folder: Int64, uid: UInt64, file: String?, index: Int) -> (outcome: PeImportOutcome, message: String) {
         var message: UnsafeMutablePointer<CChar>?
-        let outcome = file.map { path in path.withCString { pe_pgp_import_file_attachment(handle, $0, index, &message) } }
-            ?? pe_pgp_import_attachment(handle, folder, uid, index, &message)
+        let strings = CStrings()
+        let outcome = pe_pgp_import_attachment(handle, file.map(strings.add), folder, uid, index, &message)
         return (outcome, taken(message) ?? "")
     }
 
@@ -591,6 +594,11 @@ extension Core {
     /// Find Key in a contact's window: the keys of the card's addresses looked up; 0 when there is nothing to ask
     func contactFindKeys(_ card: Int64) -> UInt64 {
         pe_contact_find_keys(handle, card)
+    }
+
+    /// whether a contact's Find Key has anything to ask now: the window enables it by this
+    func contactCanFindKeys(_ card: Int64) -> Bool {
+        pe_contact_can_find_keys(handle, card)
     }
 
     /// what a lookup this window started found, after its KeysFound (the keys taken in now): the words to show

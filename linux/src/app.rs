@@ -445,17 +445,14 @@ impl Shell {
                 crate::compose_keys::refresh_all();
             }
             // a lookup a window waits for (a contact's Find Key) hears it; a compose window takes its own; a reader's
-            // Find Key is the reader's (main.on_event below)
-            Event::KeysFound { request } => {
+            // Find Key is the reader's (main.on_event below). The core learned the keys already: the windows that
+            // show keys read them again when there were any
+            Event::KeysFound { request, learned } => {
                 self.request_done(*request);
                 crate::compose_keys::keys_found(*request);
-                // one whose window closed before it ended is learned all the same, after the open windows took theirs
-                let request = *request;
-                glib::idle_add_local_once(move || {
-                    if shell().core.pgp_find_result(request).is_some() {
-                        crate::keys::learned();
-                    }
-                });
+                if *learned > 0 {
+                    crate::keys::learned();
+                }
             }
             // My Keys > Publish waits for it
             Event::KeyPublished { request } => self.request_done(*request),

@@ -209,8 +209,8 @@ async fn import(parent: &impl IsA<gtk::Widget>) -> Option<String> {
     import_bytes(parent, &title, &bytes, KeySource::File).await
 }
 
-/// Import from Clipboard: the clipboard's text handed to the core as a file's bytes are, the same questions asked; the
-/// first key imported
+/// Import from Clipboard: the clipboard's text (empty without any) handed to the core as a file's bytes are, the same
+/// questions asked; the core says when it holds no key. The first key imported
 async fn paste(parent: &impl IsA<gtk::Widget>) -> Option<String> {
     let title = words::title(Text::UiKeysPaste);
     let text = parent
@@ -222,10 +222,6 @@ async fn paste(parent: &impl IsA<gtk::Widget>) -> Option<String> {
         .flatten()
         .map(|text| text.to_string())
         .unwrap_or_default();
-    if text.trim().is_empty() {
-        ui::alert(parent, &title, &t!(UiKeysPasteNone)).await;
-        return None;
-    }
     import_bytes(parent, &title, text.as_bytes(), KeySource::Paste).await
 }
 
@@ -248,22 +244,11 @@ async fn import_bytes(parent: &impl IsA<gtk::Widget>, title: &str, bytes: &[u8],
             offer_unclaimed(parent).await;
             imported.keys.into_iter().next()
         }
-        // text without a key block in it: what was copied was something else
-        Err(ImportError::Invalid(_)) if source == KeySource::Paste && !has_key_block(bytes) => {
-            ui::alert(parent, title, &t!(UiKeysPasteNone)).await;
-            None
-        }
         Err(error) => {
             ui::alert(parent, title, &error.text()).await;
             None
         }
     }
-}
-
-/// Whether text pasted has the line an armored OpenPGP block starts with: without it the clipboard held no key, with
-/// it the core's words say what is wrong with the key
-fn has_key_block(bytes: &[u8]) -> bool {
-    String::from_utf8_lossy(bytes).contains("-----BEGIN PGP ")
 }
 
 /// The passphrase of a protected key asked for until it opens it or Cancel; what the import with it did
@@ -360,11 +345,10 @@ async fn export(parent: &impl IsA<gtk::Widget>, key: &KeyInfo) {
 /// what the server did said once it answered (over the main window when Encryption Keys closed meanwhile)
 async fn publish(parent: &gtk::Widget, key: &KeyInfo, button: &gtk::Button, closed: &std::cell::Cell<bool>) {
     let title = words::title(Text::UiKeysPublish);
-    let addresses: Vec<&str> = key.addresses.iter().map(|(address, _)| address.as_str()).collect();
-    let question = t!(UiKeysPublishAsk, addresses = &*addresses.join(", "));
+    let question = &key.publish_question;
     let (cancel, now) = (t!(UiCancel), plain(Text::UiKeysPublishNow));
     let answers = [("cancel", cancel.as_str()), ("publish", now.as_str())];
-    if ui::ask(parent, &title, &question, &answers, "publish", "cancel", None).await != "publish" {
+    if ui::ask(parent, &title, question, &answers, "publish", "cancel", None).await != "publish" {
         return;
     }
     let core = &shell().core;
@@ -898,6 +882,7 @@ impl AccountSecurity {
 struct ContactKeys {
     group: glib::WeakRef<adw::PreferencesGroup>,
     rows: RefCell<Vec<gtk::Widget>>,
+    card: pe_store::CardId,
     addresses: Vec<String>,
     find: glib::WeakRef<gtk::Button>,
     /// A lookup of Find Key is under way
@@ -925,6 +910,7 @@ pub fn contact_keys(card: pe_store::CardId, addresses: &[String]) -> Option<adw:
     let keys = Rc::new(ContactKeys {
         group: group.downgrade(),
         rows: RefCell::default(),
+        card,
         addresses: addresses.to_vec(),
         find: glib::WeakRef::new(),
         looking: std::cell::Cell::new(false),
@@ -934,7 +920,7 @@ pub fn contact_keys(card: pe_store::CardId, addresses: &[String]) -> Option<adw:
         let weak = Rc::downgrade(&keys);
         find.connect_clicked(move |_| {
             if let Some(keys) = weak.upgrade() {
-                keys.find_keys(card);
+                keys.find_keys();
             }
         });
     }
@@ -957,15 +943,11 @@ impl ContactKeys {
         let core = &shell().core;
         let mut added: Vec<gtk::Widget> = Vec::new();
         let mut first_verify: Option<gtk::Button> = None;
-        // Find Key has something to do while an address has no key that can be used
-        let mut all_usable = true;
         for (index, address) in self.addresses.iter().enumerate() {
             let peer = core.pgp_peer(address).unwrap_or_default();
             let Some(key) = peer.in_use.as_deref().and_then(|fp| core.pgp_key(fp).ok()) else {
-                all_usable = false;
                 continue;
             };
-            all_usable &= key.state == KeyState::Valid;
             let row = adw::ActionRow::builder()
                 .title(glib::markup_escape_text(&format!("{address} ({})", key.status)))
                 .subtitle(glib::markup_escape_text(&key.grouped))
@@ -1003,15 +985,23 @@ impl ContactKeys {
         }
         *self.rows.borrow_mut() = added;
         if let Some(find) = self.find.upgrade() {
-            // greyed with nothing to find: the keyboard focus, when it was on it, goes to the key found rather than to
-            // the top of the window
-            if all_usable
+            // greyed with nothing to ask (the core's rule): the keyboard focus, when it was on it, goes to the key found
+            // rather than to the top of the window
+            let can_find = core.contact_can_find_keys(self.card);
+            if !can_find
                 && find.has_focus()
                 && let Some(verify) = &first_verify
             {
                 verify.grab_focus();
             }
-            find.set_sensitive(!all_usable);
+            find.set_sensitive(can_find);
+        }
+    }
+
+    /// Words under the section's title (what a lookup is doing or found); none for empty
+    fn say(&self, text: &str) {
+        if let Some(group) = self.group.upgrade() {
+            group.set_description((!text.is_empty()).then(|| glib::markup_escape_text(text)).as_deref());
         }
     }
 
@@ -1030,42 +1020,33 @@ impl ContactKeys {
     }
 
     /// Find Key: the keys of the card's addresses looked up, "Looking for a key..." under the title meanwhile, then
-    /// what was found said there and the rows read again. The result is taken (and its keys learned) even when the
-    /// window closed first
-    fn find_keys(self: &Rc<Self>, card: pe_store::CardId) {
+    /// what was found said there and the rows read again. The core learns the keys found whether the window is still
+    /// open or not
+    fn find_keys(self: &Rc<Self>) {
         if self.looking.get() {
             return;
         }
         let core = shell().core.clone();
-        let say = |text: &str| {
-            if let Some(group) = self.group.upgrade() {
-                group.set_description((!text.is_empty()).then(|| glib::markup_escape_text(text)).as_deref());
-            }
-        };
-        let request = match core.contact_find_keys(card) {
+        let request = match core.contact_find_keys(self.card) {
             Ok(Some(request)) => request,
             Ok(None) => return,
             Err(error) => {
-                say(&error.to_string());
+                self.say(&error.to_string());
                 return;
             }
         };
         // the button stays where the focus is while it looks; another click meanwhile asks nothing
         self.looking.set(true);
-        say(&t!(PgpRecipientLooking));
+        self.say(&t!(PgpRecipientLooking));
         let (send, done) = async_channel::bounded::<bool>(2);
         shell().watch_request(request, send);
         let weak = Rc::downgrade(self);
         glib::spawn_future_local(async move {
             let _ = done.recv().await;
             let outcome = core.pgp_find_result(request);
-            learned();
             let Some(keys) = weak.upgrade() else { return };
             keys.looking.set(false);
-            if let Some(group) = keys.group.upgrade() {
-                let text = outcome.map(|o| o.text).unwrap_or_default();
-                group.set_description((!text.is_empty()).then(|| glib::markup_escape_text(&text)).as_deref());
-            }
+            keys.say(&outcome.map(|o| o.text).unwrap_or_default());
             keys.fill();
         });
     }

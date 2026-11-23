@@ -20,6 +20,7 @@
 
 struct UiEvent;
 struct StripOpened;
+struct StripImported;
 
 class Reader {
 public:
@@ -164,9 +165,10 @@ private:
     void StripMenu(POINT screen);
     // Show in Message chosen for file `index`: drawn in the message (`show`) or taken out, the view built again
     void ShowInMessage(size_t index, bool show);
-    // Import Key chosen for file `index`, a key someone attached: imported as a key file's are, what was imported said,
-    // and the view built again (a signature by that key now names its signer)
+    // Import Key chosen for file `index`, a key someone attached: imported as a key file's are, off the window thread;
+    // ImportDone says what was imported and builds the view again (a signature by that key now names its signer)
     void ImportAttachedKey(size_t index);
+    void ImportDone(StripImported* imported);
     // Find Key on the label of a part signed by a key not known here (`uri` the link): looked up by its fingerprint;
     // KeysFound takes what was found and builds the view again
     void FindSignerKey(const wchar_t* uri);
@@ -197,6 +199,9 @@ private:
     // the open under way and its item, -1 for none: a message file's on a thread of its own, a folder's message's a
     // read of the core (pe_attachment_open_start)
     std::thread opener_;
+    // Import Key's thread, and whether it runs
+    std::thread importer_;
+    bool importing_ = false;
     int openingItem_ = -1;
     uint64_t openRequest_ = 0;
     // the reads of the core waited for (ReadDone): a reply or forward and what takes it, a file to save

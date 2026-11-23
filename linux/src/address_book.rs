@@ -8,7 +8,7 @@ use std::rc::Rc;
 
 use adw::prelude::*;
 use gtk::{gdk, gio, glib};
-use pe_core::book::{BookRow, group_label};
+use pe_core::book::{BookRow, KeyMark, group_label};
 use pe_store::{CardId, GroupId};
 
 use crate::app::{shell, spawn};
@@ -101,14 +101,13 @@ fn text_column(title: &str, width: i32, expand: bool, text: fn(&BookRow) -> &str
     column
 }
 
-/// The mark of a person whose key can encrypt now: the shield with a check, in the verified tone, for a key the user
-/// verified (or their own); a key for one that is not verified; none without a key. What it says on hover and to a
-/// screen reader
-fn key_mark(row: &BookRow) -> Option<(&'static str, String)> {
-    match (row.has_key, row.key_verified) {
-        (true, true) => Some(("ic-shield-checkmark-symbolic", t!(UiBookKeyVerified))),
-        (true, false) => Some(("ic-key-symbolic", t!(UiBookKeyKnown))),
-        _ => None,
+/// The picture of a person's key mark (the core's): the shield with a check, in the verified tone, for a key the user
+/// verified (or their own); a key for one that is not verified; none without a key. And whether it is the verified one
+fn key_icon(mark: KeyMark) -> (Option<&'static str>, bool) {
+    match mark {
+        KeyMark::Verified => (Some("ic-shield-checkmark-symbolic"), true),
+        KeyMark::Known => (Some("ic-key-symbolic"), false),
+        KeyMark::None => (None, false),
     }
 }
 
@@ -133,12 +132,12 @@ fn key_column() -> gtk::ColumnViewColumn {
         ) else {
             return;
         };
-        let mark = key_mark(&row.borrow::<BookRow>());
-        crate::icons::set(&image, mark.as_ref().map(|(icon, _)| *icon));
-        let words = mark.as_ref().map(|(_, words)| words.as_str());
-        image.set_tooltip_text(words);
-        image.update_property(&[gtk::accessible::Property::Label(words.unwrap_or_default())]);
-        let verified = mark.as_ref().is_some_and(|(icon, _)| icon.starts_with("ic-shield"));
+        let row = row.borrow::<BookRow>();
+        let (icon, verified) = key_icon(row.key_mark);
+        crate::icons::set(&image, icon);
+        let words = &row.key_mark_text;
+        image.set_tooltip_text((!words.is_empty()).then_some(words.as_str()));
+        image.update_property(&[gtk::accessible::Property::Label(words)]);
         crate::ui::set_class(&image, "security-verified", verified);
         crate::ui::set_class(&image, "security-tint", verified);
     });

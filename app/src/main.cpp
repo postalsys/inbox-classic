@@ -639,14 +639,14 @@ void OnEvent(const UiEvent& event) {
         // and the security bar of the next message opened); the Address Book's marks below
         break;
     case PE_EVENT_KIND_KEYS_FOUND:
-        // the window that looked keys up takes them (a reading pane's Find Key, below with the panes' events); every
-        // compose window shows its recipients' keys again
-        ContactKeysFound(event.uid);
+        // the core learned what was found; the window that looked keys up says what (a reading pane's Find Key, below
+        // with the panes' events), every compose window shows its recipients' keys again
+        ContactKeysFound(event.uid, event.count > 0);
         ComposeKeysFound(event.uid);
         break;
     case PE_EVENT_KIND_KEY_PUBLISHED:
         // what keys.openpgp.org did, over the Encryption Keys window that asked
-        KeyPublished(event.uid);
+        KeyPublished(g_core.get(), event.uid);
         break;
     case PE_EVENT_KIND_RULES_APPLIED:
         g_rulesSaid = core::T(PE_TEXT_UI_RULES_APPLIED, {{"count", std::to_wstring(event.count)}});
@@ -670,8 +670,8 @@ void OnEvent(const UiEvent& event) {
     g_mailbox.OnEvent(event);
     // the messages open in windows of their own: shown once ready, closed once gone
     MessageWindowsEvent(event);
-    // the Address Book's key marks, once every window took the keys it found
-    if (event.kind == PE_EVENT_KIND_KEYS_FOUND || event.kind == PE_EVENT_KIND_KEYS_CHANGED) {
+    // the Address Book's key marks, when keys were learned
+    if ((event.kind == PE_EVENT_KIND_KEYS_FOUND && event.count > 0) || event.kind == PE_EVENT_KIND_KEYS_CHANGED) {
         AddressBookKeysChanged();
     }
     // the tray and the taskbar button: what is unread in the Inboxes, when a folder changed

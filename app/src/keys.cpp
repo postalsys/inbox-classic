@@ -5,7 +5,6 @@
 #include "app.h"
 
 #include <algorithm>
-#include <string_view>
 #include <vector>
 
 std::string ReadSecret(HWND edit) {
@@ -498,17 +497,10 @@ std::vector<uint8_t> ClipboardText(HWND owner) {
     return bytes;
 }
 
-// Import from Clipboard: a key copied as text (from a web page, say) imported as a file's is; a clipboard without an
-// armored key says so without asking the core. True when keys came in
+// Import from Clipboard: a key copied as text (from a web page, say) imported as a file's is; the core says when the
+// clipboard holds no key. True when keys came in
 bool PasteKeys(HWND owner, PeCore* core) {
     std::vector<uint8_t> bytes = ClipboardText(owner);
-    constexpr std::string_view kArmor = "-----BEGIN PGP ";
-    if (std::search(bytes.begin(), bytes.end(), kArmor.begin(), kArmor.end()) == bytes.end()) {
-        SecureZeroMemory(bytes.data(), bytes.size());
-        MessageBoxApp(owner, core::T(PE_TEXT_UI_KEYS_PASTE_NONE).c_str(), core::Plain(PE_TEXT_UI_KEYS_IMPORT_TITLE).c_str(),
-                      MB_OK | MB_ICONINFORMATION);
-        return false;
-    }
     return ImportKeyBytes(owner, core, bytes, PE_KEY_SOURCE_PASTE);
 }
 
@@ -766,11 +758,10 @@ struct KeysState {
 };
 
 // the Encryption Keys window while it is open and the window it is over; the publishing it started that
-// keys.openpgp.org has not answered, and the core asked
+// keys.openpgp.org has not answered, 0 for none (one at a time)
 HWND g_keysWindow = nullptr;
 HWND g_keysOwner = nullptr;
-std::vector<uint64_t> g_publishing;
-PeCore* g_publishCore = nullptr;
+uint64_t g_publishing = 0;
 
 const PeKey* KeyAt(const KeysState& state, int row) {
     return row >= 0 ? pe_pgp_key_list_get(state.keys.get(), static_cast<size_t>(row)) : nullptr;
@@ -786,7 +777,7 @@ void ShowSelected(HWND hwnd, const KeysState& state) {
     EnableWindow(Item(hwnd, IDC_KEYS_EXPORT), key != nullptr);
     EnableWindow(Item(hwnd, IDC_KEYS_BACKUP), key && key->can_back_up);
     // a contact's key is theirs to publish; one at a time
-    EnableWindow(Item(hwnd, IDC_KEYS_PUBLISH), key && key->own && g_publishing.empty());
+    EnableWindow(Item(hwnd, IDC_KEYS_PUBLISH), key && key->own && !g_publishing);
     EnableWindow(Item(hwnd, IDC_KEYS_VERIFY), key && key->can_verify);
     EnableWindow(Item(hwnd, IDC_KEYS_PROPERTIES), key != nullptr);
     EnableWindow(Item(hwnd, IDC_KEYS_REMOVE), key != nullptr);
@@ -831,11 +822,7 @@ void DrawEmptyKeys(HWND list, HDC dc) {
 
 // Publish, asked first: the key's addresses get keys.openpgp.org's confirmation mail; KeyPublished tells the rest
 void PublishKey(HWND hwnd, KeysState& state, const PeKey& key) {
-    std::wstring addresses = Text(key.addresses);
-    for (size_t at = addresses.find(L'\n'); at != std::wstring::npos; at = addresses.find(L'\n', at)) {
-        addresses.replace(at, 1, L", ");
-    }
-    std::wstring question = core::T(PE_TEXT_UI_KEYS_PUBLISH_ASK, {{"addresses", addresses}});
+    std::wstring question = Text(key.publish_question);
     std::wstring title = core::Title(PE_TEXT_UI_KEYS_PUBLISH);
     if (MessageBoxApp(hwnd, question.c_str(), title.c_str(), MB_YESNO | MB_ICONQUESTION) != IDYES) {
         return;
@@ -847,8 +834,7 @@ void PublishKey(HWND hwnd, KeysState& state, const PeKey& key) {
         return;
     }
     // greyed, with the busy pointer, until the server answered
-    g_publishing.push_back(request);
-    g_publishCore = state.core;
+    g_publishing = request;
     ShowSelected(hwnd, state);
 }
 
@@ -888,7 +874,7 @@ void OnKeysCommand(HWND hwnd, KeysState& state, WORD id) {
         }
         return;
     case IDC_KEYS_PUBLISH:
-        if (key && key->own && g_publishing.empty()) {
+        if (key && key->own && !g_publishing) {
             PublishKey(hwnd, state, *key);
         }
         return;
@@ -968,7 +954,7 @@ LRESULT CALLBACK KeysProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 0;
     case WM_SETCURSOR:
         // while keys.openpgp.org is asked
-        if (!g_publishing.empty()) {
+        if (g_publishing) {
             SetCursor(LoadCursorW(nullptr, IDC_APPSTARTING));
             return TRUE;
         }
@@ -1140,12 +1126,13 @@ void EncryptionKeysDialog(HWND owner, PeCore* core) {
     AddressBookKeysChanged();
 }
 
-void KeyPublished(uint64_t request) {
-    if (std::erase(g_publishing, request) == 0) {
+void KeyPublished(PeCore* core, uint64_t request) {
+    if (!g_publishing || request != g_publishing) {
         return;
     }
+    g_publishing = 0;
     bool ok = false;
-    core::String said(pe_pgp_publish_result(g_publishCore, request, &ok));
+    core::String said(pe_pgp_publish_result(core, request, &ok));
     if (!said) {
         return;
     }

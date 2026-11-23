@@ -40,9 +40,9 @@ struct Entry {
     size_t members = 0;
     // as it goes in an address field (the core's), empty for a person without an address
     std::wstring label;
-    // a key that can encrypt is in use for one of its addresses, and one of those is verified (the book's key marks)
-    bool hasKey = false;
-    bool keyVerified = false;
+    // the book's key mark before the name (the core's), and what it says
+    PeKeyMark keyMark = PE_KEY_MARK_NONE;
+    std::wstring keyMarkText;
 };
 
 // rows of the core's list of people: the book's (pe_cards) or a group's (pe_group_people)
@@ -56,8 +56,8 @@ std::vector<Entry> People(PeCardList* list) {
         entry.address = Text(row->address);
         entry.phone = Text(row->phone);
         entry.label = Text(row->label);
-        entry.hasKey = row->has_key;
-        entry.keyVerified = row->key_verified;
+        entry.keyMark = row->key_mark;
+        entry.keyMarkText = Text(row->key_mark_text);
         entries.push_back(std::move(entry));
     }
     return entries;
@@ -460,22 +460,18 @@ struct ContactState {
         std::wstring pending;
     };
     std::vector<Key> keys;
-    // Find Key: the lookup it started (0 for none), what the last one said, whether it can be asked now; the keys'
-    // part of the window (its label, Find Key, the rows and those words), made again once a lookup found keys, and its
-    // top
+    // Find Key: the lookup it started (0 for none) and what the last one said; the keys' part of the window (its
+    // label, Find Key, the rows and those words), made again once a lookup found keys, and its top
     uint64_t lookup = 0;
     std::wstring said;
-    bool canFind = false;
     std::vector<HWND> keyControls;
     int keysTop = 0;
     int64_t saved = 0;
     bool done = false;
 };
 
-// Contact Properties while it is open (it is modal: one at a time), and the lookups of one closed before they ended,
-// whose keys are taken all the same once they do
+// Contact Properties while it is open (it is modal: one at a time)
 HWND g_contact = nullptr;
-std::vector<std::pair<uint64_t, PeCore*>> g_droppedLookups;
 
 // the most addresses whose keys Contact Properties shows, and the ids of each one's controls
 constexpr size_t kMostKeyRows = 3;
@@ -488,38 +484,36 @@ std::wstring DisplayName(const std::wstring& first, const std::wstring& last) {
 }
 
 // what a key row says, the address on a line of its own so the fingerprint and its status stay together beside
-// Verify: "bob@example.net:" and "8A3F 21C0 ... (Valid, verified)"
-std::wstring KeyLine(PeCore* core, const ContactState::Key& key) {
-    core::KeyList found(pe_pgp_key(core, key.fingerprint.c_str()));
-    const PeKey* row = pe_pgp_key_list_get(found.get(), 0);
-    std::wstring address = core::Widen(key.address);
-    return row ? address + L":\r\n" + Text(row->grouped) + L" (" + Text(row->status) + L")" : address;
+// Verify: "bob@example.net:" and "8A3F 21C0 ... (Valid, verified)"; the address alone without the key (`row`)
+std::wstring KeyLine(const std::string& address, const PeKey* row) {
+    std::wstring wide = core::Widen(address);
+    return row ? wide + L":\r\n" + Text(row->grouped) + L" (" + Text(row->status) + L")" : wide;
 }
 
-// the key in use for each of the card's addresses as the core has them now (three at most), and whether Find Key has
-// something to look up: a saved card with an address that has no key, or one that can not be used
+// a key row's words as the core has its key now
+std::wstring KeyLine(PeCore* core, const ContactState::Key& key) {
+    core::KeyList found(pe_pgp_key(core, key.fingerprint.c_str()));
+    return KeyLine(key.address, pe_pgp_key_list_get(found.get(), 0));
+}
+
+// the key in use for each of the card's addresses as the core has them now (three at most)
 void LoadKeys(ContactState& state) {
     state.keys.clear();
-    state.canFind = false;
     for (const std::wstring& address : state.addresses) {
+        if (state.keys.size() == kMostKeyRows) {
+            break;
+        }
         std::string utf8 = core::Narrow(address);
         core::PeerKeys peer(pe_pgp_peer(state.core, utf8.c_str()));
         if (!peer || !peer->in_use) {
-            state.canFind = true;
             continue;
         }
         core::KeyList found(pe_pgp_key(state.core, peer->in_use));
-        const PeKey* row = pe_pgp_key_list_get(found.get(), 0);
-        state.canFind = state.canFind || !row || row->state != PE_KEY_STATE_VALID;
-        if (state.keys.size() == kMostKeyRows) {
-            continue;
-        }
         ContactState::Key key{utf8, peer->in_use};
         key.pending = peer->pending_text ? Text(peer->pending_text) : L"";
-        key.line = KeyLine(state.core, key);
+        key.line = KeyLine(utf8, pe_pgp_key_list_get(found.get(), 0));
         state.keys.push_back(std::move(key));
     }
-    state.canFind = state.canFind && state.id != 0;
 }
 
 // card `id` into `state`; its id left 0 when there is none
@@ -1175,7 +1169,8 @@ void BuildKeys(HWND dialog, ContactState& state, const ContactLayout& at, int y)
     made.push_back(MakeLabel(dialog, core::T(PE_TEXT_UI_CONTACT_KEY), {at.pad, y + (at.button - at.label) / 2, right - buttonWidth - at.gap,
                                                                        y + (at.button + at.label) / 2}));
     HWND find = MakeButton(dialog, PE_TEXT_UI_CONTACT_FIND_KEY, IDC_CONTACT_FIND_KEY, right - buttonWidth, y, buttonWidth);
-    EnableWindow(find, state.canFind && !state.lookup);
+    // greyed with nothing to ask (the core's rule: while it is looked up, and a minute after)
+    EnableWindow(find, pe_contact_can_find_keys(state.core, state.id));
     made.push_back(find);
     y += at.button + at.gap;
     if (state.keys.empty()) {
@@ -1263,13 +1258,10 @@ void RebuildKeys(HWND dialog, ContactState& state) {
 // Find Key: the keys of the card's addresses looked up (their providers, then keys.openpgp.org); greyed while it is
 // asked, and when there is nothing to ask (looked up a moment ago)
 void FindContactKeys(HWND dialog, ContactState& state) {
-    if (state.lookup || !state.canFind) {
+    if (state.lookup) {
         return;
     }
     state.lookup = pe_contact_find_keys(state.core, state.id);
-    if (!state.lookup) {
-        state.canFind = false;
-    }
     HWND find = GetDlgItem(dialog, IDC_CONTACT_FIND_KEY);
     // the keyboard off the button it greys (on what the lookup makes, once it is done)
     if (GetFocus() == find) {
@@ -1336,12 +1328,9 @@ int64_t ContactProperties(HWND owner, PeCore* core, int64_t id) {
     ShowAddresses(dialog, state, 0);
     ShowPhones(dialog, state, 0);
     HWND outer = std::exchange(g_contact, dialog);
+    // a lookup not done when it closes loses nothing: the core learns what it finds
     RunModal(dialog, GetDlgItem(dialog, IDC_CONTACT_FIRST), state.done);
     g_contact = outer;
-    // a lookup not done yet is not this window's any more: its keys are taken all the same once it ends
-    if (state.lookup) {
-        g_droppedLookups.emplace_back(state.lookup, core);
-    }
     if (state.picture) {
         DeleteObject(state.picture);
     }
@@ -1582,25 +1571,33 @@ void UpdateButtons(Book* book) {
     }
 }
 
-// what a row's key mark says (its tooltip, and its row's description for a screen reader), empty for none
-std::wstring KeyMarkWords(const Entry& entry) {
-    if (!entry.hasKey) {
-        return L"";
-    }
-    return core::T(entry.keyVerified ? PE_TEXT_UI_BOOK_KEY_VERIFIED : PE_TEXT_UI_BOOK_KEY_KNOWN);
-}
-
 // the key marks of the rows, before their names: no picture of the list's own (DrawKeyMark draws them), and the words
 // of each for a screen reader
 void ShowKeyMarks(const Book* book) {
+    std::vector<std::wstring> words;
+    words.reserve(book->rows.size());
     for (size_t i = 0; i < book->rows.size(); i++) {
         LVITEMW item = {};
         item.mask = LVIF_IMAGE;
         item.iItem = static_cast<int>(i);
         item.iImage = I_IMAGENONE;
         ListView_SetItem(book->list, &item);
-        SetAccessibleDescription(book->list, KeyMarkWords(book->rows[i]), static_cast<long>(i) + 1);
+        words.push_back(book->rows[i].keyMarkText);
     }
+    SetItemDescriptions(book->list, words);
+}
+
+// the picture of a key mark (the core's): the shield of a verified key, the lock of another, none without a key
+int KeyMarkIcon(PeKeyMark mark) {
+    switch (mark) {
+    case PE_KEY_MARK_VERIFIED:
+        return LIST_SHIELD_CHECKMARK;
+    case PE_KEY_MARK_KNOWN:
+        return LIST_LOCK_CLOSED;
+    case PE_KEY_MARK_NONE:
+        break;
+    }
+    return -1;
 }
 
 // a row's key mark in the room the list keeps before its name: the lock of a key, the shield of a verified one, on the
@@ -1623,14 +1620,15 @@ void DrawKeyMark(const Book* book, HDC dc, int index) {
         room.right = std::max(icon.right, label.left);
         FillRect(dc, &room, GetSysColorBrush(GetFocus() == book->list ? COLOR_HIGHLIGHT : COLOR_BTNFACE));
     }
-    if (!book->rows[index].hasKey) {
+    int mark = KeyMarkIcon(book->rows[index].keyMark);
+    if (mark < 0) {
         return;
     }
     HIMAGELIST marks = IconList(IconSet::List);
     int size = 0;
     ImageList_GetIconSize(marks, &size, &size);
     int left = icon.left + (icon.right - icon.left - size) / 2, top = icon.top + (icon.bottom - icon.top - size) / 2;
-    DrawListMark(dc, marks, book->rows[index].keyVerified ? LIST_SHIELD_CHECKMARK : LIST_LOCK_CLOSED, left, top, size, selected);
+    DrawListMark(dc, marks, mark, left, top, size, selected);
 }
 
 // the people of the group shown, or of the book, that the find box finds; `select` (a card) selected when it is there
@@ -1875,7 +1873,7 @@ bool OnBookNotify(Book* book, NMHDR* header, LRESULT& result) {
         case LVN_GETINFOTIPW: {
             // over a row with a key: what its mark says
             auto* tip = reinterpret_cast<NMLVGETINFOTIPW*>(header);
-            std::wstring words = tip->iItem >= 0 && static_cast<size_t>(tip->iItem) < book->rows.size() ? KeyMarkWords(book->rows[tip->iItem]) : L"";
+            std::wstring words = tip->iItem >= 0 && static_cast<size_t>(tip->iItem) < book->rows.size() ? book->rows[tip->iItem].keyMarkText : L"";
             if (!words.empty() && tip->pszText && tip->cchTextMax > 0) {
                 wcsncpy_s(tip->pszText, static_cast<size_t>(tip->cchTextMax), words.c_str(), _TRUNCATE);
             }
@@ -2071,22 +2069,22 @@ void AddressBookChanged() {
     }
 }
 
-void ContactKeysFound(uint64_t request) {
-    if (auto dropped = std::find_if(g_droppedLookups.begin(), g_droppedLookups.end(), [&](const auto& lookup) { return lookup.first == request; });
-        dropped != g_droppedLookups.end()) {
-        core::String taken(pe_pgp_find_result(dropped->second, request));
-        g_droppedLookups.erase(dropped);
-        return;
-    }
+void ContactKeysFound(uint64_t request, bool learned) {
     auto* state = g_contact ? reinterpret_cast<ContactState*>(GetWindowLongPtrW(g_contact, GWLP_USERDATA)) : nullptr;
-    if (!state || !state->lookup || state->lookup != request) {
+    if (!state) {
         return;
     }
-    state->lookup = 0;
-    // the keys found taken into the key book, and what was found said under the rows
-    core::String said(pe_pgp_find_result(state->core, request));
-    state->said = said ? Text(said.get()) : L"";
-    RebuildKeys(g_contact, *state);
+    bool asked = state->lookup && state->lookup == request;
+    if (asked) {
+        // what was found said under the rows (the core took the keys in already)
+        state->lookup = 0;
+        core::String said(pe_pgp_find_result(state->core, request));
+        state->said = said ? Text(said.get()) : L"";
+    }
+    // another window's lookup may have found a key of this card's addresses too
+    if (asked || learned) {
+        RebuildKeys(g_contact, *state);
+    }
 }
 
 void AddressBookKeysChanged() {

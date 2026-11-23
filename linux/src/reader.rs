@@ -8,6 +8,7 @@
 
 use adw::prelude::*;
 use gtk::{gio, glib};
+use pe_core::keys::ImportError;
 use pe_core::{Event, MessageRef, MessageView};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -370,17 +371,17 @@ impl Reader {
             };
             spawn(async move { this.open_attachment(index).await });
         };
-        // Find Key beside the label of a part signed by a key not known here: the core looks it up by the link's
-        // fingerprint; nothing is opened
+        // Find Key beside the label of a part signed by a key not known here: the core reads the fingerprint from the
+        // link and looks it up; nothing is opened
         let this = Rc::downgrade(self);
-        let find_key = move |handle: String| {
+        let find_key = move |link: &str| {
             if let Some(this) = this.upgrade() {
-                this.find_key(&handle);
+                this.find_key(link);
             }
         };
         self.preview.set_links(move |uri| {
-            if let Some(handle) = pe_html::find_key_link(uri) {
-                find_key(handle);
+            if pe_html::find_key_link(uri).is_some() {
+                find_key(uri);
                 return true;
             }
             if pe_html::is_preview_link(uri) {
@@ -676,7 +677,7 @@ impl Reader {
                 self.print_ready(*request);
                 None
             }
-            Event::KeysFound { request } if self.find_request.get() != 0 && *request == self.find_request.get() => {
+            Event::KeysFound { request, .. } if self.find_request.get() != 0 && *request == self.find_request.get() => {
                 self.keys_found(*request);
                 None
             }
@@ -1482,9 +1483,9 @@ impl Reader {
         }
     }
 
-    /// Find Key on a part's label: the key `handle` names looked up on keys.openpgp.org, said in the status bar
-    fn find_key(&self, handle: &str) {
-        match shell().core.pgp_find_handle(handle) {
+    /// Find Key on a part's label: the key the link names looked up on keys.openpgp.org, said in the status bar
+    fn find_key(&self, link: &str) {
+        match shell().core.pgp_find_handle(link) {
             Ok(request) => {
                 self.find_request.set(request);
                 self.say(&t!(PgpRecipientLooking));
@@ -1493,11 +1494,11 @@ impl Reader {
         }
     }
 
-    /// Find Key's lookup ended: what it found said, and the message shown again, its label then naming who signed it
+    /// Find Key's lookup ended (the core learned what it found): what it found said, and the message shown again, its
+    /// label then naming who signed it
     fn keys_found(&self, request: u64) {
         self.find_request.set(0);
         let outcome = shell().core.pgp_find_result(request);
-        crate::keys::learned();
         if let Some(outcome) = outcome {
             self.say(&outcome.text);
         }
@@ -1506,16 +1507,17 @@ impl Reader {
         }
     }
 
-    /// Import Key on a key attached to the message shown: the core reads it from the message (the file shown, or the
-    /// folder's message) and takes its public keys; what it did said, and the message shown again for a signature by it
+    /// Import Key on a key attached to the message shown: the core reads (and decrypts) it from the message (the file
+    /// shown, or the folder's message) off the window thread and takes its public keys; what it did said, and the
+    /// message shown again for a signature by it
     async fn import_key(&self, index: usize) {
         let Some(window) = self.window() else { return };
-        let core = &shell().core;
+        let core = shell().core.clone();
         let path = self.file.borrow().clone();
-        let outcome = match path {
-            Some(path) => core.pgp_import_file_attachment(&path, index),
-            None => core.pgp_import_attachment(self.folder.get(), self.uid.get(), index),
-        };
+        let (folder, uid) = (self.folder.get(), self.uid.get());
+        let outcome = gio::spawn_blocking(move || core.pgp_import_attachment(path.as_deref(), folder, uid, index))
+            .await
+            .unwrap_or_else(|_| Err(ImportError::Invalid(t!(UiUnknownReason))));
         let imported = outcome.is_ok();
         crate::keys::imported_attachment(&window, outcome).await;
         if imported && self.shows_message() && self.has_view() {

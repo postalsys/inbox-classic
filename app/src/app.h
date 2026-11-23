@@ -206,6 +206,8 @@ bool SetLinkCursor(HWND hwnd, WPARAM wParam);
 // what a screen reader says about a control besides its name (the reason a button is turned off); of one of its items
 // with `child` (a list view's item from 1)
 void SetAccessibleDescription(HWND control, const std::wstring& text, long child = CHILDID_SELF);
+// the same of every item of a list view at once, `texts` in the order of its items
+void SetItemDescriptions(HWND list, const std::vector<std::wstring>& texts);
 // the name a screen reader gives a control that has no label of its own
 void SetAccessibleName(HWND control, const std::wstring& text);
 // a dialog window centered on the window of `owner`, owned by it, with this client size; RunModal shows it, runs it
@@ -377,7 +379,7 @@ std::string NewKeyFor(HWND owner, PeCore* core, int64_t account);
 void OfferUnclaimed(HWND owner, PeCore* core);
 // an own key was published (the KeyPublished event, `request` its uid): what keys.openpgp.org did, said over the
 // Encryption Keys window that asked (or the main window, once it is closed)
-void KeyPublished(uint64_t request);
+void KeyPublished(PeCore* core, uint64_t request);
 
 // ---- setup.cpp ----
 
@@ -552,9 +554,9 @@ void OpenAddressBook(PeCore* core);
 void AddressBookChanged();
 // keys were found, imported or decided: an open Address Book shows its people's key marks again, the selection kept
 void AddressBookKeysChanged();
-// a lookup of keys ended (the KeysFound event, `request` its uid): an open Contact Properties that asked takes what it
-// found, says so and shows its key rows again
-void ContactKeysFound(uint64_t request);
+// a lookup of keys ended (the KeysFound event, `request` its uid, the core learned what it found): an open Contact
+// Properties that asked says what was found; one that shows keys (`learned`) shows its key rows again
+void ContactKeysFound(uint64_t request, bool learned);
 // the Address Book window, gone, before the core it uses is
 void DestroyAddressBook();
 // Select Recipients of a compose window: the book's people and groups put into To, Cc and Bcc (`fields`, their texts,
@@ -697,7 +699,7 @@ struct UiEvent {
     std::wstring message;
     // the Message-ID of a draft, for DraftSaved; the notification's text, for NewMail (`message` its title)
     std::string detail;
-    // how many messages, for NewMail and RulesApplied
+    // how many messages, for NewMail and RulesApplied; how many addresses got a key, for KeysFound
     uint64_t count = 0;
 };
 

@@ -117,15 +117,11 @@ enum KeyActions {
         return importKeys(core: core, data, source: PE_KEY_SOURCE_FILE, title: title)
     }
 
-    /// Import from Clipboard: the clipboard's text imported as a file's keys are; a clipboard without a key says so
+    /// Import from Clipboard: the clipboard's text (empty without any) imported as a file's keys are; the core says
+    /// when it holds no key
     static func importPasted(core: Core) -> Bool {
-        let title = Text.uiKeysImportTitle.text
         let pasted = NSPasteboard.general.string(forType: .string) ?? ""
-        guard !pasted.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            inform(Text.uiKeysPasteNone.text, title: title, style: .warning)
-            return false
-        }
-        return importKeys(core: core, Data(pasted.utf8), source: PE_KEY_SOURCE_PASTE, title: title)
+        return importKeys(core: core, Data(pasted.utf8), source: PE_KEY_SOURCE_PASTE, title: Text.uiKeysImportTitle.text)
     }
 
     /// the keys of `data` imported, the passphrase of a private key asked while it needs one; the summary, then whether
@@ -139,9 +135,7 @@ enum KeyActions {
             (outcome, message) = core.pgpImport(data, passphrase: passphrase, source: source)
         }
         guard outcome == PE_IMPORT_OUTCOME_IMPORTED else {
-            // text that holds no key, as the clipboard words it
-            let none = source == PE_KEY_SOURCE_PASTE && message == Text.pgpErrorNotAKey.text
-            inform(none ? Text.uiKeysPasteNone.text : message, title: title, style: .warning)
+            inform(message, title: title, style: .warning)
             return false
         }
         imported(core: core, message, title: title)
@@ -157,30 +151,31 @@ enum KeyActions {
         }
     }
 
-    /// the publishes running, each with what its window does once it is done
-    private static var publishing: [UInt64: () -> Void] = [:]
+    /// the publish running (one at a time), with what its window does once it is done
+    private static var publishing: (request: UInt64, done: () -> Void)?
 
-    /// Publish: asked first, naming the key's addresses, then uploaded; `done` runs when the server answered (or it
-    /// could not start). False when it was not started.
+    /// Publish: asked first in the core's words, naming the key's addresses, then uploaded; `done` runs when the server
+    /// answered. False when it was not started.
     static func publish(core: Core, key: PgpKey, done: @escaping () -> Void) -> Bool {
         let title = Text.uiKeysPublish.title
         // the command's word as the alert's heading, the question under it, as Mac alerts have them
-        let question = title + "\n\n" + Text.uiKeysPublishAsk.text(["addresses": key.addresses.joined(separator: ", ")])
-        guard ask(question, title: title,
+        let question = title + "\n\n" + key.publishQuestion
+        guard publishing == nil, ask(question, title: title,
                   yes: Text.uiKeysPublishNow.text, no: Text.uiCancel.text, style: .information) else { return false }
         let request = core.pgpPublish(key.fingerprint)
         guard request != 0 else {
             inform(Text.uiUnknownReason.text, title: title, style: .warning)
             return false
         }
-        publishing[request] = done
+        publishing = (request, done)
         return true
     }
 
     /// KeyPublished: what the server did, in the core's words; the window that asked shows it is done
     static func published(core: Core, _ request: UInt64) {
-        guard let done = publishing.removeValue(forKey: request), let result = core.pgpPublishResult(request) else { return }
-        done()
+        guard let running = publishing, running.request == request, let result = core.pgpPublishResult(request) else { return }
+        publishing = nil
+        running.done()
         // after this event, so the message does not hold up the others
         onMain { inform(result.text, title: Text.uiKeysPublish.title, style: result.ok ? .information : .warning) }
     }
@@ -710,8 +705,8 @@ private final class KeysListWindow: NSObject, NSTableViewDataSource, NSTableView
     private let publish = NSButton(title: Text.uiKeysPublish.opens, target: nil, action: nil)
     /// turning beside Help while a key is published
     private let spinner = busySpinner()
-    /// the key being published: Publish is greyed until the server answered
-    private var publishing: String?
+    /// a key is being published: Publish is greyed until the server answered
+    private var publishing = false
     private var keys: [PgpKey] = []
 
     init(core: Core) {
@@ -845,7 +840,7 @@ private final class KeysListWindow: NSObject, NSTableViewDataSource, NSTableView
         backup.isEnabled = key?.canBackUp ?? false
         verify.isEnabled = key?.canVerify ?? false
         // a contact's key is theirs to publish
-        publish.isEnabled = key?.own == true && publishing == nil
+        publish.isEnabled = key?.own == true && !publishing
         properties.isEnabled = key != nil
         remove.isEnabled = key != nil
     }
@@ -869,14 +864,14 @@ private final class KeysListWindow: NSObject, NSTableViewDataSource, NSTableView
     }
 
     @objc private func publishClicked() {
-        guard let key = selected, key.own, publishing == nil else { return }
+        guard let key = selected, key.own, !publishing else { return }
         let started = KeyActions.publish(core: core, key: key) { [weak self] in
-            self?.publishing = nil
+            self?.publishing = false
             self?.spinner.stopAnimation(nil)
             self?.showSelected()
         }
         guard started else { return }
-        publishing = key.fingerprint
+        publishing = true
         spinner.startAnimation(nil)
         showSelected()
     }
@@ -1064,14 +1059,25 @@ final class ContactKeys: NSObject {
         Self.shown.removeAll { $0 === self }
     }
 
-    /// KeysFound: a lookup a contact window started is taken in and its words shown; the keys read again (another
-    /// window's lookup may have found a key of this card's addresses too)
-    static func keysFound(_ request: UInt64) {
+    /// KeysFound (the core learned what was found): the window whose lookup it was shows its words and its keys
+    /// again; with keys `learned`, every contact window reads its keys again (another window's lookup may have found a
+    /// key of its card's addresses too)
+    static func keysFound(_ request: UInt64, learned: Bool) {
         for keys in shown {
-            if request != 0, request == keys.lookup {
+            let asked = request != 0 && request == keys.lookup
+            if asked {
                 keys.lookup = 0
                 keys.found = keys.core.pgpFindResult(request) ?? ""
             }
+            if asked || learned {
+                keys.show(keys.addresses)
+            }
+        }
+    }
+
+    /// keys changed elsewhere (an import of settings): every contact window reads its keys again
+    static func refreshAll() {
+        for keys in shown {
             keys.show(keys.addresses)
         }
     }
@@ -1119,7 +1125,8 @@ final class ContactKeys: NSObject {
             none.setAccessibilityIdentifier("contact.key.none")
             view.addArrangedSubview(none)
         }
-        // Find Key for a saved card with an address that has no key to encrypt with; its words under it once done
+        // Find Key for a saved card with an address that has no key to encrypt with (enabled while the core has
+        // something to ask); its words under it once done
         if card != 0 && (missing || lookup != 0) {
             view.addArrangedSubview(findRow())
         }
@@ -1139,7 +1146,7 @@ final class ContactKeys: NSObject {
         let find = keyButton(Text.uiContactFindKey.text, self, #selector(findClicked), "contact.key.find")
         find.controlSize = .small
         find.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
-        find.isEnabled = lookup == 0
+        find.isEnabled = lookup == 0 && core.contactCanFindKeys(card)
         let spinner = busySpinner()
         if lookup != 0 {
             spinner.startAnimation(nil)
@@ -1152,10 +1159,6 @@ final class ContactKeys: NSObject {
     @objc private func findClicked() {
         guard card != 0, lookup == 0 else { return }
         lookup = core.contactFindKeys(card)
-        if lookup == 0 {
-            // nothing to ask: every address was looked up a moment ago
-            NSSound.beep()
-        }
         found = lookup == 0 ? "" : Text.pgpRecipientLooking.text
         show(addresses)
     }
