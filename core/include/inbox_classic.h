@@ -248,7 +248,8 @@ typedef enum PeEventKind {
   PE_EVENT_KIND_SEND_WAITING = 23,
   // The message rules sorted `count` messages of `account`'s new mail, or of its Inbox when one was applied there
   PE_EVENT_KIND_RULES_APPLIED = 24,
-  // OpenPGP keys were looked up (`pe_compose_find_keys`, `pe_compose_find_key`): `pe_pgp_find_result` with the request in `uid`
+  // OpenPGP keys were looked up (`pe_compose_find_keys`, `pe_compose_find_key`, `pe_pgp_find_handle`,
+  // `pe_contact_find_keys`): `pe_pgp_find_result` with the request in `uid`
   PE_EVENT_KIND_KEYS_FOUND = 25,
   // An own key was published (`pe_pgp_publish`): `pe_pgp_publish_result` with the request in `uid`
   PE_EVENT_KIND_KEY_PUBLISHED = 26,
@@ -406,6 +407,10 @@ typedef enum PeReaderLink {
   // A preview of an attachment after the text: open the attachment `pe_preview_link` names, as a double-click in
   // the strip does
   PE_READER_LINK_ATTACHMENT = 5,
+  // Find Key beside the label of a part signed by a key not known here (`inboxclassic:find-key?<fingerprint or
+  // key id>`): `pe_pgp_find_handle` with the link, then on its `KeysFound` `pe_pgp_find_result` and the view built
+  // again
+  PE_READER_LINK_FIND_KEY = 6,
 } PeReaderLink;
 
 // How a message lets its reader leave its mailing list
@@ -944,6 +949,10 @@ typedef struct PeCardRow {
   // As it goes in an address field (`Name <address>`, the name quoted where it needs it), empty without an address:
   // what Write To and Select Recipients put in To, Cc or Bcc
   const char *label;
+  // A key that can encrypt now is in use for one of its addresses (the list's key mark)
+  bool has_key;
+  // One of those keys is verified (compared by the user, or the user's own): the stronger mark
+  bool key_verified;
 } PeCardRow;
 
 // A phone number of a card
@@ -1478,6 +1487,9 @@ typedef struct PeAttachment {
   // What the strip says of that part ("From part 2: Encrypted. Signed by ..."), for the accessible description;
   // `tooltip` ends with it already. Empty in any other message
   const char *part_text;
+  // It holds OpenPGP public keys (`application/pgp-keys`, or a `.asc`, `.key`, `.gpg` or `.pgp` file that pe-pgp
+  // reads as public keys): the strip offers Import Key (`pe_pgp_import_attachment`)
+  bool is_key;
 } PeAttachment;
 
 // A picture of a preview, to answer a web view with, owned by its `PePreviewAnswer`
@@ -2580,9 +2592,10 @@ uint64_t pe_compose_find_keys(const struct PeCore *core,
 uint64_t pe_compose_find_key(const struct PeCore *core,
                              const char *address);
 
-// What a lookup (`pe_compose_find_keys`, `pe_compose_find_key`) found, after its `KeysFound`: the keys are taken
-// into the key book now, once, by the window that started it. What to tell the user (the status bar), NULL for
-// another window's request or one still running. Free with `pe_string_free`.
+// What a lookup (`pe_compose_find_keys`, `pe_compose_find_key`, `pe_pgp_find_handle`, `pe_contact_find_keys`)
+// found, after its `KeysFound`: the keys are taken into the key book now, once, by the window that started it. What
+// to tell the user (the status bar, or the window's own line), NULL for another window's request or one still
+// running. Free with `pe_string_free`.
 //
 // # Safety
 // `core` must be a live handle.
@@ -4181,6 +4194,10 @@ char *pe_pgp_generate(const struct PeCore *core,
 // Imports the keys in `data` (`len` bytes, armored or binary): private ones unlocked with `passphrase` (NULL when
 // none was asked yet) and kept protected, public ones used for their addresses unless another key is (that one
 // waits for the user's decision). `message` gets what happened or why not, in words (free it with `pe_string_free`).
+// Import from Clipboard is this with the clipboard's text as UTF-8 and `PE_KEY_SOURCE_PASTE`: text that holds no key
+// comes back `PE_IMPORT_OUTCOME_INVALID` (say `ui-keys-paste-none` for an empty clipboard or one without a key
+// block). With `PE_KEY_SOURCE_ATTACHMENT` private keys are refused (`INVALID`, the words say why): a key from mail is
+// taken as a public key only.
 //
 // # Safety
 // `core` must be a live handle, `data` `len` readable bytes, `passphrase` NULL or a NUL-terminated string, `message`
@@ -4192,12 +4209,83 @@ enum PeImportOutcome pe_pgp_import(const struct PeCore *core,
                                    enum PeKeySource source,
                                    char **message);
 
+// Import Key on an attachment of a message (its `PeAttachment.is_key`): the `index`th attachment of the message as
+// `pe_message_view` lists it, imported as `pe_pgp_import` imports a file's keys (a different key for an address that
+// has one waits for the user's decision), public keys only. Reads (and, for an encrypted message, decrypts) the
+// message on the calling thread, as `pe_message_view` does; `pe_attachment_data_start` and `pe_pgp_import` with
+// `PE_KEY_SOURCE_ATTACHMENT` do the same off the window thread. `message` gets the words (free with
+// `pe_string_free`); the outcome is never `NEEDS_PASSPHRASE`. Afterwards the app asks `pe_pgp_unclaimed_question` as
+// after any import, and a reading pane showing a message signed by that key builds its view again.
+//
+// # Safety
+// `core` must be a live handle, `message` NULL or a valid pointer.
+enum PeImportOutcome pe_pgp_import_attachment(const struct PeCore *core,
+                                              int64_t folder,
+                                              uint64_t uid,
+                                              size_t index,
+                                              char **message);
+
+// `pe_pgp_import_attachment` for a message file a window shows (`pe_file_view`, `path` UTF-8)
+//
+// # Safety
+// `core` must be a live handle, `path` a NUL-terminated string, `message` NULL or a valid pointer.
+enum PeImportOutcome pe_pgp_import_file_attachment(const struct PeCore *core,
+                                                   const char *path,
+                                                   size_t index,
+                                                   char **message);
+
+// Find Key beside the label of a part signed by a key not known here: looks the key up on keys.openpgp.org by its
+// fingerprint or key id (which tells the server no address). `handle` is the link clicked
+// (`inboxclassic:find-key?<handle>`, when `pe_reader_link` says `PE_READER_LINK_FIND_KEY`) or the bare handle;
+// anything but 16, 40 or 64 hex digits is refused. `KeysFound` follows with the request in `uid`: `pe_pgp_find_result`
+// then takes what was found into the key book and gives the words for the status bar, and the reading pane builds the
+// message's view again (`pe_message_view_start`; a message window or a file's, `pe_file_view`), whose label then
+// says who signed it. 0 when it could not start: not a handle, or lookups on keys.openpgp.org are turned off (the
+// page offers no Find Key then).
+//
+// # Safety
+// `core` must be a live handle, `handle` a NUL-terminated string.
+uint64_t pe_pgp_find_handle(const struct PeCore *core,
+                            const char *handle);
+
+// Find Key in a contact's window: looks up the keys of the card's addresses that have none, or one that can no
+// longer encrypt, in each domain's Web Key Directory and then on keys.openpgp.org (unless Settings turns that off),
+// as the compose window's Find Key does. `KeysFound` follows with the request in `uid`: `pe_pgp_find_result` takes
+// the keys found into the key book (a different key for an address that has one waits, as `pe_pgp_peer` then
+// says) and gives the words for the window; then the window reads its key rows again (`pe_pgp_peer` and
+// `pe_pgp_key` for each address) and the Address Book its list (`pe_cards`, for the key marks). 0 when there is
+// nothing to ask: every address has a usable key, was asked in the last minute or is being looked up.
+//
+// # Safety
+// `core` must be a live handle.
+uint64_t pe_contact_find_keys(const struct PeCore *core,
+                              int64_t card);
+
 // The public key, armored, to save or attach; NULL when there is no such key. Free with `pe_string_free`.
 //
 // # Safety
 // `core` must be a live handle, `fingerprint` a NUL-terminated string.
 char *pe_pgp_export(const struct PeCore *core,
                     const char *fingerprint);
+
+// My Keys > Publish: uploads the public part of the own key `fingerprint` to keys.openpgp.org and asks it to send its
+// confirmation mail to the key's addresses (an address is published once its owner clicks the link). Its outcome
+// follows as `KeyPublished` with the request, for `pe_pgp_publish_result`; 0 when it could not start.
+//
+// # Safety
+// `core` must be a live handle, `fingerprint` a NUL-terminated string.
+uint64_t pe_pgp_publish(const struct PeCore *core,
+                        const char *fingerprint);
+
+// What a publish (`pe_pgp_publish`) did, after its `KeyPublished`: the words for the user (which addresses got a
+// confirmation mail, which are published, or why it failed), `ok` false for a failure. NULL for a request still
+// running or another window's. Free with `pe_string_free`.
+//
+// # Safety
+// `core` must be a live handle, `ok` a valid pointer or NULL.
+char *pe_pgp_publish_result(const struct PeCore *core,
+                            uint64_t request,
+                            bool *ok);
 
 // An own key protected by `passphrase`, armored, for a backup; NULL with the reason in `error` (free both with
 // `pe_string_free`).

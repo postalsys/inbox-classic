@@ -149,13 +149,35 @@ impl Core {
     }
 
     /// Looks up the key with `handle` (a fingerprint or key id) on keys.openpgp.org: for a signature by a key not
-    /// known here. Asking by fingerprint tells the server no address. [`Event::KeysFound`] follows. Refused while
-    /// the user turned the key server off.
+    /// known here (Find Key beside its label). Asking by fingerprint tells the server no address. [`Event::KeysFound`]
+    /// follows; the view built again then checks the signature with the key found. Refused while the user turned the
+    /// key server off, and for a handle that is not 16, 40 or 64 hex digits ([`pe_html::key_handle`]).
     pub fn pgp_find_handle(&self, handle: &str) -> Result<u64> {
+        let handle = pe_html::key_handle(handle).ok_or_else(|| crate::Error::Invalid(tr(Text::PgpFoundNoKey)))?;
         if !self.store().pgp_keyserver()? {
             return Err(crate::Error::Unavailable(keyserver_off()));
         }
-        self.start_lookup(Wanted::Handle(handle.to_string()), true)
+        self.start_lookup(Wanted::Handle(handle), true)
+    }
+
+    /// Find Key in a contact's window: the keys of the card's addresses that have none or one that can no longer
+    /// encrypt, from each domain's Web Key Directory, then keys.openpgp.org (unless Settings turns it off), as the
+    /// compose window's Find Key asks: an address asked in the last minute, or being looked up, is not asked again.
+    /// What is found is learned as any key is (a different key for an address that has one waits for the user's
+    /// decision). [`Event::KeysFound`] follows with the request; None when there is nothing to ask.
+    pub fn contact_find_keys(&self, card: pe_store::CardId) -> Result<Option<u64>> {
+        let Some(card) = self.store().card(card)? else {
+            return Err(crate::Error::NotFound);
+        };
+        let now = unix_now();
+        let mut addresses = Vec::new();
+        for address in &card.addresses {
+            let address = pe_store::normal_address(address);
+            if !self.looking_for(&address) && !self.asked_lately(&address, now)? {
+                addresses.push(address);
+            }
+        }
+        self.pgp_find_again(&addresses)
     }
 
     fn start_lookup(&self, wanted: Wanted, use_keyserver: bool) -> Result<u64> {
@@ -273,8 +295,12 @@ impl Core {
     /// Publishes an own key's public part on keys.openpgp.org, asking the server to send its confirmation mail to the
     /// key's addresses (it publishes an address once its owner clicks the link): [`Event::KeyPublished`] follows
     pub fn pgp_publish(&self, fingerprint: &str) -> Result<u64> {
-        let armored = self.pgp_export(fingerprint)?;
         let key = self.pgp_key(fingerprint)?;
+        // only the user's own key: a contact's is theirs to publish
+        if !key.own {
+            return Err(crate::Error::NotFound);
+        }
+        let armored = self.pgp_export(fingerprint)?;
         let addresses: Vec<String> = key.addresses.into_iter().map(|(address, _)| address).collect();
         let request = self.next_request.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         let servers = self.key_servers();

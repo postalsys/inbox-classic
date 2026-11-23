@@ -33,6 +33,8 @@ pub struct KeyRing {
     /// The key in use for each address that has one (a correspondent's, an own address's): a signature by another
     /// key that holds the address (one waiting for the user's decision, one the user kept away) is not the sender's
     pub in_use: HashMap<String, String>,
+    /// Keys may be looked up on keys.openpgp.org (Settings): a part signed by a key not known here offers Find Key
+    pub find_keys: bool,
 }
 
 /// How a part's colour and words read (green, blue, amber, grey): the page's own tones
@@ -160,6 +162,15 @@ impl Verdict {
             lines.push(tr_args(Text::PgpDetailsFor, &[("keys", (&keys.join(", ")).into())]));
         }
         lines
+    }
+
+    /// The key Find Key looks up: the fingerprint or key id of a signature by a key not known here, when it is one
+    /// ([`pe_html::key_handle`]); None for any other verdict
+    pub fn unknown_key(&self) -> Option<String> {
+        match (&self.signature, &self.sealed) {
+            (Signature::UnknownKey { key }, None) => pe_html::key_handle(key),
+            _ => None,
+        }
     }
 
     /// The label of the section, in words

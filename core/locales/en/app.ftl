@@ -438,6 +438,8 @@ ui-attachment-save-as = Save As...
 ui-attachment-save-all = Save All...
 # the strip's menu: a checked item for a picture or PDF file, drawn in the message (checked) or not
 ui-attachment-show-in-message = Show in Message
+# the strip's menu: imports the file, a key someone attached, into Encryption Keys
+ui-attachment-import-key = Import Key...
 ui-attachments-strip = Attachments
 ui-attachment-note-title = Opening this file
 ui-attachment-program-tip = Open is off for this kind of file: it can run programs. Save it to open it yourself.
@@ -524,6 +526,10 @@ ui-menu-delete = &Delete
 ui-book-find-hint = Type a name or e-mail address
 ui-book-all-contacts = All Contacts
 ui-col-phone = Phone
+# the Address Book list's key mark: its tooltip or the accessible name of a contact with an encryption key
+ui-book-key-known = Has an encryption key
+# the stronger mark: a key the user verified (compared its fingerprint with its owner)
+ui-book-key-verified = Has a verified encryption key
 ui-book-empty = The Address Book is empty. Click New Contact to add someone, or import a vCard or CSV file from the File menu.
 ui-book-no-match = No contacts match “{ $words }”.
 ui-book-delete-ask = { $count ->
@@ -673,6 +679,15 @@ ui-keys-import = &Import...
 ui-keys-export = &Export...
 ui-keys-backup = &Back Up...
 ui-keys-verify = &Verify...
+# My Keys: publishes the selected own key on keys.openpgp.org; N, I, E, B, V, P and R are taken in this window
+ui-keys-publish = P&ublish...
+# the question before publishing; { $addresses } are the key's addresses, separated by commas
+ui-keys-publish-ask = Publish your public key on keys.openpgp.org so that others can find it by your address? The server sends a confirmation link to { $addresses }; each address is listed only after you open its link.
+# the button that confirms that question on the Mac and Linux
+ui-keys-publish-now = Publish
+# My Keys: imports a key copied as text; N, I, E, B, V, P, R and U are taken in this window
+ui-keys-paste = Import from C&lipboard
+ui-keys-paste-none = The clipboard holds no OpenPGP key.
 ui-keys-new-title = New Key
 ui-keys-new-for = Make a key for:
 ui-keys-new-make = &Make Key
@@ -728,6 +743,8 @@ ui-account-key-new = &New Key...
 ui-account-autocrypt = &Send my public key with my messages (Autocrypt)
 ui-contact-key = Encryption key:
 ui-contact-key-none = No key
+# a contact's key section: looks up the keys of the contact's addresses (their mail providers, then keys.openpgp.org)
+ui-contact-find-key = &Find Key
 ui-contact-key-use-new = Use the &New Key
 ui-contact-key-keep = &Keep the Current One
 ui-recipient-keys-title = Recipients’ Keys

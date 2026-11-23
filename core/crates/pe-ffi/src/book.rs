@@ -57,6 +57,10 @@ pub struct PeCardRow {
     /// As it goes in an address field (`Name <address>`, the name quoted where it needs it), empty without an address:
     /// what Write To and Select Recipients put in To, Cc or Bcc
     pub label: *const c_char,
+    /// A key that can encrypt now is in use for one of its addresses (the list's key mark)
+    pub has_key: bool,
+    /// One of those keys is verified (compared by the user, or the user's own): the stronger mark
+    pub key_verified: bool,
 }
 
 /// The people of the address book; free with `pe_card_list_free`
@@ -70,6 +74,8 @@ fn card_list(rows: &[BookRow]) -> *mut PeCardList {
         phone: strings.add(&row.phone),
         company: strings.add(&row.company),
         label: strings.add(&row.label),
+        has_key: row.has_key,
+        key_verified: row.key_verified,
     })))
 }
 

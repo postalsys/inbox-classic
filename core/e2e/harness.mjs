@@ -17,6 +17,7 @@ import { dirname, join } from 'node:path';
 import { createServer } from 'node:http';
 import { readFileSync } from 'node:fs';
 import imapkit from 'imapkit';
+import * as openpgp from 'openpgp';
 import { check } from './pgp.mjs';
 
 // Every plugin that loads together with the others, as imapflow's tests use them
@@ -120,14 +121,21 @@ const other = second ? await start(second) : null;
 // POST /pgp/check with a JSON body: { raw (base64), key, passphrase, signer, recipients }; the answer as JSON.
 // The same server plays keys.openpgp.org and every domain's Web Key Directory for the app (`--key-server`), so no
 // lookup of a UI test leaves the computer: GET /vks/v1/by-email/<address> gives a key put there with
-// POST /pgp/keys { address, key (armored) }, everything else 404.
+// POST /pgp/keys { address, key (armored) }, everything else 404. Publishing as keys.openpgp.org answers it:
+// POST /vks/v1/upload { keytext } gives a token and each address of the key "unpublished", POST
+// /vks/v1/request-verify { token, addresses } makes those "pending" (the confirmation mail the real one sends); GET
+// /pgp/uploads lists what was uploaded ({ fingerprint, addresses, asked }) for the tests to check.
 const served = new Map();
+const uploads = [];
 const pgp = createServer((req, res) => {
     const answer = (status, body) => {
         res.writeHead(status, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(body));
     };
     const path = req.url.split('?')[0];
+    if (req.method === 'GET' && path === '/pgp/uploads') {
+        return answer(200, uploads);
+    }
     if (req.method === 'GET') {
         const address = path.startsWith('/vks/v1/by-email/') ? decodeURIComponent(path.slice(17)).toLowerCase() : null;
         if (address && served.has(address)) {
@@ -137,8 +145,9 @@ const pgp = createServer((req, res) => {
         res.writeHead(404, { 'Content-Type': 'text/plain' });
         return res.end('not found');
     }
-    if (req.method !== 'POST' || (path !== '/pgp/check' && path !== '/pgp/keys')) {
-        return answer(404, { error: 'POST /pgp/check or /pgp/keys' });
+    const publishing = path === '/vks/v1/upload' || path === '/vks/v1/request-verify';
+    if (req.method !== 'POST' || (path !== '/pgp/check' && path !== '/pgp/keys' && !publishing)) {
+        return answer(404, { error: 'POST /pgp/check, /pgp/keys or a keys.openpgp.org publish' });
     }
     const chunks = [];
     req.on('data', chunk => chunks.push(chunk));
@@ -148,6 +157,26 @@ const pgp = createServer((req, res) => {
             if (path === '/pgp/keys') {
                 served.set(String(body.address).toLowerCase(), String(body.key));
                 return answer(200, { ok: true });
+            }
+            if (path === '/vks/v1/upload') {
+                const key = await openpgp.readKey({ armoredKey: String(body.keytext) });
+                const addresses = key.users
+                    .map(user => user.userID && user.userID.email)
+                    .filter(Boolean)
+                    .map(address => address.toLowerCase());
+                const token = `t${uploads.length}`;
+                uploads.push({ token, fingerprint: key.getFingerprint().toUpperCase(), addresses, asked: [] });
+                const status = Object.fromEntries(addresses.map(address => [address, 'unpublished']));
+                return answer(200, { key_fpr: key.getFingerprint().toUpperCase(), token, status });
+            }
+            if (path === '/vks/v1/request-verify') {
+                const upload = uploads.find(u => u.token === body.token);
+                if (!upload) return answer(400, { error: 'unknown token' });
+                upload.asked = (body.addresses || []).map(a => String(a).toLowerCase());
+                const status = Object.fromEntries(
+                    upload.addresses.map(a => [a, upload.asked.includes(a) ? 'pending' : 'unpublished'])
+                );
+                return answer(200, { key_fpr: upload.fingerprint, token: upload.token, status });
             }
             answer(200, await check(body));
         } catch (error) {

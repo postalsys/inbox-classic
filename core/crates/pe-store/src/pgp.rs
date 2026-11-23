@@ -214,6 +214,29 @@ impl Store {
         statement.query_map([], |row| Ok((row.get(0)?, row.get(1)?)))?.collect()
     }
 
+    /// Every correspondent's key in use with whether the user verified it for that address, in one query: the
+    /// Address Book's key marks
+    pub fn pgp_keys_in_use_marked(&self) -> Result<Vec<(String, StoredKey, bool)>> {
+        let mut statement = self.db.prepare(
+            "SELECT p.address, k.fingerprint, k.cert, k.secret, k.source, k.added, k.changed, \
+             coalesce(a.verified, 0) FROM pgp_peers p JOIN pgp_keys k ON k.fingerprint = p.fingerprint \
+             LEFT JOIN pgp_key_addresses a ON a.fingerprint = p.fingerprint AND a.address = p.address",
+        )?;
+        statement
+            .query_map([], |row| {
+                let key = StoredKey {
+                    fingerprint: row.get(1)?,
+                    cert: row.get(2)?,
+                    secret: row.get(3)?,
+                    source: row.get(4)?,
+                    added: row.get(5)?,
+                    changed: row.get(6)?,
+                };
+                Ok((row.get(0)?, key, row.get(7)?))
+            })?
+            .collect()
+    }
+
     pub fn set_pgp_peer(&self, peer: &PgpPeer) -> Result<()> {
         self.db.execute(
             "INSERT INTO pgp_peers (address, fingerprint, pending, pending_since, autocrypt_seen, autocrypt_key_seen, \

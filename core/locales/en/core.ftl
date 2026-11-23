@@ -744,6 +744,8 @@ pgp-imported-public = { $count ->
 }
 pgp-imported-pending = Another key is already used for { $addresses }: the new one waits in the contact until you choose it.
 pgp-error-needs-passphrase = The private key is protected by a passphrase. Type it to import the key.
+# Import Key on a file attached to a message that holds a private key: keys from mail are taken as public keys only
+pgp-error-attached-private = This file holds a private key. To import it, save it and import the file in Encryption Keys.
 pgp-error-mismatch = The private key does not belong to its public key. It may have been altered.
 pgp-file-name-public = { $who } public key.asc
 pgp-file-name-private = { $who } private key backup.asc
@@ -754,6 +756,8 @@ pgp-part-verified = Signed by { $signer }, key verified
 pgp-part-signed = Signed by { $signer } (key not verified)
 pgp-part-other = Signed by { $signer }, who is not the sender
 pgp-part-unknown-key = Signed, but the key is not known
+# the button beside that label: looks up the key that made the signature on keys.openpgp.org
+pgp-part-find-key = Find Key
 pgp-part-not-signed = Not signed
 pgp-part-not-checked = Signature not checked
 pgp-part-encrypted = Encrypted. { $signature }

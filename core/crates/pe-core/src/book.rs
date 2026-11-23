@@ -1,6 +1,7 @@
 //! The address book of the windows: people and groups kept by the user, a message's sender added, vCard and CSV
 //! files read in and written out, and the completion of address fields that offers the book first.
 
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use pe_i18n::{Text, tr, tr_args};
@@ -35,6 +36,10 @@ pub struct BookRow {
     pub company: String,
     /// As it goes in an address field ([`card_label`]), empty without an address
     pub label: String,
+    /// A key that can encrypt now is in use for one of its addresses: the list's key mark
+    pub has_key: bool,
+    /// One of those keys is verified (the user compared it, or it is the user's own): the stronger mark
+    pub key_verified: bool,
 }
 
 impl BookRow {
@@ -46,7 +51,20 @@ impl BookRow {
             phone: phone.to_string(),
             company: company.to_string(),
             label: label_of(name, address),
+            has_key: false,
+            key_verified: false,
         }
+    }
+
+    /// Its key marks from the addresses it has ([`Core::pgp_key_marks`])
+    fn marked<'a>(mut self, addresses: impl IntoIterator<Item = &'a String>, marks: &HashMap<String, bool>) -> Self {
+        for address in addresses {
+            if let Some(verified) = marks.get(&pe_store::normal_address(address)) {
+                self.has_key = true;
+                self.key_verified |= verified;
+            }
+        }
+        self
     }
 
     fn of_card(card: &Card) -> BookRow {
@@ -211,7 +229,12 @@ impl Core {
 
     /// [`Core::cards`] as the book's rows
     pub fn card_rows(&self, filter: &str) -> Result<Vec<BookRow>> {
-        Ok(self.cards(filter)?.iter().map(BookRow::of_card).collect())
+        let marks = self.pgp_key_marks()?;
+        Ok(self
+            .cards(filter)?
+            .iter()
+            .map(|card| BookRow::of_card(card).marked(&card.addresses, &marks))
+            .collect())
     }
 
     pub fn card(&self, id: CardId) -> Result<Option<Card>> {
@@ -253,11 +276,15 @@ impl Core {
         if self.store().group(id)?.is_none() {
             return Err(Error::NotFound);
         }
+        let marks = self.pgp_key_marks()?;
         Ok(self
             .store()
             .group_people(id, filter)?
             .iter()
-            .map(|m| BookRow::new(m.card.unwrap_or(0), &m.name, &m.address, &m.phone, &m.company))
+            .map(|m| {
+                BookRow::new(m.card.unwrap_or(0), &m.name, &m.address, &m.phone, &m.company)
+                    .marked([&m.address], &marks)
+            })
             .collect())
     }
 
@@ -660,6 +687,8 @@ mod tests {
                 phone: "+1 555 0100".into(),
                 company: "Acme".into(),
                 label: "Mary Smith <mary@example.com>".into(),
+                has_key: false,
+                key_verified: false,
             }]
         );
 

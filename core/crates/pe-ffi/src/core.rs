@@ -141,7 +141,8 @@ pub enum PeEventKind {
     SendWaiting = 23,
     /// The message rules sorted `count` messages of `account`'s new mail, or of its Inbox when one was applied there
     RulesApplied = 24,
-    /// OpenPGP keys were looked up (`pe_compose_find_keys`, `pe_compose_find_key`): `pe_pgp_find_result` with the request in `uid`
+    /// OpenPGP keys were looked up (`pe_compose_find_keys`, `pe_compose_find_key`, `pe_pgp_find_handle`,
+    /// `pe_contact_find_keys`): `pe_pgp_find_result` with the request in `uid`
     KeysFound = 25,
     /// An own key was published (`pe_pgp_publish`): `pe_pgp_publish_result` with the request in `uid`
     KeyPublished = 26,
@@ -2152,6 +2153,9 @@ pub struct PeAttachment {
     /// What the strip says of that part ("From part 2: Encrypted. Signed by ..."), for the accessible description;
     /// `tooltip` ends with it already. Empty in any other message
     pub part_text: *const c_char,
+    /// It holds OpenPGP public keys (`application/pgp-keys`, or a `.asc`, `.key`, `.gpg` or `.pgp` file that pe-pgp
+    /// reads as public keys): the strip offers Import Key (`pe_pgp_import_attachment`)
+    pub is_key: bool,
 }
 
 impl From<pe_core::Protection> for PeProtection {
@@ -2417,6 +2421,7 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
             part: a.part.map_or(0, |part| part as u32 + 1),
             protection: a.protection.into(),
             part_text: strings.add(&a.part_text),
+            is_key: a.is_key,
         })
         .collect();
     let invitation = view.invitation.as_ref().map(|event| {
@@ -2555,6 +2560,10 @@ pub enum PeReaderLink {
     /// A preview of an attachment after the text: open the attachment `pe_preview_link` names, as a double-click in
     /// the strip does
     Attachment = 5,
+    /// Find Key beside the label of a part signed by a key not known here (`inboxclassic:find-key?<fingerprint or
+    /// key id>`): `pe_pgp_find_handle` with the link, then on its `KeysFound` `pe_pgp_find_result` and the view built
+    /// again
+    FindKey = 6,
 }
 
 /// Words an instant (seconds since the Unix epoch) for the event cards: its day in full (`time` false) or its time of
@@ -2638,6 +2647,8 @@ pub unsafe extern "C" fn pe_reader_link(uri: *const c_char) -> PeReaderLink {
             PeReaderLink::OpenCalendar
         } else if pe_html::part_link(uri).is_some() {
             PeReaderLink::Part
+        } else if pe_html::find_key_link(uri).is_some() {
+            PeReaderLink::FindKey
         } else if pe_html::is_preview_link(uri) {
             PeReaderLink::Attachment
         } else {

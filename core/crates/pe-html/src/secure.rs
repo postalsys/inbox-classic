@@ -25,6 +25,23 @@ pub fn part_link(uri: &str) -> Option<usize> {
     uri.strip_prefix(PART_LINK)?.parse().ok()
 }
 
+/// The link of Find Key beside the label of a part signed by a key not known here: `inboxclassic:find-key?<handle>`,
+/// the handle the signature's fingerprint or key id ([`key_handle`]). The page holds it, never a part.
+pub const FIND_KEY_LINK: &str = "inboxclassic:find-key?";
+
+/// A fingerprint or key id as Find Key asks for it: hex only, 16 (a key id), 40 (a v4 fingerprint) or 64 (a v6
+/// fingerprint) digits, in upper case; None for anything else. It comes from a link of a document, so nothing else
+/// passes.
+pub fn key_handle(handle: &str) -> Option<String> {
+    let valid = matches!(handle.len(), 16 | 40 | 64) && handle.bytes().all(|b| b.is_ascii_hexdigit());
+    valid.then(|| handle.to_ascii_uppercase())
+}
+
+/// The handle of a Find Key link ([`FIND_KEY_LINK`]), if it is one
+pub fn find_key_link(uri: &str) -> Option<String> {
+    key_handle(uri.strip_prefix(FIND_KEY_LINK)?)
+}
+
 /// How a part's label looks: the colour of its frame
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PartTone {
@@ -55,6 +72,9 @@ pub struct SecurePart<'a> {
     pub tone: PartTone,
     pub label: &'a str,
     pub shown: bool,
+    /// Find Key beside the label: the handle of the signature's key ([`key_handle`]) and the button's words; None
+    /// for no button
+    pub find_key: Option<(&'a str, &'a str)>,
 }
 
 /// What the address of a part's document ends with, after the page's own address: `part-N`
@@ -99,9 +119,18 @@ pub fn secure_page(parts: &[SecurePart], remote_images: bool) -> String {
     for (index, part) in parts.iter().enumerate() {
         let label = editor::text(part.label);
         let tone = part.tone.class();
-        body.push_str(&format!(
-            "<section class=\"pe-p pe-{tone}\"><a class=\"pe-l\" href=\"{PART_LINK}{index}\">{label}</a>"
-        ));
+        let label = format!("<a class=\"pe-l\" href=\"{PART_LINK}{index}\">{label}</a>");
+        // a handle that is not one is not written: the link would be refused when clicked
+        let find = part
+            .find_key
+            .and_then(|(handle, words)| Some((key_handle(handle)?, editor::text(words))));
+        match find {
+            Some((handle, words)) => body.push_str(&format!(
+                "<section class=\"pe-p pe-{tone}\"><div class=\"pe-r\">{label}\
+                 <a class=\"pe-f\" href=\"{FIND_KEY_LINK}{handle}\">{words}</a></div>"
+            )),
+            None => body.push_str(&format!("<section class=\"pe-p pe-{tone}\">{label}")),
+        }
         if part.shown {
             body.push_str(&format!(
                 "<iframe class=\"pe-d\" sandbox=\"allow-same-origin allow-top-navigation-by-user-activation\" title=\"{}\" src=\"{PART_DOCUMENT}{index}\"></iframe>",
@@ -121,6 +150,11 @@ pub fn secure_page(parts: &[SecurePart], remote_images: bool) -> String {
          .pe-l{{display:block;padding:4px 10px;font-weight:bold;font-size:9pt;color:var(--t);background:var(--b);\
          text-decoration:none;border-bottom:1px solid var(--c)}}\
          .pe-l:hover{{text-decoration:underline}}\
+         .pe-r{{display:flex;align-items:center;background:var(--b);border-bottom:1px solid var(--c)}}\
+         .pe-r .pe-l{{flex:1;border-bottom:0}}\
+         .pe-f{{margin:2px 8px;padding:1px 10px;font-size:9pt;color:var(--t);border:1px solid var(--c);\
+         border-radius:4px;text-decoration:none;white-space:nowrap}}\
+         .pe-f:hover{{background:Canvas}}\
          .pe-d{{display:block;width:100%;border:0;height:120px}}\
          .pe-v{{--c:#2e7d32;--b:#e8f5e9;--t:#1b5e20}}\
          .pe-g{{--c:#1f5fae;--b:#e6eefa;--t:#174a87}}\
@@ -147,11 +181,13 @@ mod tests {
                     tone: PartTone::Verified,
                     label: "Signed by Alice <a@x.org>",
                     shown: true,
+                    find_key: None,
                 },
                 SecurePart {
                     tone: PartTone::Warning,
                     label: "Not shown",
                     shown: false,
+                    find_key: None,
                 },
             ],
             false,
@@ -179,6 +215,58 @@ mod tests {
         );
         assert_eq!(part_document("inboxclassic://preview/7/"), None);
         assert_eq!(part_document("part-x"), None);
+    }
+
+    #[test]
+    fn find_key_beside_the_label_of_an_unknown_key() {
+        let handle = "0123456789abcdef0123456789ABCDEF01234567";
+        let part = |find_key| SecurePart {
+            tone: PartTone::Neutral,
+            label: "Signed, but the key is not known",
+            shown: true,
+            find_key,
+        };
+        let page = secure_page(&[part(Some((handle, "Find <Key>")))], false);
+        assert!(page.contains(&format!(
+            "href=\"{FIND_KEY_LINK}{}\">Find &lt;Key&gt;</a>",
+            handle.to_uppercase()
+        )));
+        assert!(page.contains(&format!("href=\"{PART_LINK}0\"")));
+        // a handle that is not one gets no button
+        for bad in ["\"><script>", "0123456789ABCDEF0", "", "0123456789ABCDEG"] {
+            let page = secure_page(&[part(Some((bad, "Find Key")))], false);
+            assert!(!page.contains(FIND_KEY_LINK) && !page.contains("<script"), "{bad}");
+        }
+        assert!(!secure_page(&[part(None)], false).contains(FIND_KEY_LINK));
+    }
+
+    #[test]
+    fn find_key_links_are_strict() {
+        let fingerprint = "0123456789ABCDEF0123456789ABCDEF01234567";
+        assert_eq!(
+            find_key_link(&format!("{FIND_KEY_LINK}{}", fingerprint.to_lowercase())).as_deref(),
+            Some(fingerprint)
+        );
+        assert_eq!(
+            find_key_link("inboxclassic:find-key?0123456789abcdef").as_deref(),
+            Some("0123456789ABCDEF")
+        );
+        assert_eq!(key_handle(&"A".repeat(64)), Some("A".repeat(64)));
+        for bad in [
+            "inboxclassic:find-key?",
+            "inboxclassic:find-key?0123456789ABCDE",
+            "inboxclassic:find-key?0123456789ABCDEF0",
+            "inboxclassic:find-key?0123456789ABCDEX",
+            "inboxclassic:find-key?0123456789ABCDEF/",
+            "inboxclassic:find-key?0x23456789ABCDEF",
+            "inboxclassic:find-key?0123456789ABCDEF&x=1",
+            "inboxclassic:find-key?%30123456789ABCDEF",
+            "inboxclassic:find-key? 0123456789ABCDEF",
+            "https://example.org/inboxclassic:find-key?0123456789ABCDEF",
+            "inboxclassic:part-1",
+        ] {
+            assert_eq!(find_key_link(bad), None, "{bad}");
+        }
     }
 
     #[test]
