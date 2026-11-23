@@ -1,0 +1,18 @@
+From: Frank Example <frank@example.org>
+To: Alex Morgan <testuser@inboxclassic.test>
+Subject: Frank's new computer
+Date: Tue, 03 Nov 2026 10:00:00 +0000
+Message-ID: <autocrypt-frank-2@ui-test.example>
+Autocrypt: addr=frank@example.org;
+ keydata=xjMEaucNoBYJKwYBBAHaRw8BAQdAGrzFGE0O+QhBuCCjM27Czk5sujrT9hahLNNmrfWBbFXNIUZy
+ YW5rIEV4YW1wbGUgPGZyYW5rQGV4YW1wbGUub3JnPsKOBBMWCAA2BQJq5w2gFiEEKFmfFpEGvoff
+ 7L0EZU6cwK2I4FQCGwMCHgkDCwkHAxUKCAEWBScJAgcCAhkBAAoJEGVOnMCtiOBUHPkA/R1GtNmK
+ Kv0Sp/kAX7KYXtbcNiOM86p/neA5A1EuK8LRAQCMwm3hHi2xetwWsdyTGA1fpzJ07kNktszcbLVq
+ vp0+Ds44BGrnDaASCisGAQQBl1UBBQEBB0BbMid/GhESkr0WNKitam4CEXH6J5aT5DRdR2Wxfx8a
+ YAMBCAfCeAQYFggAIAUCaucNoAIbDBYhBChZnxaRBr6H3+y9BGVOnMCtiOBUAAoJEGVOnMCtiOBU
+ mRsBALZqjq1AhCOblcmNXSpScWJOwQhSgJZCihNh3DB0SJMVAQCPTPnbxQI256qZjqQ23aN7XeXJ
+ bgQnvZci+Hg22kgQDQ==
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+I set up a new computer, and it made a new key.

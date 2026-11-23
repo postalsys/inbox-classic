@@ -1,0 +1,30 @@
+From: Erin Example <erin@example.org>
+To: Alex Morgan <testuser@inboxclassic.test>
+Subject: My public key
+Date: Sun, 01 Nov 2026 10:00:00 +0000
+Message-ID: <key-attached@ui-test.example>
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="mix"
+
+--mix
+Content-Type: text/plain; charset=utf-8
+
+Here is my public key, so that you can write to me encrypted.
+--mix
+Content-Type: application/pgp-keys; name="Erin Example public key.asc"
+Content-Disposition: attachment; filename="Erin Example public key.asc"
+
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+
+xjMEaucNoBYJKwYBBAHaRw8BAQdAEUCmFIqzqPv+4B9EeH1ECYiJW/1/ubQcJIcp
+ja8Ef33NH0VyaW4gRXhhbXBsZSA8ZXJpbkBleGFtcGxlLm9yZz7CjgQTFggANgUC
+aucNoBYhBL2nuu3+8G0F1hF3eVeGVVurhc1MAhsDAh4JAwsJBwMVCggBFgUnCQIH
+AgIZAQAKCRBXhlVbq4XNTDhvAP9HcALLY/Or1xSptqcx/Sgo0UbP7KHanP6t+MA0
+bx38VwEAlO9HhUetTE1W0fbC8DwjHNCdgLkrqJE/hzfFULaRYgHOOARq5w2gEgor
+BgEEAZdVAQUBAQdA8KU08yliFuQvms2kR8FQi/Jg32P9bH+BfL0oVo1d4CADAQgH
+wngEGBYIACAFAmrnDaACGwwWIQS9p7rt/vBtBdYRd3lXhlVbq4XNTAAKCRBXhlVb
+q4XNTFd4AP9rZyVEhFcclyUpHldBAjLYBfwjHmUfdwVdh3MF61ICRQEA7uwYAPu2
+eUHVleV0w+mcdSbn8MAvw+FKfRzSbIEK+QE=
+=IiH+
+-----END PGP PUBLIC KEY BLOCK-----
+--mix--

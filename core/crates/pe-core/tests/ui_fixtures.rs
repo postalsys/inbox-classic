@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use std::sync::Mutex;
 use std::sync::mpsc::{self, Receiver};
 
-use pe_core::keys::KeySource;
+use pe_core::keys::{KeySource, Learned};
 use pe_core::protect::Tone;
 use pe_core::{Core, Event, Options, PasswordStore, Protection};
 
@@ -168,4 +168,90 @@ fn each_case_reads_as_the_ui_tests_expect() {
         "{}",
         view.attachments[1].tooltip
     );
+}
+
+/// The keys and messages of finding, publishing and passing on keys (SCENARIO.md 19k): Dave's key opens what
+/// `secure-no-key.eml` says, Erin's attached key is offered and imported, Frank's Autocrypt keys are learned and the
+/// second waits, and the keys the harness serves hold their addresses
+#[test]
+fn the_keys_of_finding_read_as_the_ui_tests_expect() {
+    let dir = pe_testkit::TempDir::new("ui-fixtures-finding");
+    let (core, events) = core(&dir);
+    let read = |name: &str| std::fs::read(fixtures().join(name)).unwrap();
+    let dave = pe_pgp::read_certs(&read("dave.asc")).unwrap().remove(0);
+    // Find Key beside the label of Dave's signature asks for his key's fingerprint (or key id)
+    let shown = view(&core, &events, "secure-no-key.eml");
+    let parts = shown.protection.clone().unwrap().parts;
+    assert_eq!(parts.len(), 1);
+    let handle = parts[0].find_key.clone().expect("Find Key");
+    // asked by its fingerprint, which the harness serves it by
+    assert_eq!(handle, dave.fingerprint());
+    assert!(shown.document.contains(&format!("inboxclassic:find-key?{handle}")));
+    // once his key is there, the label and the bar name him
+    core.pgp_import(&read("dave.asc"), None, KeySource::Keyserver).unwrap();
+    let protection = view(&core, &events, "secure-no-key.eml").protection.unwrap();
+    assert_eq!(
+        (protection.tone, protection.text.as_str()),
+        (Tone::Good, "Signed by dave@example.com (key not verified)")
+    );
+    assert_eq!(
+        protection.parts[0].label,
+        "Signed by dave@example.com (key not verified)"
+    );
+    assert_eq!(protection.parts[0].find_key, None);
+
+    // Erin's key, attached: Import Key
+    let shown = view(&core, &events, "key-attached.eml");
+    let files: Vec<_> = shown
+        .attachments
+        .iter()
+        .map(|a| (a.filename.as_str(), a.is_key))
+        .collect();
+    assert_eq!(files, [("Erin Example public key.asc", true)]);
+    let imported = core
+        .pgp_import_file_attachment(&fixtures().join("key-attached.eml"), 0)
+        .unwrap();
+    assert_eq!(imported.addresses, [("erin@example.org".to_string(), Learned::Used)]);
+    let erin = core.pgp_key(&imported.keys[0]).unwrap();
+    assert_eq!(
+        (erin.name.as_str(), erin.source.as_str()),
+        ("Erin Example", "From a message")
+    );
+
+    // Frank's first message: his key learned from its Autocrypt header
+    view(&core, &events, "autocrypt-frank-1.eml");
+    let frank = core.pgp_peer("frank@example.org").unwrap();
+    let first = frank.in_use.clone().expect("Frank's key learned");
+    assert_eq!(frank.pending, None);
+    let key = core.pgp_key(&first).unwrap();
+    assert_eq!(
+        (key.name.as_str(), key.source.as_str(), key.own),
+        ("Frank Example", "From a message's Autocrypt header", false)
+    );
+    // his second, later, with another key: it waits for the user's decision, the first stays in use
+    view(&core, &events, "autocrypt-frank-2.eml");
+    let frank = core.pgp_peer("frank@example.org").unwrap();
+    assert_eq!(frank.in_use.as_deref(), Some(first.as_str()));
+    let second = frank.pending.clone().expect("the new key waits");
+    assert_ne!(second, first);
+    let pending = frank.pending_text.unwrap();
+    assert!(
+        pending.starts_with("A different key for frank@example.org was found on "),
+        "{pending}"
+    );
+    // Keep the Current One
+    core.pgp_decide("frank@example.org", false).unwrap();
+    let frank = core.pgp_peer("frank@example.org").unwrap();
+    assert_eq!((frank.in_use.as_deref(), frank.pending), (Some(first.as_str()), None));
+
+    // the keys the harness serves, and the one pasted, hold their addresses
+    for (name, address) in [
+        ("grace.asc", "grace@example.net"),
+        ("heidi.asc", "heidi@example.net"),
+        ("judy.asc", "judy@example.net"),
+    ] {
+        let certs = pe_pgp::read_certs(&read(name)).unwrap();
+        assert_eq!(certs.len(), 1, "{name}");
+        assert_eq!(certs[0].addresses(1_793_527_200), [address], "{name}");
+    }
 }

@@ -903,6 +903,62 @@ const sections = [
                 what: 'A contact\'s Properties show the key used for each of their addresses with its fingerprint and status. Another key found for an address waits there until the user chooses it.',
                 how: 'A contact\'s Properties in the Address Book.',
                 checked: ['The fingerprint and Valid, verified']
+            },
+            {
+                shot: 'keys-12-publish',
+                name: 'Publishing your key',
+                what: 'Publish uploads the public part of your own key to keys.openpgp.org and asks the server to send a confirmation link to each of its addresses: an address is listed only once its owner opens the link, so nobody can publish a key for an address that is not theirs. A contact\'s key is theirs to publish, so Publish is greyed for it.',
+                how: 'Publish in Encryption Keys, with your key selected.',
+                checked: ['Greyed for a contact\'s key', 'The question names the address', 'The server got the key and was asked to confirm the address']
+            },
+            {
+                shot: 'keys-13-paste',
+                name: 'A key from the clipboard',
+                what: 'Import from Clipboard reads a key copied as text, such as one shown on a web page, as Import reads a file.',
+                how: 'Import from Clipboard in Encryption Keys.',
+                checked: ['Plain text: the clipboard holds no key', 'A key: imported, "Pasted"']
+            },
+            {
+                shot: 'keys-14-find-signer',
+                name: 'Find Key for a signature',
+                what: 'A part signed with a key you do not have has Find Key beside its label: it asks keys.openpgp.org for the key by the signature\'s fingerprint, which tells the server no address. Found, the label names who signed.',
+                how: 'Find Key on the label of a part signed by an unknown key.',
+                checked: ['Find Key beside the label', 'Asked by the fingerprint only', 'Signed by dave@example.com (key not verified)']
+            },
+            {
+                shot: 'keys-15-contact-find',
+                name: 'Find Key for a contact',
+                what: 'Find Key in a contact\'s properties looks up the keys of their addresses: each address\'s own mail provider first (its Web Key Directory), then keys.openpgp.org unless Settings turns it off.',
+                how: 'Find Key in a contact\'s Properties in the Address Book.',
+                checked: ['Found in her provider\'s directory', 'The key shown in her properties']
+            },
+            {
+                shot: 'keys-16-attached-key',
+                name: 'A key attached to a message',
+                what: 'An attachment that holds a public key offers Import Key: it is read as a key, not judged by its name. Keys from mail are taken as public keys only.',
+                how: 'Import Key in the attachment\'s menu.',
+                checked: ['Offered for the key only', 'Imported, "From a message"']
+            },
+            {
+                shot: 'keys-17-book-marks',
+                name: 'Key marks in the Address Book',
+                what: 'The Address Book marks contacts who have a key that can encrypt, and marks a key you verified differently.',
+                how: 'Tools > Address Book.',
+                checked: ['Verified, found and none told apart']
+            },
+            {
+                shot: 'keys-18-learned',
+                name: 'A key learned from Autocrypt',
+                what: 'A message whose Autocrypt header carries its sender\'s key teaches that key when it is opened, unverified, without a question.',
+                how: 'Open a message from someone whose mail program sends Autocrypt.',
+                checked: ['In Encryption Keys, "From a message\'s Autocrypt header"', 'In the contact\'s properties']
+            },
+            {
+                shot: 'keys-19-changed-key',
+                name: 'A changed key waits for you',
+                what: 'A different key for an address that has one never replaces it silently: it waits in the contact\'s properties until you choose Use the New Key or Keep the Current One.',
+                how: 'A contact\'s Properties after a message with another key.',
+                checked: ['The note and both choices', 'Keep keeps the key in use']
             }
         ]
     },
@@ -1070,6 +1126,13 @@ const sections = [
                 what: 'Your public key attached to the message as a file, sent as application/pgp-keys, which mail programs offer to import.',
                 how: 'Insert > Attach My Public Key (File on the Mac).',
                 checked: ['The key in the Attach line', 'Sent as application/pgp-keys']
+            },
+            {
+                shot: 'write-36-found-on-encrypt',
+                name: 'A recipient\'s key found as you write',
+                what: 'With Encrypt on, a recipient without a key is looked up at once (their provider\'s directory, then keys.openpgp.org); found, their lock turns blue and the message is sent encrypted to them without a question.',
+                how: 'Encrypt a message to someone whose key is published.',
+                checked: ['Grey while it is looked up, then blue', 'Sent encrypted to the key found']
             }
         ]
     },

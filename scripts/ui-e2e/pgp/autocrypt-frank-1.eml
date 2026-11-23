@@ -1,0 +1,18 @@
+From: Frank Example <frank@example.org>
+To: Alex Morgan <testuser@inboxclassic.test>
+Subject: Hello from Frank
+Date: Sun, 01 Nov 2026 10:00:00 +0000
+Message-ID: <autocrypt-frank-1@ui-test.example>
+Autocrypt: addr=frank@example.org;
+ keydata=xjMEaucNoBYJKwYBBAHaRw8BAQdA/41A+eobTbaZohVLCkNO4duciJav5FkegoiB4BoAOknNIUZy
+ YW5rIEV4YW1wbGUgPGZyYW5rQGV4YW1wbGUub3JnPsKOBBMWCAA2BQJq5w2gFiEELgGYNLXIWfPF
+ gG4VT2eVfSaDnvACGwMCHgkDCwkHAxUKCAEWBScJAgcCAhkBAAoJEE9nlX0mg57wqCkA/ihrcjML
+ 3+Ba5QDvAPcV2Jiywt82Zj8P9mFYIDU8UFezAQDv8Ijzzh8FQQGxq7DUWU4s71hFG4LIWfpXG2El
+ ArrEA844BGrnDaASCisGAQQBl1UBBQEBB0CEUuWDHyfin8ujs2Z62y750nCSx/4a5errZIbjlvsH
+ ZAMBCAfCeAQYFggAIAUCaucNoAIbDBYhBC4BmDS1yFnzxYBuFU9nlX0mg57wAAoJEE9nlX0mg57w
+ 8HQBAK4nsAMUlSuXb1+MTxUTfU5xC/Qmyj0Vdy+dMZSr4gMzAP92KCDS3aGFhL+At3d/M1PirsbO
+ /rEB9/KofEzF1XcQDg==
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+Hi, this is Frank. My mail program sends my key with each message.
