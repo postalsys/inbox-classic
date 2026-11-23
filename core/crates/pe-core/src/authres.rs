@@ -1,12 +1,12 @@
 //! Whose word counts in a message's headers: the verdict of the account's own provider (Authentication-Results, RFC
 //! 8601). Anyone can write such a header into a message; what a sender can not do is write above the server that
 //! receives it, which puts its verdict on top of everything the sender wrote. So only the newest verdict counts: the
-//! first block of Authentication-Results from the top, which must carry a name the account trusts ([`Verifiers`]: the
-//! provider table below, or the account's own "Trust verdicts from"). When the topmost names anyone else, the message
-//! has no verdict; nothing further down is looked at. Some providers (iCloud, Fastmail, Proton) write one header per
-//! check, with other fields between them: the block goes on through those and ends at the next Received or
-//! DKIM-Signature (the sender's trace and signatures), or at a verdict in another name. A check the block gives twice
-//! is taken from its newest header.
+//! topmost Authentication-Results, which must carry a name the account trusts ([`Verifiers`]: the provider table
+//! below, or the account's own "Trust sender checks from"). When it names anyone else, the message has no verdict;
+//! nothing further down is looked at, as a sender's own can follow the provider's directly (Gmail's is the last header
+//! Gmail writes). Some providers (iCloud, Fastmail, Proton) write one header a check, with other fields between them,
+//! and remove those senders write: their block goes on through those and ends at the next Received or
+//! DKIM-Signature, or at a verdict in another name. A check the block gives twice is taken from its newest header.
 //!
 //! Zoho places its Authentication-Results after the last Received line, among the headers the sender wrote, so its
 //! verdict is read from the ARC set (RFC 8617) it puts at the very top: the ARC-Authentication-Results of the highest
@@ -62,6 +62,8 @@ enum Rule {
     Named,
     /// The top block, in its names or none (Microsoft's older mail)
     Nameless,
+    /// The top block of one header a check (iCloud, Fastmail, Proton), which removes those senders write
+    PerCheck,
     /// Its own ARC set on top, sealed in one of these domains (Zoho)
     Arc(&'static [&'static str]),
 }
@@ -83,6 +85,14 @@ const fn named(hosts: &'static [&'static str], names: &'static [&'static str]) -
     }
 }
 
+const fn per_check(hosts: &'static [&'static str], names: &'static [&'static str]) -> Provider {
+    Provider {
+        hosts,
+        names,
+        rule: Rule::PerCheck,
+    }
+}
+
 const fn zoho(hosts: &'static [&'static str], seals: &'static [&'static str]) -> Provider {
     Provider {
         hosts,
@@ -100,16 +110,16 @@ const PROVIDERS: &[Provider] = &[
         names: &["microsoft.com"],
         rule: Rule::Nameless,
     },
-    named(&["icloud.com", "me.com", "mac.com"], &["icloud.com"]),
+    per_check(&["icloud.com", "me.com", "mac.com"], &["icloud.com"]),
     named(
         &["yahoo.com", "ymail.com", "rocketmail.com", "aol.com"],
         &["yahoo.com", "aol.com"],
     ),
-    named(
+    per_check(
         &["fastmail.com", "fastmail.fm", "messagingengine.com"],
         &["messagingengine.com"],
     ),
-    named(
+    per_check(
         &["proton.me", "protonmail.com", "protonmail.ch", "pm.me"],
         &["protonmail.ch"],
     ),
@@ -433,7 +443,7 @@ impl Verdict {
     pub fn of(all: &[Header], verifiers: &Verifiers) -> Option<Verdict> {
         match verifiers.rule {
             Rule::Arc(seals) => arc_set(all, verifiers, seals),
-            Rule::Named | Rule::Nameless => top_block(all, verifiers),
+            Rule::Named | Rule::Nameless | Rule::PerCheck => top_block(all, verifiers),
         }
     }
 
@@ -478,13 +488,19 @@ impl Verdict {
     }
 }
 
-/// The provider's block: the first Authentication-Results from the top and those after it in a trusted name, up to
-/// the next Received or DKIM-Signature; None when the first is not the provider's
+/// The provider's verdict on top: the first Authentication-Results from the top, when it is in a trusted name, up to
+/// the next Received, DKIM-Signature or verdict in another name (its end: what the provider wrote, as its BIMI
+/// headers, is above it). Only that header's results, as a sender's own can follow it directly (Gmail's is the last
+/// header Gmail writes) and would add checks the provider left out; but for a provider of one header a check, also
+/// those of the trusted ones after it, a check given twice taken from the newest.
 fn top_block(all: &[Header], verifiers: &Verifiers) -> Option<Verdict> {
     let start = all.iter().position(|h| is(h, "authentication-results"))?;
-    let mut results = Vec::new();
+    let (id, mut results) = parse(&all[start].value);
+    if !verifiers.trusts(id.as_deref()) {
+        return None;
+    }
     let mut end = all.len();
-    for (at, header) in all.iter().enumerate().skip(start) {
+    for (at, header) in all.iter().enumerate().skip(start + 1) {
         if is(header, "received") || is(header, "dkim-signature") {
             end = at;
             break;
@@ -494,15 +510,13 @@ fn top_block(all: &[Header], verifiers: &Verifiers) -> Option<Verdict> {
         }
         let (id, found) = parse(&header.value);
         if !verifiers.trusts(id.as_deref()) {
-            if at == start {
-                return None;
-            }
             end = at;
             break;
         }
-        // a check an earlier header of the block gave is not given again by a later one: the newest says it
-        let seen: Vec<String> = results.iter().map(|r: &Outcome| r.method.clone()).collect();
-        results.extend(found.into_iter().filter(|r| !seen.contains(&r.method)));
+        if verifiers.rule == Rule::PerCheck {
+            let seen: Vec<String> = results.iter().map(|r| r.method.clone()).collect();
+            results.extend(found.into_iter().filter(|r| !seen.contains(&r.method)));
+        }
     }
     Some(Verdict { results, end })
 }
@@ -667,14 +681,23 @@ mod tests {
         .unwrap();
         assert!(found.confirms("shop.com"));
         assert!(!found.confirms("bank.example"));
-        // a check given again lower in the block: the newest says it
-        let twice = verdict(
-            "Authentication-Results: mx.provider.example; dmarc=fail header.from=bank.example\r\n\
-             Authentication-Results: mx.provider.example; dmarc=pass header.from=bank.example; dkim=pass header.d=shop.com",
-            &verifiers,
+        // a sender's own right under the provider's, as under Gmail's (the last header Gmail writes): it adds no check
+        // the provider left out, and its logo headers are not the provider's
+        let gmail = Verifiers::of_host("ann@gmail.com", "imap.gmail.com");
+        let added = verdict(
+            "Received: from mta.paypa1-alerts.com by mx.google.com\r\n\
+             Received-SPF: pass\r\n\
+             Authentication-Results: mx.google.com; spf=pass smtp.mailfrom=paypa1-alerts.com; \
+             dmarc=pass header.from=paypa1-alerts.com\r\n\
+             Authentication-Results: mx.google.com; dkim=pass header.d=bank.example; \
+             bimi=pass header.d=paypa1-alerts.com policy.authority=pass\r\n\
+             BIMI-Location: v=BIMI1; l=https://paypa1-alerts.com/paypal.svg\r\n\
+             From: PayPal <service@paypa1-alerts.com>",
+            &gmail,
         )
         .unwrap();
-        assert!(!twice.confirms("bank.example") && twice.confirms("shop.com"));
+        assert!(!added.confirms("bank.example"));
+        assert!(!added.logo("paypa1-alerts.com"));
         // no verdict at all
         assert_eq!(verdict("X-Other: 1", &verifiers), None);
     }
