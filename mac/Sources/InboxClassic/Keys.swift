@@ -720,8 +720,8 @@ private final class KeysListWindow: NSObject, NSTableViewDataSource, NSTableView
         window.setContentSize(NSSize(width: 760, height: 380))
         window.contentMinSize = NSSize(width: 620, height: 320)
         super.init()
-        for (id, title, width) in [("name", Text.uiKeysColName.text, 150.0), ("address", Text.uiKeysColAddress.text, 180.0),
-                                   ("kind", Text.uiKeysColKind.text, 110.0), ("status", Text.uiKeysColStatus.text, 140.0)] {
+        for (id, title, width) in [("name", Text.uiKeysColName.text, 140.0), ("address", Text.uiKeysColAddress.text, 170.0),
+                                   ("kind", Text.uiKeysColKind.text, 100.0), ("status", Text.uiKeysColStatus.text, 170.0)] {
             let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier(id))
             column.title = title
             column.width = width
