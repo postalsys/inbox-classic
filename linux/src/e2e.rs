@@ -2224,6 +2224,10 @@ async fn set_account_field(d: &Driver, field: &str, text: &str, shot: Option<&st
     };
     let shown = text_of(form.upcast_ref(), field);
     set_text(form.upcast_ref(), field, text);
+    // the field in view for the screenshot: the form scrolls
+    if let Some(row) = named_in(form.upcast_ref(), field) {
+        row.grab_focus();
+    }
     if let Some(shot) = shot {
         pause(500).await;
         d.shot(&form, shot).await;
