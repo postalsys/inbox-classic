@@ -1,6 +1,6 @@
 # Translation review, round 7
 
-## Resume here
+## Completed review
 
 - Authoritative checkout: `/Users/andris/Projects/PostalExpress`, branch `master`.
 - Started at `f5470316c0aa06cf1a4b53d7e9be16432026df4b`; previous reviewed baseline `cc96034650ebb623dad6fb4f5b7a806971d75e52`. Round 6 remains archived.
@@ -10,7 +10,7 @@
 - Current inventory: 35 languages including English, each with 1,502 catalog entries and 53 help topics.
 - Static checks: all 210 catalogs parse; all 34 language checkers have zero structural findings after accounting for 52,870 expected removed-mark diagnostics. All 2,345 modeled mnemonic scope instances are clear; all 5,565 platform help variants are balanced and references valid. Historical contextual literal/reference differences are preserved and documented.
 - Offline pe-ffi/help-export builds and Windows/macOS/Linux help exports passed. Final generated-output and rendered-label evidence is kept with the review records.
-- Next: commit to local master, update the reviewed baseline, verify zero pending/unmarked changes and archive round 7. Do not push or create a PR.
+- Round 7 is complete and archived. Content commit and `REVIEWED`: `af31d1c03fc18cd3df8ed7e7ce708dfb148a2be8`. The baseline check reports zero pending messages, zero pending help passages and zero unmarked changes. All changes are local on master; do not push or create a PR.
 - Evidence: `/Users/andris/Projects/PostalExpress/build/i18n-round7-20261123`. Frozen language ledgers, original snapshots, source followups, final hashes and independent coverage reports are preserved there.
 
 ## Validation policy

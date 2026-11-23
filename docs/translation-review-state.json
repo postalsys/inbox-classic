@@ -1,6 +1,6 @@
 {
   "round": 7,
-  "status": "in_progress",
+  "status": "complete",
   "starting_commit": "f5470316c0aa06cf1a4b53d7e9be16432026df4b",
   "starting_review_baseline": "cc96034650ebb623dad6fb4f5b7a806971d75e52",
   "previous_round": 6,
@@ -5099,11 +5099,13 @@
   },
   "validation_policy": "No local test suites, CI queries or manually triggered workflows; static checks and offline builds allowed.",
   "evidence_checkpoint": "/Users/andris/Projects/PostalExpress/build/i18n-round7-20261123",
-  "next_batch": "All language work is reviewed. Commit local master, advance REVIEWED to the content commit, run the zero-pending check and archive the completed round. Do not push.",
+  "next_batch": "None. Round 7 is complete and committed to local master. Do not push.",
   "publication": {
     "authorized": false,
     "status": "local_only",
-    "instruction": "Commit to local master; do not push."
+    "instruction": "Commit to local master; do not push.",
+    "content_commit": "af31d1c03fc18cd3df8ed7e7ce708dfb148a2be8",
+    "pushed": false
   },
   "parallel_review": {
     "authorized_by_user": true,
@@ -7561,7 +7563,11 @@
       },
       "final-generated-rendered-review.json": {
         "path": "/Users/andris/Projects/PostalExpress/build/i18n-round7-20261123/final-generated-rendered-review.json",
-        "sha256": "9ba4e279df4ab934d729d2fa1a92d37b1a6e82c090a0021087b41f111dca384e"
+        "sha256": "7494f324f86c1218f99e71bf0f73d077d2f50a49391fa5672bb872bf4f0b596b"
+      },
+      "retained-context-differences.json": {
+        "path": "/Users/andris/Projects/PostalExpress/build/i18n-round7-20261123/retained-context-differences.json",
+        "sha256": "c4b659365ce1c5438300a1055154ad18952c7fca77a897b9c9ad38962c099d43"
       }
     }
   },
@@ -7586,10 +7592,21 @@
     "native_speaker_or_GUI_certification": false,
     "generated_and_rendered_output": "Passed; generated C/Swift IDs, installer/Linux metadata and ordered dynamic labels in 210 reviewed topic/platform/language exports match current sources.",
     "retained_context_differences": "All 560 observations match round 6 exactly; no new exception accepted.",
-    "git_diff_check": "passed"
+    "git_diff_check": "passed",
+    "review_baseline_check": {
+      "exit_code": 0,
+      "result": "0 messages and 0 help passages wait for a review; 0 new or changed without a mark",
+      "baseline": "af31d1c03fc18cd3df8ed7e7ce708dfb148a2be8",
+      "log_sha256": "b1c34ba0bdb98083b3495bd5142c475b9a57f7e00a57bfe38fadbde7c1539398"
+    },
+    "rendered_reviewed_pages": 210,
+    "rendered_dynamic_labels": 5002,
+    "rendered_settings_paths": 105
   },
   "latest_upstream_check": {
     "commit": "f5470316c0aa06cf1a4b53d7e9be16432026df4b",
     "checked_at": "2026-11-23T13:36:56.117315+00:00"
-  }
+  },
+  "completed_at": "2026-11-23T13:43:21.175443+00:00",
+  "reviewed_content_commit": "af31d1c03fc18cd3df8ed7e7ce708dfb148a2be8"
 }
