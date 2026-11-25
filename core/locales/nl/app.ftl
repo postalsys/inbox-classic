@@ -417,6 +417,8 @@ ui-delete-folder-question = De map “{ $folder }” met alle berichten en subma
 ui-properties = Eigensc&happen
 ui-account-sync = &Verzenden en ontvangen
 ui-account-properties = &Eigenschappen...
+# review: new
+ui-account-properties-of = A&ccounteigenschappen...
 ui-account-move-up = Om&hoog
 ui-account-move-down = Om&laag
 ui-menu-open = &Openen

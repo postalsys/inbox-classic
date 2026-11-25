@@ -419,6 +419,8 @@ ui-delete-folder-question = 要删除文件夹“{ $folder }”及其中的邮�
 ui-properties = 属性(&S)
 ui-account-sync = 发送和接收(&V)
 ui-account-properties = 属性(&R)...
+# review: new
+ui-account-properties-of = 帐户属性(&C)...
 ui-account-move-up = 上移(&U)
 ui-account-move-down = 下移(&W)
 ui-menu-open = 打开(&O)

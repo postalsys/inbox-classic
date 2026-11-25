@@ -401,9 +401,11 @@ pub async fn one_account_tree(d: &Driver) {
     main.folders.open_menu(&tree, 120.0, 20.0, inbox);
     let labels = menu_labels(main.folder_popover.borrow().as_ref());
     d.check(
-        labels.iter().any(|l| l == "New Folder\u{2026}") && !labels.iter().any(|l| l == "Properties\u{2026}"),
+        labels.iter().any(|l| l == "New Folder\u{2026}")
+            && labels.last() == Some(&crate::words::plain(Text::UiAccountPropertiesOf))
+            && !labels.iter().any(|l| *l == crate::words::plain(Text::UiAccountSync)),
         &format!(
-            "right-clicking the Inbox gives the folder's menu, no account commands ({})",
+            "right-clicking the Inbox gives the folder's menu, ending with Account Properties, no other account commands ({})",
             labels.join(", ")
         ),
     );
@@ -3392,13 +3394,23 @@ pub async fn all_inboxes_by_account(d: &Driver) {
         wait_until(10, || u64::from(messages_listed()) == both).await,
         "All Inboxes again lists both accounts' Inboxes",
     );
-    // the second account's Properties: the Account name field, filled with its name
-    let parent = main.window().clone();
-    crate::app::spawn(async move {
-        if crate::accounts::account_properties(&parent, second_account).await {
-            shell().main().reload();
-        }
-    });
+    // the second account's Properties, from its row under All Inboxes: the last item of its right-click menu
+    // a right-click selects the row it is on, as the tree's gesture does
+    main.folders.select(second, false);
+    let tree: gtk::Widget = main.folders.view.clone().upcast();
+    main.folders.open_menu(&tree, 120.0, 40.0, second);
+    let labels = menu_labels(main.folder_popover.borrow().as_ref());
+    d.check(
+        labels.last() == Some(&crate::words::plain(Text::UiAccountPropertiesOf)),
+        &format!(
+            "the account's row under All Inboxes ends its menu with Account Properties ({})",
+            labels.join(", ")
+        ),
+    );
+    if let Some(popover) = main.folder_popover.borrow_mut().take() {
+        popover.popdown();
+    }
+    let _ = tree.activate_action("folder.properties", None);
     match wait_dialog(10, "account-properties").await {
         Some(form) => {
             let field = text_of(form.upcast_ref(), "form-0");
@@ -3420,6 +3432,11 @@ pub async fn all_inboxes_by_account(d: &Driver) {
                     heading(),
                     row(second)
                 ),
+            );
+            let bar = || main.selected_name();
+            d.check(
+                wait_until(10, || bar() == "Inbox - Second").await,
+                &format!("the folder bar names the account by its new name ({})", bar()),
             );
         }
         None => d.check(false, "the second account's Properties opens"),

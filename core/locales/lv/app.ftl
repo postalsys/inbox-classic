@@ -420,6 +420,8 @@ ui-delete-folder-question = Vai dzēst mapi „{ $folder }” ar tās ziņojumie
 ui-properties = R&ekvizīti
 ui-account-sync = Sūtīt un saņe&mt
 ui-account-properties = &Rekvizīti...
+# review: new
+ui-account-properties-of = &Konta rekvizīti...
 ui-account-move-up = Pārvietot &augšup
 ui-account-move-down = Pārvietot l&ejup
 ui-menu-open = &Atvērt

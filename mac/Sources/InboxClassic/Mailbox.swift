@@ -2214,6 +2214,11 @@ public final class Mailbox: NSObject {
             menu.addItem(.separator())
             addItems(moveItems(row.account), to: menu, account: row.account)
         }
+        // a row named after its account (or the only account's Inbox) opens the account's properties, to rename it there
+        if row.accountProperties {
+            menu.addItem(.separator())
+            addItems([(Text.uiAccountPropertiesOf.opens, #selector(accountMenuProperties(_:)), true)], to: menu, account: row.account)
+        }
         menu.autoenablesItems = false
         return menu
     }

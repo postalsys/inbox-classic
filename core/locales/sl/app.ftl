@@ -420,6 +420,8 @@ ui-delete-folder-question = Želite izbrisati mapo »{ $folder }« z njenimi spo
 ui-properties = &Lastnosti
 ui-account-sync = &Pošlji in prejmi
 ui-account-properties = L&astnosti...
+# review: new
+ui-account-properties-of = Lastnosti ra&čuna...
 ui-account-move-up = Premakni &gor
 ui-account-move-down = Premakni &dol
 ui-menu-open = O&dpri

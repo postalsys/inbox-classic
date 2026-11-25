@@ -925,6 +925,8 @@ public:
     int64_t CurrentAccount() const;
     // the account whose own row is selected in the tree (the account row's menu is for it), 0 when another row is
     int64_t SelectedAccount() const;
+    // the account whose properties the selected row's menu opens: a heading's, or a row named after its account
+    int64_t PropertiesAccount() const;
     // File > Folder > New Folder applies to the row selected in the tree
     bool CanNewFolder() const;
     // the selected account row, or the selected Inbox under All Inboxes, moved `step` places in the accounts' order (-1
@@ -1010,6 +1012,7 @@ private:
         bool boldCollapsed = false;
         bool dropTarget = false;
         bool reordersAccounts = false;
+        bool accountProperties = false;  // its menu ends with Account Properties
         PeTreeMenu menu = PE_TREE_MENU_NONE;
         // what it lists when selected (pe_list_view_set_list with `folder`)
         PeTreeList list = PE_TREE_LIST_NONE;

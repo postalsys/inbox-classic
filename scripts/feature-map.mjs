@@ -238,11 +238,12 @@ const sections = [
             {
                 shot: 'all-inboxes-3-accounts',
                 name: 'All Inboxes by account',
-                what: "Under All Inboxes each account's Inbox has a row of its own, named as the account is, with its unread count: the one place each account's Inbox is, as the account's heading lists its other folders. All Inboxes lists every Inbox's mail; a row under it lists that Inbox alone, and the folder bar names the Inbox and the account. The folder list remembers which rows were open. Each account has an Account name of its own (Gmail, Work), set in its Properties; a new one starts with its provider's name or its domain.",
-                how: "Open All Inboxes in the folder tree and select an account's row under it; File > Accounts > Properties for the Account name.",
+                what: "Under All Inboxes each account's Inbox has a row of its own, named as the account is, with its unread count: the one place each account's Inbox is, as the account's heading lists its other folders. All Inboxes lists every Inbox's mail; a row under it lists that Inbox alone, and the folder bar names the Inbox and the account. The folder list remembers which rows were open. Each account has an Account name of its own (Gmail, Work), set in its Properties, which Account Properties in the right-click menu of the account's row opens; a new one starts with its provider's name or its domain.",
+                how: "Open All Inboxes in the folder tree and select an account's row under it; right-click it and choose Account Properties for the Account name.",
                 checked: [
                     'All Inboxes has a row for each account, with its unread count',
                     "An account's row lists its Inbox alone, the folder bar names it",
+                    "The row's menu ends with Account Properties, which opens that account's Properties",
                     "The Account name set in Properties is the account's heading and its row's name"
                 ]
             },

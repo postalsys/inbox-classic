@@ -409,6 +409,8 @@ ui-delete-folder-question = フォルダー「{ $folder }」を、その中の�
 ui-properties = プロパティ(&S)
 ui-account-sync = 送受信(&V)
 ui-account-properties = プロパティ(&R)...
+# review: new
+ui-account-properties-of = アカウントのプロパティ(&C)...
 ui-account-move-up = 上へ移動(&U)
 ui-account-move-down = 下へ移動(&W)
 ui-menu-open = 開く(&O)

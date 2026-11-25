@@ -112,6 +112,10 @@ pub struct TreeRow {
     pub reorders_accounts: bool,
     /// Its menu
     pub menu: TreeMenu,
+    /// Its menu opens its account's Properties: a heading's (Properties), and a folder's ending with Account Properties
+    /// on a row named after its account (an Inbox under All Inboxes, a folder under All Sent or All Drafts) and on the
+    /// Inbox of the only account, which has no heading to offer them
+    pub account_properties: bool,
     /// What it lists when chosen
     pub list: TreeList,
     /// A row with rows under it starts open (All Inboxes, a heading) or closed (All Sent, All Drafts); whether the
@@ -154,6 +158,7 @@ impl TreeRow {
             selectable: kind != TreeRowKind::Account,
             drop_target: false,
             reorders_accounts: kind == TreeRowKind::Account,
+            account_properties: kind == TreeRowKind::Account,
             menu: match kind {
                 TreeRowKind::AllInboxes => TreeMenu::MarkRead,
                 TreeRowKind::Account => TreeMenu::Account,
@@ -263,6 +268,7 @@ fn folder_row(folder: &Folder, depth: usize) -> TreeRow {
         selectable: folder.info.selectable,
         drop_target: folder.info.selectable,
         reorders_accounts: false,
+        account_properties: false,
         menu: TreeMenu::Folder,
         list: TreeList::Folder,
         starts_open: true,
@@ -302,7 +308,13 @@ fn fill_below(rows: &mut [(TreeRow, u64)]) {
 fn one_account(folders: &[(Folder, usize)], account: AccountId, mut flagged: TreeRow) -> Vec<(TreeRow, u64)> {
     let (inbox, rest) = split_inbox(folders);
     let mut rows: Vec<(TreeRow, u64)> = inbox
-        .map(|inbox| (folder_row(inbox, 0), counted(inbox)))
+        .map(|inbox| {
+            let row = TreeRow {
+                account_properties: true,
+                ..folder_row(inbox, 0)
+            };
+            (row, counted(inbox))
+        })
         .into_iter()
         .collect();
     // with one account New Folder from Flagged goes at its top
@@ -343,6 +355,7 @@ fn account_folder_row(folder: &Folder, title: &str) -> TreeRow {
     TreeRow {
         label: title.to_string(),
         title: format!("{} - {title}", text::folder_name(&folder.info)),
+        account_properties: true,
         // its folders are listed under the account's heading: one made from here goes there
         new_folder_parent: 0,
         ..folder_row(folder, 1)
@@ -374,6 +387,7 @@ fn several_accounts(
                 label: title.clone(),
                 title: format!("{} - {title}", text::folder_name(&inbox.info)),
                 reorders_accounts: true,
+                account_properties: true,
                 ..folder_row(inbox, 1)
             };
             rows.push((row, counted(inbox)));
@@ -689,6 +703,22 @@ mod tests {
         );
         assert!(!rows[9].selectable && rows[9].reorders_accounts && rows[1].reorders_accounts);
         assert!(rows[1].drop_target && !rows[0].drop_target && !rows[9].drop_target && !rows[3].drop_target);
+        // the rows named after an account, and the headings, open the account's Properties
+        let offering: Vec<usize> = (0..rows.len()).filter(|&i| rows[i].account_properties).collect();
+        assert_eq!(offering, [1, 2, 4, 5, 7, 9, 15]);
+    }
+
+    #[test]
+    fn the_only_accounts_inbox_offers_its_properties() {
+        pe_i18n::set_language("en");
+        let one = rows(vec![(account(1, "ann@example.org"), folders(1, 0))], 0);
+        let offering: Vec<&str> = one
+            .iter()
+            .filter(|row| row.account_properties)
+            .map(|row| row.label.as_str())
+            .collect();
+        assert_eq!(offering, ["Inbox"], "no heading is there to offer them");
+        assert_eq!(one[0].menu, TreeMenu::Folder);
     }
 
     #[test]

@@ -576,6 +576,7 @@ Mailbox::TreeRow Mailbox::RowFrom(const PeTreeRow& row) {
     made.boldCollapsed = row.bold_collapsed;
     made.dropTarget = row.drop_target;
     made.reordersAccounts = row.reorders_accounts;
+    made.accountProperties = row.account_properties;
     made.menu = row.menu;
     made.list = row.list;
     made.parent = row.parent;
@@ -623,6 +624,11 @@ HTREEITEM Mailbox::FindRow(const std::string& key) const {
 int64_t Mailbox::SelectedAccount() const {
     const TreeRow* row = SelectedTreeRow();
     return row && row->kind == PE_TREE_ROW_KIND_ACCOUNT ? row->account : 0;
+}
+
+int64_t Mailbox::PropertiesAccount() const {
+    const TreeRow* row = SelectedTreeRow();
+    return row && row->accountProperties ? row->account : 0;
 }
 
 bool Mailbox::CanNewFolder() const {
@@ -2397,6 +2403,11 @@ void Mailbox::FolderMenu() {
     if (row->reordersAccounts) {
         AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
         AppendMoveItems(menu);
+    }
+    // a row named after its account (or the only account's Inbox) opens the account's properties, to rename it there
+    if (row->accountProperties) {
+        AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+        AppendMenuW(menu, MF_STRING, IDM_ACCOUNT_PROPERTIES, core::T(PE_TEXT_UI_ACCOUNT_PROPERTIES_OF).c_str());
     }
     TrackPopupMenu(menu, TPM_RIGHTBUTTON, screen.x, screen.y, 0, parent_, nullptr);
     DestroyMenu(menu);

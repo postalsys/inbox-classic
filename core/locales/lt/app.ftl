@@ -417,6 +417,8 @@ ui-delete-folder-question = Panaikinti aplanką „{ $folder }“ su jo laiškai
 ui-properties = &Ypatybės
 ui-account-sync = Siųsti ir &gauti
 ui-account-properties = &Ypatybės...
+# review: new
+ui-account-properties-of = Paskyros &ypatybės...
 ui-account-move-up = Perkelti &aukštyn
 ui-account-move-down = Perkelti ž&emyn
 ui-menu-open = Ati&daryti

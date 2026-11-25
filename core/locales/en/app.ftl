@@ -425,6 +425,7 @@ ui-delete-folder-question = Delete the folder “{ $folder }” with its message
 ui-properties = Propertie&s
 ui-account-sync = Send and Recei&ve
 ui-account-properties = P&roperties...
+ui-account-properties-of = A&ccount Properties...
 ui-account-move-up = Move &Up
 ui-account-move-down = Move Do&wn
 ui-menu-open = &Open

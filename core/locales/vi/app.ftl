@@ -419,6 +419,8 @@ ui-delete-folder-question = Xóa thư mục “{ $folder }” cùng các thư v�
 ui-properties = T&huộc tính
 ui-account-sync = &Gửi và nhận
 ui-account-properties = Thuộc tín&h...
+# review: new
+ui-account-properties-of = Thuộc tính tài &khoản...
 ui-account-move-up = Di chuyển &lên
 ui-account-move-down = &Di chuyển xuống
 ui-menu-open = &Mở

@@ -419,6 +419,8 @@ ui-delete-folder-question = Hapus folder “{ $folder }” beserta pesan dan fol
 ui-properties = Pr&operti
 ui-account-sync = &Kirim dan Terima
 ui-account-properties = P&roperti...
+# review: new
+ui-account-properties-of = P&roperti akun...
 ui-account-move-up = &Pindahkan ke Atas
 ui-account-move-down = Pindahkan ke Ba&wah
 ui-menu-open = &Buka

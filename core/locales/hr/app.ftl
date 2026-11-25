@@ -415,6 +415,8 @@ ui-delete-folder-question = Izbrisati mapu „{ $folder }“ s njezinim porukama
 ui-properties = Svo&jstva
 ui-account-sync = Pošalji i p&rimi
 ui-account-properties = Svo&jstva...
+# review: new
+ui-account-properties-of = Svojstva ra&čuna...
 ui-account-move-up = Premjesti &gore
 ui-account-move-down = Premjesti &dolje
 ui-menu-open = Ot&vori

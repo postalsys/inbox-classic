@@ -419,6 +419,8 @@ ui-delete-folder-question = “{ $folder }” 폴더를 그 안의 메시지 및
 ui-properties = 속성(&S)
 ui-account-sync = 보내기/받기(&V)
 ui-account-properties = 속성(&R)...
+# review: new
+ui-account-properties-of = 계정 속성(&C)...
 ui-account-move-up = 위로 이동(&U)
 ui-account-move-down = 아래로 이동(&W)
 ui-menu-open = 열기(&O)

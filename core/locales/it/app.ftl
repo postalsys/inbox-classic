@@ -417,6 +417,8 @@ ui-delete-folder-question = Eliminare la cartella “{ $folder }” con tutti i 
 ui-properties = Propriet&à
 ui-account-sync = &Invia e ricevi
 ui-account-properties = &Proprietà...
+# review: new
+ui-account-properties-of = &Proprietà dell'account...
 ui-account-move-up = Sposta &su
 ui-account-move-down = Sposta &giù
 ui-menu-open = &Apri

@@ -2315,8 +2315,8 @@ extension UITest {
         await shot(main.window, "folders-6-one-account")
 
         let titles = treeMenu(0)?.items.filter { !$0.isSeparatorItem }.map(\.title) ?? []
-        check(titles.contains(Command.newFolder.label) && !titles.contains(Text.uiAccountSync.text) && !titles.contains { $0.hasPrefix(Text.uiAccountProperties.text.replacingOccurrences(of: "...", with: "")) },
-              "right-clicking the Inbox gives the folder's menu, without the account's commands (\(titles))")
+        check(titles.contains(Command.newFolder.label) && !titles.contains(Text.uiAccountSync.text) && titles.last == Text.uiAccountPropertiesOf.opens,
+              "right-clicking the Inbox gives the folder's menu, ending with Account Properties, without the account's other commands (\(titles))")
 
         tree.selectRowIndexes(IndexSet(integer: 1), byExtendingSelection: false)
         _ = await waitUntil(5) { self.main.mailbox.flagged }
@@ -2726,11 +2726,14 @@ extension UITest {
         tree.selectRowIndexes(IndexSet(integer: allRow), byExtendingSelection: false)
 
         step("the account name")
-        command(.accounts)
-        guard let window = await waitWindow("accounts", 10) else { throw Failed(description: "no Accounts window") }
-        let table: NSTableView? = find("accounts.list", in: window)
-        table?.selectRowIndexes(IndexSet(integer: 1), byExtendingSelection: false)
-        press(find("accounts.properties", in: window))
+        // the second account's row under All Inboxes: the last item of its right-click menu opens its Properties
+        guard let workRow = treeRow(PE_TREE_ROW_KIND_ACCOUNT_INBOX, account: accounts[1].id), let rowMenu = treeMenu(workRow) else {
+            throw Failed(description: "no row under All Inboxes for the second account")
+        }
+        let rowTitles = rowMenu.items.filter { !$0.isSeparatorItem }.map(\.title)
+        check(rowTitles.last == Text.uiAccountPropertiesOf.opens,
+              "the account's row under All Inboxes ends its menu with Account Properties (\(rowTitles))")
+        onMain { rowMenu.performActionForItem(at: rowMenu.items.count - 1) }
         guard let form = await waitFor(10, { self.window("form").flatMap { $0.title == Text.uiProperties.text ? $0 : nil } }) else {
             throw Failed(description: "no Properties form")
         }
@@ -2742,12 +2745,12 @@ extension UITest {
             answer(ask, Text.uiYes.text)
         }
         _ = await waitUntil(10) { !form.isVisible }
-        press(find("accounts.close", in: window))
-        _ = await waitUntil(10) { !window.isVisible }
         let secondLabels = { [PE_TREE_ROW_KIND_ACCOUNT, PE_TREE_ROW_KIND_ACCOUNT_INBOX].map {
             self.treeRow($0, account: accounts[1].id).flatMap(self.treeNode)?.row.label ?? "" } }
         check(await waitUntil(10) { secondLabels() == ["Second", "Second"] },
               "set to Second, the account's heading and its row under All Inboxes say Second (\(secondLabels()))")
+        check(await waitUntil(10) { self.main.window.title == "Inbox - Second" },
+              "the title names the account by its new name (\(main.window.title))")
 
         step("the account's menu")
         let menu = main.mailbox.accountMenu(accounts[0].id)

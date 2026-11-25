@@ -418,6 +418,8 @@ ui-delete-folder-question = Eliminar a pasta «{ $folder }» com as respetivas m
 ui-properties = Propriedade&s
 ui-account-sync = Enviar e &receber
 ui-account-properties = &Propriedades...
+# review: new
+ui-account-properties-of = Propriedades da c&onta...
 ui-account-move-up = Mover para &cima
 ui-account-move-down = Mover para &baixo
 ui-menu-open = &Abrir
