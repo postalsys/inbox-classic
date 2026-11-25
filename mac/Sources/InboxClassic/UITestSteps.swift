@@ -2426,6 +2426,19 @@ extension UITest {
             await pause(0.5)
         }
         check(to?.stringValue == "Ann Example <ann@example.com>, ", "Return after it leaves a comma for the next (\(to?.stringValue ?? ""))")
+        // what does not begin anyone's entry stays as typed: the list offers Ann (her surname), Tab keeps the text
+        let offered = to?.people("example") ?? []
+        completing.makeFirstResponder(to)
+        if let editor = to?.currentEditor() as? NSTextView {
+            editor.string = ""
+            editor.insertText("example", replacementRange: NSRange(location: 0, length: 0))
+            onMain { editor.complete(nil) }
+            await pause(1)
+            onMain { editor.doCommand(by: #selector(NSResponder.insertTab(_:))) }
+            await pause(0.5)
+        }
+        check(!offered.isEmpty && to?.stringValue == "example",
+              "an address typed that only resembles someone's stays as typed (\(to?.stringValue ?? ""), offered \(offered.count))")
         await closeCompose(completing)
     }
 

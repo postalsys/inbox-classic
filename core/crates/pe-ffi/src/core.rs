@@ -1092,6 +1092,11 @@ pub struct PeContact {
     /// A group of the address book: shown by its `name`, it puts its members (`label`) in the field, and is not
     /// forgotten with `pe_contact_forget`
     pub group: bool,
+    /// What was typed begins its name, address or label: the list may have it chosen for Return or Tab to take; when
+    /// the first is not, nothing is chosen and what was typed stays
+    pub completes: bool,
+    /// What was typed begins its `label`: a field that fills the rest in as the user types may do so
+    pub fills_in: bool,
 }
 
 pub struct PeContactList(Rows<PeContact>);
@@ -1117,6 +1122,8 @@ pub unsafe extern "C" fn pe_contacts(core: *const PeCore, typed: *const c_char, 
                 address: strings.add(&c.address),
                 label: strings.add(&c.label),
                 group: c.group,
+                completes: c.completes,
+                fills_in: c.inline,
             })))
         })
     }

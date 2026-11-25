@@ -92,6 +92,8 @@ impl Completion {
             return;
         }
         let found = shell().core.completions(typed, SHOWN).unwrap_or_default();
+        // the best one chosen only when it begins with what was typed; otherwise what is typed stays
+        let first_completes = found.first().is_some_and(|f| f.completes);
         if found.is_empty() {
             self.hide();
             return;
@@ -112,8 +114,13 @@ impl Completion {
             rows.push((found.label, if found.group { String::new() } else { found.address }));
         }
         *self.rows.borrow_mut() = rows;
-        // the best one chosen: Enter or Tab takes it
-        self.list.select_row(self.list.row_at_index(0).as_ref());
+        // the best one chosen for Enter or Tab to take, when it begins with what was typed
+        let first = if first_completes {
+            self.list.row_at_index(0)
+        } else {
+            None
+        };
+        self.list.select_row(first.as_ref());
         self.popover.set_width_request(self.entry.width());
         if !self.shown() {
             self.popover.popup();
@@ -139,7 +146,8 @@ impl Completion {
 
     fn move_by(&self, by: i32) {
         let count = self.rows.borrow().len() as i32;
-        let current = self.chosen().map_or(0, |i| i as i32);
+        // nothing chosen yet: Down goes to the first
+        let current = self.chosen().map_or(-1, |i| i as i32);
         let next = (current + by).clamp(0, (count - 1).max(0));
         self.list.select_row(self.list.row_at_index(next).as_ref());
     }
@@ -166,6 +174,11 @@ impl Completion {
         match key {
             gdk::Key::Down => self.move_by(1),
             gdk::Key::Up => self.move_by(-1),
+            // nothing chosen: the list closes, what is typed stays and the key does its own work
+            gdk::Key::Return | gdk::Key::KP_Enter | gdk::Key::Tab if self.chosen().is_none() => {
+                self.hide();
+                return glib::Propagation::Proceed;
+            }
             gdk::Key::Return | gdk::Key::KP_Enter | gdk::Key::Tab => self.take(self.chosen()),
             gdk::Key::Escape => self.hide(),
             gdk::Key::Delete if modifiers.contains(gdk::ModifierType::SHIFT_MASK) => self.forget(),
