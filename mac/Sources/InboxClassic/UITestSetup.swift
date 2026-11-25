@@ -10,9 +10,11 @@ extension UITest {
     /// here, and the form comes back: the form shown now
     func firstRunImport(_ start: NSWindow) async throws -> NSWindow {
         let link: NSButton? = find("account.import", in: start)
-        check(link?.title.hasPrefix(Text.uiSetupFirstRun.title) == true,
-              "before the first account, Add Mail Account offers to import settings and accounts (\(link?.title ?? ""))")
-        check(link?.isBordered == true && link?.bezelStyle == .push, "the import is a push button")
+        let join: NSButton? = find("account.joinSync", in: start)
+        let other = views(NSTextField.self, in: start.contentView).contains { $0.stringValue == Text.uiFirstRunOther.text }
+        check(other && join?.title == Text.uiFirstRunSync.opens && link?.title == Text.uiFirstRunImport.opens,
+              "before the first account, Add Mail Account asks about another computer, with Join Its Sync and Import from a File (\(join?.title ?? ""), \(link?.title ?? ""))")
+        check(link?.isBordered == true && link?.bezelStyle == .push && join?.bezelStyle == .push, "both are push buttons")
         await shot(start, "setup-5-first-run")
         var asked: String?
         TestHooks.open = { title in

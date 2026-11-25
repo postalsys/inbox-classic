@@ -305,6 +305,11 @@ typedef enum PeEventKind {
   // A mailing list was asked to let the user go, or a request failed: the windows read the bar of the message they
   // show again (`pe_list_bar`)
   PE_EVENT_KIND_LISTS_CHANGED = 40,
+  // Settings sync read what the other computers wrote: answer with `pe_settings_sync_continue`
+  PE_EVENT_KIND_SETTINGS_SYNC_READY = 41,
+  // Settings sync's state changed, a probe or the computers have their answer, or a sync brought news: the Sync
+  // settings read `pe_settings_sync_state` again, the windows take `pe_settings_sync_news`
+  PE_EVENT_KIND_SETTINGS_SYNC_CHANGED = 42,
 } PeEventKind;
 
 typedef enum PeSecurity {
@@ -688,6 +693,24 @@ typedef enum PeSetupError {
   PE_SETUP_ERROR_INVALID = 3,
 } PeSetupError;
 
+// Where the vault is: a folder (`path`), or an S3-compatible bucket (the others)
+typedef enum PeSyncPlaceKind {
+  PE_SYNC_PLACE_KIND_FOLDER = 0,
+  PE_SYNC_PLACE_KIND_BUCKET = 1,
+} PeSyncPlaceKind;
+
+// What a probe found
+typedef enum PeSyncProbe {
+  // It is still looking
+  PE_SYNC_PROBE_WAITING = 0,
+  // Nothing there yet: this computer starts the vault
+  PE_SYNC_PROBE_EMPTY = 1,
+  // A vault: this computer joins it
+  PE_SYNC_PROBE_VAULT = 2,
+  // It could not be reached: `pe_settings_sync_probe` says why
+  PE_SYNC_PROBE_PROBLEM = 3,
+} PeSyncProbe;
+
 // The accounts; free with `pe_account_list_free`
 typedef struct PeAccountList PeAccountList;
 
@@ -809,6 +832,22 @@ typedef struct PeSignInAppList PeSignInAppList;
 
 // The presets; free with `pe_sign_in_preset_list_free`
 typedef struct PeSignInPresetList PeSignInPresetList;
+
+// The computers of the vault; free with `pe_settings_sync_computers_free`
+typedef struct PeSyncComputers PeSyncComputers;
+
+// The history; free with `pe_settings_sync_history_free`
+typedef struct PeSyncHistory PeSyncHistory;
+
+// What the last syncs brought: app preferences to apply, and a notice in words (empty for none); free with
+// `pe_settings_sync_news_free`
+typedef struct PeSyncNews PeSyncNews;
+
+// The restore points, newest first; free with `pe_settings_sync_restore_points_free`
+typedef struct PeSyncRestorePoints PeSyncRestorePoints;
+
+// [`PeSyncState`] with its strings; free with `pe_settings_sync_state_free`
+typedef struct PeSyncStateHandle PeSyncStateHandle;
 
 // The rows of the Move and Copy window; free with `pe_target_list_free`
 typedef struct PeTargetList PeTargetList;
@@ -1929,6 +1968,88 @@ typedef struct PeSetupPref {
   // It counts once the app starts again (the language, listed last): the window may offer to restart
   bool restart;
 } PeSetupPref;
+
+// What a computer syncs: each kind of data, and each kind of secret under the data it goes with
+typedef struct PeSyncChoice {
+  bool accounts;
+  // Passwords of the accounts that sign in with one
+  bool passwords;
+  // Google and Microsoft sign-ins (and those of other sign-in apps)
+  bool sign_ins;
+  bool sign_in_apps;
+  // The sign-in apps' client secrets
+  bool app_secrets;
+  bool contacts;
+  bool keys;
+  // The user's own private keys
+  bool private_keys;
+  bool rules;
+  bool trusted;
+  bool settings;
+  bool preferences;
+} PeSyncChoice;
+
+// Settings sync as the Sync settings show it
+typedef struct PeSyncState {
+  bool on;
+  bool busy;
+  // Where it syncs through and as what computer, one line ("/Users/ann/Dropbox/Inbox Classic, as “MacBook”");
+  // empty while off
+  const char *place;
+  // How it went, one line: under way, the problem, or when it last synced; empty while off
+  const char *status;
+  struct PeSyncChoice choice;
+} PeSyncState;
+
+// A place as the setup window takes it; strings UTF-8, NULL for empty
+typedef struct PeSyncPlace {
+  enum PeSyncPlaceKind kind;
+  const char *path;
+  // `https://s3.eu-central-1.amazonaws.com`, `https://<account>.r2.cloudflarestorage.com`
+  const char *endpoint;
+  // Empty for `us-east-1`; `auto` for R2
+  const char *region;
+  const char *bucket;
+  // A folder in the bucket, empty for its root
+  const char *prefix;
+  const char *access_key;
+} PeSyncPlace;
+
+// An app preference another computer changed
+typedef struct PeSyncPref {
+  const char *name;
+  const char *value;
+} PeSyncPref;
+
+// A computer of the vault
+typedef struct PeSyncComputer {
+  // What `pe_settings_sync_remove_computer` takes
+  const char *device;
+  const char *name;
+  // When it last synced, in words
+  const char *seen;
+  bool this_;
+} PeSyncComputer;
+
+// An edit from another computer that one made here at the same time replaced
+typedef struct PeSyncHistoryRow {
+  // What `pe_settings_sync_restore` takes
+  int64_t id;
+  const char *when;
+  // What it was an edit of: "Contact Ann Lee"
+  const char *item;
+  // The value it set, quoted and shortened; empty when it is not text
+  const char *value;
+  // The computer it came from
+  const char *source;
+} PeSyncHistoryRow;
+
+// A restore point: how things were before a sync took something away
+typedef struct PeSyncRestorePoint {
+  // What `pe_settings_sync_restore_point_read` takes
+  const char *path;
+  const char *when;
+} PeSyncRestorePoint;
 
 // A language there is a catalog of
 typedef struct PeLanguage {
@@ -5668,6 +5789,194 @@ struct PeSetupLines *pe_setup_import(const struct PeCore *core,
                                      const size_t *accounts,
                                      size_t count,
                                      char **error);
+
+// Everything, as sync is set up
+struct PeSyncChoice pe_sync_choice_default(void);
+
+// The state of settings sync now
+//
+// # Safety
+// `core` must be live.
+struct PeSyncStateHandle *pe_settings_sync_state(const struct PeCore *core);
+
+// # Safety
+// `state` must be NULL or a live handle.
+const struct PeSyncState *pe_settings_sync_state_get(const struct PeSyncStateHandle *state);
+
+// # Safety
+// `state` must be NULL or a handle not freed yet.
+void pe_settings_sync_state_free(struct PeSyncStateHandle *state);
+
+// What a computer syncs changed (a switch of the Sync settings): a sync follows
+//
+// # Safety
+// `core` must be live.
+void pe_settings_sync_set_choice(const struct PeCore *core, struct PeSyncChoice choice);
+
+// Looks at a place on the core's runtime: `SettingsSyncChanged` when `pe_settings_sync_probe` has the answer.
+// `secret` is the bucket's secret access key (NULL for a folder).
+//
+// # Safety
+// `core` must be live, `place` valid, `secret` NULL or NUL-terminated.
+void pe_settings_sync_probe_start(const struct PeCore *core,
+                                  const struct PeSyncPlace *place,
+                                  const char *secret);
+
+// The answer of the last probe; for `Problem`, the reason in `error` (NULL or a pointer to a string to free with
+// `pe_string_free`)
+//
+// # Safety
+// `core` must be live, `error` NULL or a valid pointer.
+enum PeSyncProbe pe_settings_sync_probe(const struct PeCore *core,
+                                        char **error);
+
+// Turns sync on: a new vault in an empty place sealed with `passphrase`, or the vault there opened with it; the
+// first sync starts by itself. False with the reason in `error` (a wrong passphrase, a place that can not be
+// reached).
+//
+// # Safety
+// `core` must be live, `place` valid, the strings NULL or NUL-terminated, `error` NULL or a valid pointer.
+bool pe_settings_sync_turn_on(const struct PeCore *core,
+                              const struct PeSyncPlace *place,
+                              const char *secret,
+                              const char *passphrase,
+                              const char *name,
+                              struct PeSyncChoice choice,
+                              char **error);
+
+// Turns sync off on this computer: the vault and the other computers stay as they are
+//
+// # Safety
+// `core` must be live.
+void pe_settings_sync_turn_off(const struct PeCore *core);
+
+// Sync Now
+//
+// # Safety
+// `core` must be live.
+void pe_settings_sync_now(const struct PeCore *core);
+
+// The answer to `SettingsSyncReady`, on the window's thread: what the others wrote applied here and what changed
+// here sent. `prefs` carries the app preferences now (`pe_setup_export_set_pref`; the parts are not read), NULL
+// for none.
+//
+// # Safety
+// `core` must be live, `prefs` NULL or a live export.
+void pe_settings_sync_continue(const struct PeCore *core,
+                               const struct PeSetupExport *prefs);
+
+// The news of the syncs since it was last taken, taken (each once)
+//
+// # Safety
+// `core` must be live.
+struct PeSyncNews *pe_settings_sync_news(const struct PeCore *core);
+
+// # Safety
+// `news` must be NULL or a live handle.
+size_t pe_settings_sync_news_prefs_count(const struct PeSyncNews *news);
+
+// # Safety
+// `news` must be NULL or a live handle.
+const struct PeSyncPref *pe_settings_sync_news_pref(const struct PeSyncNews *news, size_t index);
+
+// The notice, empty when there is nothing to say
+//
+// # Safety
+// `news` must be NULL or a live handle.
+const char *pe_settings_sync_news_notice(const struct PeSyncNews *news);
+
+// # Safety
+// `news` must be NULL or a handle not freed yet.
+void pe_settings_sync_news_free(struct PeSyncNews *news);
+
+// Reads the computers of the vault on the runtime: `SettingsSyncChanged` when `pe_settings_sync_computers` has them
+//
+// # Safety
+// `core` must be live.
+void pe_settings_sync_computers_start(const struct PeCore *core);
+
+// The computers read, NULL while they are read
+//
+// # Safety
+// `core` must be live.
+struct PeSyncComputers *pe_settings_sync_computers(const struct PeCore *core);
+
+// # Safety
+// `list` must be NULL or a live handle.
+size_t pe_settings_sync_computers_count(const struct PeSyncComputers *list);
+
+// # Safety
+// `list` must be NULL or a live handle.
+const struct PeSyncComputer *pe_settings_sync_computers_get(const struct PeSyncComputers *list,
+                                                            size_t index);
+
+// # Safety
+// `list` must be NULL or a handle not freed yet.
+void pe_settings_sync_computers_free(struct PeSyncComputers *list);
+
+// Takes a computer out of the vault (lost or given away): it stops syncing the next time it tries, what it wrote
+// stays; `SettingsSyncChanged` when it is done
+//
+// # Safety
+// `core` must be live, `device` NUL-terminated.
+void pe_settings_sync_remove_computer(const struct PeCore *core,
+                                      const char *device);
+
+// The edits that lost to a later one, newest first
+//
+// # Safety
+// `core` must be live.
+struct PeSyncHistory *pe_settings_sync_history(const struct PeCore *core);
+
+// # Safety
+// `list` must be NULL or a live handle.
+size_t pe_settings_sync_history_count(const struct PeSyncHistory *list);
+
+// # Safety
+// `list` must be NULL or a live handle.
+const struct PeSyncHistoryRow *pe_settings_sync_history_get(const struct PeSyncHistory *list,
+                                                            size_t index);
+
+// # Safety
+// `list` must be NULL or a handle not freed yet.
+void pe_settings_sync_history_free(struct PeSyncHistory *list);
+
+// An edit of the history put back, made here again so the next sync takes it to the others (an app preference
+// comes back in `pe_settings_sync_news`). `prefs` as for `pe_settings_sync_continue`. False when its item is gone.
+//
+// # Safety
+// `core` must be live, `prefs` NULL or a live export.
+bool pe_settings_sync_restore(const struct PeCore *core,
+                              int64_t id,
+                              const struct PeSetupExport *prefs);
+
+// The restore points kept
+//
+// # Safety
+// `core` must be live.
+struct PeSyncRestorePoints *pe_settings_sync_restore_points(const struct PeCore *core);
+
+// # Safety
+// `list` must be NULL or a live handle.
+size_t pe_settings_sync_restore_points_count(const struct PeSyncRestorePoints *list);
+
+// # Safety
+// `list` must be NULL or a live handle.
+const struct PeSyncRestorePoint *pe_settings_sync_restore_points_get(const struct PeSyncRestorePoints *list,
+                                                                     size_t index);
+
+// # Safety
+// `list` must be NULL or a handle not freed yet.
+void pe_settings_sync_restore_points_free(struct PeSyncRestorePoints *list);
+
+// A restore point read as a setup file, for the Import window (`pe_setup_import` brings back what the user
+// chooses of it); NULL with the reason in `error` (NULL or a pointer to a string to free with `pe_string_free`)
+//
+// # Safety
+// `core` must be live, `path` NUL-terminated, `error` NULL or a valid pointer.
+struct PeSetupFile *pe_settings_sync_restore_point_read(const struct PeCore *core,
+                                                        const char *path,
+                                                        char **error);
 
 // Word `text` (PE_TEXT_...) in the language in use, `&` marking a menu letter as the catalog has it. Free with
 // `pe_string_free`; NULL for a number that is no word.

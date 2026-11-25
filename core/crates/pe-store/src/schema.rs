@@ -849,6 +849,39 @@ UPDATE messages SET sender_auth = NULL, logo_id = NULL, auth_headers = NULL
     r#"
 CREATE INDEX messages_thread_focus ON messages (folder_id, thread_id, seen, COALESCE(internal_date, date));
 "#,
+    // settings sync (sync.rs): each synced item's id on every computer, its fields as last synced here, how far each
+    // other computer's changes were read, and the edits a later one won over
+    r#"
+CREATE TABLE sync_ids (
+    kind TEXT NOT NULL,
+    local TEXT NOT NULL,
+    id TEXT NOT NULL,
+    PRIMARY KEY (kind, local),
+    UNIQUE (kind, id)
+);
+CREATE TABLE sync_fields (
+    kind TEXT NOT NULL,
+    id TEXT NOT NULL,
+    field TEXT NOT NULL,
+    stamp TEXT NOT NULL,
+    hash TEXT NOT NULL,
+    PRIMARY KEY (kind, id, field)
+);
+CREATE TABLE sync_devices (
+    device TEXT PRIMARY KEY,
+    seq INTEGER NOT NULL
+);
+CREATE TABLE sync_lost (
+    id INTEGER PRIMARY KEY,
+    at INTEGER NOT NULL,
+    kind TEXT NOT NULL,
+    item TEXT NOT NULL,
+    field TEXT NOT NULL,
+    value TEXT NOT NULL,
+    label TEXT NOT NULL,
+    source TEXT NOT NULL
+);
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

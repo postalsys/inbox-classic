@@ -403,7 +403,7 @@ impl Core {
         Ok(Outcome::Added(id, note))
     }
 
-    fn import_settings(&self, setup: &SetupFile) -> Result<()> {
+    pub(crate) fn import_settings(&self, setup: &SetupFile) -> Result<()> {
         let Some(settings) = &setup.data.settings else {
             return Ok(());
         };
@@ -446,18 +446,7 @@ impl Core {
         let (added, skipped) = store.import_cards(&setup.data.cards)?;
         summary.count(ImportLineKind::Added, Text::SetupAddedContacts, added as usize);
         summary.count(ImportLineKind::Skipped, Text::SetupSkippedContacts, skipped as usize);
-        // every address of the book, once: (card, its name, its default address)
-        let mut cards: HashMap<String, (CardId, String, String)> = HashMap::new();
-        for card in store.cards("")? {
-            let Some(default) = card.addresses.first() else {
-                continue;
-            };
-            for address in &card.addresses {
-                cards
-                    .entry(address.to_lowercase())
-                    .or_insert_with(|| (card.id, card.name.clone(), default.clone()));
-            }
-        }
+        let cards = book_addresses(&store)?;
         let mut groups: HashMap<String, Group> = store
             .groups("")?
             .into_iter()
@@ -619,6 +608,38 @@ impl Core {
 
 /// Adds to `members` those of a file's group (name, address) not in it yet: a card of the book by its card, an address
 /// of no card by itself, each once. `cards` holds every address of the book. Whether any was added.
+/// Every address of the book, once, in lower case: (card, its name, its default address)
+pub(crate) fn book_addresses(store: &pe_store::Store) -> Result<HashMap<String, (CardId, String, String)>> {
+    let mut cards: HashMap<String, (CardId, String, String)> = HashMap::new();
+    for card in store.cards("")? {
+        let Some(default) = card.addresses.first() else {
+            continue;
+        };
+        for address in &card.addresses {
+            cards
+                .entry(address.to_lowercase())
+                .or_insert_with(|| (card.id, card.name.clone(), default.clone()));
+        }
+    }
+    Ok(cards)
+}
+
+/// A group member of a file (name, address) as a member here: the card whose address it is, else the address alone
+pub(crate) fn member_of(name: &str, address: &str, cards: &HashMap<String, (CardId, String, String)>) -> Member {
+    match cards.get(&address.to_lowercase()) {
+        Some((card, name, default)) => Member {
+            card: Some(*card),
+            name: name.clone(),
+            address: default.clone(),
+        },
+        None => Member {
+            card: None,
+            name: name.to_string(),
+            address: address.to_string(),
+        },
+    }
+}
+
 fn group_members(
     members: &mut Vec<Member>,
     added: &[(String, String)],
@@ -628,18 +649,7 @@ fn group_members(
     let mut addresses: HashSet<String> = members.iter().map(|member| member.address.to_lowercase()).collect();
     let before = members.len();
     for (name, address) in added {
-        let member = match cards.get(&address.to_lowercase()) {
-            Some((card, name, default)) => Member {
-                card: Some(*card),
-                name: name.clone(),
-                address: default.clone(),
-            },
-            None => Member {
-                card: None,
-                name: name.clone(),
-                address: address.clone(),
-            },
-        };
+        let member = member_of(name, address, cards);
         let new_card = member.card.is_none_or(|card| cards_in.insert(card));
         if new_card && addresses.insert(member.address.to_lowercase()) {
             members.push(member);

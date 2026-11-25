@@ -152,7 +152,7 @@ enum SetupCalls {
 // ---- the app's own preferences, by the names the three apps share ----
 
 @MainActor
-private enum SetupPrefs {
+enum SetupPrefs {
     typealias Access = (get: (AppDelegate) -> String, set: (AppDelegate, String) -> Void)
 
     /// each portable preference of this app: how to read it and how to set it
@@ -246,12 +246,7 @@ enum SetupFiles {
         }
         switch read {
         case .file(let file):
-            guard let done = SetupImportWindow(core: core, file: file).run() else { return [] }
-            SetupDoneWindow(title: title, heading: nil, lines: done.lines).run()
-            if done.preferences {
-                SetupPrefs.apply(file.prefs)
-            }
-            return done.accounts
+            return importRead(core: core, file, title: title)
         case .invalid(let reason):
             inform(reason.isEmpty ? Text.uiUnknownReason.text : reason, title: title, style: .warning)
             return []
@@ -259,6 +254,20 @@ enum SetupFiles {
             // cancelled
             return []
         }
+    }
+}
+
+extension SetupFiles {
+    /// a file read (a setup file, or a restore point of sync): what it holds shown, the parts and accounts chosen
+    /// imported, what was done said, the preferences applied; the accounts added
+    @discardableResult
+    static func importRead(core: Core, _ file: SetupFile, title: String) -> [Int64] {
+        guard let done = SetupImportWindow(core: core, file: file).run() else { return [] }
+        SetupDoneWindow(title: title, heading: nil, lines: done.lines).run()
+        if done.preferences {
+            SetupPrefs.apply(file.prefs)
+        }
+        return done.accounts
     }
 }
 

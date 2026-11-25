@@ -448,6 +448,141 @@ ui-settings-language = Bahasa
 # a group's title as the label before its first control, in the Mac's panes: the colon as the language writes it
 ui-settings-label = { $label }:
 ui-apply = &Terapkan
+# review: new
+ui-settings-sync = Sinkronisasi
+# review: new
+ui-sync-note = Jaga agar akun, kunci, Buku Alamat, aturan, dan pengaturan Anda tetap sama di setiap komputer, melalui folder atau penyimpanan milik Anda sendiri. Semuanya dienkripsi dengan frasa sandi sinkronisasi Anda sebelum meninggalkan komputer ini.
+# review: new
+ui-sync-place = Disinkronkan melalui:
+# review: new
+ui-sync-status = Status:
+# review: new
+ui-sync-set-up = &Siapkan Sinkronisasi…
+# review: new
+ui-sync-now = Sinkronkan S&ekarang
+# review: new
+ui-sync-computers = Ko&mputer…
+# review: new
+ui-sync-history = Ri&wayat…
+# review: new
+ui-sync-turn-off = M&atikan Sinkronisasi…
+# review: new
+ui-sync-what = Yang disinkronkan
+# review: new
+ui-sync-what-note = Kata sandi, proses masuk, dan kunci privat hanya dikirim dalam keadaan terenkripsi. Kosongkan centang pada apa yang harus tetap berada di komputer ini.
+# review: new
+ui-sync-accounts = Ak&un
+# review: new
+ui-sync-passwords = Kata san&di
+# review: new
+ui-sync-sign-ins = &Proses masuk dengan Google, Microsoft, dan aplikasi masuk
+# review: new
+ui-sync-sign-in-apps = Apl&ikasi masuk
+# review: new
+ui-sync-app-secrets = Ra&hasia aplikasi masuk
+# review: new
+ui-sync-contacts = &Buku Alamat
+# review: new
+ui-sync-keys = &Kunci
+# review: new
+ui-sync-private-keys = Kunci p&rivat Anda
+# review: new
+ui-sync-rules = Atura&n
+# review: new
+ui-sync-trusted = Pengirim teper&caya
+# review: new
+ui-sync-settings = Pen&gaturan
+# review: new
+ui-sync-preferences = Tata &letak dan tampilan
+# review: new
+ui-sync-everything = Semuanya
+# review: new
+ui-sync-some-left-out = Sebagian tidak disertakan
+# review: new
+ui-sync-where = Tempat menyimpannya
+# review: new
+ui-sync-folder = Sebuah folder
+# review: new
+ui-sync-folder-note = Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud, atau Syncthing menyalinnya ke komputer Anda yang lain.
+# review: new
+ui-sync-bucket = Penyimpanan yang kompatibel dengan S3
+# review: new
+ui-sync-bucket-note = Amazon S3, Cloudflare R2, Backblaze B2, MinIO, atau penyimpanan lain yang bekerja seperti S3.
+# review: new
+ui-sync-folder-label = &Folder:
+# review: new
+ui-sync-folder-none = Belum dipilih
+# review: new
+ui-sync-choose-folder = &Pilih…
+# review: new
+ui-sync-choose-folder-title = Pilih Folder untuk Sinkronisasi
+# review: new
+ui-sync-endpoint = &Endpoint:
+# review: new
+ui-sync-region = &Region:
+# review: new
+ui-sync-bucket-name = &Bucket:
+# review: new
+ui-sync-prefix = Folder di b&ucket:
+# review: new
+ui-sync-access-key = ID kunci &akses:
+# review: new
+ui-sync-secret-key = Kunci akses ra&hasia:
+# review: new
+ui-sync-next = Ber&ikutnya
+# review: new
+ui-sync-join-title = Bergabung dengan Sinkronisasi
+# review: new
+ui-sync-join-note = Tempat ini menyimpan sinkronisasi komputer Anda yang lain. Ketik frasa sandi sinkronisasi yang Anda pilih di komputer pertama.
+# review: new
+ui-sync-start-title = Mulai Sinkronisasi
+# review: new
+ui-sync-start-note = Pilih frasa sandi sinkronisasi. Anda mengetiknya sekali di setiap komputer yang Anda tambahkan. Simpan di tempat yang aman: tanpanya, tidak ada komputer lain yang dapat bergabung.
+# review: new
+ui-sync-name = &Nama komputer ini:
+# review: new
+ui-sync-merge-note = Isi komputer ini dan isi sinkronisasi digabungkan: akun atau kontak yang ada di keduanya menjadi satu.
+# review: new
+ui-sync-turn-on = Ak&tifkan Sinkronisasi
+# review: new
+ui-sync-on = Sinkronisasi aktif.
+# review: new
+ui-sync-turn-off-ask = Matikan sinkronisasi di komputer ini? Semuanya tetap seperti sekarang, di sini dan di komputer Anda yang lain. Komputer ini hanya berhenti menyinkronkan.
+# review: new
+ui-sync-turn-off-button = Matikan
+# review: new
+ui-sync-computers-title = Komputer
+# review: new
+ui-sync-computers-note = Komputer yang menyinkronkan melalui tempat ini. Hapus komputer yang tidak lagi Anda gunakan: komputer itu berhenti menyinkronkan, dan apa yang sudah disinkronkannya tetap ada.
+# review: new
+ui-sync-this-computer = Komputer ini
+# review: new
+ui-sync-seen = Terakhir disinkronkan { $when }
+# review: new
+ui-sync-remove-ask = Hapus “{ $name }” dari sinkronisasi? Komputer itu berhenti menyinkronkan saat mencoba lagi berikutnya. Untuk menyinkronkannya lagi, siapkan sinkronisasi di komputer itu sekali lagi.
+# review: new
+ui-sync-loading = Membaca…
+# review: new
+ui-sync-history-title = Riwayat
+# review: new
+ui-sync-history-note = Jika hal yang sama diubah di dua komputer pada waktu yang sama, perubahan yang dibuat terakhir dipertahankan dan perubahan lainnya ada di sini. Pulihkan salah satunya untuk menggunakannya sebagai gantinya.
+# review: new
+ui-sync-history-empty = Tidak ada perubahan yang digantikan.
+# review: new
+ui-sync-history-row = Dari { $source }, { $when }
+# review: new
+ui-sync-restore = &Pulihkan
+# review: new
+ui-sync-restore-points = Titik pemulihan
+# review: new
+ui-sync-restore-points-note = Sebelum sinkronisasi menghapus sesuatu di sini, keadaan sebelumnya disimpan. Buka salah satunya untuk mengembalikan bagian yang Anda pilih.
+# review: new
+ui-sync-restore-points-empty = Belum ada.
+# review: new
+ui-sync-open-point = &Buka…
+# Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
+# review: new
+win-sync-back = < &Kembali
 ui-language-label = &Bahasa:
 ui-restart-note = Mulai ulang Inbox Classic untuk mengganti bahasa.
 ui-restart-ask = Inbox Classic menampilkan bahasa { $language } setelah dimulai ulang. Mulai ulang sekarang?
@@ -763,6 +898,12 @@ ui-setup-from = Disimpan oleh Inbox Classic { $version } pada { $date }.
 ui-setup-import-button = &Impor
 ui-setup-done = Selesai
 ui-setup-first-run = Impor pengaturan dan akun dari komputer lain...
+# review: new
+ui-first-run-other = Sudah menggunakan Inbox Classic di komputer lain? Bawa akun dan pengaturannya ke sini.
+# review: new
+ui-first-run-sync = Bergabung dengan Sinkronisasinya…
+# review: new
+ui-first-run-import = Impor dari File…
 
 ui-field-verifiers = Percayai hasil pemeriksaan pengirim dari:
 ui-attachment-import-key = Impor Kunci...

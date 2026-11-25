@@ -450,6 +450,141 @@ ui-settings-encryption = Šifrovanie
 ui-settings-language = Jazyk
 ui-settings-label = { $label }:
 ui-apply = &Použiť
+# review: new
+ui-settings-sync = Synchronizácia
+# review: new
+ui-sync-note = Majte svoje kontá, kľúče, adresár, pravidlá a nastavenia rovnaké na každom počítači, a to cez priečinok alebo úložisko, ktoré vlastníte. Všetko sa zašifruje vašou prístupovou frázou synchronizácie skôr, než opustí tento počítač.
+# review: new
+ui-sync-place = Synchronizované cez:
+# review: new
+ui-sync-status = Stav:
+# review: new
+ui-sync-set-up = &Nastaviť synchronizáciu…
+# review: new
+ui-sync-now = S&ynchronizovať teraz
+# review: new
+ui-sync-computers = P&očítače…
+# review: new
+ui-sync-history = &História…
+# review: new
+ui-sync-turn-off = &Vypnúť synchronizáciu…
+# review: new
+ui-sync-what = Čo synchronizovať
+# review: new
+ui-sync-what-note = Heslá, prihlásenia a súkromné kľúče sa prenášajú iba zašifrované. Vynechajte, čo má zostať len v tomto počítači.
+# review: new
+ui-sync-accounts = Kon&tá
+# review: new
+ui-sync-passwords = He&slá
+# review: new
+ui-sync-sign-ins = Prihlásenia cez &Google, Microsoft a prihlasovacie aplikácie
+# review: new
+ui-sync-sign-in-apps = Prihlasovacie &aplikácie
+# review: new
+ui-sync-app-secrets = Ta&jné kódy prihlasovacích aplikácií
+# review: new
+ui-sync-contacts = A&dresár
+# review: new
+ui-sync-keys = &Kľúče
+# review: new
+ui-sync-private-keys = Vaše súkro&mné kľúče
+# review: new
+ui-sync-rules = P&ravidlá
+# review: new
+ui-sync-trusted = Dôveryhodní odosie&latelia
+# review: new
+ui-sync-settings = Nastav&enia
+# review: new
+ui-sync-preferences = Rozloženie a &zobrazenie
+# review: new
+ui-sync-everything = Všetko
+# review: new
+ui-sync-some-left-out = Niečo je vynechané
+# review: new
+ui-sync-where = Kam ukladať
+# review: new
+ui-sync-folder = Priečinok
+# review: new
+ui-sync-folder-note = Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud alebo Syncthing ho skopíruje do vašich ďalších počítačov.
+# review: new
+ui-sync-bucket = Úložisko kompatibilné s S3
+# review: new
+ui-sync-bucket-note = Amazon S3, Cloudflare R2, Backblaze B2, MinIO alebo iné úložisko, ktoré funguje ako S3.
+# review: new
+ui-sync-folder-label = &Priečinok:
+# review: new
+ui-sync-folder-none = Zatiaľ nevybraný
+# review: new
+ui-sync-choose-folder = &Vybrať…
+# review: new
+ui-sync-choose-folder-title = Vyberte priečinok na synchronizáciu
+# review: new
+ui-sync-endpoint = &Koncový bod:
+# review: new
+ui-sync-region = &Oblasť:
+# review: new
+ui-sync-bucket-name = &Bucket:
+# review: new
+ui-sync-prefix = Priečinok v b&uckete:
+# review: new
+ui-sync-access-key = &ID prístupového kľúča:
+# review: new
+ui-sync-secret-key = &Tajný prístupový kľúč:
+# review: new
+ui-sync-next = Ď&alej
+# review: new
+ui-sync-join-title = Pripojiť sa k synchronizácii
+# review: new
+ui-sync-join-note = Na tomto mieste je synchronizácia vašich ďalších počítačov. Zadajte prístupovú frázu synchronizácie, ktorú ste zvolili na prvom z nich.
+# review: new
+ui-sync-start-title = Spustiť synchronizáciu
+# review: new
+ui-sync-start-note = Zvoľte prístupovú frázu synchronizácie. Zadáte ju raz na každom počítači, ktorý pridáte. Uložte si ju na bezpečné miesto: bez nej sa žiadny ďalší počítač nepripojí.
+# review: new
+ui-sync-name = &Názov tohto počítača:
+# review: new
+ui-sync-merge-note = To, čo má tento počítač, a to, čo obsahuje synchronizácia, sa spojí: konto alebo kontakt, ktorý je na oboch miestach, bude len jeden.
+# review: new
+ui-sync-turn-on = &Zapnúť synchronizáciu
+# review: new
+ui-sync-on = Synchronizácia je zapnutá.
+# review: new
+ui-sync-turn-off-ask = Vypnúť synchronizáciu v tomto počítači? Všetko zostane, ako je, tu aj na vašich ďalších počítačoch. Tento počítač sa len prestane synchronizovať.
+# review: new
+ui-sync-turn-off-button = Vypnúť
+# review: new
+ui-sync-computers-title = Počítače
+# review: new
+ui-sync-computers-note = Počítače, ktoré sa synchronizujú cez toto miesto. Odstráňte ten, ktorý už nepoužívate: prestane sa synchronizovať a to, čo synchronizoval, zostane.
+# review: new
+ui-sync-this-computer = Tento počítač
+# review: new
+ui-sync-seen = Naposledy synchronizované: { $when }
+# review: new
+ui-sync-remove-ask = Odstrániť počítač „{ $name }“ zo synchronizácie? Pri ďalšom pokuse sa prestane synchronizovať. Ak ho chcete znova synchronizovať, nastavte na ňom synchronizáciu znova.
+# review: new
+ui-sync-loading = Načítava sa…
+# review: new
+ui-sync-history-title = História
+# review: new
+ui-sync-history-note = Keď bola rovnaká vec zmenená na dvoch počítačoch v rovnakom čase, zostala zmena vykonaná ako posledná a tá druhá je tu. Obnovte ju, ak ju chcete použiť namiesto toho.
+# review: new
+ui-sync-history-empty = Žiadne zmeny neboli nahradené.
+# review: new
+ui-sync-history-row = Zdroj: { $source }, { $when }
+# review: new
+ui-sync-restore = &Obnoviť
+# review: new
+ui-sync-restore-points = Body obnovenia
+# review: new
+ui-sync-restore-points-note = Skôr než synchronizácia v tomto počítači niečo odstráni, uloží sa predchádzajúci stav. Otvorte bod obnovenia a vráťte z neho, čo si vyberiete.
+# review: new
+ui-sync-restore-points-empty = Zatiaľ žiadne.
+# review: new
+ui-sync-open-point = Ot&voriť…
+# Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
+# review: new
+win-sync-back = < &Späť
 ui-language-label = &Jazyk:
 ui-restart-note = Jazyk sa zmení po reštartovaní Inbox Classic.
 ui-restart-ask = Nový jazyk po reštartovaní Inbox Classic: { $language }. Reštartovať teraz?
@@ -796,6 +931,12 @@ ui-setup-from = Uložil Inbox Classic { $version } dňa { $date }.
 ui-setup-import-button = &Importovať
 ui-setup-done = Hotovo
 ui-setup-first-run = Importovať nastavenia a kontá z iného počítača...
+# review: new
+ui-first-run-other = Už používate Inbox Classic na inom počítači? Preneste sem jeho kontá a nastavenia.
+# review: new
+ui-first-run-sync = Pripojiť sa k jeho synchronizácii…
+# review: new
+ui-first-run-import = Importovať zo súboru…
 
 ui-field-verifiers = Dôveryhodné zdroje overenia odosielateľa:
 ui-attachment-import-key = Importovať kľúč...

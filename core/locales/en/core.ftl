@@ -910,6 +910,33 @@ setup-error-newer = This setup was saved by a newer Inbox Classic ({ $version })
 setup-error-needs-passphrase = This setup is protected by a passphrase. Type the passphrase it was saved with.
 setup-error-wrong-passphrase = That is not the passphrase this setup was saved with.
 setup-error-changed = The setup file failed its integrity check. It may be altered or damaged and cannot be imported.
+sync-wrong-passphrase = That is not the sync passphrase of this vault. Type the one you chose when you set up sync on your first computer.
+sync-place = { $place }, as “{ $name }”
+sync-news-removed = { $count ->
+    [one] Sync removed the account { $accounts }, as it was removed on another computer.
+   *[other] Sync removed the accounts { $accounts }, as they were removed on another computer.
+}
+sync-news-lost = { $count ->
+    [one] A change made at the same time on another computer was replaced by the one made here. The sync history keeps it.
+   *[other] { $count } changes made at the same time on other computers were replaced by those made here. The sync history keeps them.
+}
+sync-status-busy = Syncing…
+sync-status-never = Not synced yet.
+sync-status-last = Last synced { $when }.
+sync-status-today = Last synced today at { $time }.
+sync-when-today = today at { $time }
+sync-status-problem = Could not sync: { $problem }
+sync-removed-here = This computer was removed from sync on another computer. Turn sync off, then set it up again to join.
+sync-item-account = Account { $name }
+sync-item-contact = Contact { $name }
+sync-item-group = Group { $name }
+sync-item-key = Key { $name }
+sync-item-rule = Rule { $name }
+sync-item-trusted = Trusted sender { $name }
+sync-item-sign-in-app = Sign-in app { $name }
+sync-item-settings = Settings
+sync-another-computer = another computer
+sync-no-key = This computer no longer has the key of the sync vault. Turn sync off and on again with the sync passphrase.
 setup-error-read = The setup file could not be read: { $error }
 setup-error-write = The setup could not be saved: { $error }
 setup-error-no-parts = Choose at least one part.

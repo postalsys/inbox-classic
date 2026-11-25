@@ -48,6 +48,7 @@ pub mod setup;
 mod shown;
 mod sign_in_apps;
 mod snippet;
+pub mod sync;
 mod targets;
 mod text;
 pub mod timing;
@@ -139,6 +140,12 @@ pub enum Event {
     SyncStarted {
         account: AccountId,
     },
+    /// Settings sync read what the other computers wrote: the window answers with
+    /// [`Core::settings_sync_continue`] and its app preferences
+    SettingsSyncReady,
+    /// Settings sync's state changed ([`Core::settings_sync_state`]), or a sync brought news for the window
+    /// ([`Core::settings_sync_news`]), or a probe has its answer ([`Core::settings_sync_probe`])
+    SettingsSyncChanged,
     SyncFinished {
         account: AccountId,
         /// What kept the sync from finishing (told by a `Failed` before), None when it did: the account is online
@@ -557,6 +564,8 @@ pub struct Core {
     /// The accounts whose main worker finished a sync, for their readers to connect after
     synced: Arc<worker::Synced>,
     secrets: Secrets,
+    /// Settings sync (sync/run.rs)
+    sync: sync::run::Runner,
     /// The OpenPGP certificates read from the store, each read once (keys.rs)
     pgp_certs: Arc<keys::CertCache>,
     /// Whether each key in use can encrypt, for the Address Book's key marks (keys.rs)
@@ -690,6 +699,7 @@ impl Core {
             tokens: worker::Tokens::default(),
             timings: timing::Timings::default(),
             secrets,
+            sync: Default::default(),
             pgp_certs: Default::default(),
             pgp_marks: Default::default(),
             trust,
@@ -739,6 +749,7 @@ impl Core {
             let events = core.events.clone();
             core.runtime()?.spawn(async move { events(Event::PdfPreviewsOff) });
         }
+        let _ = core.settings_sync_start();
         Ok(core)
     }
 

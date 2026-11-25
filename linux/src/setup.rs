@@ -59,7 +59,7 @@ fn chosen(checks: &[(Parts, gtk::CheckButton)]) -> Parts {
 // ---- the app's preferences, by the names the three apps share ----
 
 /// Each portable preference as settings.ini and the windows have it now, as the core takes it
-fn preferences() -> Vec<(String, String)> {
+pub(crate) fn preferences() -> Vec<(String, String)> {
     let shell = shell();
     let flag = |on: bool| if on { "1" } else { "0" }.to_string();
     pe_core::setup::PREFERENCES
@@ -86,7 +86,7 @@ fn preferences() -> Vec<(String, String)> {
 
 /// The preferences of a file, checked by the core, kept and applied as Preferences and the View menu apply them; true
 /// when one of them counts only from the next start and changed (the language)
-fn apply_preferences(prefs: &[(String, String)]) -> bool {
+pub(crate) fn apply_preferences(prefs: &[(String, String)]) -> bool {
     use pe_core::layout::LayoutMode;
     let shell = shell();
     let main = shell.main();
@@ -386,7 +386,7 @@ async fn ask_passphrase(parent: &impl IsA<gtk::Widget>, path: &Path) -> Option<R
 }
 
 /// The import window: what the file holds, each part and account to choose; Import imports them and says what it did
-async fn choose_and_import(parent: &impl IsA<gtk::Widget>, setup: SetupFile) -> Vec<i64> {
+pub(crate) async fn choose_and_import(parent: &impl IsA<gtk::Widget>, setup: SetupFile) -> Vec<i64> {
     let title = plain(Text::UiSetupImportTitle);
     let content = content_box();
     let intro = ui::wrapped_label(&plain(Text::UiSetupImportIntro));

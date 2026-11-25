@@ -442,6 +442,141 @@ ui-settings-encryption = Cifrado
 ui-settings-language = Idioma
 ui-settings-label = { $label }:
 ui-apply = Apli&car
+# review: new
+ui-settings-sync = Sincronización
+# review: new
+ui-sync-note = Mantenga iguales en todos sus equipos las cuentas, las claves, la Libreta de direcciones, las reglas y la configuración, a través de una carpeta o un almacenamiento de su propiedad. Todo se cifra con su contraseña de sincronización antes de salir de este equipo.
+# review: new
+ui-sync-place = Sincronizado a través de:
+# review: new
+ui-sync-status = Estado:
+# review: new
+ui-sync-set-up = Con&figurar la sincronización…
+# review: new
+ui-sync-now = Sincronizar &ahora
+# review: new
+ui-sync-computers = &Equipos…
+# review: new
+ui-sync-history = &Historial…
+# review: new
+ui-sync-turn-off = &Desactivar la sincronización…
+# review: new
+ui-sync-what = Qué sincronizar
+# review: new
+ui-sync-what-note = Las contraseñas, los datos de acceso y las claves privadas solo viajan cifrados. Excluya lo que deba quedarse en este equipo.
+# review: new
+ui-sync-accounts = Cue&ntas
+# review: new
+ui-sync-passwords = Contra&señas
+# review: new
+ui-sync-sign-ins = &Inicios de sesión con Google, Microsoft y aplicaciones de inicio de sesión
+# review: new
+ui-sync-sign-in-apps = A&plicaciones de inicio de sesión
+# review: new
+ui-sync-app-secrets = Sec&retos de las aplicaciones de inicio de sesión
+# review: new
+ui-sync-contacts = &Libreta de direcciones
+# review: new
+ui-sync-keys = Cla&ves
+# review: new
+ui-sync-private-keys = S&us claves privadas
+# review: new
+ui-sync-rules = Re&glas
+# review: new
+ui-sync-trusted = Re&mitentes de confianza
+# review: new
+ui-sync-settings = C&onfiguración
+# review: new
+ui-sync-preferences = Diseño y vis&ta
+# review: new
+ui-sync-everything = Todo
+# review: new
+ui-sync-some-left-out = Algunos elementos excluidos
+# review: new
+ui-sync-where = Dónde guardarla
+# review: new
+ui-sync-folder = Una carpeta
+# review: new
+ui-sync-folder-note = Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud o Syncthing la copia en sus otros equipos.
+# review: new
+ui-sync-bucket = Almacenamiento compatible con S3
+# review: new
+ui-sync-bucket-note = Amazon S3, Cloudflare R2, Backblaze B2, MinIO u otro almacenamiento que funcione como S3.
+# review: new
+ui-sync-folder-label = &Carpeta:
+# review: new
+ui-sync-folder-none = Aún no se ha elegido ninguna
+# review: new
+ui-sync-choose-folder = &Elegir…
+# review: new
+ui-sync-choose-folder-title = Elegir la carpeta de sincronización
+# review: new
+ui-sync-endpoint = &Punto de conexión:
+# review: new
+ui-sync-region = &Región:
+# review: new
+ui-sync-bucket-name = &Bucket:
+# review: new
+ui-sync-prefix = Carpeta en el b&ucket:
+# review: new
+ui-sync-access-key = &ID de clave de acceso:
+# review: new
+ui-sync-secret-key = Clave de acceso secre&ta:
+# review: new
+ui-sync-next = &Siguiente
+# review: new
+ui-sync-join-title = Unirse a la sincronización
+# review: new
+ui-sync-join-note = Esta ubicación contiene la sincronización de sus otros equipos. Escriba la contraseña de sincronización que eligió en el primero.
+# review: new
+ui-sync-start-title = Iniciar la sincronización
+# review: new
+ui-sync-start-note = Elija una contraseña de sincronización. La escribirá una vez en cada equipo que agregue. Guárdela en un lugar seguro: sin ella, ningún otro equipo podrá unirse.
+# review: new
+ui-sync-name = &Nombre de este equipo:
+# review: new
+ui-sync-merge-note = Lo que tiene este equipo y lo que contiene la sincronización se combinan: una cuenta o un contacto que esté en ambos pasa a ser uno solo.
+# review: new
+ui-sync-turn-on = Acti&var la sincronización
+# review: new
+ui-sync-on = La sincronización está activada.
+# review: new
+ui-sync-turn-off-ask = ¿Desactivar la sincronización en este equipo? Todo queda como está, aquí y en sus otros equipos. Este equipo simplemente deja de sincronizarse.
+# review: new
+ui-sync-turn-off-button = Desactivar
+# review: new
+ui-sync-computers-title = Equipos
+# review: new
+ui-sync-computers-note = Los equipos que se sincronizan a través de esta ubicación. Quite el que ya no use: deja de sincronizarse y lo que sincronizó se conserva.
+# review: new
+ui-sync-this-computer = Este equipo
+# review: new
+ui-sync-seen = Última sincronización: { $when }
+# review: new
+ui-sync-remove-ask = ¿Quitar «{ $name }» de la sincronización? Dejará de sincronizarse la próxima vez que lo intente. Para volver a sincronizarlo, configure de nuevo la sincronización en él.
+# review: new
+ui-sync-loading = Leyendo…
+# review: new
+ui-sync-history-title = Historial
+# review: new
+ui-sync-history-note = Cuando se modificó lo mismo en dos equipos a la vez, se conservó el último cambio realizado y el otro está aquí. Restaure uno para usarlo en su lugar.
+# review: new
+ui-sync-history-empty = No se reemplazó ningún cambio.
+# review: new
+ui-sync-history-row = Desde { $source }, { $when }
+# review: new
+ui-sync-restore = &Restaurar
+# review: new
+ui-sync-restore-points = Puntos de restauración
+# review: new
+ui-sync-restore-points-note = Antes de que una sincronización quite algo aquí, se guarda cómo estaba todo. Abra uno para recuperar lo que elija de él.
+# review: new
+ui-sync-restore-points-empty = Aún no hay ninguno.
+# review: new
+ui-sync-open-point = &Abrir…
+# Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
+# review: new
+win-sync-back = < &Atrás
 ui-language-label = &Idioma:
 ui-restart-note = Reinicie Inbox Classic para aplicar el nuevo idioma.
 ui-restart-ask = Después de reiniciar, Inbox Classic usará el idioma { $language }. ¿Reiniciar ahora?
@@ -780,6 +915,12 @@ ui-setup-from = Guardado con Inbox Classic { $version } el { $date }.
 ui-setup-import-button = &Importar
 ui-setup-done = Listo
 ui-setup-first-run = Importar configuración y cuentas de otro equipo...
+# review: new
+ui-first-run-other = ¿Ya usa Inbox Classic en otro equipo? Traiga aquí sus cuentas y su configuración.
+# review: new
+ui-first-run-sync = Unirse a su sincronización…
+# review: new
+ui-first-run-import = Importar desde un archivo…
 
 ui-field-verifiers = Confiar en las comprobaciones del remitente realizadas por:
 ui-attachment-import-key = Importar clave...

@@ -963,6 +963,54 @@ setup-error-newer = Este arquivo foi salvo por uma versão mais recente do Inbox
 setup-error-needs-passphrase = Este arquivo está protegido por uma frase secreta. Digite a frase usada ao salvá-lo.
 setup-error-wrong-passphrase = Esta não é a frase secreta usada para proteger o arquivo.
 setup-error-changed = Não foi possível confirmar a integridade do arquivo de configurações. O arquivo não pode ser importado.
+# review: new
+sync-wrong-passphrase = Esta não é a frase secreta de sincronização deste cofre. Digite a que você escolheu ao configurar a sincronização no primeiro computador.
+# review: new
+sync-place = { $place }, como “{ $name }”
+# review: new
+sync-news-removed = { $count ->
+    [one] A sincronização removeu a conta { $accounts }, pois ela foi removida em outro computador.
+   *[other] A sincronização removeu as contas { $accounts }, pois elas foram removidas em outro computador.
+}
+# review: new
+sync-news-lost = { $count ->
+    [one] { $count } alteração feita ao mesmo tempo em outro computador foi substituída pela feita aqui. O histórico de sincronização a mantém.
+   *[other] { $count } alterações feitas ao mesmo tempo em outros computadores foram substituídas pelas feitas aqui. O histórico de sincronização as mantém.
+}
+# review: new
+sync-status-busy = Sincronizando…
+# review: new
+sync-status-never = Ainda não sincronizado.
+# review: new
+sync-status-last = Última sincronização: { $when }.
+# review: new
+sync-status-today = Última sincronização: hoje às { $time }.
+# review: new
+sync-when-today = hoje às { $time }
+# review: new
+sync-status-problem = Não foi possível sincronizar: { $problem }
+# review: new
+sync-removed-here = Este computador foi removido da sincronização em outro computador. Desative a sincronização e configure-a de novo para entrar.
+# review: new
+sync-item-account = Conta { $name }
+# review: new
+sync-item-contact = Contato { $name }
+# review: new
+sync-item-group = Grupo { $name }
+# review: new
+sync-item-key = Chave { $name }
+# review: new
+sync-item-rule = Regra { $name }
+# review: new
+sync-item-trusted = Remetente confiável { $name }
+# review: new
+sync-item-sign-in-app = Aplicativo de login { $name }
+# review: new
+sync-item-settings = Configurações
+# review: new
+sync-another-computer = outro computador
+# review: new
+sync-no-key = Este computador não tem mais a chave do cofre de sincronização. Desative e ative a sincronização novamente com a frase secreta de sincronização.
 setup-error-read = Não foi possível ler o arquivo de configurações: { $error }
 setup-error-write = Não foi possível salvar o arquivo de configurações: { $error }
 setup-error-no-parts = Selecione pelo menos um item.

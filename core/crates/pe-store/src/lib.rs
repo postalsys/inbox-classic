@@ -36,6 +36,7 @@ mod search;
 mod selection;
 mod senders;
 mod sign_in_apps;
+pub mod sync;
 #[cfg(test)]
 mod test_support;
 pub(crate) mod threads;

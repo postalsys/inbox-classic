@@ -969,6 +969,56 @@ setup-error-newer = Ove su postavke spremljene u novijoj verziji programa Inbox 
 setup-error-needs-passphrase = Ova datoteka s postavkama zaštićena je pristupnom frazom. Unesite frazu kojom je zaštićena pri spremanju.
 setup-error-wrong-passphrase = Pristupna fraza nije točna za ovu datoteku s postavkama.
 setup-error-changed = Provjera cjelovitosti datoteke s postavkama nije uspjela pa je nije moguće uvesti.
+# review: new
+sync-wrong-passphrase = To nije pristupna fraza za sinkronizaciju ovog trezora. Upišite onu koju ste odabrali kad ste postavili sinkronizaciju na prvom računalu.
+# review: new
+sync-place = { $place }, kao „{ $name }“
+# review: new
+sync-news-removed = { $count ->
+    [1] Sinkronizacija je uklonila račun jer je uklonjen na drugom računalu: { $accounts }.
+   *[other] Sinkronizacija je uklonila račune jer su uklonjeni na drugom računalu: { $accounts }.
+}
+# review: new
+sync-news-lost = { $count ->
+    [1] Promjena napravljena u isto vrijeme na drugom računalu zamijenjena je promjenom napravljenom ovdje. Povijest sinkronizacije je čuva.
+    [one] { $count } promjena napravljena u isto vrijeme na drugim računalima zamijenjena je promjenama napravljenima ovdje. Povijest sinkronizacije ih čuva.
+    [few] { $count } promjene napravljene u isto vrijeme na drugim računalima zamijenjene su promjenama napravljenima ovdje. Povijest sinkronizacije ih čuva.
+   *[other] { $count } promjena napravljenih u isto vrijeme na drugim računalima zamijenjeno je promjenama napravljenima ovdje. Povijest sinkronizacije ih čuva.
+}
+# review: new
+sync-status-busy = Sinkronizacija…
+# review: new
+sync-status-never = Još nije sinkronizirano.
+# review: new
+sync-status-last = Posljednja sinkronizacija: { $when }.
+# review: new
+sync-status-today = Posljednja sinkronizacija: danas u { $time }.
+# review: new
+sync-when-today = danas u { $time }
+# review: new
+sync-status-problem = Sinkronizacija nije uspjela: { $problem }
+# review: new
+sync-removed-here = Ovo je računalo uklonjeno iz sinkronizacije na drugom računalu. Isključite sinkronizaciju, a zatim je ponovno postavite da biste se pridružili.
+# review: new
+sync-item-account = Račun { $name }
+# review: new
+sync-item-contact = Kontakt { $name }
+# review: new
+sync-item-group = Grupa { $name }
+# review: new
+sync-item-key = Ključ { $name }
+# review: new
+sync-item-rule = Pravilo { $name }
+# review: new
+sync-item-trusted = Pouzdani pošiljatelj { $name }
+# review: new
+sync-item-sign-in-app = Aplikacija za prijavu { $name }
+# review: new
+sync-item-settings = Postavke
+# review: new
+sync-another-computer = drugo računalo
+# review: new
+sync-no-key = Ovo računalo više nema ključ trezora za sinkronizaciju. Isključite sinkronizaciju i ponovno je uključite pristupnom frazom za sinkronizaciju.
 setup-error-read = Datoteku s postavkama nije moguće pročitati: { $error }
 setup-error-write = Postavke nije moguće spremiti: { $error }
 setup-error-no-parts = Odaberite barem jednu skupinu podataka.

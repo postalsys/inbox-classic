@@ -47,7 +47,7 @@ struct Setting {
 }
 
 const PLATFORMS: [&str; 3] = ["windows", "mac", "linux"];
-const KINDS: [&str; 3] = ["switch", "choice", "button"];
+const KINDS: [&str; 4] = ["switch", "choice", "button", "status"];
 
 impl Setting {
     fn on(&self, platform: &str) -> bool {
@@ -233,7 +233,7 @@ fn c_header(view: &View) -> String {
     out.push_str(
         "// a check box, a list with its label, or a button that opens a window or acts at once\n\
          enum PeSettingKind : unsigned char {\n    PE_SETTING_KIND_SWITCH,\n    PE_SETTING_KIND_CHOICE,\n    \
-         PE_SETTING_KIND_BUTTON,\n};\n\n\
+         PE_SETTING_KIND_BUTTON,\n    PE_SETTING_KIND_STATUS,\n};\n\n\
          struct PeSettingsPageInfo {\n    PeSettingsPage page;\n    PeText label;\n};\n\n\
          // titled false: no title of its own (the page's one group), label is then the page's\n\
          struct PeSettingsGroupInfo {\n    PeSettingsGroup group;\n    PeSettingsPage page;\n    bool titled;\n    \
@@ -366,8 +366,8 @@ fn swift_groups(out: &mut String, view: &View) {
 fn swift_settings(out: &mut String, view: &View) {
     let case = |s: &(&Page, &Group, &Setting)| camel(&s.2.id, false);
     out.push_str(
-        "/// What a setting is: a check box, a pop-up with its label, or a push button\nenum SettingKind {\n    \
-         case toggle, choice, button\n}\n\n/// A setting of the settings window\nenum Setting {\n",
+        "/// What a setting is: a check box, a pop-up with its label, a push button, or a line of state with its label\nenum SettingKind {\n    \
+         case toggle, choice, button, status\n}\n\n/// A setting of the settings window\nenum Setting {\n",
     );
     for setting in &view.settings {
         writeln!(out, "    case {}", case(setting)).unwrap();
@@ -377,6 +377,7 @@ fn swift_settings(out: &mut String, view: &View) {
         match s.2.kind.as_str() {
             "switch" => ".toggle",
             "choice" => ".choice",
+            "status" => ".status",
             _ => ".button",
         }
         .to_string()
@@ -495,7 +496,7 @@ fn rust_settings(out: &mut String, view: &View) {
     writeln!(
         out,
         "/// What a setting is: a switch row, a choice row with its value as subtitle, or a button row\n{RUST_DERIVE}\n\
-         pub enum SettingKind {{\n    Switch,\n    Choice,\n    Button,\n}}\n\n/// A setting of Preferences\n\
+         pub enum SettingKind {{\n    Switch,\n    Choice,\n    Button,\n    Status,\n}}\n\n/// A setting of Preferences\n\
          {RUST_DERIVE}\npub enum {ty} {{"
     )
     .unwrap();

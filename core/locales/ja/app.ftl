@@ -438,6 +438,141 @@ ui-settings-encryption = 暗号化
 ui-settings-language = 言語
 ui-settings-label = { $label }:
 ui-apply = 適用(&A)
+# review: new
+ui-settings-sync = 同期
+# review: new
+ui-sync-note = アカウント、キー、アドレス帳、ルール、設定を、自分が管理するフォルダーまたはストレージを通じて、すべてのコンピューターで同じに保ちます。すべてのデータは、このコンピューターから送られる前に同期パスフレーズで暗号化されます。
+# review: new
+ui-sync-place = 同期先:
+# review: new
+ui-sync-status = 状態:
+# review: new
+ui-sync-set-up = 同期の設定(&S)…
+# review: new
+ui-sync-now = 今すぐ同期(&N)
+# review: new
+ui-sync-computers = コンピューター(&M)…
+# review: new
+ui-sync-history = 履歴(&H)…
+# review: new
+ui-sync-turn-off = 同期をオフにする(&T)…
+# review: new
+ui-sync-what = 同期する項目
+# review: new
+ui-sync-what-note = パスワード、サインイン情報、秘密キーは、暗号化された状態でのみ転送されます。このコンピューターだけに残しておくものは、オフにしてください。
+# review: new
+ui-sync-accounts = アカウント(&O)
+# review: new
+ui-sync-passwords = パスワード(&W)
+# review: new
+ui-sync-sign-ins = Google、Microsoft、サインイン アプリでのサインイン(&I)
+# review: new
+ui-sync-sign-in-apps = サインイン アプリ(&P)
+# review: new
+ui-sync-app-secrets = サインイン アプリのクライアント シークレット(&C)
+# review: new
+ui-sync-contacts = アドレス帳(&D)
+# review: new
+ui-sync-keys = キー(&K)
+# review: new
+ui-sync-private-keys = 自分の秘密キー(&R)
+# review: new
+ui-sync-rules = ルール(&U)
+# review: new
+ui-sync-trusted = 信頼できる送信者(&E)
+# review: new
+ui-sync-settings = 設定(&G)
+# review: new
+ui-sync-preferences = レイアウトと表示(&V)
+# review: new
+ui-sync-everything = すべて
+# review: new
+ui-sync-some-left-out = 一部を除外
+# review: new
+ui-sync-where = 保存場所
+# review: new
+ui-sync-folder = フォルダー
+# review: new
+ui-sync-folder-note = Dropbox、OneDrive、iCloud Drive、Google Drive、Nextcloud、Syncthingがほかのコンピューターにコピーします。
+# review: new
+ui-sync-bucket = S3互換ストレージ
+# review: new
+ui-sync-bucket-note = Amazon S3、Cloudflare R2、Backblaze B2、MinIOなど、S3と同じように使えるストレージ。
+# review: new
+ui-sync-folder-label = フォルダー(&F):
+# review: new
+ui-sync-folder-none = まだ選択されていません
+# review: new
+ui-sync-choose-folder = 選択(&C)…
+# review: new
+ui-sync-choose-folder-title = 同期に使うフォルダーの選択
+# review: new
+ui-sync-endpoint = エンドポイント(&E):
+# review: new
+ui-sync-region = リージョン(&R):
+# review: new
+ui-sync-bucket-name = バケット(&B):
+# review: new
+ui-sync-prefix = バケット内のフォルダー(&U):
+# review: new
+ui-sync-access-key = アクセス キー ID(&A):
+# review: new
+ui-sync-secret-key = シークレット アクセス キー(&S):
+# review: new
+ui-sync-next = 次へ(&N)
+# review: new
+ui-sync-join-title = 同期に参加
+# review: new
+ui-sync-join-note = この場所には、ほかのコンピューターの同期データがあります。最初のコンピューターで決めた同期パスフレーズを入力してください。
+# review: new
+ui-sync-start-title = 同期の開始
+# review: new
+ui-sync-start-note = 同期パスフレーズを決めてください。追加するコンピューターごとに1回入力します。安全な場所に保管してください。パスフレーズがないと、ほかのコンピューターは参加できません。
+# review: new
+ui-sync-name = このコンピューターの名前(&N):
+# review: new
+ui-sync-merge-note = このコンピューターにあるものと同期にあるものが統合されます。両方にあるアカウントや連絡先は1つになります。
+# review: new
+ui-sync-turn-on = 同期をオンにする(&T)
+# review: new
+ui-sync-on = 同期はオンです。
+# review: new
+ui-sync-turn-off-ask = このコンピューターで同期をオフにしますか？このコンピューターでもほかのコンピューターでも、すべてそのまま残ります。このコンピューターが同期をやめるだけです。
+# review: new
+ui-sync-turn-off-button = オフにする
+# review: new
+ui-sync-computers-title = コンピューター
+# review: new
+ui-sync-computers-note = この場所を通じて同期しているコンピューターです。使わなくなったコンピューターは削除してください。そのコンピューターは同期をやめ、それまでに同期したものは残ります。
+# review: new
+ui-sync-this-computer = このコンピューター
+# review: new
+ui-sync-seen = 最終同期：{ $when }
+# review: new
+ui-sync-remove-ask = 「{ $name }」を同期から削除しますか？次に同期しようとしたときに、同期が停止します。もう一度同期するには、そのコンピューターで同期をもう一度設定してください。
+# review: new
+ui-sync-loading = 読み取り中…
+# review: new
+ui-sync-history-title = 履歴
+# review: new
+ui-sync-history-note = 同じものが2台のコンピューターで同時に変更された場合は、最後に行われた変更が残り、もう一方の変更はここに保存されます。代わりにそちらを使うには、復元してください。
+# review: new
+ui-sync-history-empty = 置き換えられた変更はありません。
+# review: new
+ui-sync-history-row = { $source }から、{ $when }
+# review: new
+ui-sync-restore = 復元(&R)
+# review: new
+ui-sync-restore-points = 復元ポイント
+# review: new
+ui-sync-restore-points-note = 同期によってこのコンピューターから何かが削除される前に、それまでの状態が保存されます。復元ポイントを開くと、その中から選んだものを元に戻せます。
+# review: new
+ui-sync-restore-points-empty = まだありません。
+# review: new
+ui-sync-open-point = 開く(&O)…
+# Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
+# review: new
+win-sync-back = < 戻る(&B)
 ui-language-label = 言語(&L):
 ui-restart-note = 言語を変更するには、Inbox Classicを再起動してください。
 ui-restart-ask = 再起動すると、Inbox Classicは{ $language }で表示されます。今すぐ再起動しますか？
@@ -747,6 +882,12 @@ ui-setup-from = Inbox Classic { $version }で{ $date }に保存されました�
 ui-setup-import-button = インポート(&I)
 ui-setup-done = 完了
 ui-setup-first-run = 別のコンピューターから設定とアカウントをインポート...
+# review: new
+ui-first-run-other = すでに別のコンピューターでInbox Classicを使っていますか？そのアカウントと設定をここに取り込めます。
+# review: new
+ui-first-run-sync = その同期に参加…
+# review: new
+ui-first-run-import = ファイルからインポート…
 
 ui-field-verifiers = 送信者の確認結果を信頼するサーバー:
 ui-attachment-import-key = キーをインポート...

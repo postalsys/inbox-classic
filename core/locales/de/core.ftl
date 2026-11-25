@@ -887,6 +887,54 @@ setup-error-newer = Die Exportdatei wurde mit einer neueren Version von Inbox Cl
 setup-error-needs-passphrase = Diese Exportdatei ist mit einer Passphrase geschützt. Geben Sie die beim Export verwendete Passphrase ein.
 setup-error-wrong-passphrase = Mit dieser Passphrase lässt sich die Exportdatei nicht öffnen.
 setup-error-changed = Die Integritätsprüfung der Exportdatei ist fehlgeschlagen. Die Datei kann nicht importiert werden.
+# review: new
+sync-wrong-passphrase = Das ist nicht die Synchronisierungs-Passphrase dieses Tresors. Geben Sie die Passphrase ein, die Sie beim Einrichten der Synchronisierung auf Ihrem ersten Computer gewählt haben.
+# review: new
+sync-place = { $place }, als „{ $name }“
+# review: new
+sync-news-removed = { $count ->
+    [one] Die Synchronisierung hat das Konto { $accounts } entfernt, da es auf einem anderen Computer entfernt wurde.
+   *[other] Die Synchronisierung hat die Konten { $accounts } entfernt, da sie auf einem anderen Computer entfernt wurden.
+}
+# review: new
+sync-news-lost = { $count ->
+    [one] Eine gleichzeitige Änderung auf einem anderen Computer wurde durch die Änderung auf diesem Computer ersetzt. Der Synchronisierungsverlauf bewahrt sie auf.
+   *[other] { $count } gleichzeitige Änderungen auf anderen Computern wurden durch die Änderungen auf diesem Computer ersetzt. Der Synchronisierungsverlauf bewahrt sie auf.
+}
+# review: new
+sync-status-busy = Wird synchronisiert…
+# review: new
+sync-status-never = Noch nicht synchronisiert.
+# review: new
+sync-status-last = Zuletzt synchronisiert: { $when }.
+# review: new
+sync-status-today = Zuletzt synchronisiert: heute um { $time }.
+# review: new
+sync-when-today = heute um { $time }
+# review: new
+sync-status-problem = Synchronisierung fehlgeschlagen: { $problem }
+# review: new
+sync-removed-here = Dieser Computer wurde auf einem anderen Computer aus der Synchronisierung entfernt. Schalten Sie die Synchronisierung aus und richten Sie sie erneut ein, um wieder beizutreten.
+# review: new
+sync-item-account = Konto { $name }
+# review: new
+sync-item-contact = Kontakt { $name }
+# review: new
+sync-item-group = Gruppe { $name }
+# review: new
+sync-item-key = Schlüssel { $name }
+# review: new
+sync-item-rule = Regel { $name }
+# review: new
+sync-item-trusted = Vertrauenswürdiger Absender { $name }
+# review: new
+sync-item-sign-in-app = Anmelde-App { $name }
+# review: new
+sync-item-settings = Einstellungen
+# review: new
+sync-another-computer = ein anderer Computer
+# review: new
+sync-no-key = Dieser Computer hat den Schlüssel des Synchronisierungstresors nicht mehr. Schalten Sie die Synchronisierung aus und mit der Synchronisierungs-Passphrase wieder ein.
 setup-error-read = Die Exportdatei konnte nicht gelesen werden: { $error }
 setup-error-write = Die Exportdatei konnte nicht gespeichert werden: { $error }
 setup-error-no-parts = Wählen Sie mindestens einen Datenbereich aus.

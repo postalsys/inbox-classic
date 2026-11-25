@@ -666,7 +666,7 @@ mod tests {
         // without the password the same domain is a guess
         let net = Net::new(|request| match request.method {
             Method::Post => Reply::Challenge,
-            Method::Get => Reply::Body(404, String::new()),
+            _ => Reply::Body(404, String::new()),
         });
         assert_eq!(find("user@example.com", &net).await.source, Source::Guess);
     }
@@ -688,7 +688,7 @@ mod tests {
                     r#"<Autodiscover><Response><Account><Action>redirectUrl</Action><RedirectUrl>https://collector.example.org/x</RedirectUrl></Account></Response></Autodiscover>"#.into(),
                 ),
                 Method::Post => Reply::Challenge,
-                Method::Get => Reply::Body(404, String::new()),
+                _ => Reply::Body(404, String::new()),
             }
         });
         let credentials = Credentials {

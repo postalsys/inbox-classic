@@ -35,9 +35,9 @@ fn group_titles_are_headings_in_every_language() {
 }
 
 #[test]
-fn the_pages_are_general_reading_downloading() {
+fn the_pages_are_general_reading_downloading_sync() {
     let pages: Vec<&str> = PAGES.iter().map(|p| p.0).collect();
-    assert_eq!(pages, ["general", "reading", "downloading"]);
+    assert_eq!(pages, ["general", "reading", "downloading", "sync"]);
     assert_eq!(
         pe_i18n::message_in("en", "ui-download-heading").as_deref(),
         Some("Downloading")
@@ -60,7 +60,8 @@ fn the_access_keys_of_each_windows_page_are_unique_in_every_language() {
         for (page, _) in PAGES {
             let labels = SETTINGS
                 .iter()
-                .filter(|s| s.0 == *page && s.6.contains(&"windows"))
+                // a line of state is a label, not a control: no access key
+                .filter(|s| s.0 == *page && s.6.contains(&"windows") && s.3 != "status")
                 .map(|s| s.4)
                 .chain(["ui-apply", "ui-ok", "ui-cancel"]);
             let mut keys: HashMap<String, &str> = HashMap::new();

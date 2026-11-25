@@ -407,6 +407,37 @@ struct SetupImported {
 // File > Import Settings and Accounts: a setup file chosen, its passphrase asked for when it has one, what it holds
 // chosen and imported, and what was added and skipped said
 SetupImported ImportSetupDialog(HWND owner, PeCore* core);
+// the import window over a setup the core has read already (a restore point of sync): what it holds chosen and
+// imported, what was added and skipped said; nothing for a NULL `file`
+SetupImported ImportSetupFile(HWND owner, PeCore* core, core::SetupFile file);
+// the app preferences as they are now, in an export the core reads by their shared names (settings sync's answer to
+// SettingsSyncReady, and what a restore of the history takes)
+core::SetupExport AppPrefsExport();
+// `work` on a thread of its own while the window `waiting` waits for it: it keeps painting, takes no input meanwhile
+// (its OK button off, the wait cursor over it), and goes on once the thread is done
+void RunWaiting(HWND waiting, const std::function<void()>& work);
+
+// ---- sync.cpp ----
+
+// Set Up Sync over `owner` (Options' Sync tab, or Add Mail Account on the first run): where to keep the vault, looked
+// at, then the passphrase that starts a new one or joins the one there; true once sync is on
+bool SetUpSyncDialog(HWND owner, PeCore* core);
+// Options > Sync > Computers: the computers of the vault, read by the core, each but this one with Remove
+void SyncComputersDialog(HWND owner, PeCore* core);
+// Options > Sync > History: the edits another computer's replaced, each with Restore
+void SyncHistoryDialog(HWND owner, PeCore* core);
+// SettingsSyncChanged: the open Set Up Sync takes the answer of its probe, the open Computers its list
+void SyncWindowsChanged();
+// the flag of `choice` that the switch `setting` (a PeSetting of the Sync page's What to sync) stands for; NULL for
+// another setting
+bool* SyncChoiceFlag(PeSyncChoice& choice, int setting);
+// the first account a sync brings, waited for over `owner` up to a minute (Join Its Sync on the first run); 0 for none
+int64_t WaitForSyncedAccount(HWND owner, PeCore* core);
+// the UI test's second computer (--test-hooks only): another core in this process with a store of its own that syncs
+// through the same folder. A request in tab-separated words: `join <folder> <passphrase>` (its accounts after its
+// first sync plus 10, 9 when it could not join), `card <address>` (a contact added there and synced: 11, else 10),
+// `has <address>` (11 when this computer's book has the address, else 10), `close`
+LRESULT TestSyncSecond(PeCore* core, const std::wstring& request);
 
 // ---- agents.cpp ----
 
@@ -550,6 +581,8 @@ struct WindowOptions {
 bool OptionsDialog(HWND owner, PeCore* core, const WindowOptions& window, const std::function<void(const WindowOptions&)>& apply);
 // the core turned PDF previews off (PdfPreviewsOff): an open Options shows it so, as set
 void OptionsPdfPreviewsOff();
+// settings sync's state changed (SettingsSyncChanged): an open Options shows it on its Sync tab
+void OptionsSyncChanged();
 // Tools > Make Default Mail App, and its button in Options: Windows' Default Apps settings, where only the user can
 // choose it, or what says it is chosen already
 void MakeDefaultMailApp(HWND owner);
@@ -698,6 +731,10 @@ void SearchFor(const std::wstring& words);
 // app preferences it brought set (what else it changed comes as the core's events); the first account added, 0 for
 // none
 int64_t ImportSetup(HWND owner);
+// a restore point of sync opened in the import window (History's Open), then the app preferences it brought set
+void ImportRestorePoint(HWND owner, core::SetupFile file);
+// what the user did, said in the main window's status bar (Sync is on)
+void SayInStatusBar(const std::wstring& text);
 
 // ---- mailbox.cpp ----
 
@@ -1880,6 +1917,57 @@ enum SetupControlId : WORD {
     IDC_RETRY_BAR,
     // Import: an account's check box, IDC_SETUP_ACCOUNT + its place in the file's list
     IDC_SETUP_ACCOUNT = 1000,
+};
+
+// the controls of settings sync (options.cpp's Sync tab, sync.cpp's windows), which the UI test finds by them
+enum SyncControlId : WORD {
+    // the Sync tab: what sync is for, where it syncs through and how it went (the values beside their labels), its
+    // buttons, and the What to sync check boxes, IDC_OPTIONS_SYNC_SWITCH + their place in core/settings.toml
+    IDC_OPTIONS_SYNC_NOTE = 960,
+    IDC_OPTIONS_SYNC_PLACE,
+    IDC_OPTIONS_SYNC_STATUS,
+    IDC_OPTIONS_SYNC_SET_UP,
+    IDC_OPTIONS_SYNC_NOW,
+    IDC_OPTIONS_SYNC_COMPUTERS,
+    IDC_OPTIONS_SYNC_HISTORY,
+    IDC_OPTIONS_SYNC_TURN_OFF,
+    IDC_OPTIONS_SYNC_WHAT_NOTE,
+    IDC_OPTIONS_SYNC_SWITCH = 970,
+    // Set Up Sync, its first step: the kind of place, the folder and Choose, the bucket's fields
+    IDC_SYNC_KIND_FOLDER = 1200,
+    IDC_SYNC_KIND_BUCKET,
+    IDC_SYNC_FOLDER,
+    IDC_SYNC_CHOOSE,
+    IDC_SYNC_ENDPOINT,
+    IDC_SYNC_REGION,
+    IDC_SYNC_BUCKET,
+    IDC_SYNC_PREFIX,
+    IDC_SYNC_ACCESS_KEY,
+    IDC_SYNC_SECRET_KEY,
+    // its second step: what it says (Start Sync or Join Sync), the passphrase (twice to start), what the core says of
+    // it, the name of this computer and the note of joining
+    IDC_SYNC_NOTE,
+    IDC_SYNC_PASSPHRASE,
+    IDC_SYNC_PASSPHRASE_AGAIN,
+    IDC_SYNC_FEEDBACK,
+    IDC_SYNC_NAME,
+    IDC_SYNC_MERGE_NOTE,
+    // both: why the place or the passphrase was not taken, in red; Back (the default button, IDOK, is Next and then
+    // Turn On Sync)
+    IDC_SYNC_PROBLEM,
+    IDC_SYNC_BACK,
+    // Computers and History: the list, Remove or Restore, what is said with none; History's restore points, Open, and
+    // what is said with none
+    IDC_SYNC_LIST,
+    IDC_SYNC_ACT,
+    IDC_SYNC_EMPTY,
+    IDC_SYNC_POINTS,
+    IDC_SYNC_OPEN_POINT,
+    IDC_SYNC_POINTS_EMPTY,
+    // Add Mail Account before the first account: Join Its Sync (Import from a File is IDC_SETUP_FIRST_RUN)
+    IDC_SYNC_FIRST_RUN,
+    // Set Up Sync's What to sync check boxes, IDC_SYNC_WHAT + their place in core/settings.toml
+    IDC_SYNC_WHAT = 1240,
 };
 
 constexpr UINT_PTR TIMER_MARK_READ = 1;

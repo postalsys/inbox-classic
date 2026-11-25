@@ -448,6 +448,141 @@ ui-settings-encryption = Salaus
 ui-settings-language = Kieli
 ui-settings-label = { $label }:
 ui-apply = &Käytä
+# review: new
+ui-settings-sync = Synkronointi
+# review: new
+ui-sync-note = Pidä tilisi, avaimesi, osoitekirjasi, sääntösi ja asetuksesi samoina jokaisella tietokoneella omistamasi kansion tai tallennustilan kautta. Kaikki salataan synkronoinnin salalauseellasi, ennen kuin mitään lähtee tältä tietokoneelta.
+# review: new
+ui-sync-place = Synkronointipaikka:
+# review: new
+ui-sync-status = Tila:
+# review: new
+ui-sync-set-up = &Määritä synkronointi…
+# review: new
+ui-sync-now = Synkronoi &nyt
+# review: new
+ui-sync-computers = &Tietokoneet…
+# review: new
+ui-sync-history = &Historia…
+# review: new
+ui-sync-turn-off = &Poista synkronointi käytöstä…
+# review: new
+ui-sync-what = Mitä synkronoidaan
+# review: new
+ui-sync-what-note = Salasanat, kirjautumiset ja yksityiset avaimet siirtyvät vain salattuina. Jätä pois se, minkä pitää pysyä vain tällä tietokoneella.
+# review: new
+ui-sync-accounts = T&ilit
+# review: new
+ui-sync-passwords = S&alasanat
+# review: new
+ui-sync-sign-ins = Kirjautumiset &Googlella, Microsoftilla ja kirjautumissovelluksilla
+# review: new
+ui-sync-sign-in-apps = Kirjautumissovell&ukset
+# review: new
+ui-sync-app-secrets = Kirjautumissovellusten asiakassalaisuu&det
+# review: new
+ui-sync-contacts = &Osoitekirja
+# review: new
+ui-sync-keys = A&vaimet
+# review: new
+ui-sync-private-keys = &Yksityiset avaimesi
+# review: new
+ui-sync-rules = &Säännöt
+# review: new
+ui-sync-trusted = Luotetut lähettä&jät
+# review: new
+ui-sync-settings = As&etukset
+# review: new
+ui-sync-preferences = Asette&lu ja näkymä
+# review: new
+ui-sync-everything = Kaikki
+# review: new
+ui-sync-some-left-out = Osa jätetty pois
+# review: new
+ui-sync-where = Missä se säilytetään
+# review: new
+ui-sync-folder = Kansio
+# review: new
+ui-sync-folder-note = Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud tai Syncthing kopioi sen muille tietokoneillesi.
+# review: new
+ui-sync-bucket = S3-yhteensopiva tallennustila
+# review: new
+ui-sync-bucket-note = Amazon S3, Cloudflare R2, Backblaze B2, MinIO tai muu tallennustila, joka toimii kuten S3.
+# review: new
+ui-sync-folder-label = &Kansio:
+# review: new
+ui-sync-folder-none = Ei vielä valittu
+# review: new
+ui-sync-choose-folder = &Valitse…
+# review: new
+ui-sync-choose-folder-title = Valitse kansio, jonka kautta synkronoidaan
+# review: new
+ui-sync-endpoint = &Päätepiste:
+# review: new
+ui-sync-region = &Alue:
+# review: new
+ui-sync-bucket-name = Säi&lö:
+# review: new
+ui-sync-prefix = Kansio sä&ilössä:
+# review: new
+ui-sync-access-key = Käyttöavaimen &tunnus:
+# review: new
+ui-sync-secret-key = &Salainen käyttöavain:
+# review: new
+ui-sync-next = Seu&raava
+# review: new
+ui-sync-join-title = Liity synkronointiin
+# review: new
+ui-sync-join-note = Tässä paikassa on muiden tietokoneidesi synkronointi. Kirjoita synkronoinnin salalause, jonka valitsit ensimmäisellä tietokoneella.
+# review: new
+ui-sync-start-title = Aloita synkronointi
+# review: new
+ui-sync-start-note = Valitse synkronoinnin salalause. Kirjoitat sen kerran jokaisella tietokoneella, jonka lisäät. Säilytä se turvallisessa paikassa: ilman sitä mikään muu tietokone ei voi liittyä.
+# review: new
+ui-sync-name = Tämän tietokoneen &nimi:
+# review: new
+ui-sync-merge-note = Tämän tietokoneen tiedot ja synkronoinnin tiedot yhdistetään: tili tai yhteystieto, joka on molemmissa, yhdistyy yhdeksi.
+# review: new
+ui-sync-turn-on = &Ota synkronointi käyttöön
+# review: new
+ui-sync-on = Synkronointi on käytössä.
+# review: new
+ui-sync-turn-off-ask = Poistetaanko synkronointi käytöstä tällä tietokoneella? Kaikki pysyy ennallaan täällä ja muilla tietokoneillasi. Tämä tietokone vain lopettaa synkronoinnin.
+# review: new
+ui-sync-turn-off-button = Poista käytöstä
+# review: new
+ui-sync-computers-title = Tietokoneet
+# review: new
+ui-sync-computers-note = Tietokoneet, jotka synkronoivat tämän paikan kautta. Poista tietokone, jota et enää käytä: sen synkronointi loppuu, ja sen synkronoimat tiedot säilyvät.
+# review: new
+ui-sync-this-computer = Tämä tietokone
+# review: new
+ui-sync-seen = Synkronoitu viimeksi { $when }
+# review: new
+ui-sync-remove-ask = Poistetaanko ”{ $name }” synkronoinnista? Sen synkronointi loppuu, kun se seuraavan kerran yrittää synkronoida. Jos haluat synkronoida sen taas, määritä synkronointi uudelleen kyseisellä tietokoneella.
+# review: new
+ui-sync-loading = Luetaan…
+# review: new
+ui-sync-history-title = Historia
+# review: new
+ui-sync-history-note = Kun sama asia muutettiin kahdella tietokoneella samaan aikaan, viimeksi tehty muutos säilytettiin ja toinen on tässä. Palauta muutos, jos haluat käyttää sitä sen sijaan.
+# review: new
+ui-sync-history-empty = Muutoksia ei ole korvattu.
+# review: new
+ui-sync-history-row = Lähde: { $source }, { $when }
+# review: new
+ui-sync-restore = &Palauta
+# review: new
+ui-sync-restore-points = Palautuspisteet
+# review: new
+ui-sync-restore-points-note = Ennen kuin synkronointi poistaa täältä jotain, aiempi tila tallennetaan. Avaa palautuspiste, niin voit palauttaa siitä valitsemasi osat.
+# review: new
+ui-sync-restore-points-empty = Ei vielä yhtään.
+# review: new
+ui-sync-open-point = &Avaa…
+# Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
+# review: new
+win-sync-back = < &Edellinen
 ui-language-label = Ki&eli:
 ui-restart-note = Kieli vaihtuu, kun Inbox Classic käynnistetään uudelleen.
 ui-restart-ask = Valittu kieli ({ $language }) otetaan käyttöön, kun Inbox Classic käynnistetään uudelleen. Käynnistetäänkö ohjelma uudelleen nyt?
@@ -785,6 +920,12 @@ ui-setup-from = Tallentanut Inbox Classic { $version }, { $date }.
 ui-setup-import-button = &Tuo
 ui-setup-done = Valmis
 ui-setup-first-run = Tuo asetukset ja tilit toisesta tietokoneesta...
+# review: new
+ui-first-run-other = Käytätkö Inbox Classicia jo toisella tietokoneella? Tuo sen tilit ja asetukset tänne.
+# review: new
+ui-first-run-sync = Liity sen synkronointiin…
+# review: new
+ui-first-run-import = Tuo tiedostosta…
 
 ui-field-verifiers = Luota näiden palvelinten lähettäjätarkistuksiin:
 ui-attachment-import-key = Tuo avain...

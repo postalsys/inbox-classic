@@ -123,53 +123,6 @@ void PlaceRows(HWND dialog, const std::vector<Row>& rows, int top) {
     }
 }
 
-// `work` on a thread of its own while the window `waiting` waits for it: it keeps painting, takes no input meanwhile
-// (its OK button off, the wait cursor over it), and goes on once the thread is done
-void RunWaiting(HWND waiting, const std::function<void()>& work) {
-    HWND ok = Item(waiting, IDOK);
-    bool okOn = ok && IsWindowEnabled(ok);
-    if (ok) {
-        EnableWindow(ok, FALSE);
-    }
-    std::atomic<bool> finished = false;
-    DWORD windowThread = GetCurrentThreadId();
-    std::thread worker([&] {
-        work();
-        finished = true;
-        // wakes the loop below
-        PostThreadMessageW(windowThread, WM_NULL, 0, 0);
-    });
-    HCURSOR wait = LoadCursorW(nullptr, IDC_WAIT);
-    SetCursor(wait);
-    MSG msg = {};
-    bool quit = false;
-    while (!finished && !quit) {
-        if (GetMessageW(&msg, nullptr, 0, 0) <= 0) {
-            quit = true;
-            break;
-        }
-        bool keys = msg.message >= WM_KEYFIRST && msg.message <= WM_KEYLAST;
-        bool mouse = (msg.message >= WM_MOUSEFIRST && msg.message <= WM_MOUSELAST) || (msg.message >= WM_NCMOUSEMOVE && msg.message <= WM_NCXBUTTONDBLCLK);
-        if (keys || mouse) {
-            if (msg.message == WM_MOUSEMOVE || msg.message == WM_NCMOUSEMOVE) {
-                SetCursor(wait);
-            }
-            continue;
-        }
-        TranslateMessage(&msg);
-        DispatchMessageW(&msg);
-    }
-    worker.join();
-    if (quit) {
-        // kept for the main loop
-        PostQuitMessage(static_cast<int>(msg.wParam));
-    }
-    if (ok) {
-        EnableWindow(ok, okOn);
-    }
-    SetCursor(LoadCursorW(nullptr, IDC_ARROW));
-}
-
 // ---- what was done: the lines of the core, and Done ----
 
 struct DoneState {
@@ -563,6 +516,57 @@ bool ChooseImport(HWND owner, ImportState& state) {
 
 }  // namespace
 
+void RunWaiting(HWND waiting, const std::function<void()>& work) {
+    HWND ok = Item(waiting, IDOK);
+    bool okOn = ok && IsWindowEnabled(ok);
+    if (ok) {
+        EnableWindow(ok, FALSE);
+    }
+    std::atomic<bool> finished = false;
+    DWORD windowThread = GetCurrentThreadId();
+    std::thread worker([&] {
+        work();
+        finished = true;
+        // wakes the loop below
+        PostThreadMessageW(windowThread, WM_NULL, 0, 0);
+    });
+    HCURSOR wait = LoadCursorW(nullptr, IDC_WAIT);
+    SetCursor(wait);
+    MSG msg = {};
+    bool quit = false;
+    while (!finished && !quit) {
+        if (GetMessageW(&msg, nullptr, 0, 0) <= 0) {
+            quit = true;
+            break;
+        }
+        bool keys = msg.message >= WM_KEYFIRST && msg.message <= WM_KEYLAST;
+        bool mouse = (msg.message >= WM_MOUSEFIRST && msg.message <= WM_MOUSELAST) || (msg.message >= WM_NCMOUSEMOVE && msg.message <= WM_NCXBUTTONDBLCLK);
+        if (keys || mouse) {
+            if (msg.message == WM_MOUSEMOVE || msg.message == WM_NCMOUSEMOVE) {
+                SetCursor(wait);
+            }
+            continue;
+        }
+        TranslateMessage(&msg);
+        DispatchMessageW(&msg);
+    }
+    worker.join();
+    if (quit) {
+        // kept for the main loop
+        PostQuitMessage(static_cast<int>(msg.wParam));
+    }
+    if (ok) {
+        EnableWindow(ok, okOn);
+    }
+    SetCursor(LoadCursorW(nullptr, IDC_ARROW));
+}
+
+core::SetupExport AppPrefsExport() {
+    core::SetupExport prefs(pe_setup_export_new(0));
+    HandPrefs(prefs.get());
+    return prefs;
+}
+
 void ExportSetupDialog(HWND owner, PeCore* core) {
     HelpScope help("setup");
     RegisterDialogClass(kExportClass, ExportProc);
@@ -637,10 +641,16 @@ SetupImported ImportSetupDialog(HWND owner, PeCore* core) {
     if (path.empty()) {
         return result;
     }
-    core::SetupFile file = ReadSetup(owner, core, path, title);
+    return ImportSetupFile(owner, core, ReadSetup(owner, core, path, title));
+}
+
+SetupImported ImportSetupFile(HWND owner, PeCore* core, core::SetupFile file) {
+    SetupImported result;
     if (!file) {
         return result;
     }
+    HelpScope help("setup");
+    std::wstring title = core::Plain(PE_TEXT_UI_SETUP_IMPORT_TITLE);
     ImportState state{core, file.get(), title};
     if (!ChooseImport(owner, state)) {
         return result;

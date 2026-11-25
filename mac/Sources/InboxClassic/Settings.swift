@@ -94,7 +94,7 @@ enum Languages {
     }
 }
 
-/// Inbox Classic > Settings: the panes of core/settings.toml (General, Reading, Downloading) behind a toolbar, as the
+/// Inbox Classic > Settings: the panes of core/settings.toml (General, Reading, Downloading, Sync) behind a toolbar, as the
 /// system's own apps have them. The window is titled by its pane and opens on the one chosen last. As Mac settings
 /// windows do, a change counts at once; a language counts once the app starts again, which it offers to do.
 @MainActor
@@ -120,6 +120,10 @@ final class SettingsWindow: NSObject, NSWindowDelegate, NSToolbarDelegate {
     private let core: Core
     /// the codes of the language pop-up's items, nil for System default
     private var codes: [String?] = []
+    /// the Sync pane's two faces: what sync is for with Set Up Sync while it is off, its state, buttons and what it
+    /// syncs while it is on
+    private var syncOff = NSView()
+    private var syncOn = NSView()
 
     static func open(core: Core) {
         if let shown {
@@ -151,7 +155,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate, NSToolbarDelegate {
         for page in SettingsPage.allCases {
             panes[page] = makePane(page)
         }
-        updateDependents()
+        refreshSync()
         select(SettingsPage(rawValue: Self.lastPane.value) ?? .general, animate: false)
     }
 
@@ -229,6 +233,9 @@ final class SettingsWindow: NSObject, NSWindowDelegate, NSToolbarDelegate {
         for setting in settings {
             controls[setting] = control(for: setting)
         }
+        if page == .sync {
+            return makeSyncPane()
+        }
         let labels = labelColumn(for: page, controls: settings.compactMap { controls[$0] })
         let labelWidth = labels.values.map(\.preferredMaxLayoutWidth).max() ?? 0
         let room = Self.width - 2 * Self.margin
@@ -262,7 +269,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate, NSToolbarDelegate {
         // a pane without pop-ups has its controls start at the margin
         grid.column(at: 0).isHidden = labels.isEmpty
         grid.column(at: 0).xPlacement = .trailing
-        return framed(grid)
+        return framed(grid, help: "options")
     }
 
     /// The labels of `page` by their settings, as wide as the widest of them, up to a limit that leaves the widest of
@@ -283,9 +290,9 @@ final class SettingsWindow: NSObject, NSWindowDelegate, NSToolbarDelegate {
     }
 
     /// `grid` within the pane's margins, the help button in the bottom right corner under it
-    private func framed(_ grid: NSGridView) -> NSView {
+    private func framed(_ grid: NSView, help topic: String) -> NSView {
         grid.translatesAutoresizingMaskIntoConstraints = false
-        let help = HelpButton("options")
+        let help = HelpButton(topic)
         help.translatesAutoresizingMaskIntoConstraints = false
         let view = NSView()
         view.addSubview(grid)
@@ -352,6 +359,22 @@ final class SettingsWindow: NSObject, NSWindowDelegate, NSToolbarDelegate {
             return fillDownloadAhead(choice(setting, #selector(downloadAheadChosen)))
         case .downloadLimit:
             return filled(choice(setting, #selector(downloadLimitChosen)), Core.downloadLimits, core.downloadLimitIndex)
+        case .syncPlace, .syncStatus:
+            return statusLine(setting)
+        case .syncSetUp:
+            return button(setting, #selector(syncSetUpClicked))
+        case .syncNow:
+            return button(setting, #selector(syncNowClicked))
+        case .syncComputers:
+            return button(setting, #selector(syncComputersClicked))
+        case .syncHistory:
+            return button(setting, #selector(syncHistoryClicked))
+        case .syncTurnOff:
+            return button(setting, #selector(syncTurnOffClicked))
+        case .syncAccounts, .syncPasswords, .syncSignIns, .syncSignInApps, .syncAppSecrets, .syncContacts, .syncKeys,
+             .syncPrivateKeys, .syncRules, .syncTrusted, .syncSettings, .syncPreferences:
+            // set from sync's state by refreshSync
+            return toggle(setting, true, #selector(syncChoiceChanged))
         }
     }
 
@@ -384,9 +407,18 @@ final class SettingsWindow: NSObject, NSWindowDelegate, NSToolbarDelegate {
         return button
     }
 
-    /// the words before `setting`: a pop-up's own label, its group's title with a colon on the group's first row
+    /// a line of state (where sync syncs through, how it went), its words from the core; they can be copied
+    private func statusLine(_ setting: Setting) -> NSTextField {
+        let line = NSTextField(wrappingLabelWithString: "")
+        line.isSelectable = true
+        line.setAccessibilityIdentifier(id(setting))
+        return line
+    }
+
+    /// the words before `setting`: a pop-up's or a line of state's own label, its group's title with a colon on the
+    /// group's first row
     private func labelText(_ setting: Setting, in group: SettingsGroup) -> String? {
-        if setting.kind == .choice {
+        if setting.kind == .choice || setting.kind == .status {
             return setting.label.text
         }
         guard setting == group.settings.first, let title = group.label else { return nil }
@@ -462,6 +494,153 @@ final class SettingsWindow: NSObject, NSWindowDelegate, NSToolbarDelegate {
     private func fillDownloadAhead(_ popup: NSPopUpButton) -> NSPopUpButton {
         let items = [Text.uiDownloadAheadRecent, Text.uiDownloadAheadAll, Text.uiDownloadAheadNever]
         return filled(popup, items.map(\.text), Int(core.downloadAhead.rawValue))
+    }
+
+    // ---- the Sync pane ----
+
+    /// The Sync pane, made of the settings of its groups: while sync is off, its picture, what it is for and Set Up
+    /// Sync as the pane's one action; while it is on, where it syncs through and how it went in the label column's
+    /// grid, Sync Now, Computers and History in a row, Turn Off Sync under them, then What to sync's check boxes
+    private func makeSyncPane() -> NSView {
+        let page = SettingsPage.sync
+        let room = Self.width - 2 * Self.margin
+        // off
+        let picture = NSImageView()
+        picture.image = NSImage(systemSymbolName: page.symbol, accessibilityDescription: nil)?
+            .withSymbolConfiguration(.init(pointSize: 40, weight: .regular))
+        picture.contentTintColor = .secondaryLabelColor
+        picture.setContentHuggingPriority(.required, for: .horizontal)
+        let pictureWidth: CGFloat = 56
+        picture.widthAnchor.constraint(equalToConstant: pictureWidth).isActive = true
+        let note = NSTextField(wrappingLabelWithString: hyphensKept(SettingsGroup.sync.note?.text ?? ""))
+        note.isSelectable = false
+        note.preferredMaxLayoutWidth = room - pictureWidth - 16
+        note.setAccessibilityIdentifier("settings.syncNote")
+        let setUp = controls[.syncSetUp] ?? NSButton()
+        let words = NSStackView(views: [note, setUp])
+        words.orientation = .vertical
+        words.alignment = .leading
+        words.spacing = 12
+        let off = NSStackView(views: [picture, words])
+        off.alignment = .top
+        off.spacing = 16
+        syncOff = off
+
+        // on: the labels of the lines of state and of What to sync, the controls in the column after them
+        let settings = page.groups.flatMap(\.settings)
+        let labels = labelColumn(for: page, controls: settings.compactMap { controls[$0] }.filter { !($0 is NSTextField) })
+        let labelWidth = labels.values.map(\.preferredMaxLayoutWidth).max() ?? 0
+        let column = room - labelWidth - Self.spacing
+        let grid = NSGridView()
+        grid.rowSpacing = 10
+        grid.columnSpacing = Self.spacing
+        for setting in [Setting.syncPlace, .syncStatus] {
+            guard let line = controls[setting] as? NSTextField else { continue }
+            line.preferredMaxLayoutWidth = column
+            labels[setting].map(line.setAccessibilityTitleUIElement)
+            grid.addRow(with: [labels[setting] ?? NSGridCell.emptyContentView, line])
+        }
+        // Sync Now, Computers and History side by side when they fit, else one under the other
+        let actions = NSStackView(views: [Setting.syncNow, .syncComputers, .syncHistory].compactMap { controls[$0] })
+        actions.spacing = 8
+        if actions.fittingSize.width > column {
+            actions.orientation = .vertical
+            actions.alignment = .leading
+        }
+        grid.addRow(with: [NSGridCell.emptyContentView, actions])
+        grid.row(at: grid.numberOfRows - 1).topPadding = 6
+        grid.addRow(with: [NSGridCell.emptyContentView, controls[.syncTurnOff] ?? NSView()])
+        let what = SettingsGroup.syncWhat
+        let first = grid.numberOfRows
+        for setting in what.settings {
+            guard let box = controls[setting] as? WrappingCheckbox else { continue }
+            let width = column - (setting.dependsOn == nil ? 0 : Self.indent)
+            box.preferredMaxLayoutWidth = width
+            grid.addRow(with: [labels[setting] ?? NSGridCell.emptyContentView, width < column ? indented(box, by: column - width) : box])
+            grid.row(at: grid.numberOfRows - 1).rowAlignment = .firstBaseline
+        }
+        grid.row(at: first).topPadding = 16
+        if let whatNote = what.note {
+            grid.addRow(with: [NSGridCell.emptyContentView, noteLabel(whatNote.text, width: column)])
+            grid.row(at: grid.numberOfRows - 1).topPadding = -4
+        }
+        grid.rowAlignment = .firstBaseline
+        grid.column(at: 0).xPlacement = .trailing
+        syncOn = grid
+
+        let both = NSStackView(views: [off, grid])
+        both.orientation = .vertical
+        both.alignment = .leading
+        return framed(both, help: "sync")
+    }
+
+    /// the Sync pane as sync is now: its face, its lines of state, Sync Now off while a sync runs, what it syncs; the
+    /// window as tall as the pane when it is shown
+    func refreshSync() {
+        let state = core.syncState
+        syncOff.isHidden = state.on
+        syncOn.isHidden = !state.on
+        (controls[.syncPlace] as? NSTextField)?.stringValue = state.place
+        (controls[.syncStatus] as? NSTextField)?.stringValue = state.status
+        // the pane's one action while off is its default button
+        (controls[.syncSetUp] as? NSButton)?.keyEquivalent = state.on ? "" : "\r"
+        controls[.syncNow]?.isEnabled = !state.busy
+        for (setting, flag) in syncFlags {
+            (controls[setting] as? NSButton)?.state = state.choice[keyPath: flag] ? .on : .off
+        }
+        updateDependents()
+        if pane == .sync, let view = panes[.sync], window.contentView === view {
+            view.layoutSubtreeIfNeeded()
+            var frame = window.frameRect(forContentRect: NSRect(origin: .zero, size: view.fittingSize))
+            if frame.size != window.frame.size {
+                frame.origin = NSPoint(x: window.frame.minX, y: window.frame.maxY - frame.height)
+                window.setFrame(frame, display: true, animate: window.isVisible)
+            }
+        }
+    }
+
+    /// the Sync pane's controls, for the UI test
+    func syncControl(_ setting: Setting) -> NSControl? {
+        controls[setting]
+    }
+
+    /// whether the pane shows sync as on
+    var syncShownOn: Bool { !syncOn.isHidden && syncOff.isHidden }
+
+    @objc func syncSetUpClicked() {
+        _ = SyncSetupSheet(core: core).run(on: window)
+        refreshSync()
+    }
+
+    @objc func syncNowClicked() {
+        pe_settings_sync_now(core.handle)
+    }
+
+    @objc func syncComputersClicked() {
+        SyncComputersSheet(core: core).run(on: window)
+    }
+
+    @objc func syncHistoryClicked() {
+        SyncHistorySheet(core: core).run(on: window)
+    }
+
+    /// Turn Off Sync, asked first: the vault and the other computers stay as they are
+    @objc func syncTurnOffClicked() {
+        let title = Text.uiSyncTurnOff.title
+        guard ask(title + "\n\n" + Text.uiSyncTurnOffAsk.text, title: title, yes: Text.uiSyncTurnOffButton.text,
+                  no: Text.uiCancel.text, destructive: true) else { return }
+        pe_settings_sync_turn_off(core.handle)
+        refreshSync()
+    }
+
+    /// a check box of What to sync: the choice changed at once, a sync follows
+    @objc func syncChoiceChanged() {
+        updateDependents()
+        var choice = core.syncState.choice
+        for (setting, flag) in syncFlags {
+            choice[keyPath: flag] = (controls[setting] as? NSButton)?.state == .on
+        }
+        pe_settings_sync_set_choice(core.handle, choice)
     }
 
     /// a check box that depends on another enabled only while that one is checked, keeping its own value

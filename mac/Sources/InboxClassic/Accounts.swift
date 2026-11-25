@@ -207,12 +207,14 @@ private struct StartOffer {
     var more = false
     var fields = false
     var next = Text.macNext.text
-    /// the link that imports settings and accounts from another computer (the first start)
+    /// the setup of another computer, its sync joined or a file of it imported (the first start)
     var importSetup = false
 }
 
 private enum Start {
     case cancel, next, signIn(SignInChoice), importSetup
+    /// sync turned on, and the first sync brought this account
+    case joined(Int64)
 }
 
 @MainActor
@@ -244,6 +246,7 @@ private final class StartPage: NSObject {
         emailField.placeholderString = "name@example.com"
 
         var rows: [NSView] = [wrappingLabel(offer.intro)]
+        var other: NSView?
         // the rows as wide as the buttons need, whose words are longer in some languages
         var width: CGFloat = 440
         // the buttons, side by side; none when every one of them is off
@@ -280,11 +283,23 @@ private final class StartPage: NSObject {
             let line = NSBox()
             line.boxType = .separator
             rows.append(line)
-            // a push button on its own row: beside Cancel and Next its words would not fit
-            let importButton = NSButton(title: Text.uiSetupFirstRun.opens, target: self, action: #selector(importClicked))
-            importButton.bezelStyle = .push
+            // what it is for, then its two ways in a row of their own: beside Cancel and Next their words would not fit
+            let said = wrappingLabel(Text.uiFirstRunOther.text)
+            other = said
+            rows.append(said)
+            let join = NSButton(title: Text.uiFirstRunSync.opens, target: self, action: #selector(joinClicked))
+            join.setAccessibilityIdentifier("account.joinSync")
+            let importButton = NSButton(title: Text.uiFirstRunImport.opens, target: self, action: #selector(importClicked))
             importButton.setAccessibilityIdentifier("account.import")
-            rows.append(importButton)
+            join.bezelStyle = .push
+            importButton.bezelStyle = .push
+            let ways = NSStackView(views: [join, importButton])
+            ways.spacing = 12
+            rows.append(ways)
+            joining.isDisplayedWhenStopped = false
+            joining.style = .spinning
+            joining.controlSize = .small
+            ways.addArrangedSubview(joining)
         }
         let cancel = NSButton(title: Text.uiCancel.text, target: self, action: #selector(cancelled))
         cancel.keyEquivalent = "\u{1b}"
@@ -302,7 +317,7 @@ private final class StartPage: NSObject {
         stack.alignment = .leading
         stack.spacing = 14
         stack.edgeInsets = NSEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
-        for row in rows where row is NSBox || row === rows[0] {
+        for row in rows where row is NSBox || row === rows[0] || row === other {
             row.widthAnchor.constraint(equalToConstant: width).isActive = true
         }
         window.contentView = stack
@@ -415,6 +430,37 @@ private final class StartPage: NSObject {
         NSApp.stopModal()
     }
 
+    /// turns while the first sync brings the accounts of the other computer
+    private let joining = NSProgressIndicator()
+
+    /// Join Its Sync: Set Up Sync over this window; once sync is on, the window waits (up to a minute) for the first
+    /// sync to bring an account and then finishes with it, as an import does
+    @objc private func joinClicked() {
+        guard SyncSetupSheet(core: core).run(on: window) else { return }
+        for case let control as NSControl in views(in: window.contentView) {
+            control.isEnabled = false
+        }
+        joining.startAnimation(nil)
+        let started = Date()
+        func look() {
+            if let account = core.accounts().first {
+                result = .joined(account.id)
+                NSApp.stopModal()
+            } else if Date().timeIntervalSince(started) > 60 {
+                result = .cancel
+                NSApp.stopModal()
+            } else {
+                after(0.1) { look() }
+            }
+        }
+        look()
+    }
+
+    private func views(in root: NSView?) -> [NSView] {
+        guard let root else { return [] }
+        return [root] + root.subviews.flatMap { views(in: $0) }
+    }
+
     @objc private func cancelled() {
         result = .cancel
         NSApp.stopModal()
@@ -508,6 +554,8 @@ func newAccountDialog(core: Core) -> Int64 {
         case .next: break starting
         case .importSetup:
             if let added = SetupFiles.importFile(core: core).first { return added }
+        case .joined(let account):
+            return account
         }
     }
 
@@ -535,6 +583,7 @@ func newAccountDialog(core: Core) -> Int64 {
         }
         switch StartPage(core: core, apps: apps, offer: offer, name: name, email: email).run(name: &name, email: &email) {
         case .cancel, .importSetup: return 0
+        case .joined(let account): return account
         case .signIn(let with): return addSignedIn(core: core, with: with, name: name, email: email)
         case .next: break
         }

@@ -444,6 +444,8 @@ impl Shell {
                 main.reader.reload();
                 crate::compose_keys::refresh_all();
             }
+            Event::SettingsSyncReady => crate::sync::ready(),
+            Event::SettingsSyncChanged => crate::sync::changed(),
             // a lookup a window waits for (a contact's Find Key) hears it; a compose window takes its own; a reader's
             // Find Key is the reader's (main.on_event below). The core learned the keys already: the windows that
             // show keys read them again when there were any

@@ -1149,18 +1149,31 @@ try {
         if ($shots -and $warning) { Shot $warning 'account-4-warning' }
         Click $warning 6
     }
-    # before the first account, Add Mail Account offers the settings and accounts of another computer (setup.cpp, app.h
-    # SetupControlId): its push button opens the import, which asks for a file first; cancelled, the page is there again
-    $IDC_SETUP_FIRST_RUN = 956
+    # before the first account, Add Mail Account asks whether there is another computer (accounts.cpp, app.h
+    # SetupControlId, SyncControlId): Join Its Sync opens Set Up Sync, Import from a File the import, which asks for a
+    # file first; cancelled, the page is there again
+    $IDC_SETUP_FIRST_RUN = 956; $IDC_SYNC_FIRST_RUN = 1224
     $start = StartPage $true 20
     $importLink = if ($start) { [Native.Win]::GetDlgItem($start, $IDC_SETUP_FIRST_RUN) } else { [IntPtr]::Zero }
-    Check ($importLink -ne [IntPtr]::Zero -and (WindowText $importLink) -eq 'Import settings and accounts from another computer...') "before the first account, Add Mail Account offers to import settings and accounts from another computer ($(if ($importLink -ne [IntPtr]::Zero) { WindowText $importLink }))"
-    if ($importLink -ne [IntPtr]::Zero) {
+    $joinLink = if ($start) { [Native.Win]::GetDlgItem($start, $IDC_SYNC_FIRST_RUN) } else { [IntPtr]::Zero }
+    Check ($importLink -ne [IntPtr]::Zero -and (WindowText $importLink) -eq $en['ui-first-run-import'] -and $joinLink -ne [IntPtr]::Zero -and (WindowText $joinLink) -eq $en['ui-first-run-sync'] -and (Statics $start) -match [regex]::Escape($en['ui-first-run-other'])) "before the first account, Add Mail Account asks about another computer and offers Join Its Sync and Import from a File ($(if ($joinLink -ne [IntPtr]::Zero) { WindowText $joinLink }), $(if ($importLink -ne [IntPtr]::Zero) { WindowText $importLink }))"
+    if ($joinLink -ne [IntPtr]::Zero) {
         Shot $start 'setup-5-first-run'
-        Check (PushButton $start $IDC_SETUP_FIRST_RUN) 'the import is a push button, which Tab reaches'
+        Check ((PushButton $start $IDC_SYNC_FIRST_RUN) -and (PushButton $start $IDC_SETUP_FIRST_RUN)) 'both are push buttons, which Tab reaches'
+        Click $start $IDC_SYNC_FIRST_RUN
+        $setUp = WaitShown 'InboxClassicSyncSetUp' 20
+        Check ($null -ne $setUp) 'Join Its Sync opens Set Up Sync'
+        if ($setUp) {
+            Click $setUp 2
+            [void](WaitFor { -not [Native.Win]::IsWindow($setUp) } 10)
+        }
+        $start = StartPage $true 20
+        Check ($null -ne $start) 'cancelled, Add Mail Account is there again'
+    }
+    if ($start -and $importLink -ne [IntPtr]::Zero) {
         Click $start $IDC_SETUP_FIRST_RUN
         $open = WaitWindow '#32770' 'Import Settings and Accounts' 40
-        Check ($null -ne $open) 'the button opens the import, which asks for a file'
+        Check ($null -ne $open) 'Import from a File opens the import, which asks for a file'
         if ($open) { Check (CloseDialog $open) 'Cancel closes it' }
         Check ($null -ne (StartPage $true 20)) 'cancelled, Add Mail Account is there again'
     }
@@ -8095,6 +8108,113 @@ public static class Dragger {
         [void](WaitFor { -not [Native.Win]::IsWindow($book) } 10)
     }
 
+    # ---- settings sync ----
+
+    Step 'settings sync'
+    # app/src/app.h (SyncControlId), main.cpp (kTestSyncSecond)
+    $IDM_OPTIONS = 137
+    $IDC_OPTIONS_SYNC_NOTE = 960; $IDC_OPTIONS_SYNC_PLACE = 961; $IDC_OPTIONS_SYNC_STATUS = 962; $IDC_OPTIONS_SYNC_SET_UP = 963
+    $IDC_OPTIONS_SYNC_NOW = 964; $IDC_OPTIONS_SYNC_COMPUTERS = 965; $IDC_OPTIONS_SYNC_HISTORY = 966; $IDC_OPTIONS_SYNC_TURN_OFF = 967
+    $IDC_OPTIONS_SYNC_SWITCH = 970
+    $IDC_SYNC_KIND_FOLDER = 1200; $IDC_SYNC_FOLDER = 1202; $IDC_SYNC_CHOOSE = 1203; $IDC_SYNC_PASSPHRASE = 1211
+    $IDC_SYNC_PASSPHRASE_AGAIN = 1212; $IDC_SYNC_NAME = 1214; $IDC_SYNC_PROBLEM = 1216; $IDC_SYNC_BACK = 1217; $IDC_SYNC_LIST = 1218
+    $IDC_SYNC_EMPTY = 1220; $IDC_SYNC_POINTS_EMPTY = 1223
+    $kTestSyncSecond = 0x53594E43
+    $syncPassphrase = 'correct horse battery staple'
+    $vault = Join-Path $env:TEMP "inbox-classic-vault-$PID"
+    Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $vault
+    [void](New-Item -ItemType Directory -Force $vault)
+    Command $main $IDM_OPTIONS
+    $options = WaitShown 'InboxClassicOptions'
+    Check ($null -ne $options) 'Tools > Options opens'
+    if ($options) {
+        OptionsPage $options 3
+        Check ((Visible $options $IDC_OPTIONS_SYNC_NOTE) -and (Visible $options $IDC_OPTIONS_SYNC_SET_UP) -and -not (Visible $options $IDC_OPTIONS_SYNC_NOW) -and -not (Visible $options $IDC_OPTIONS_SYNC_SWITCH)) 'while sync is off, the Sync tab says what it is for and offers Set Up Sync, nothing else'
+        Shot $options 'sync-1-off'
+
+        # Set Up Sync: a folder, then a new passphrase
+        Click $options $IDC_OPTIONS_SYNC_SET_UP
+        $setUp = WaitShown 'InboxClassicSyncSetUp' 10
+        Check ($null -ne $setUp) 'Set Up Sync opens'
+    }
+    if ($options -and $setUp) {
+        Check ((Visible $setUp $IDC_SYNC_KIND_FOLDER) -and -not (Enabled $setUp 1) -and -not (Visible $setUp $IDC_SYNC_BACK)) 'it asks where to keep it, a folder chosen, Next off until there is one, no Back'
+        Shot $setUp 'sync-2-where'
+        # S3-compatible storage shows the bucket's fields in the folder's place (IDC_SYNC_KIND_BUCKET, IDC_SYNC_ENDPOINT)
+        foreach ($kind in @(@{ On = 1201; Off = 1200 }, @{ On = 1200; Off = 1201 })) {
+            [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($setUp, $kind.Off), 0x00F1, [IntPtr]0, [IntPtr]::Zero)
+            [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($setUp, $kind.On), 0x00F1, [IntPtr]1, [IntPtr]::Zero)
+            Click $setUp $kind.On
+            if ($kind.On -eq 1201) {
+                Check ([bool](WaitFor { (Visible $setUp 1204) -and -not (Visible $setUp $IDC_SYNC_FOLDER) } 5)) 'S3-compatible storage asks for the endpoint, region, bucket, folder and keys in the folder''s place'
+                Shot $setUp 'sync-2b-bucket'
+            }
+        }
+        [void](WaitFor { Visible $setUp $IDC_SYNC_FOLDER } 5)
+        Click $setUp $IDC_SYNC_CHOOSE
+        Check (AnswerFolderDialog 'Choose the Folder to Sync Through' $vault) 'Choose asks for the folder'
+        Check ([bool](WaitFor { (GetText $setUp $IDC_SYNC_FOLDER) -eq $vault -and (Enabled $setUp 1) } 10)) "the folder chosen is in its field, Next on ($(GetText $setUp $IDC_SYNC_FOLDER))"
+        Click $setUp 1
+        Check ([bool](WaitFor { (Visible $setUp $IDC_SYNC_PASSPHRASE_AGAIN) } 20)) 'the folder is empty: it asks for a new sync passphrase, twice'
+        Check ((GetText $setUp $IDC_SYNC_NAME) -ne '' -and (Visible $setUp $IDC_SYNC_BACK) -and -not (Enabled $setUp 1)) "with the name of this computer filled in ($(GetText $setUp $IDC_SYNC_NAME)), Back, and Turn On Sync off until the passphrase is typed"
+        Shot $setUp 'sync-3-start'
+        SetText $setUp $IDC_SYNC_PASSPHRASE $syncPassphrase
+        SetText $setUp $IDC_SYNC_PASSPHRASE_AGAIN $syncPassphrase
+        SetText $setUp $IDC_SYNC_NAME 'Desktop'
+        Check ([bool](WaitFor { Enabled $setUp 1 } 5)) 'typed twice the same, Turn On Sync is on'
+        Click $setUp 1
+        Check ([bool](WaitFor { -not [Native.Win]::IsWindow($setUp) } 20)) "Turn On Sync closes the dialog$(if ([Native.Win]::IsWindow($setUp)) { ': ' + (GetText $setUp $IDC_SYNC_PROBLEM) })"
+        $written = WaitFor { (Test-Path (Join-Path $vault 'vault.json')) -and @(Get-ChildItem -ErrorAction SilentlyContinue (Join-Path $vault 'devices')).Count -eq 1 } 30
+        Check ([bool]$written) 'the first sync writes the vault into the folder'
+        Check ([bool](WaitFor { (Visible $options $IDC_OPTIONS_SYNC_NOW) -and (Visible $options $IDC_OPTIONS_SYNC_SWITCH) -and -not (Visible $options $IDC_OPTIONS_SYNC_SET_UP) } 10)) 'while on, the tab shows where it syncs, how it went, its buttons and what it syncs'
+        Check ((GetText $options $IDC_OPTIONS_SYNC_PLACE) -match 'Desktop' -and (WaitText $options $IDC_OPTIONS_SYNC_STATUS) -ne '') "where it syncs through as which computer, and how it went ($(GetText $options $IDC_OPTIONS_SYNC_PLACE); $(GetText $options $IDC_OPTIONS_SYNC_STATUS))"
+        Start-Sleep -Milliseconds 500
+        Shot $options 'sync-4-on'
+
+        # a second computer (another core in the app, a store of its own) joins with the passphrase and gets the accounts
+        $joined = [Native.Win]::SendText($main, $kTestSyncSecond, "join`t$vault`t$syncPassphrase")
+        Check ($joined -ge 11) "a second computer is refused a wrong passphrase, joins with the right one and gets the accounts ($($joined - 10) accounts)"
+        $added = [Native.Win]::SendText($main, $kTestSyncSecond, "card`tfriend@sync.example")
+        Click $options $IDC_OPTIONS_SYNC_NOW
+        $arrived = WaitFor { [Native.Win]::SendText($main, $kTestSyncSecond, "has`tfriend@sync.example") -eq 11 } 30
+        Check ($added -eq 11 -and [bool]$arrived) 'a contact added on the second computer arrives on Sync Now'
+
+        # the computers of the vault
+        Click $options $IDC_OPTIONS_SYNC_COMPUTERS
+        $computers = WaitShown 'InboxClassicSyncComputers' 10
+        Check ($null -ne $computers) 'Computers opens'
+        if ($computers) {
+            $listed = WaitFor { (Visible $computers $IDC_SYNC_LIST) -and (ListCount ([Native.Win]::GetDlgItem($computers, $IDC_SYNC_LIST))) -eq 2 } 15
+            Check ([bool]$listed) 'Computers lists both'
+            Shot $computers 'sync-5-computers'
+            Click $computers 1
+            [void](WaitFor { -not [Native.Win]::IsWindow($computers) } 5)
+        }
+        Click $options $IDC_OPTIONS_SYNC_HISTORY
+        $history = WaitShown 'InboxClassicSyncHistory' 10
+        Check ($null -ne $history) 'History opens'
+        if ($history) {
+            Check ((Visible $history $IDC_SYNC_EMPTY) -and (GetText $history $IDC_SYNC_EMPTY) -eq $en['ui-sync-history-empty']) "History says no change was replaced ($(GetText $history $IDC_SYNC_EMPTY))"
+            Check (Visible $history $IDC_SYNC_POINTS_EMPTY) 'and that there is no restore point yet'
+            Shot $history 'sync-6-history'
+            Click $history 1
+            [void](WaitFor { -not [Native.Win]::IsWindow($history) } 5)
+        }
+
+        # Turn Off Sync, asked first
+        Click $options $IDC_OPTIONS_SYNC_TURN_OFF
+        $ask = WaitShown 'InboxClassicAsk' 10
+        Check ($ask -and (Statics $ask) -match 'Turn off sync on this computer') "Turn Off Sync asks first ($(if ($ask) { Statics $ask }))"
+        if ($ask) { Click $ask 1 }
+        Check ([bool](WaitFor { (Visible $options $IDC_OPTIONS_SYNC_SET_UP) -and -not (Visible $options $IDC_OPTIONS_SYNC_NOW) } 10)) 'then it is off here, the tab offers Set Up Sync again'
+        [void][Native.Win]::SendText($main, $kTestSyncSecond, 'close')
+    }
+    if ($options) {
+        Click $options 2
+        [void](WaitFor { -not [Native.Win]::IsWindow($options) } 5)
+    }
+    Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $vault
+
     # ---- Options and the language ----
 
     Step 'Options and the language'
@@ -8900,6 +9020,18 @@ public static bool HasIcon(IntPtr window) {
             OptionsPage $options 2
             CheckPseudo $options 'Options, Downloading'
             Shot $options 'lang-4c-pseudo-options-downloading'
+            OptionsPage $options 3
+            CheckPseudo $options 'Options, Sync'
+            Shot $options 'lang-4d-pseudo-options-sync'
+            # Set Up Sync's first step, its longer words (app.h: IDC_OPTIONS_SYNC_SET_UP)
+            Click $options 963
+            $setUp = WaitShown 'InboxClassicSyncSetUp' 10
+            if ($setUp) {
+                CheckPseudo $setUp 'Set Up Sync'
+                Shot $setUp 'lang-4e-pseudo-sync-setup'
+                Click $setUp 2
+                [void](WaitFor { -not [Native.Win]::IsWindow($setUp) } 5)
+            }
             Click $options 2
         }
         [void](WaitFor { -not [Native.Win]::IsWindow($options) } 10)

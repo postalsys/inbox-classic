@@ -448,6 +448,141 @@ ui-settings-encryption = Шифроване
 ui-settings-language = Език
 ui-settings-label = { $label }:
 ui-apply = &Прилагане
+# review: new
+ui-settings-sync = Синхронизиране
+# review: new
+ui-sync-note = Поддържайте акаунтите, ключовете, адресната книга, правилата и настройките си еднакви на всеки компютър чрез папка или хранилище, които са ваши. Всичко се шифрова с фразата ви за достъп за синхронизиране, преди да напусне този компютър.
+# review: new
+ui-sync-place = Синхронизира се чрез:
+# review: new
+ui-sync-status = Състояние:
+# review: new
+ui-sync-set-up = &Настройване на синхронизирането…
+# review: new
+ui-sync-now = Синхронизиране се&га
+# review: new
+ui-sync-computers = Ко&мпютри…
+# review: new
+ui-sync-history = &История…
+# review: new
+ui-sync-turn-off = И&зключване на синхронизирането…
+# review: new
+ui-sync-what = Какво да се синхронизира
+# review: new
+ui-sync-what-note = Паролите, данните за влизане и частните ключове се пренасят само шифровани. Пропуснете това, което трябва да остане само на този компютър.
+# review: new
+ui-sync-accounts = Ака&унти
+# review: new
+ui-sync-passwords = Па&роли
+# review: new
+ui-sync-sign-ins = &Влизане с Google, Microsoft и приложения за влизане
+# review: new
+ui-sync-sign-in-apps = Прил&ожения за влизане
+# review: new
+ui-sync-app-secrets = &Тайни на приложенията за влизане
+# review: new
+ui-sync-contacts = &Адресна книга
+# review: new
+ui-sync-keys = &Ключове
+# review: new
+ui-sync-private-keys = Вашите &частни ключове
+# review: new
+ui-sync-rules = Прави&ла
+# review: new
+ui-sync-trusted = &Доверени податели
+# review: new
+ui-sync-settings = На&стройки
+# review: new
+ui-sync-preferences = Подред&ба и изглед
+# review: new
+ui-sync-everything = Всичко
+# review: new
+ui-sync-some-left-out = Някои неща са пропуснати
+# review: new
+ui-sync-where = Къде да се пази
+# review: new
+ui-sync-folder = Папка
+# review: new
+ui-sync-folder-note = Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud или Syncthing я копира на другите ви компютри.
+# review: new
+ui-sync-bucket = Хранилище, съвместимо с S3
+# review: new
+ui-sync-bucket-note = Amazon S3, Cloudflare R2, Backblaze B2, MinIO или друго хранилище, което работи като S3.
+# review: new
+ui-sync-folder-label = &Папка:
+# review: new
+ui-sync-folder-none = Все още не е избрана
+# review: new
+ui-sync-choose-folder = Из&биране…
+# review: new
+ui-sync-choose-folder-title = Избор на папка за синхронизиране
+# review: new
+ui-sync-endpoint = Крайна &точка:
+# review: new
+ui-sync-region = &Регион:
+# review: new
+ui-sync-bucket-name = Ко&фа:
+# review: new
+ui-sync-prefix = Папка в коф&ата:
+# review: new
+ui-sync-access-key = ИД на &ключа за достъп:
+# review: new
+ui-sync-secret-key = &Секретен ключ за достъп:
+# review: new
+ui-sync-next = &Напред
+# review: new
+ui-sync-join-title = Присъединяване към синхронизирането
+# review: new
+ui-sync-join-note = На това място е синхронизирането на другите ви компютри. Въведете фразата за достъп за синхронизиране, която избрахте на първия от тях.
+# review: new
+ui-sync-start-title = Започване на синхронизирането
+# review: new
+ui-sync-start-note = Изберете фраза за достъп за синхронизиране. Въвеждате я веднъж на всеки компютър, който добавяте. Пазете я на сигурно място: без нея никой друг компютър не може да се присъедини.
+# review: new
+ui-sync-name = &Име на този компютър:
+# review: new
+ui-sync-merge-note = Това, което има този компютър, и това, което има синхронизирането, се обединяват: акаунт или контакт, който е и на двете места, става един.
+# review: new
+ui-sync-turn-on = &Включване на синхронизирането
+# review: new
+ui-sync-on = Синхронизирането е включено.
+# review: new
+ui-sync-turn-off-ask = Да се изключи ли синхронизирането на този компютър? Всичко остава както е, тук и на другите ви компютри. Този компютър просто спира да се синхронизира.
+# review: new
+ui-sync-turn-off-button = Изключване
+# review: new
+ui-sync-computers-title = Компютри
+# review: new
+ui-sync-computers-note = Компютрите, които се синхронизират чрез това място. Премахнете компютъра, който вече не използвате: той спира да се синхронизира, а синхронизираното от него остава.
+# review: new
+ui-sync-this-computer = Този компютър
+# review: new
+ui-sync-seen = Последно синхронизиране: { $when }
+# review: new
+ui-sync-remove-ask = Да се премахне ли компютърът „{ $name }“ от синхронизирането? Той спира да се синхронизира при следващия опит. За да го синхронизирате отново, настройте синхронизирането на него още веднъж.
+# review: new
+ui-sync-loading = Четене…
+# review: new
+ui-sync-history-title = История
+# review: new
+ui-sync-history-note = Когато едно и също нещо е променено на два компютъра по едно и също време, е запазена последно направената промяна, а другата е тук. Възстановете я, ако искате да се използва вместо запазената.
+# review: new
+ui-sync-history-empty = Няма заменени промени.
+# review: new
+ui-sync-history-row = От { $source }, { $when }
+# review: new
+ui-sync-restore = &Възстановяване
+# review: new
+ui-sync-restore-points = Точки за възстановяване
+# review: new
+ui-sync-restore-points-note = Преди синхронизирането да премахне нещо тук, предишното състояние се запазва. Отворете точка за възстановяване, за да върнете от нея това, което изберете.
+# review: new
+ui-sync-restore-points-empty = Все още няма.
+# review: new
+ui-sync-open-point = &Отваряне…
+# Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
+# review: new
+win-sync-back = < На&зад
 ui-language-label = &Език:
 ui-restart-note = Рестартирайте Inbox Classic, за да смените езика.
 ui-restart-ask = Избраният език ({ $language }) ще се използва след рестартиране на Inbox Classic. Да се рестартира ли сега?
@@ -785,6 +920,12 @@ ui-setup-from = Запазено от Inbox Classic { $version } на { $date }.
 ui-setup-import-button = &Импортиране
 ui-setup-done = Готово
 ui-setup-first-run = Импортиране на настройки и акаунти от друг компютър...
+# review: new
+ui-first-run-other = Вече използвате Inbox Classic на друг компютър? Пренесете акаунтите и настройките му тук.
+# review: new
+ui-first-run-sync = Присъединяване към синхронизирането му…
+# review: new
+ui-first-run-import = Импортиране от файл…
 
 ui-field-verifiers = Доверени източници за проверка на подателя:
 ui-attachment-import-key = Импортиране на ключ...

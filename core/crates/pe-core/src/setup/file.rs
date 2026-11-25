@@ -654,7 +654,7 @@ fn too_many<T>(list: &[T], max: usize) -> Result<(), SetupError> {
 }
 
 /// What `document` holds, checked; `encrypted` says whether its secrets count (a file that is not sealed has none)
-fn checked(document: Document, encrypted: bool) -> Result<SetupFile, SetupError> {
+pub(crate) fn checked(document: Document, encrypted: bool) -> Result<SetupFile, SetupError> {
     let created = Some(document.created)
         .filter(|at| (0..=253_402_300_799).contains(at))
         .unwrap_or(0);
@@ -732,7 +732,7 @@ fn left_out(file: &mut SetupFile, part: Parts, count: usize) {
 }
 
 /// A secret of a file that is sealed; a file that is not has none
-fn secret(value: &Option<String>, encrypted: bool) -> Option<Zeroizing<String>> {
+pub(crate) fn secret(value: &Option<String>, encrypted: bool) -> Option<Zeroizing<String>> {
     value
         .as_deref()
         .filter(|secret| encrypted && !secret.is_empty() && secret.len() <= 64 * 1024)

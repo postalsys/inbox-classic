@@ -31,7 +31,8 @@ fn language_of(choice: Option<&str>) -> &'static str {
 pub async fn open(parent: &impl IsA<gtk::Widget>) {
     let dialog = adw::PreferencesDialog::builder()
         .title(t!(GtkPreferences))
-        .content_width(600)
+        // four pages in the view switcher, each label whole in every language
+        .content_width(720)
         .build();
     dialog.set_widget_name("preferences-dialog");
     for page in SettingsPage::ALL {
@@ -84,6 +85,9 @@ fn group_of(group: SettingsGroup) -> adw::PreferencesGroup {
         shown.add(&row);
         rows.push((setting, row));
     }
+    if group == SettingsGroup::SyncWhat {
+        crate::sync::group_built(&shown);
+    }
     shown
 }
 
@@ -111,6 +115,25 @@ fn row_of(setting: Setting) -> gtk::Widget {
         Setting::Keyserver => keyserver_row(setting).upcast(),
         Setting::DownloadAhead => download_ahead_row(setting).upcast(),
         Setting::DownloadLimit => download_limit_row(setting).upcast(),
+        Setting::SyncPlace
+        | Setting::SyncStatus
+        | Setting::SyncSetUp
+        | Setting::SyncNow
+        | Setting::SyncComputers
+        | Setting::SyncHistory
+        | Setting::SyncTurnOff
+        | Setting::SyncAccounts
+        | Setting::SyncPasswords
+        | Setting::SyncSignIns
+        | Setting::SyncSignInApps
+        | Setting::SyncAppSecrets
+        | Setting::SyncContacts
+        | Setting::SyncKeys
+        | Setting::SyncPrivateKeys
+        | Setting::SyncRules
+        | Setting::SyncTrusted
+        | Setting::SyncSettings
+        | Setting::SyncPreferences => crate::sync::row(setting),
     }
 }
 
@@ -119,7 +142,7 @@ pub fn row_name(setting: Setting) -> String {
     format!("preferences-{}", setting.name())
 }
 
-fn name_row(row: &impl IsA<gtk::Widget>, setting: Setting) {
+pub(crate) fn name_row(row: &impl IsA<gtk::Widget>, setting: Setting) {
     row.set_widget_name(&row_name(setting));
 }
 
@@ -261,7 +284,7 @@ fn keyserver_row(setting: Setting) -> adw::SwitchRow {
 }
 
 /// A switch titled by `setting`, its note under it; `changed` is called with each new state
-fn switch_row(setting: Setting, active: bool, changed: impl Fn(bool) + 'static) -> adw::SwitchRow {
+pub(crate) fn switch_row(setting: Setting, active: bool, changed: impl Fn(bool) + 'static) -> adw::SwitchRow {
     let row = adw::SwitchRow::builder()
         .title(plain(setting.text()))
         .active(active)
@@ -276,7 +299,7 @@ fn switch_row(setting: Setting, active: bool, changed: impl Fn(bool) + 'static) 
 
 /// A button row titled by `setting` (without the dots of the menu command it repeats), `pressed` called with the
 /// dialog it is in
-fn button_row(setting: Setting, pressed: impl Fn(adw::PreferencesDialog) + 'static) -> adw::ButtonRow {
+pub(crate) fn button_row(setting: Setting, pressed: impl Fn(adw::PreferencesDialog) + 'static) -> adw::ButtonRow {
     let row = adw::ButtonRow::builder().title(title(setting.text())).build();
     name_row(&row, setting);
     row.connect_activated(move |row| {
@@ -288,7 +311,7 @@ fn button_row(setting: Setting, pressed: impl Fn(adw::PreferencesDialog) + 'stat
 }
 
 /// The preferences dialog `row` is in
-fn dialog_of(row: &impl IsA<gtk::Widget>) -> Option<adw::PreferencesDialog> {
+pub(crate) fn dialog_of(row: &impl IsA<gtk::Widget>) -> Option<adw::PreferencesDialog> {
     row.ancestor(adw::PreferencesDialog::static_type())
         .and_downcast::<adw::PreferencesDialog>()
 }

@@ -717,6 +717,53 @@ setup-error-newer = この設定は、より新しいInbox Classic（{ $version 
 setup-error-needs-passphrase = この設定はパスフレーズで保護されています。保存時に使用したパスフレーズを入力してください。
 setup-error-wrong-passphrase = この設定の保存時に使用されたパスフレーズではありません。
 setup-error-changed = 設定ファイルが整合性チェックに失敗しました。改ざんまたは破損している可能性があるため、インポートできません。
+# review: new
+sync-wrong-passphrase = この保管庫の同期パスフレーズではありません。最初のコンピューターで同期を設定したときに決めたパスフレーズを入力してください。
+# review: new
+sync-place = { $place }（「{ $name }」として）
+# review: new
+sync-news-removed = { $count ->
+   *[other] ほかのコンピューターで削除されたため、同期によってアカウント{ $accounts }が削除されました。
+}
+# review: new
+sync-news-lost = { $count ->
+    [1] 別のコンピューターで同時に行われた変更が、このコンピューターでの変更に置き換えられました。その変更は同期の履歴に保存されています。
+   *[other] ほかのコンピューターで同時に行われた{ $count }件の変更が、このコンピューターでの変更に置き換えられました。それらの変更は同期の履歴に保存されています。
+}
+# review: new
+sync-status-busy = 同期中…
+# review: new
+sync-status-never = まだ同期されていません。
+# review: new
+sync-status-last = 最終同期：{ $when }
+# review: new
+sync-status-today = 最終同期：今日の{ $time }
+# review: new
+sync-when-today = 今日の{ $time }
+# review: new
+sync-status-problem = 同期できませんでした：{ $problem }
+# review: new
+sync-removed-here = このコンピューターは、別のコンピューターで同期から削除されました。参加するには、同期をオフにしてから、もう一度設定してください。
+# review: new
+sync-item-account = アカウント{ $name }
+# review: new
+sync-item-contact = 連絡先{ $name }
+# review: new
+sync-item-group = グループ{ $name }
+# review: new
+sync-item-key = キー{ $name }
+# review: new
+sync-item-rule = ルール{ $name }
+# review: new
+sync-item-trusted = 信頼できる送信者{ $name }
+# review: new
+sync-item-sign-in-app = サインイン アプリ{ $name }
+# review: new
+sync-item-settings = 設定
+# review: new
+sync-another-computer = 別のコンピューター
+# review: new
+sync-no-key = このコンピューターには、同期の保管庫のキーがなくなりました。同期パスフレーズを使って、同期をいったんオフにしてからもう一度オンにしてください。
 setup-error-read = 設定ファイルを読み取れませんでした：{ $error }
 setup-error-write = 設定を保存できませんでした：{ $error }
 setup-error-no-parts = 1つ以上の項目を選択してください。

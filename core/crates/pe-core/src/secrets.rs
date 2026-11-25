@@ -15,6 +15,12 @@ pub(crate) enum Key {
     App(SignInAppId),
     /// The master key that wraps the private OpenPGP keys (keys.rs)
     Pgp,
+    /// Settings sync's vault key, base64 (sync)
+    Vault,
+    /// The secret access key of the S3 bucket settings sync uses
+    SyncBucket,
+    /// The passphrase settings sync's restore points are sealed with
+    RestorePoints,
 }
 
 impl From<AccountId> for Key {
@@ -91,6 +97,9 @@ mod native {
                 Key::Account(account) => format!("{}/{account}", self.profile),
                 Key::App(app) => format!("{}/app/{app}", self.profile),
                 Key::Pgp => format!("{}/pgp", self.profile),
+                Key::Vault => format!("{}/sync", self.profile),
+                Key::SyncBucket => format!("{}/sync-bucket", self.profile),
+                Key::RestorePoints => format!("{}/restore-points", self.profile),
             };
             self.store.build("InboxClassic", &name, None).ok()
         }

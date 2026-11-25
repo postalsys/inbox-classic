@@ -45,7 +45,8 @@ extension UITest {
               "then the languages by their own names (\(titles.dropFirst().joined(separator: ", ")))")
         check(shown.notify.title == Text.uiNotifyNewMail.text, "Notify of New Mail is there too")
         let panes = settings.toolbar?.items.map(\.label) ?? []
-        check(panes == [Text.uiSettingsGeneral.text, Text.uiSettingsReading.text, Text.uiDownloadHeading.text], "the toolbar has the panes General, Reading and Downloading (\(panes))")
+        check(panes == [Text.uiSettingsGeneral.text, Text.uiSettingsReading.text, Text.uiDownloadHeading.text, Text.uiSettingsSync.text],
+              "the toolbar has the panes General, Reading, Downloading and Sync (\(panes))")
         // the pane chosen last is the dark messages step's Reading
         check(shown.pane == .reading && settings.title == Text.uiSettingsReading.text, "it opens on the pane chosen last, titled by it (\(settings.title))")
         await showPane(shown, .general)
@@ -140,7 +141,7 @@ extension UITest {
         command(.options)
         if let options = await waitFor(10, { SettingsWindow.current }) {
             for (page, name) in [(SettingsPage.general, "lang-4-pseudo-options"), (.reading, "lang-4b-pseudo-options-reading"),
-                                 (.downloading, "lang-4c-pseudo-options-downloading")] {
+                                 (.downloading, "lang-4c-pseudo-options-downloading"), (.sync, "lang-4d-pseudo-options-sync")] {
                 await showPane(options, page)
                 await shot(options.window, name)
                 checkCatalogWords(in: options.window, "Settings, \(page.rawValue)")

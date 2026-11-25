@@ -1,0 +1,20 @@
+<!--review--><h1>Arvutite sünkroonimine</h1>
+<p class="summary">Hoidke oma kontod, võtmed, kontaktid, reeglid ja seaded kõigis arvutites ühesugused, kasutades teile kuuluvat kausta või salvestusruumi.</p>
+<p>Sünkroonimine hoiab teie seadistuse hoidlat teie valitud kohas: kaustas, mida Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud või Syncthing teie arvutite vahel kopeerib, või S3-ga ühilduvas salvestusruumis. Kõik hoidlas olev krüpteeritakse teie sünkroonimisparooliga enne, kui see arvutist lahkub. Teie kirju hoidlas pole, need jäävad teie meiliserveritesse.</p>
+<h2>Sünkroonimise seadistamine esimeses arvutis</h2>
+<ol>
+    <li>Avage seadetes <b data-settings="sync"></b> ja klõpsake nuppu <b data-text="ui-sync-set-up"></b>.</li>
+    <li>Valige <b data-text="ui-sync-folder"></b> ja klõpsake nuppu <b data-text="ui-sync-choose-folder"></b> või valige <b data-text="ui-sync-bucket"></b> ja sisestage selle andmed. Klõpsake nuppu <b data-text="ui-sync-next"></b>.</li>
+    <li>Sisestage sünkroonimisparool kaks korda ja selle arvuti nimi. Valige, mida sünkroonida, ja klõpsake nuppu <b data-text="ui-sync-turn-on"></b>.</li>
+</ol>
+<aside class="warning">Hoidke sünkroonimisparooli turvalises kohas. Ilma selleta ei saa ükski teine arvuti liituda.</aside>
+<h2>Teise arvuti lisamine</h2>
+<ol>
+    <li>Avage teises arvutis seadetes <b data-settings="sync"></b>, klõpsake nuppu <b data-text="ui-sync-set-up"></b> ja valige sama kaust või salvestusruum.</li>
+    <li>Sisestage sünkroonimisparool, mille valisite esimeses arvutis, ja klõpsake nuppu <b data-text="ui-sync-turn-on"></b>.</li>
+</ol>
+<p>Arvutis juba olevad andmed ja sünkroonimise andmed ühendatakse: konto või kontakt, mis on mõlemas, muutub üheks. Teie kirjad laaditakse serveritest uuesti alla.</p>
+<h2>Sünkroonimise ajal</h2>
+<p>Iga arvuti sünkroonib iga paari minuti järel ja siis, kui klõpsate nuppu <b data-text="ui-sync-now"></b>. Kui sama asja muudeti kahes arvutis samal ajal, jäetakse alles viimasena tehtud muudatus ja teine läheb aknasse <b data-text="ui-sync-history"></b>, kus saate selle taastada. Kui teine arvuti eemaldab konto, annab peaaken sellest teada.</p>
+<p>Arvuti, mida te enam ei kasuta, sünkroonimise lõpetamiseks klõpsake nuppu <b data-text="ui-sync-computers"></b> ja eemaldage see. Selle arvuti sünkroonimise lõpetamiseks klõpsake nuppu <b data-text="ui-sync-turn-off"></b>: kõik jääb nii, nagu on.</p>
+<nav class="related"><a href="topic:move-computer"></a> <a href="topic:manage-accounts"></a> <a href="topic:encryption-keys"></a></nav><!--/review-->

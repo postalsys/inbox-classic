@@ -232,6 +232,13 @@ pub struct PeSetupExport {
     prefs: Vec<(String, String)>,
 }
 
+impl PeSetupExport {
+    /// The app preferences handed in
+    pub(crate) fn prefs(&self) -> &[(String, String)] {
+        &self.prefs
+    }
+}
+
 /// A new export of `parts` (`PE_SETUP_*` flags), without a passphrase
 #[unsafe(no_mangle)]
 pub extern "C" fn pe_setup_export_new(parts: u32) -> *mut PeSetupExport {
@@ -409,7 +416,7 @@ pub struct PeSetupFile {
     _strings: Strings,
 }
 
-fn file_handle(file: SetupFile) -> PeSetupFile {
+pub(crate) fn file_handle(file: SetupFile) -> PeSetupFile {
     let mut strings = Strings::default();
     let info = PeSetupInfo {
         encrypted: file.encrypted,

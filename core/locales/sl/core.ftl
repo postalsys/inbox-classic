@@ -1020,6 +1020,58 @@ setup-error-newer = Datoteko z nastavitvami je shranila novejša različica prog
 setup-error-needs-passphrase = Datoteka z nastavitvami je zaščitena z zaščitnim geslom. Vnesite geslo, s katerim je bila shranjena.
 setup-error-wrong-passphrase = To ni zaščitno geslo, s katerim je bila shranjena datoteka z nastavitvami.
 setup-error-changed = Celovitosti datoteke z nastavitvami ni bilo mogoče potrditi. Morda je spremenjena ali poškodovana, zato je ni mogoče uvoziti.
+# review: new
+sync-wrong-passphrase = To ni zaščitno geslo za sinhronizacijo tega trezorja. Vnesite tisto, ki ste ga izbrali, ko ste nastavili sinhronizacijo v prvem računalniku.
+# review: new
+sync-place = { $place }, kot »{ $name }«
+# review: new
+sync-news-removed = { $count ->
+    [1] Sinhronizacija je odstranila račun, ker je bil odstranjen v drugem računalniku: { $accounts }.
+    [2] Sinhronizacija je odstranila računa, ker sta bila odstranjena v drugem računalniku: { $accounts }.
+   *[other] Sinhronizacija je odstranila račune, ker so bili odstranjeni v drugem računalniku: { $accounts }.
+}
+# review: new
+sync-news-lost = { $count ->
+    [1] Sprememba, narejena hkrati v drugem računalniku, je bila nadomeščena s spremembo, narejeno tukaj. Zgodovina sinhronizacije jo hrani.
+    [one] { $count } sprememba, narejena hkrati v drugih računalnikih, je bila nadomeščena s tukajšnjo. Zgodovina sinhronizacije jo hrani.
+    [two] { $count } spremembi, narejeni hkrati v drugih računalnikih, sta bili nadomeščeni s tukajšnjima. Zgodovina sinhronizacije ju hrani.
+    [few] { $count } spremembe, narejene hkrati v drugih računalnikih, so bile nadomeščene s tukajšnjimi. Zgodovina sinhronizacije jih hrani.
+   *[other] { $count } sprememb, narejenih hkrati v drugih računalnikih, je bilo nadomeščenih s tukajšnjimi. Zgodovina sinhronizacije jih hrani.
+}
+# review: new
+sync-status-busy = Sinhroniziranje…
+# review: new
+sync-status-never = Še ni sinhronizirano.
+# review: new
+sync-status-last = Zadnja sinhronizacija: { $when }.
+# review: new
+sync-status-today = Zadnja sinhronizacija: danes ob { $time }.
+# review: new
+sync-when-today = danes ob { $time }
+# review: new
+sync-status-problem = Sinhronizacija ni uspela: { $problem }
+# review: new
+sync-removed-here = Ta računalnik je bil odstranjen iz sinhronizacije v drugem računalniku. Izklopite sinhronizacijo in jo nato znova nastavite, da se pridružite.
+# review: new
+sync-item-account = Račun { $name }
+# review: new
+sync-item-contact = Stik { $name }
+# review: new
+sync-item-group = Skupina { $name }
+# review: new
+sync-item-key = Ključ { $name }
+# review: new
+sync-item-rule = Pravilo { $name }
+# review: new
+sync-item-trusted = Zaupanja vreden pošiljatelj { $name }
+# review: new
+sync-item-sign-in-app = Aplikacija za prijavo { $name }
+# review: new
+sync-item-settings = Nastavitve
+# review: new
+sync-another-computer = drug računalnik
+# review: new
+sync-no-key = Ta računalnik nima več ključa trezorja za sinhronizacijo. Izklopite sinhronizacijo in jo znova vklopite z zaščitnim geslom za sinhronizacijo.
 setup-error-read = Datoteke z nastavitvami ni bilo mogoče prebrati: { $error }
 setup-error-write = Datoteke z nastavitvami ni bilo mogoče shraniti: { $error }
 setup-error-no-parts = Izberite vsaj eno kategorijo podatkov.

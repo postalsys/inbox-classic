@@ -447,6 +447,141 @@ ui-settings-encryption = Šifrování
 ui-settings-language = Jazyk
 ui-settings-label = { $label }:
 ui-apply = &Použít
+# review: new
+ui-settings-sync = Synchronizace
+# review: new
+ui-sync-note = Udržujte účty, klíče, Adresář, pravidla a nastavení stejné na každém počítači, a to přes složku nebo úložiště, které vlastníte. Vše se zašifruje vaší heslovou frází synchronizace dříve, než opustí tento počítač.
+# review: new
+ui-sync-place = Synchronizováno přes:
+# review: new
+ui-sync-status = Stav:
+# review: new
+ui-sync-set-up = &Nastavit synchronizaci…
+# review: new
+ui-sync-now = Synchronizovat n&yní
+# review: new
+ui-sync-computers = Počíta&če…
+# review: new
+ui-sync-history = &Historie…
+# review: new
+ui-sync-turn-off = &Vypnout synchronizaci…
+# review: new
+ui-sync-what = Co synchronizovat
+# review: new
+ui-sync-what-note = Hesla, přihlášení a soukromé klíče se přenášejí jen zašifrované. Vynechte, co má zůstat jen v tomto počítači.
+# review: new
+ui-sync-accounts = Úč&ty
+# review: new
+ui-sync-passwords = Hes&la
+# review: new
+ui-sync-sign-ins = Př&ihlášení přes Google, Microsoft a přihlašovací aplikace
+# review: new
+ui-sync-sign-in-apps = Přihlašovací &aplikace
+# review: new
+ui-sync-app-secrets = Ta&jné kódy přihlašovacích aplikací
+# review: new
+ui-sync-contacts = A&dresář
+# review: new
+ui-sync-keys = &Klíče
+# review: new
+ui-sync-private-keys = Vaše &soukromé klíče
+# review: new
+ui-sync-rules = P&ravidla
+# review: new
+ui-sync-trusted = Důvěryhodní &odesílatelé
+# review: new
+ui-sync-settings = Nastav&ení
+# review: new
+ui-sync-preferences = Rozvržení a &zobrazení
+# review: new
+ui-sync-everything = Vše
+# review: new
+ui-sync-some-left-out = Něco je vynecháno
+# review: new
+ui-sync-where = Kam ukládat
+# review: new
+ui-sync-folder = Složka
+# review: new
+ui-sync-folder-note = Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud nebo Syncthing ji zkopíruje na vaše další počítače.
+# review: new
+ui-sync-bucket = Úložiště kompatibilní s S3
+# review: new
+ui-sync-bucket-note = Amazon S3, Cloudflare R2, Backblaze B2, MinIO nebo jiné úložiště, které funguje jako S3.
+# review: new
+ui-sync-folder-label = &Složka:
+# review: new
+ui-sync-folder-none = Zatím nevybrána
+# review: new
+ui-sync-choose-folder = &Vybrat…
+# review: new
+ui-sync-choose-folder-title = Vyberte složku pro synchronizaci
+# review: new
+ui-sync-endpoint = &Koncový bod:
+# review: new
+ui-sync-region = &Oblast:
+# review: new
+ui-sync-bucket-name = &Bucket:
+# review: new
+ui-sync-prefix = Složka v b&ucketu:
+# review: new
+ui-sync-access-key = &ID přístupového klíče:
+# review: new
+ui-sync-secret-key = &Tajný přístupový klíč:
+# review: new
+ui-sync-next = &Další
+# review: new
+ui-sync-join-title = Připojit se k synchronizaci
+# review: new
+ui-sync-join-note = Na tomto místě je synchronizace vašich dalších počítačů. Zadejte heslovou frázi synchronizace, kterou jste zvolili na prvním z nich.
+# review: new
+ui-sync-start-title = Spustit synchronizaci
+# review: new
+ui-sync-start-note = Zvolte heslovou frázi synchronizace. Zadáte ji jednou na každém počítači, který přidáte. Uložte si ji na bezpečné místo: bez ní se žádný další počítač nepřipojí.
+# review: new
+ui-sync-name = &Název tohoto počítače:
+# review: new
+ui-sync-merge-note = Co má tento počítač a co obsahuje synchronizace, se spojí: účet nebo kontakt, který je na obou místech, bude jen jeden.
+# review: new
+ui-sync-turn-on = Za&pnout synchronizaci
+# review: new
+ui-sync-on = Synchronizace je zapnutá.
+# review: new
+ui-sync-turn-off-ask = Vypnout synchronizaci v tomto počítači? Vše zůstane, jak je, zde i na vašich dalších počítačích. Tento počítač se jen přestane synchronizovat.
+# review: new
+ui-sync-turn-off-button = Vypnout
+# review: new
+ui-sync-computers-title = Počítače
+# review: new
+ui-sync-computers-note = Počítače, které se synchronizují přes toto místo. Odeberte ten, který už nepoužíváte: přestane se synchronizovat a to, co synchronizoval, zůstane.
+# review: new
+ui-sync-this-computer = Tento počítač
+# review: new
+ui-sync-seen = Naposledy synchronizováno: { $when }
+# review: new
+ui-sync-remove-ask = Odebrat počítač „{ $name }“ ze synchronizace? Při příštím pokusu se přestane synchronizovat. Chcete-li jej znovu synchronizovat, nastavte na něm synchronizaci znovu.
+# review: new
+ui-sync-loading = Načítání…
+# review: new
+ui-sync-history-title = Historie
+# review: new
+ui-sync-history-note = Když byla stejná věc změněna na dvou počítačích současně, zůstala změna provedená jako poslední a ta druhá je zde. Obnovte ji, chcete-li místo toho použít ji.
+# review: new
+ui-sync-history-empty = Žádné změny nebyly nahrazeny.
+# review: new
+ui-sync-history-row = Zdroj: { $source }, { $when }
+# review: new
+ui-sync-restore = Obno&vit
+# review: new
+ui-sync-restore-points = Body obnovení
+# review: new
+ui-sync-restore-points-note = Než synchronizace něco v tomto počítači odebere, uloží se předchozí stav. Otevřete bod obnovení a vraťte z něj, co si vyberete.
+# review: new
+ui-sync-restore-points-empty = Zatím žádné.
+# review: new
+ui-sync-open-point = &Otevřít…
+# Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
+# review: new
+win-sync-back = < &Zpět
 ui-language-label = &Jazyk:
 ui-restart-note = Jazyk se změní po restartu Inbox Classic.
 ui-restart-ask = Vybraný jazyk ({ $language }) se použije po restartu aplikace Inbox Classic. Restartovat hned?
@@ -792,6 +927,12 @@ ui-setup-from = Uloženo aplikací Inbox Classic { $version } dne { $date }.
 ui-setup-import-button = &Importovat
 ui-setup-done = Hotovo
 ui-setup-first-run = Importovat nastavení a účty z jiného počítače...
+# review: new
+ui-first-run-other = Už používáte Inbox Classic na jiném počítači? Přeneste sem jeho účty a nastavení.
+# review: new
+ui-first-run-sync = Připojit se k jeho synchronizaci…
+# review: new
+ui-first-run-import = Importovat ze souboru…
 
 ui-field-verifiers = Důvěryhodné zdroje ověření odesílatele:
 ui-attachment-import-key = Importovat klíč...

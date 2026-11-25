@@ -1,0 +1,20 @@
+<!--review--><h1>同步您的電腦</h1>
+<p class="summary">透過您自己的資料夾或儲存空間，讓每部電腦上的帳戶、金鑰、連絡人、規則和設定保持一致。</p>
+<p>同步會在您選擇的位置保存一個包含您設定的保管庫：可以是 Dropbox、OneDrive、iCloud Drive、Google Drive、Nextcloud 或 Syncthing 在您的電腦之間複製的資料夾，也可以是 S3 相容儲存空間。其中的所有內容在離開電腦之前，都會以您的同步密語加密。您的郵件不在其中，它們會保留在您的郵件伺服器上。</p>
+<h2>在第一部電腦上設定同步</h2>
+<ol>
+    <li>開啟<b data-settings="sync"></b>，然後按一下<b data-text="ui-sync-set-up"></b>。</li>
+    <li>選擇<b data-text="ui-sync-folder"></b>並按一下<b data-text="ui-sync-choose-folder"></b>，或選擇<b data-text="ui-sync-bucket"></b>並填寫其詳細資料。按一下<b data-text="ui-sync-next"></b>。</li>
+    <li>輸入兩次同步密語，並輸入這部電腦的名稱。選擇要同步的項目，然後按一下<b data-text="ui-sync-turn-on"></b>。</li>
+</ol>
+<aside class="warning">請將同步密語保存在安全的地方。沒有它，其他電腦就無法加入。</aside>
+<h2>新增另一部電腦</h2>
+<ol>
+    <li>在另一部電腦上，開啟<b data-settings="sync"></b>，按一下<b data-text="ui-sync-set-up"></b>，然後選擇同一個資料夾或儲存空間。</li>
+    <li>輸入您在第一部電腦上選擇的同步密語，然後按一下<b data-text="ui-sync-turn-on"></b>。</li>
+</ol>
+<p>這部電腦上已有的項目和同步中的項目會合併：兩邊都有的帳戶或連絡人會合為一個。您的郵件會從伺服器重新下載。</p>
+<h2>同步期間</h2>
+<p>每部電腦每隔幾分鐘同步一次，在您按一下<b data-text="ui-sync-now"></b>時也會同步。當同一個項目在兩部電腦上同時被變更時，會保留最後做出的變更，另一個變更會移到<b data-text="ui-sync-history"></b>，您可以在那裡還原它。當另一部電腦移除帳戶時，主視窗會顯示相關訊息。</p>
+<p>若要停止同步一部您不再使用的電腦，請按一下<b data-text="ui-sync-computers"></b>並將它移除。若要停止同步這部電腦，請按一下<b data-text="ui-sync-turn-off"></b>：所有項目都會維持原狀。</p>
+<nav class="related"><a href="topic:move-computer"></a> <a href="topic:manage-accounts"></a> <a href="topic:encryption-keys"></a></nav><!--/review-->

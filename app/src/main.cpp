@@ -552,6 +552,28 @@ void AskPassword(int64_t account) {
     }
 }
 
+// the app preferences an import or a sync brought, set (below)
+void ApplySetupPrefs(HWND owner, const std::vector<SetupPref>& prefs);
+
+// SettingsSyncChanged: Options' Sync tab and the sync windows show it; what the syncs brought taken, the app
+// preferences another computer changed set as an import sets them, the notice said in the status bar
+void SyncChanged() {
+    OptionsSyncChanged();
+    SyncWindowsChanged();
+    using News = std::unique_ptr<PeSyncNews, core::Deleter<pe_settings_sync_news_free>>;
+    News news(pe_settings_sync_news(g_core.get()));
+    std::vector<SetupPref> prefs;
+    for (size_t i = 0; i < pe_settings_sync_news_prefs_count(news.get()); i++) {
+        const PeSyncPref* pref = pe_settings_sync_news_pref(news.get(), i);
+        prefs.push_back({pref->name ? pref->name : "", pref->value ? pref->value : "", false});
+    }
+    ApplySetupPrefs(g_main, prefs);
+    std::wstring notice = Text(pe_settings_sync_news_notice(news.get()));
+    if (!notice.empty()) {
+        SetStatus(notice);
+    }
+}
+
 void OnEvent(const UiEvent& event) {
     // the picture of a preview, for the page that asked for it: nothing else changed
     if (event.kind == PE_EVENT_KIND_PREVIEW_ANSWERED) {
@@ -651,6 +673,15 @@ void OnEvent(const UiEvent& event) {
     case PE_EVENT_KIND_RULES_APPLIED:
         g_rulesSaid = core::T(PE_TEXT_UI_RULES_APPLIED, {{"count", std::to_wstring(event.count)}});
         SetSyncStatus(g_rulesSaid, true);
+        break;
+    case PE_EVENT_KIND_SETTINGS_SYNC_READY: {
+        // what the others wrote applied here and what changed here sent, with the app preferences as they are now
+        core::SetupExport prefs = AppPrefsExport();
+        pe_settings_sync_continue(g_core.get(), prefs.get());
+        break;
+    }
+    case PE_EVENT_KIND_SETTINGS_SYNC_CHANGED:
+        SyncChanged();
         break;
     case PE_EVENT_KIND_TRANSFERRING:
         // how far messages going to another account are, and what was done once they all went; how far a large
@@ -1613,6 +1644,17 @@ void ApplySetupPrefs(HWND owner, const std::vector<SetupPref>& prefs) {
 
 }  // namespace
 
+void ImportRestorePoint(HWND owner, core::SetupFile file) {
+    SetupImported imported = ImportSetupFile(owner, g_core.get(), std::move(file));
+    if (imported.imported) {
+        ApplySetupPrefs(owner, imported.prefs);
+    }
+}
+
+void SayInStatusBar(const std::wstring& text) {
+    SetStatus(text);
+}
+
 int64_t ImportSetup(HWND owner) {
     SetupImported imported = ImportSetupDialog(owner, g_core.get());
     if (!imported.imported) {
@@ -1692,6 +1734,8 @@ constexpr ULONG_PTR kTestPdfCrashed = 0x50444643;
 constexpr ULONG_PTR kTestDeep = 0x44454550;
 // with --test-hooks only: the newest Print window's look at its page (TestPrint, the text to find in it)
 constexpr ULONG_PTR kTestPrint = 0x50524E54;
+// with --test-hooks only: the second computer of settings sync (TestSyncSecond, its request the text)
+constexpr ULONG_PTR kTestSyncSecond = 0x53594E43;
 // the link it handed over, opened once WM_COPYDATA returned
 constexpr UINT WM_OPEN_MAILTO = WM_APP + 61;
 std::wstring g_pendingMailto;
@@ -2177,6 +2221,9 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         if (g_arguments.testHooks && data->dwData == kTestPrint && data->cbData % sizeof(wchar_t) == 0) {
             return static_cast<LRESULT>(TestPrint(std::wstring(static_cast<const wchar_t*>(data->lpData), data->cbData / sizeof(wchar_t))));
+        }
+        if (g_arguments.testHooks && data->dwData == kTestSyncSecond && data->cbData % sizeof(wchar_t) == 0) {
+            return TestSyncSecond(g_core.get(), std::wstring(static_cast<const wchar_t*>(data->lpData), data->cbData / sizeof(wchar_t)));
         }
         if (g_arguments.testHooks && data->dwData == kTestPdfCrashed) {
             return pe_pdf_previews_crashed_for_tests(g_core.get()) ? 1 : 0;

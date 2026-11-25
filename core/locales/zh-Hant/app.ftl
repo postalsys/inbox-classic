@@ -447,6 +447,141 @@ ui-settings-language = 語言
 # a group's title as the label before its first control, in the Mac's panes: the colon as the language writes it
 ui-settings-label = { $label }：
 ui-apply = 套用(&A)
+# review: new
+ui-settings-sync = 同步
+# review: new
+ui-sync-note = 透過您自己的資料夾或儲存空間，讓每部電腦上的帳戶、金鑰、通訊錄、規則和設定保持一致。所有內容在離開這部電腦之前，都會以您的同步密語加密。
+# review: new
+ui-sync-place = 同步位置：
+# review: new
+ui-sync-status = 狀態：
+# review: new
+ui-sync-set-up = 設定同步(&S)...
+# review: new
+ui-sync-now = 立即同步(&N)
+# review: new
+ui-sync-computers = 電腦(&M)...
+# review: new
+ui-sync-history = 歷程記錄(&H)...
+# review: new
+ui-sync-turn-off = 關閉同步(&T)...
+# review: new
+ui-sync-what = 要同步的項目
+# review: new
+ui-sync-what-note = 密碼、登入資訊和私密金鑰只會以加密形式傳輸。請取消選取應該只留在這部電腦上的項目。
+# review: new
+ui-sync-accounts = 帳戶(&O)
+# review: new
+ui-sync-passwords = 密碼(&W)
+# review: new
+ui-sync-sign-ins = 透過 Google、Microsoft 和登入應用程式的登入(&I)
+# review: new
+ui-sync-sign-in-apps = 登入應用程式(&P)
+# review: new
+ui-sync-app-secrets = 登入應用程式的用戶端密碼(&C)
+# review: new
+ui-sync-contacts = 通訊錄(&D)
+# review: new
+ui-sync-keys = 金鑰(&K)
+# review: new
+ui-sync-private-keys = 您的私密金鑰(&R)
+# review: new
+ui-sync-rules = 規則(&U)
+# review: new
+ui-sync-trusted = 信任的寄件者(&E)
+# review: new
+ui-sync-settings = 設定(&G)
+# review: new
+ui-sync-preferences = 版面配置與檢視(&V)
+# review: new
+ui-sync-everything = 全部
+# review: new
+ui-sync-some-left-out = 部分項目未同步
+# review: new
+ui-sync-where = 存放位置
+# review: new
+ui-sync-folder = 資料夾
+# review: new
+ui-sync-folder-note = 由 Dropbox、OneDrive、iCloud Drive、Google Drive、Nextcloud 或 Syncthing 將它複製到您的其他電腦。
+# review: new
+ui-sync-bucket = S3 相容儲存空間
+# review: new
+ui-sync-bucket-note = Amazon S3、Cloudflare R2、Backblaze B2、MinIO 或其他與 S3 運作方式相同的儲存空間。
+# review: new
+ui-sync-folder-label = 資料夾(&F)：
+# review: new
+ui-sync-folder-none = 尚未選擇
+# review: new
+ui-sync-choose-folder = 選擇(&C)...
+# review: new
+ui-sync-choose-folder-title = 選擇用於同步的資料夾
+# review: new
+ui-sync-endpoint = 端點(&E)：
+# review: new
+ui-sync-region = 區域(&R)：
+# review: new
+ui-sync-bucket-name = 儲存貯體(&B)：
+# review: new
+ui-sync-prefix = 儲存貯體中的資料夾(&U)：
+# review: new
+ui-sync-access-key = 存取金鑰 ID(&A)：
+# review: new
+ui-sync-secret-key = 私密存取金鑰(&S)：
+# review: new
+ui-sync-next = 下一步(&N)
+# review: new
+ui-sync-join-title = 加入同步
+# review: new
+ui-sync-join-note = 這個位置存放著您其他電腦的同步資料。請輸入您在第一部電腦上選擇的同步密語。
+# review: new
+ui-sync-start-title = 開始同步
+# review: new
+ui-sync-start-note = 請選擇一個同步密語。您新增的每部電腦都需要輸入一次。請將它保存在安全的地方：沒有它，其他電腦就無法加入。
+# review: new
+ui-sync-name = 這部電腦的名稱(&N)：
+# review: new
+ui-sync-merge-note = 這部電腦上已有的項目和同步中的項目會合併：兩邊都有的帳戶或連絡人會合為一個。
+# review: new
+ui-sync-turn-on = 開啟同步(&T)
+# review: new
+ui-sync-on = 同步已開啟。
+# review: new
+ui-sync-turn-off-ask = 要在這部電腦上關閉同步嗎？這裡和您其他電腦上的所有項目都會維持原狀，只是這部電腦不再同步。
+# review: new
+ui-sync-turn-off-button = 關閉
+# review: new
+ui-sync-computers-title = 電腦
+# review: new
+ui-sync-computers-note = 透過這個位置同步的電腦。移除您不再使用的電腦：它會停止同步，它已同步的項目會保留。
+# review: new
+ui-sync-this-computer = 這部電腦
+# review: new
+ui-sync-seen = 上次同步：{ $when }
+# review: new
+ui-sync-remove-ask = 要將「{ $name }」從同步中移除嗎？它會在下次嘗試同步時停止同步。若要再次同步，請在該電腦上重新設定同步。
+# review: new
+ui-sync-loading = 正在讀取...
+# review: new
+ui-sync-history-title = 歷程記錄
+# review: new
+ui-sync-history-note = 當同一個項目在兩部電腦上同時被變更時，會保留最後做出的變更，另一個變更則保存在這裡。還原它即可改用它。
+# review: new
+ui-sync-history-empty = 沒有被取代的變更。
+# review: new
+ui-sync-history-row = 來自{ $source }，{ $when }
+# review: new
+ui-sync-restore = 還原(&R)
+# review: new
+ui-sync-restore-points = 還原點
+# review: new
+ui-sync-restore-points-note = 在同步從這裡移除任何項目之前，會先儲存當時的狀態。開啟一個還原點，即可從中取回您選擇的項目。
+# review: new
+ui-sync-restore-points-empty = 尚無。
+# review: new
+ui-sync-open-point = 開啟(&O)...
+# Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
+# review: new
+win-sync-back = < 上一步(&B)
 ui-language-label = 語言(&L)：
 ui-restart-note = 重新啟動 Inbox Classic 即可變更語言。
 ui-restart-ask = Inbox Classic 重新啟動後會以{ $language }顯示。要立即重新啟動嗎？
@@ -763,6 +898,12 @@ ui-setup-from = 由 Inbox Classic { $version }於{ $date }儲存。
 ui-setup-import-button = 匯入(&I)
 ui-setup-done = 完成
 ui-setup-first-run = 從另一部電腦匯入設定與帳戶...
+# review: new
+ui-first-run-other = 已經在另一部電腦上使用 Inbox Classic 嗎？將它的帳戶和設定帶到這裡。
+# review: new
+ui-first-run-sync = 加入它的同步...
+# review: new
+ui-first-run-import = 從檔案匯入...
 
 ui-field-verifiers = 信任下列伺服器的寄件者檢查結果：
 ui-attachment-import-key = 匯入金鑰...

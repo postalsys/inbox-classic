@@ -297,7 +297,27 @@ struct OptionsState {
     std::array<std::vector<std::wstring>, PE_SETTING_COUNT> items;
     // the height of a drop-down list in the dialog font, which its label is centered on
     int comboHeight = 0;
+    // settings sync: on, and the Sync tab's controls shown only while it is on, or only while it is off
+    bool syncOn = false;
+    std::vector<HWND> syncOnOnly;
+    std::vector<HWND> syncOffOnly;
 };
+
+using SyncState = std::unique_ptr<PeSyncStateHandle, core::Deleter<pe_settings_sync_state_free>>;
+
+// whether `setting` is one of the Sync tab's What to sync check boxes
+bool IsSyncSwitch(PeSetting setting) {
+    return setting >= PE_SETTING_SYNC_ACCOUNTS && setting <= PE_SETTING_SYNC_PREFERENCES;
+}
+
+// what the What to sync check box `setting` is now: the core's choice, everything while sync is off
+int SyncSwitchValue(PeCore* core, PeSetting setting) {
+    SyncState sync(pe_settings_sync_state(core));
+    const PeSyncState* now = pe_settings_sync_state_get(sync.get());
+    PeSyncChoice choice = now && now->on ? now->choice : pe_sync_choice_default();
+    bool* flag = SyncChoiceFlag(choice, setting);
+    return flag && *flag ? 1 : 0;
+}
 
 // Options while it is open, for what the core changes meanwhile
 OptionsState* g_openOptions = nullptr;
@@ -348,9 +368,29 @@ int CurrentValue(const OptionsState& state, PeSetting setting, const WindowOptio
         return static_cast<int>(pe_download_ahead(state.core));
     case PE_SETTING_DOWNLOAD_LIMIT:
         return static_cast<int>(pe_download_limit_index(state.core));
+    case PE_SETTING_SYNC_ACCOUNTS:
+    case PE_SETTING_SYNC_PASSWORDS:
+    case PE_SETTING_SYNC_SIGN_INS:
+    case PE_SETTING_SYNC_SIGN_IN_APPS:
+    case PE_SETTING_SYNC_APP_SECRETS:
+    case PE_SETTING_SYNC_CONTACTS:
+    case PE_SETTING_SYNC_KEYS:
+    case PE_SETTING_SYNC_PRIVATE_KEYS:
+    case PE_SETTING_SYNC_RULES:
+    case PE_SETTING_SYNC_TRUSTED:
+    case PE_SETTING_SYNC_SETTINGS:
+    case PE_SETTING_SYNC_PREFERENCES:
+        return SyncSwitchValue(state.core, setting);
     case PE_SETTING_DEFAULT_MAIL_APP:
     case PE_SETTING_EML_DEFAULT:
     case PE_SETTING_TRUSTED_SENDERS:
+    case PE_SETTING_SYNC_PLACE:
+    case PE_SETTING_SYNC_STATUS:
+    case PE_SETTING_SYNC_SET_UP:
+    case PE_SETTING_SYNC_NOW:
+    case PE_SETTING_SYNC_COMPUTERS:
+    case PE_SETTING_SYNC_HISTORY:
+    case PE_SETTING_SYNC_TURN_OFF:
     case PE_SETTING_COUNT:
         return 0;
     }
@@ -405,12 +445,50 @@ void StoreValue(PeCore* core, PeSetting setting, int value, WindowOptions& windo
     case PE_SETTING_DOWNLOAD_LIMIT:
         pe_set_download_limit_index(core, static_cast<size_t>(value));
         return;
+    // What to sync is set at once for all of them (ApplySyncChoice); the rest of the Sync tab sets nothing
+    case PE_SETTING_SYNC_ACCOUNTS:
+    case PE_SETTING_SYNC_PASSWORDS:
+    case PE_SETTING_SYNC_SIGN_INS:
+    case PE_SETTING_SYNC_SIGN_IN_APPS:
+    case PE_SETTING_SYNC_APP_SECRETS:
+    case PE_SETTING_SYNC_CONTACTS:
+    case PE_SETTING_SYNC_KEYS:
+    case PE_SETTING_SYNC_PRIVATE_KEYS:
+    case PE_SETTING_SYNC_RULES:
+    case PE_SETTING_SYNC_TRUSTED:
+    case PE_SETTING_SYNC_SETTINGS:
+    case PE_SETTING_SYNC_PREFERENCES:
+    case PE_SETTING_SYNC_PLACE:
+    case PE_SETTING_SYNC_STATUS:
+    case PE_SETTING_SYNC_SET_UP:
+    case PE_SETTING_SYNC_NOW:
+    case PE_SETTING_SYNC_COMPUTERS:
+    case PE_SETTING_SYNC_HISTORY:
+    case PE_SETTING_SYNC_TURN_OFF:
     case PE_SETTING_LANGUAGE:
     case PE_SETTING_DEFAULT_MAIL_APP:
     case PE_SETTING_EML_DEFAULT:
     case PE_SETTING_TRUSTED_SENDERS:
     case PE_SETTING_COUNT:
         return;
+    }
+}
+
+// the What to sync check boxes set, when sync is on and they show something else than was applied
+void ApplySyncChoice(const OptionsState& state, const OptionValues& values) {
+    if (!state.syncOn) {
+        return;
+    }
+    bool changed = false;
+    PeSyncChoice choice = pe_sync_choice_default();
+    for (const PeSettingInfo& info : kSettings) {
+        if (bool* flag = SyncChoiceFlag(choice, info.setting)) {
+            *flag = values[info.setting] != 0;
+            changed = changed || values[info.setting] != state.applied[info.setting];
+        }
+    }
+    if (changed) {
+        pe_settings_sync_set_choice(state.core, choice);
     }
 }
 
@@ -457,6 +535,7 @@ std::wstring ApplyOptions(OptionsState& state) {
     for (const PeSettingInfo& info : kSettings) {
         StoreValue(state.core, info.setting, values[info.setting], window);
     }
+    ApplySyncChoice(state, values);
     state.applyWindow(window);
     for (int64_t id : state.untrusted) {
         pe_untrust_sender(state.core, id);
@@ -470,12 +549,18 @@ std::wstring ApplyOptions(OptionsState& state) {
 
 // ---- Options: the pages ----
 
+// whether a control of the Sync tab is shown as sync is now
+bool SyncShows(const OptionsState& state, HWND control) {
+    auto in = [&](const std::vector<HWND>& controls) { return std::find(controls.begin(), controls.end(), control) != controls.end(); };
+    return state.syncOn ? !in(state.syncOffOnly) : !in(state.syncOnOnly);
+}
+
 // the tab `page` and its controls shown, the others' hidden; the focus on the tab strip if it was on a control hidden
 void ShowPage(OptionsState& state, int page) {
     TabCtrl_SetCurSel(state.tabs, page);
     for (int p = 0; p < PE_SETTINGS_PAGE_COUNT; p++) {
         for (HWND control : state.pages[p]) {
-            ShowWindow(control, p == page ? SW_SHOW : SW_HIDE);
+            ShowWindow(control, p == page && SyncShows(state, control) ? SW_SHOW : SW_HIDE);
         }
     }
     HWND focus = GetFocus();
@@ -539,6 +624,25 @@ std::vector<std::wstring> ChoiceItems(const OptionsState& state, PeSetting setti
     case PE_SETTING_TRUSTED_SENDERS:
     case PE_SETTING_SEARCH_ENCRYPTED:
     case PE_SETTING_KEYSERVER:
+    case PE_SETTING_SYNC_PLACE:
+    case PE_SETTING_SYNC_STATUS:
+    case PE_SETTING_SYNC_SET_UP:
+    case PE_SETTING_SYNC_NOW:
+    case PE_SETTING_SYNC_COMPUTERS:
+    case PE_SETTING_SYNC_HISTORY:
+    case PE_SETTING_SYNC_TURN_OFF:
+    case PE_SETTING_SYNC_ACCOUNTS:
+    case PE_SETTING_SYNC_PASSWORDS:
+    case PE_SETTING_SYNC_SIGN_INS:
+    case PE_SETTING_SYNC_SIGN_IN_APPS:
+    case PE_SETTING_SYNC_APP_SECRETS:
+    case PE_SETTING_SYNC_CONTACTS:
+    case PE_SETTING_SYNC_KEYS:
+    case PE_SETTING_SYNC_PRIVATE_KEYS:
+    case PE_SETTING_SYNC_RULES:
+    case PE_SETTING_SYNC_TRUSTED:
+    case PE_SETTING_SYNC_SETTINGS:
+    case PE_SETTING_SYNC_PREFERENCES:
     case PE_SETTING_COUNT:
         return {};
     }
@@ -591,6 +695,33 @@ SettingIds Ids(PeSetting setting) {
         return {IDC_OPTIONS_DOWNLOAD_AHEAD};
     case PE_SETTING_DOWNLOAD_LIMIT:
         return {IDC_OPTIONS_DOWNLOAD_LIMIT};
+    case PE_SETTING_SYNC_PLACE:
+        return {IDC_OPTIONS_SYNC_PLACE};
+    case PE_SETTING_SYNC_STATUS:
+        return {IDC_OPTIONS_SYNC_STATUS};
+    case PE_SETTING_SYNC_SET_UP:
+        return {IDC_OPTIONS_SYNC_SET_UP};
+    case PE_SETTING_SYNC_NOW:
+        return {IDC_OPTIONS_SYNC_NOW};
+    case PE_SETTING_SYNC_COMPUTERS:
+        return {IDC_OPTIONS_SYNC_COMPUTERS};
+    case PE_SETTING_SYNC_HISTORY:
+        return {IDC_OPTIONS_SYNC_HISTORY};
+    case PE_SETTING_SYNC_TURN_OFF:
+        return {IDC_OPTIONS_SYNC_TURN_OFF};
+    case PE_SETTING_SYNC_ACCOUNTS:
+    case PE_SETTING_SYNC_PASSWORDS:
+    case PE_SETTING_SYNC_SIGN_INS:
+    case PE_SETTING_SYNC_SIGN_IN_APPS:
+    case PE_SETTING_SYNC_APP_SECRETS:
+    case PE_SETTING_SYNC_CONTACTS:
+    case PE_SETTING_SYNC_KEYS:
+    case PE_SETTING_SYNC_PRIVATE_KEYS:
+    case PE_SETTING_SYNC_RULES:
+    case PE_SETTING_SYNC_TRUSTED:
+    case PE_SETTING_SYNC_SETTINGS:
+    case PE_SETTING_SYNC_PREFERENCES:
+        return {IDC_OPTIONS_SYNC_SWITCH + (setting - PE_SETTING_SYNC_ACCOUNTS)};
     case PE_SETTING_COUNT:
         return {};
     }
@@ -613,6 +744,8 @@ struct PageBuilder {
     // the right edge of the row of buttons going on, the next button to its right; -1 when none is
     int buttonRight = -1;
     int buttonTop = 0;
+    // when the controls made now are shown: always, only while sync is on, or only while it is off
+    enum class When { Always, SyncOn, SyncOff } when = When::Always;
 };
 
 // the space between controls; the indent of the words beside a check box, and of a check box under the one it
@@ -627,6 +760,11 @@ constexpr int kButtonHeight = 25;
 HWND AddControl(PageBuilder& b, const wchar_t* className, const std::wstring& text, DWORD style, int id, const RECT& bounds) {
     HWND control = CreateChild(b.state.dialog, className, text.c_str(), style, id, bounds);
     b.state.pages[b.page].push_back(control);
+    if (b.when == PageBuilder::When::SyncOn) {
+        b.state.syncOnOnly.push_back(control);
+    } else if (b.when == PageBuilder::When::SyncOff) {
+        b.state.syncOffOnly.push_back(control);
+    }
     return control;
 }
 
@@ -706,6 +844,26 @@ void AddButton(PageBuilder& b, const PeSettingInfo& info) {
     b.buttonRight = x + width;
 }
 
+// a value the core words (where sync syncs through, how it went) beside its label, the labels a column as wide as the
+// longest of the group's: the place on one line, shortened in the middle of its path; the status wrapped on two
+void AddStatus(PageBuilder& b, const PeSettingInfo& info) {
+    EndButtons(b);
+    int column = 0;
+    for (const PeSettingInfo& other : kSettings) {
+        if (other.group == info.group && other.kind == PE_SETTING_KIND_STATUS) {
+            column = std::max(column, static_cast<int>(MeasureText(core::T(other.label)).cx));
+        }
+    }
+    column += Scale(kGap) + Scale(4);
+    int line = static_cast<int>(MeasureText(L"Ag").cy);
+    bool place = info.setting == PE_SETTING_SYNC_PLACE;
+    int height = place ? line : 2 * line;
+    AddControl(b, L"STATIC", core::T(info.label), SS_LEFT | SS_NOPREFIX, 0, {b.x0, b.y, b.x0 + column, b.y + line});
+    DWORD style = SS_LEFT | SS_NOPREFIX | (place ? SS_PATHELLIPSIS : SS_EDITCONTROL);
+    b.state.controls[info.setting] = AddControl(b, L"STATIC", L"", style, Ids(info.setting).control, {b.x0 + column, b.y, b.x1, b.y + height});
+    b.y += height + Scale(kGap);
+}
+
 void AddSetting(PageBuilder& b, const PeSettingInfo& info) {
     switch (info.kind) {
     case PE_SETTING_KIND_SWITCH:
@@ -717,7 +875,42 @@ void AddSetting(PageBuilder& b, const PeSettingInfo& info) {
     case PE_SETTING_KIND_BUTTON:
         AddButton(b, info);
         return;
+    case PE_SETTING_KIND_STATUS:
+        AddStatus(b, info);
+        return;
     }
+}
+
+// the What to sync check boxes: shown while sync is on; on the Sync group, Set Up Sync only while it is off, and the
+// rest only while it is on
+PageBuilder::When SyncWhen(const PeSettingInfo& info) {
+    if (info.group == PE_SETTINGS_GROUP_SYNC_WHAT) {
+        return PageBuilder::When::SyncOn;
+    }
+    if (info.group != PE_SETTINGS_GROUP_SYNC) {
+        return PageBuilder::When::Always;
+    }
+    return info.setting == PE_SETTING_SYNC_SET_UP ? PageBuilder::When::SyncOff : PageBuilder::When::SyncOn;
+}
+
+// a group of many check boxes in two columns: the setting the second column starts with, at a check box of its own
+// (not one under another) past the middle; PE_SETTING_COUNT for one column
+PeSetting SecondColumn(const PeSettingsGroupInfo& group) {
+    std::vector<const PeSettingInfo*> switches;
+    for (const PeSettingInfo& info : kSettings) {
+        if (info.group == group.group && info.kind == PE_SETTING_KIND_SWITCH) {
+            switches.push_back(&info);
+        }
+    }
+    if (switches.size() <= 8) {
+        return PE_SETTING_COUNT;
+    }
+    for (size_t i = switches.size() / 2; i < switches.size(); i++) {
+        if (!switches[i]->hasParent) {
+            return switches[i]->setting;
+        }
+    }
+    return PE_SETTING_COUNT;
 }
 
 // a group in a group box titled by it, its controls inside; the page's one untitled group without a box, as its tab
@@ -728,18 +921,54 @@ void AddGroup(PageBuilder& b, const PeSettingsGroupInfo& group) {
     int margin = group.titled ? Scale(kGroupMargin) : 0;
     b.x0 = b.left + margin;
     b.x1 = b.right - margin;
+    b.when = group.group == PE_SETTINGS_GROUP_SYNC_WHAT ? PageBuilder::When::SyncOn : PageBuilder::When::Always;
     if (group.titled) {
         box = AddControl(b, L"BUTTON", core::T(group.label), BS_GROUPBOX, 0, {b.left, top, b.right, top + Scale(kGroupTop)});
         b.y = top + Scale(kGroupTop);
     }
-    for (const PeSettingInfo& info : kSettings) {
-        if (info.group == group.group) {
-            AddSetting(b, info);
-        }
+    // the Sync group says what sync is for first, over Set Up Sync or the state and buttons
+    bool noteFirst = group.group == PE_SETTINGS_GROUP_SYNC;
+    if (group.hasNote && noteFirst) {
+        AddNote(b, core::T(group.note), b.x0, IDC_OPTIONS_SYNC_NOTE);
+        b.y += Scale(kGroupGap);
     }
+    int settingsTop = b.y, columnTop = b.y, firstColumnEnd = 0, right = b.x1;
+    PeSetting second = SecondColumn(group);
+    for (const PeSettingInfo& info : kSettings) {
+        if (info.group != group.group) {
+            continue;
+        }
+        b.when = SyncWhen(info);
+        if (info.setting == second) {
+            // the columns side by side, the gap between them the indent of a check box's words
+            firstColumnEnd = b.y;
+            b.y = columnTop;
+            b.x0 = (b.x0 + right) / 2 + Scale(kGap);
+            b.x1 = right;
+        } else if (second != PE_SETTING_COUNT && b.y == columnTop) {
+            b.x1 = (b.x0 + right) / 2 - Scale(kGap);
+        }
+        if (info.setting == PE_SETTING_SYNC_SET_UP) {
+            // in the place of the rows shown while sync is on, as it is shown only while sync is off
+            int below = b.y;
+            b.y = settingsTop;
+            AddButton(b, info);
+            EndButtons(b);
+            b.y = below;
+            continue;
+        }
+        AddSetting(b, info);
+    }
+    b.y = std::max(b.y, firstColumnEnd);
+    b.x0 = b.left + margin;
+    b.x1 = right;
     EndButtons(b);
-    if (group.hasNote) {
-        AddNote(b, core::T(group.note), b.x0, group.group == PE_SETTINGS_GROUP_DOWNLOADING ? IDC_OPTIONS_DOWNLOAD_NOTE : 0);
+    b.when = group.group == PE_SETTINGS_GROUP_SYNC_WHAT ? PageBuilder::When::SyncOn : PageBuilder::When::Always;
+    if (group.hasNote && !noteFirst) {
+        int id = group.group == PE_SETTINGS_GROUP_DOWNLOADING ? IDC_OPTIONS_DOWNLOAD_NOTE
+                 : group.group == PE_SETTINGS_GROUP_SYNC_WHAT ? IDC_OPTIONS_SYNC_WHAT_NOTE
+                                                               : 0;
+        AddNote(b, core::T(group.note), b.x0, id);
         b.y += Scale(kGap);
     }
     // the space after the last control becomes the box's bottom margin
@@ -806,6 +1035,48 @@ bool PageKey(OptionsState& state, WPARAM key) {
     return true;
 }
 
+// the Sync tab as sync is now: on or off, where it syncs through and how it went, Sync Now off while a sync runs, and
+// What to sync as the core has it (a check box changed and not applied yet keeps what the user chose)
+void RefreshSync(OptionsState& state) {
+    SyncState sync(pe_settings_sync_state(state.core));
+    const PeSyncState* now = pe_settings_sync_state_get(sync.get());
+    if (!now) {
+        return;
+    }
+    state.syncOn = now->on;
+    SetWindowTextW(state.controls[PE_SETTING_SYNC_PLACE], Text(now->place).c_str());
+    SetWindowTextW(state.controls[PE_SETTING_SYNC_STATUS], Text(now->status).c_str());
+    HWND syncNow = state.controls[PE_SETTING_SYNC_NOW];
+    if (now->busy && GetFocus() == syncNow) {
+        SetFocus(state.controls[PE_SETTING_SYNC_COMPUTERS]);
+    }
+    EnableWindow(syncNow, !now->busy);
+    PeSyncChoice choice = now->on ? now->choice : pe_sync_choice_default();
+    for (const PeSettingInfo& info : kSettings) {
+        bool* flag = SyncChoiceFlag(choice, info.setting);
+        if (!flag) {
+            continue;
+        }
+        HWND box = state.controls[info.setting];
+        if (Checked(box) == (state.applied[info.setting] != 0)) {
+            Button_SetCheck(box, *flag ? BST_CHECKED : BST_UNCHECKED);
+        }
+        state.applied[info.setting] = *flag ? 1 : 0;
+    }
+    ShowPage(state, TabCtrl_GetCurSel(state.tabs));
+    UpdateOptions(state);
+}
+
+// Turn Off Sync, asked first, the safe answer the default
+void TurnOffSync(OptionsState& state) {
+    if (Ask(state.dialog, core::Title(PE_TEXT_UI_SYNC_TURN_OFF), core::T(PE_TEXT_UI_SYNC_TURN_OFF_ASK), core::T(PE_TEXT_UI_SYNC_TURN_OFF_BUTTON),
+            core::T(PE_TEXT_UI_CANCEL), true)) {
+        pe_settings_sync_turn_off(state.core);
+        RefreshSync(state);
+        SetFocus(state.controls[PE_SETTING_SYNC_SET_UP]);
+    }
+}
+
 void OptionsCommand(OptionsState& state, WORD id, WORD code) {
     switch (id) {
     case IDOK:
@@ -833,6 +1104,25 @@ void OptionsCommand(OptionsState& state, WORD id, WORD code) {
         return;
     case IDC_OPTIONS_DEFAULT_APP:
         MakeDefaultMailApp(state.dialog);
+        return;
+    case IDC_OPTIONS_SYNC_SET_UP:
+        if (SetUpSyncDialog(state.dialog, state.core)) {
+            RefreshSync(state);
+            SetFocus(state.controls[PE_SETTING_SYNC_NOW]);
+        }
+        return;
+    case IDC_OPTIONS_SYNC_NOW:
+        pe_settings_sync_now(state.core);
+        RefreshSync(state);
+        return;
+    case IDC_OPTIONS_SYNC_COMPUTERS:
+        SyncComputersDialog(state.dialog, state.core);
+        return;
+    case IDC_OPTIONS_SYNC_HISTORY:
+        SyncHistoryDialog(state.dialog, state.core);
+        return;
+    case IDC_OPTIONS_SYNC_TURN_OFF:
+        TurnOffSync(state);
         return;
     }
     if (code == BN_CLICKED || code == CBN_SELCHANGE) {
@@ -926,9 +1216,9 @@ void BuildOptions(OptionsState& state) {
         x += buttonWidth + Scale(kGap);
     }
     ResizeClient(dialog, width, top + Scale(kButtonHeight) + pad);
-    // nothing to apply yet; the settings that depend on another enabled by it
-    UpdateOptions(state);
-    ShowPage(state, PE_SETTINGS_PAGE_GENERAL);
+    // nothing to apply yet; the settings that depend on another enabled by it; the Sync tab as sync is
+    TabCtrl_SetCurSel(state.tabs, PE_SETTINGS_PAGE_GENERAL);
+    RefreshSync(state);
 }
 
 }  // namespace
@@ -987,6 +1277,12 @@ void OptionsPdfPreviewsOff() {
     g_openOptions->applied[PE_SETTING_PDF_PREVIEWS] = 0;
     Button_SetCheck(g_openOptions->controls[PE_SETTING_PDF_PREVIEWS], BST_UNCHECKED);
     UpdateOptions(*g_openOptions);
+}
+
+void OptionsSyncChanged() {
+    if (g_openOptions && g_openOptions->dialog) {
+        RefreshSync(*g_openOptions);
+    }
 }
 
 void MakeDefaultMailApp(HWND owner) {

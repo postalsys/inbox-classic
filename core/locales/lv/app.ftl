@@ -454,6 +454,141 @@ ui-settings-encryption = Šifrēšana
 ui-settings-language = Valoda
 ui-settings-label = { $label }:
 ui-apply = &Lietot
+# review: new
+ui-settings-sync = Sinhronizācija
+# review: new
+ui-sync-note = Uzturiet kontus, atslēgas, adrešu grāmatu, kārtulas un iestatījumus vienādus visos datoros, izmantojot jums piederošu mapi vai krātuvi. Pirms dati atstāj šo datoru, viss tiek šifrēts ar jūsu sinhronizācijas paroles frāzi.
+# review: new
+ui-sync-place = Sinhronizācijas vieta:
+# review: new
+ui-sync-status = Statuss:
+# review: new
+ui-sync-set-up = Iestatīt &sinhronizāciju…
+# review: new
+ui-sync-now = Sinhronizēt &tūlīt
+# review: new
+ui-sync-computers = &Datori…
+# review: new
+ui-sync-history = &Vēsture…
+# review: new
+ui-sync-turn-off = I&zslēgt sinhronizāciju…
+# review: new
+ui-sync-what = Ko sinhronizēt
+# review: new
+ui-sync-what-note = Paroles, pierakstīšanās dati un privātās atslēgas tiek pārsūtītas tikai šifrētā veidā. Noņemiet atzīmi no tā, kam jāpaliek tikai šajā datorā.
+# review: new
+ui-sync-accounts = &Konti
+# review: new
+ui-sync-passwords = &Paroles
+# review: new
+ui-sync-sign-ins = Pierakstīšanās ar &Google, Microsoft un pierakstīšanās lietotnēm
+# review: new
+ui-sync-sign-in-apps = Pierakstīšanās lietot&nes
+# review: new
+ui-sync-app-secrets = Pierakstīšanās lietotņu klientu n&oslēpumi
+# review: new
+ui-sync-contacts = Adr&ešu grāmata
+# review: new
+ui-sync-keys = &Atslēgas
+# review: new
+ui-sync-private-keys = &Jūsu privātās atslēgas
+# review: new
+ui-sync-rules = Kā&rtulas
+# review: new
+ui-sync-trusted = Uzti&camie sūtītāji
+# review: new
+ui-sync-settings = &Iestatījumi
+# review: new
+ui-sync-preferences = Izkārtojums &un skats
+# review: new
+ui-sync-everything = Viss
+# review: new
+ui-sync-some-left-out = Daļa nav iekļauta
+# review: new
+ui-sync-where = Kur to glabāt
+# review: new
+ui-sync-folder = Mape
+# review: new
+ui-sync-folder-note = Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud vai Syncthing to kopē uz jūsu citiem datoriem.
+# review: new
+ui-sync-bucket = Ar S3 saderīga krātuve
+# review: new
+ui-sync-bucket-note = Amazon S3, Cloudflare R2, Backblaze B2, MinIO vai cita krātuve, kas darbojas kā S3.
+# review: new
+ui-sync-folder-label = &Mape:
+# review: new
+ui-sync-folder-none = Vēl nav izvēlēta
+# review: new
+ui-sync-choose-folder = &Izvēlēties…
+# review: new
+ui-sync-choose-folder-title = Izvēlieties mapi, caur kuru sinhronizēt
+# review: new
+ui-sync-endpoint = &Galapunkts:
+# review: new
+ui-sync-region = &Reģions:
+# review: new
+ui-sync-bucket-name = &Spainis:
+# review: new
+ui-sync-prefix = Mape spai&nī:
+# review: new
+ui-sync-access-key = Piekļuves atslēgas I&D:
+# review: new
+ui-sync-secret-key = Slepenā &piekļuves atslēga:
+# review: new
+ui-sync-next = &Tālāk
+# review: new
+ui-sync-join-title = Pievienoties sinhronizācijai
+# review: new
+ui-sync-join-note = Šajā vietā ir jūsu citu datoru sinhronizācija. Ievadiet sinhronizācijas paroles frāzi, ko izvēlējāties pirmajā datorā.
+# review: new
+ui-sync-start-title = Sākt sinhronizāciju
+# review: new
+ui-sync-start-note = Izvēlieties sinhronizācijas paroles frāzi. Tā būs jāievada vienreiz katrā datorā, ko pievienosiet. Glabājiet to drošā vietā: bez tās neviens cits dators nevarēs pievienoties.
+# review: new
+ui-sync-name = Šī datora nosa&ukums:
+# review: new
+ui-sync-merge-note = Šī datora dati un sinhronizācijas dati tiek apvienoti: konts vai kontaktpersona, kas ir abās vietās, kļūst par vienu.
+# review: new
+ui-sync-turn-on = I&eslēgt sinhronizāciju
+# review: new
+ui-sync-on = Sinhronizācija ir ieslēgta.
+# review: new
+ui-sync-turn-off-ask = Vai izslēgt sinhronizāciju šajā datorā? Viss paliek, kā ir, gan šeit, gan jūsu citos datoros. Šis dators vienkārši pārtrauc sinhronizāciju.
+# review: new
+ui-sync-turn-off-button = Izslēgt
+# review: new
+ui-sync-computers-title = Datori
+# review: new
+ui-sync-computers-note = Datori, kas sinhronizē caur šo vietu. Noņemiet datoru, ko vairs neizmantojat: tas pārtrauc sinhronizāciju, un tas, ko tas sinhronizēja, paliek.
+# review: new
+ui-sync-this-computer = Šis dators
+# review: new
+ui-sync-seen = Pēdējā sinhronizācija: { $when }
+# review: new
+ui-sync-remove-ask = Vai noņemt datoru „{ $name }” no sinhronizācijas? Tas pārtrauks sinhronizāciju nākamajā mēģinājumā. Lai to atkal sinhronizētu, vēlreiz iestatiet sinhronizāciju tajā datorā.
+# review: new
+ui-sync-loading = Notiek lasīšana…
+# review: new
+ui-sync-history-title = Vēsture
+# review: new
+ui-sync-history-note = Ja kaut kas tika mainīts divos datoros vienlaikus, tika paturēta pēdējā veiktā izmaiņa, bet otra ir redzama šeit. Atjaunojiet to, ja vēlaties izmantot to.
+# review: new
+ui-sync-history-empty = Neviena izmaiņa nav aizstāta.
+# review: new
+ui-sync-history-row = Avots: { $source }, { $when }
+# review: new
+ui-sync-restore = &Atjaunot
+# review: new
+ui-sync-restore-points = Atjaunošanas punkti
+# review: new
+ui-sync-restore-points-note = Pirms sinhronizācija šeit kaut ko noņem, tiek saglabāts iepriekšējais stāvoklis. Atveriet atjaunošanas punktu, lai atgūtu no tā to, ko izvēlaties.
+# review: new
+ui-sync-restore-points-empty = Vēl nav neviena.
+# review: new
+ui-sync-open-point = A&tvērt…
+# Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
+# review: new
+win-sync-back = < &Atpakaļ
 ui-language-label = &Valoda:
 ui-restart-note = Restartējiet Inbox Classic, lai mainītu valodu.
 ui-restart-ask = Pēc restartēšanas Inbox Classic būs šajā valodā: { $language }. Restartēt tūlīt?
@@ -795,6 +930,12 @@ ui-setup-from = Fails saglabāts ar Inbox Classic { $version } ({ $date }).
 ui-setup-import-button = &Importēt
 ui-setup-done = Gatavs
 ui-setup-first-run = Importēt iestatījumus un kontus no cita datora...
+# review: new
+ui-first-run-other = Vai jau izmantojat Inbox Classic citā datorā? Pārnesiet uz šejieni tā kontus un iestatījumus.
+# review: new
+ui-first-run-sync = Pievienoties tā sinhronizācijai…
+# review: new
+ui-first-run-import = Importēt no faila…
 
 ui-field-verifiers = Uzticēties sūtītāja pārbaudēm no:
 ui-attachment-import-key = Importēt atslēgu...

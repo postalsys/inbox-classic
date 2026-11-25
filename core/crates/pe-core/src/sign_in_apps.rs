@@ -404,7 +404,7 @@ impl Core {
     }
 
     /// The accounts of app `id` at its servers, their workers started again with them
-    fn move_accounts_to(&self, id: SignInAppId, app: &SignInApp) -> Result<()> {
+    pub(crate) fn move_accounts_to(&self, id: SignInAppId, app: &SignInApp) -> Result<()> {
         let with = SignInWith::App(id);
         let auth = pe_store::Auth::OAuth2(with.auth_name());
         let provider = app_provider(app, None);

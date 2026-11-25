@@ -41,6 +41,7 @@ mod layout;
 
 /// Pictures from trusted senders, and in every message
 mod pictures;
+mod sync;
 
 /// Step 19g: Message Rules
 mod rules;
@@ -1197,10 +1198,14 @@ async fn scenario(d: Rc<Driver>) {
         d.blocked("the first sync did not bring the account's folders and messages");
         return;
     }
-    // while working on one step: PE_E2E_ONLY=conversations (in LINUX_DOCKER="-e PE_E2E_ONLY=...") runs only it after
-    // the account is set up
-    if std::env::var("PE_E2E_ONLY").as_deref() == Ok("conversations") {
-        steps::conversations(&d).await;
+    // while working on one step: PE_E2E_ONLY=<step> (in LINUX_DOCKER="-e PE_E2E_ONLY=...") runs only it after the
+    // account is set up
+    if let Ok(only) = std::env::var("PE_E2E_ONLY") {
+        match only.as_str() {
+            "conversations" => steps::conversations(&d).await,
+            "sync" => sync::settings_sync(&d).await,
+            _ => {}
+        }
         steps::closing(&d).await;
         return;
     }
@@ -1275,6 +1280,7 @@ async fn scenario(d: Rc<Driver>) {
     accounts(&d).await;
     sign_in_apps(&d).await;
     setup::settings_and_accounts(&d).await;
+    sync::settings_sync(&d).await;
     encrypted_list::encryption_settings(&d).await;
     steps::languages(&d).await;
     steps::language_tour(&d).await;

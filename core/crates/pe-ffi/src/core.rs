@@ -188,6 +188,11 @@ pub enum PeEventKind {
     /// A mailing list was asked to let the user go, or a request failed: the windows read the bar of the message they
     /// show again (`pe_list_bar`)
     ListsChanged = 40,
+    /// Settings sync read what the other computers wrote: answer with `pe_settings_sync_continue`
+    SettingsSyncReady = 41,
+    /// Settings sync's state changed, a probe or the computers have their answer, or a sync brought news: the Sync
+    /// settings read `pe_settings_sync_state` again, the windows take `pe_settings_sync_news`
+    SettingsSyncChanged = 42,
 }
 
 #[repr(C)]
@@ -286,6 +291,8 @@ impl Callback {
             Event::PrintReady { request } => (PeEventKind::PrintReady, 0, 0, *request),
             Event::PreviewsPrepared { .. } => (PeEventKind::PreviewsPrepared, 0, 0, 0),
             Event::ListsChanged => (PeEventKind::ListsChanged, 0, 0, 0),
+            Event::SettingsSyncReady => (PeEventKind::SettingsSyncReady, 0, 0, 0),
+            Event::SettingsSyncChanged => (PeEventKind::SettingsSyncChanged, 0, 0, 0),
             Event::OutboxChanged { account } => (PeEventKind::OutboxChanged, *account, 0, 0),
             Event::NewMail {
                 account, folder, uid, ..
