@@ -11,6 +11,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include <string>
 #include <thread>
 #include <vector>
@@ -94,6 +95,8 @@ public:
     bool FollowLink(const wchar_t* uri);
     // called when the bounce card's "Show the message that bounced" is clicked, with the message it names
     std::function<void(int64_t folder, uint64_t uid)> onBouncedMessage;
+    // called with the path of a message file to open in a message window (Open Reaction Email)
+    std::function<void(const std::wstring& path)> onOpenFile;
     // the UI test's look at the parts' frames of the message shown and its requests to the internet (preview.h)
     int64_t TestFrames() { return preview_.TestFrames(); }
     int RemoteRequests() const { return preview_.RemoteRequests(); }
@@ -120,6 +123,17 @@ private:
     // the view in view_ shown: its header, bars and document
     void ShowInfo();
     void ShowHeader(const PeMessageInfo* info);
+    // the Reactions line under the header, read again from the core for the message shown (hidden when it has none)
+    void LoadReactions();
+    // the Reactions line drawn: its label in the header's label column, then one chip a person; where each chip is
+    void DrawReactions(const DRAWITEMSTRUCT& item);
+    // the chip at `x` of the Reactions line (its client area), -1 for none
+    int ReactionAt(int x) const;
+    // the menu of the chip `chip` (-1: the keyboard's, a submenu a person when there are several) at `screen`, (-1,
+    // -1) for under the line: Open Reaction Email, Show as Email and when they reacted
+    void ReactionsMenu(int chip, POINT screen);
+    void OpenReactionEmail(const std::shared_ptr<PeReactions>& list, size_t chip);
+    static LRESULT CALLBACK ReactionsProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR, DWORD_PTR data);
     void ShowBars(bool files, bool pictures);
     // the security bar of a signed or encrypted message, shown or hidden as `info` has it (none: hidden)
     void ShowSecurity(const PeMessageInfo* info);
@@ -196,6 +210,11 @@ private:
     HWND parent_ = nullptr;
     RECT area_ = {};
     HWND header_ = nullptr;
+    // the Reactions line under the header's lines (owner-drawn, its words its text for screen readers), the core's
+    // list of who reacted it shows (shared, so a menu open keeps the one it was made from) and where each chip is
+    HWND reactions_ = nullptr;
+    std::shared_ptr<PeReactions> reactionList_;
+    std::vector<std::pair<int, int>> reactionSpans_;
     // the paper clip button (a toolbar of one), the information bar of blocked pictures, the one of a failed download
     HWND attachments_ = nullptr;
     // the strip of the files under the header (a list view of small icons), an item a file

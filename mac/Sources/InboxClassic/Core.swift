@@ -1088,6 +1088,9 @@ struct Message {
     /// picture are drawn alike), and the initials shown without one
     let picture: UInt64
     let initials: String
+    /// its emoji reactions' badge after the subject, the core's ("👍❤️ 3"; a collapsed conversation's are its
+    /// messages'); empty for none
+    let reactions: String
 
     init(_ message: PeMessage) {
         folder = message.folder
@@ -1125,6 +1128,7 @@ struct Message {
         protectionWords = words.isEmpty ? nil : words
         picture = message.picture
         initials = text(message.initials)
+        reactions = text(message.reactions)
     }
 }
 

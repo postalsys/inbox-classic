@@ -59,6 +59,11 @@ final class Reader: NSObject {
     /// Find in This Message: a bar over the message, as Safari and Mail have
     private let findBar = FindBar()
     private let header = HeaderText(wrappingLabelWithString: "")
+    /// under the header fields: "Reactions:" and a chip a person who reacted, shown only when someone did
+    private let reactionsRow = NSStackView()
+    private let reactionsLabel = NSTextField(labelWithString: "")
+    /// the core's list the chips stand for, kept while they are shown (their menus act on it)
+    private var reactions: OpaquePointer?
     private let logo = NSImageView()
     /// the header and the line under it, shown only over a message
     private let headerBox = NSView()
@@ -87,6 +92,10 @@ final class Reader: NSObject {
     /// the logo's side in pixels, for the core to draw it at
     var logoPixels: Int { Int(48 * (view.window?.backingScaleFactor ?? 2)) }
 
+    deinit {
+        pe_reactions_free(reactions)
+    }
+
     init(core: Core) {
         self.core = core
         super.init()
@@ -111,7 +120,18 @@ final class Reader: NSObject {
         right.orientation = .vertical
         right.alignment = .trailing
         right.setContentHuggingPriority(.required, for: .horizontal)
-        let top = NSStackView(views: [logo, header, right])
+        setUpReactions()
+        // the header fields, the reactions under them
+        let fields = NSStackView(views: [header, reactionsRow])
+        fields.orientation = .vertical
+        fields.alignment = .leading
+        // as far under Subject as the header's lines are apart
+        fields.spacing = 3
+        fields.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        fields.setContentHuggingPriority(.init(249), for: .horizontal)
+        header.widthAnchor.constraint(equalTo: fields.widthAnchor).isActive = true
+        reactionsRow.widthAnchor.constraint(lessThanOrEqualTo: fields.widthAnchor).isActive = true
+        let top = NSStackView(views: [logo, fields, right])
         top.alignment = .top
         top.spacing = 10
         top.edgeInsets = NSEdgeInsets(top: 8, left: 10, bottom: 8, right: 10)
@@ -123,7 +143,7 @@ final class Reader: NSObject {
             top.topAnchor.constraint(equalTo: headerBox.topAnchor),
             top.bottomAnchor.constraint(equalTo: headerBox.bottomAnchor),
             // the same 8pt under the text with a logo as without, and never shorter than the logo
-            header.bottomAnchor.constraint(lessThanOrEqualTo: headerBox.bottomAnchor, constant: -8),
+            fields.bottomAnchor.constraint(lessThanOrEqualTo: headerBox.bottomAnchor, constant: -8),
             logo.bottomAnchor.constraint(lessThanOrEqualTo: headerBox.bottomAnchor, constant: -8),
         ])
         headerLine.boxType = .separator
@@ -193,6 +213,7 @@ final class Reader: NSObject {
         downloadingTimer?.invalidate()
         retry.isHidden = true
         header.stringValue = ""
+        showReactions(nil)
         // no empty band over the pane's "no message" or several messages' page; a message about to load keeps it
         showHeader(loading)
         // the files of the message before are never offered for the next one
@@ -282,6 +303,8 @@ final class Reader: NSObject {
         attachments.addItem(withTitle: Text.macFiles.text(["count": files]))
         attachments.item(at: 0)?.image = Icons.list("attach")
         strip.show(view.attachments)
+        // a message of a folder: who reacted to it (a file has none)
+        loadReactions()
         // a mailing list that says how to leave it: the core's bar (none for a message file)
         showListBar(text: text(info.list_bar), button: text(info.list_button))
         // asked for, or loaded by themselves (Settings, a trusted sender the provider confirmed): the core says
@@ -401,6 +424,110 @@ final class Reader: NSObject {
 
     /// the menu of the bar's Download Pictures, for the UI test
     var picturesMenu: NSMenu? { picturesChoices.isHidden ? nil : picturesChoices.menu }
+
+    // ---- the reactions ----
+
+    private func setUpReactions() {
+        reactionsLabel.stringValue = Text.uiReactionsLabel.text
+        reactionsLabel.font = .boldSystemFont(ofSize: NSFont.systemFontSize)
+        reactionsLabel.textColor = .secondaryLabelColor
+        reactionsLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+        reactionsRow.orientation = .horizontal
+        reactionsRow.alignment = .centerY
+        reactionsRow.spacing = 6
+        reactionsRow.addView(reactionsLabel, in: .leading)
+        reactionsRow.setVisibilityPriority(.mustHold, for: reactionsLabel)
+        reactionsRow.setCustomSpacing(8, after: reactionsLabel)
+        reactionsRow.setAccessibilityIdentifier("reader.reactions")
+        reactionsRow.setAccessibilityElement(true)
+        reactionsRow.setAccessibilityRole(.group)
+        reactionsRow.setAccessibilityLabel(Text.uiReactionsLabel.text)
+        reactionsRow.isHidden = true
+    }
+
+    /// the reactions to the message shown read again from the core: when it is shown, and when its folder changed
+    /// (a reaction came, or one was shown as an email)
+    private func loadReactions() {
+        guard file == nil, uid != 0 else {
+            showReactions(nil)
+            return
+        }
+        showReactions(pe_reactions(core.handle, folder, uid))
+    }
+
+    /// a chip a person of `list` (taken, freed when replaced), the row hidden without any
+    private func showReactions(_ list: OpaquePointer?) {
+        for chip in reactionsRow.views where chip !== reactionsLabel {
+            reactionsRow.removeView(chip)
+        }
+        pe_reactions_free(reactions)
+        reactions = list
+        let count = pe_reactions_count(list)
+        for index in 0..<count {
+            guard let reaction = pe_reactions_get(list, index)?.pointee else { continue }
+            let chip = ReactionChip(text: text(reaction.text), when: text(reaction.when), index: index)
+            chip.menu = reactionMenu(chip)
+            chip.target = self
+            chip.action = #selector(chipClicked(_:))
+            reactionsRow.addView(chip, in: .leading)
+            // what does not fit is left out rather than squeezed
+            reactionsRow.setVisibilityPriority(.detachOnlyIfNecessary, for: chip)
+        }
+        reactionsRow.isHidden = count == 0
+    }
+
+    /// the chips' words, "👍 Kate Kalda" (for the UI test)
+    var reactionChips: [String] { reactionsRow.isHidden ? [] : chips.map(\.title) }
+
+    /// the menu of the chip `index` (for the UI test)
+    func reactionMenu(at index: Int) -> NSMenu? { chips.first { $0.index == index }?.menu }
+
+    private var chips: [ReactionChip] { reactionsRow.views.compactMap { $0 as? ReactionChip } }
+
+    /// a chip's menu: the email opened, the email listed again, and when the reaction came
+    private func reactionMenu(_ chip: ReactionChip) -> NSMenu {
+        let menu = NSMenu()
+        menu.autoenablesItems = false
+        let open = menu.addItem(withTitle: Text.uiReactionOpenEmail.text, action: #selector(openReactionChosen(_:)), keyEquivalent: "")
+        let show = menu.addItem(withTitle: Text.uiReactionShowAsEmail.text, action: #selector(showAsEmailChosen(_:)), keyEquivalent: "")
+        for item in [open, show] {
+            item.target = self
+            item.tag = chip.index
+        }
+        menu.addItem(.separator())
+        menu.addItem(withTitle: Text.uiReactionWhen.text(["when": chip.when]), action: nil, keyEquivalent: "").isEnabled = false
+        return menu
+    }
+
+    /// a click on a chip opens its menu under it, as a pop-up button's does
+    @objc private func chipClicked(_ chip: ReactionChip) {
+        chip.menu?.popUp(positioning: nil, at: NSPoint(x: 0, y: chip.bounds.height + 4), in: chip)
+    }
+
+    @objc private func openReactionChosen(_ sender: NSMenuItem) {
+        openReactionEmail(sender.tag)
+    }
+
+    /// Open Reaction Email: the email written to a file the core keeps, opened in a message window as a message file
+    /// from the Finder is
+    func openReactionEmail(_ index: Int) {
+        guard let reactions, let path = taken(pe_reactions_email_file(core.handle, reactions, index)) else {
+            inform(Text.uiNotShown.text, style: .warning, in: view.window)
+            return
+        }
+        AppDelegate.shared?.application(NSApp, open: [URL(fileURLWithPath: path)])
+    }
+
+    @objc private func showAsEmailChosen(_ sender: NSMenuItem) {
+        showReactionAsEmail(sender.tag)
+    }
+
+    /// Show as Email: the person's emails listed again for good, their chip gone
+    func showReactionAsEmail(_ index: Int) {
+        guard let reactions else { return }
+        pe_reactions_show_as_email(core.handle, reactions, index)
+        loadReactions()
+    }
 
     private func headerText(_ info: PeMessageInfo) -> NSAttributedString {
         headerText(from: text(info.from), date: info.has_date ? info.date : nil, to: text(info.to), cc: text(info.cc),
@@ -647,6 +774,11 @@ final class Reader: NSObject {
                     status(said)
                 }
                 rebuild()
+            }
+        case PE_EVENT_KIND_FOLDER_CHANGED:
+            // a reaction to the message shown came, or one was listed as an email again
+            if event.folder == folder && showsMessage {
+                loadReactions()
             }
         case PE_EVENT_KIND_SYNC_FINISHED:
             // the account is back: a message it could not give is tried again
@@ -1501,6 +1633,68 @@ final class ReaderStack: NSStackView {
         }
         let bar = children.filter { ($0 as AnyObject) === security }
         return bar + children.filter { ($0 as AnyObject) !== security }
+    }
+}
+
+/// One person's reactions in the header, "👍 Kate Kalda": a small rounded token, as Mail's address tokens are, whose
+/// click (or right-click) opens its menu. Drawn by itself: the inline bezel's own grey text reads as disabled.
+final class ReactionChip: NSButton {
+    let index: Int
+    let when: String
+    private static let font = NSFont.systemFont(ofSize: NSFont.systemFontSize - 1)
+    private static let height: CGFloat = 20
+    private static let padding: CGFloat = 8
+
+    init(text: String, when: String, index: Int) {
+        self.index = index
+        self.when = when
+        super.init(frame: .zero)
+        isBordered = false
+        setButtonType(.momentaryChange)
+        font = ReactionChip.font
+        title = text
+        attributedTitle = NSAttributedString(string: text, attributes: [
+            .font: ReactionChip.font, .foregroundColor: NSColor.labelColor,
+        ])
+        lineBreakMode = .byTruncatingTail
+        setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
+        setContentHuggingPriority(.required, for: .horizontal)
+        toolTip = Text.uiReactionWhen.text(["when": when])
+        setAccessibilityLabel(text)
+        setAccessibilityHelp(toolTip)
+        setAccessibilityRole(.popUpButton)
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    override var intrinsicContentSize: NSSize {
+        let size = attributedTitle.size()
+        return NSSize(width: ceil(size.width) + 2 * ReactionChip.padding, height: ReactionChip.height)
+    }
+
+    private var shape: NSBezierPath {
+        NSBezierPath(roundedRect: bounds, xRadius: bounds.height / 2, yRadius: bounds.height / 2)
+    }
+
+    override func draw(_ dirtyRect: NSRect) {
+        // the fill of a token, darker while pressed; the system's colours, so dark mode has its own
+        (isHighlighted ? NSColor.tertiaryLabelColor : NSColor.quaternaryLabelColor).setFill()
+        shape.fill()
+        let size = attributedTitle.size()
+        let room = bounds.insetBy(dx: ReactionChip.padding, dy: 0)
+        let line = NSRect(x: room.minX, y: (bounds.height - size.height) / 2, width: room.width, height: size.height)
+        let style = NSMutableParagraphStyle()
+        style.lineBreakMode = .byTruncatingTail
+        style.alignment = .center
+        let title = NSMutableAttributedString(attributedString: attributedTitle)
+        title.addAttribute(.paragraphStyle, value: style, range: NSRange(location: 0, length: title.length))
+        title.draw(with: line, options: [.usesLineFragmentOrigin, .truncatesLastVisibleLine])
+    }
+
+    override var focusRingMaskBounds: NSRect { bounds }
+
+    override func drawFocusRingMask() {
+        shape.fill()
     }
 }
 

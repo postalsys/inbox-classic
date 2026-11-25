@@ -6574,6 +6574,87 @@ public static class Dragger {
     Command $main $IDM_SYNC
     [void](WaitFor { @($codeSubjects | Where-Object { $null -ne (& $rowOf $_) }).Count -eq 0 } 20)
 
+    # ---- emoji reactions ----
+
+    Step 'emoji reactions'
+    $IDC_REACTIONS = 246; $kTestReactionBadge = 0x52454143
+    $thumb = [char]::ConvertFromUtf32(0x1F44D)
+    $reacted = 'Furniture'
+    AddMessage ("From: Kate Kalda <kate@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: $reacted`r`n" +
+        "Date: $($now.AddHours(-2).ToString('r'))`r`nMessage-ID: <furniture-prices@example.com>`r`nMIME-Version: 1.0`r`n" +
+        "Content-Type: text/plain; charset=utf-8`r`n`r`nThe prices for the new chairs are in.`r`n") @('\Seen')
+    Command $main $IDM_SYNC
+    SelectFolder 0
+    Check ([bool](WaitFor { $null -ne (& $rowOf $reacted) } 30)) 'a message from Kate is in the Inbox'
+    # Gmail's reaction to it from Kate, whose domain the provider says signed it: plain text, the reaction part, HTML
+    AddMessage ("Authentication-Results: mx.inboxclassic.test; dkim=pass header.d=example.com`r`n" +
+        "From: Kate Kalda <kate@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: Re: $reacted`r`n" +
+        "Date: $($now.AddHours(-1).ToString('r'))`r`nMessage-ID: <furniture-reaction@example.com>`r`n" +
+        "In-Reply-To: <furniture-prices@example.com>`r`nReferences: <furniture-prices@example.com>`r`nMIME-Version: 1.0`r`n" +
+        "Content-Type: multipart/alternative; boundary=`"r`"`r`n`r`n" +
+        "--r`r`nContent-Type: text/plain; charset=UTF-8`r`nContent-Transfer-Encoding: quoted-printable`r`n`r`n" +
+        "=F0=9F=91=8D`r`n`r`nKate Kalda reacted via Gmail`r`n" +
+        "--r`r`nContent-Type: text/vnd.google.email-reaction+json; charset=UTF-8`r`nContent-Transfer-Encoding: quoted-printable`r`n`r`n" +
+        "{`"emoji`": `"=F0=9F=91=8D`", `"version`": 1}`r`n" +
+        "--r`r`nContent-Type: text/html; charset=UTF-8`r`n`r`n<p style=`"font-size:50px`">&#x1F44D;</p><p>Kate Kalda reacted via Gmail</p>`r`n--r--`r`n")
+    Command $main $IDM_SYNC
+    $badged = WaitFor { if ([Native.Win]::SendText($main, $kTestReactionBadge, "$reacted`n$thumb") -eq 1) { $true } } 30
+    Check ([bool]$badged) "the message's row carries the reaction's badge ($([Native.Win]::SendText($main, $kTestReactionBadge, "$reacted`n$thumb")))"
+    # grouped by conversation, a reply listed would make the message's row a conversation's
+    $kTestThreadLabel = 0x544C424C
+    $listedAgain = { $null -ne (& $rowOf "Re: $reacted") -or [Native.Win]::SendText($main, $kTestThreadLabel, "$reacted`n-") -ne 0 }
+    Check (-not (& $listedAgain)) 'the reaction email is not in the Inbox list'
+    Check ([bool](WaitFor { Seen 'Message-ID: <furniture-reaction@example\.com>' } 20)) 'and it is read on the server'
+    Shot $main 'reactions-1-list'
+    Check (SelectSubject $reacted) 'the reading pane shows the reacted message'
+    $line = WaitFor { if (Visible $main $IDC_REACTIONS) { GetText $main $IDC_REACTIONS } } 10
+    Check ("$line" -like "*$thumb Kate Kalda*") "its header has a Reactions line with Kate's reaction ($line)"
+    Shot $main 'reactions-2-header'
+    # the line's menu from the keyboard (the menu key): one person, so their items at once
+    $reactionLine = [Native.Win]::GetDlgItem($main, $IDC_REACTIONS)
+    $reactionMenu = {
+        param([string]$choose, [string]$shot)
+        [void][Native.Win]::PostMessage($reactionLine, 0x007B, $reactionLine, [IntPtr](-1))
+        $menu = WaitWindow '#32768' $null 10
+        if (-not $menu) { return @() }
+        $labels = @([Native.Win]::MenuLabels([Native.Win]::SendMessage($menu, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero)))
+        if ($shot) { Shot $main $shot $menu }
+        $at = if ($choose) { [array]::IndexOf($labels, $choose) } else { -1 }
+        if ($at -lt 0) {
+            Key $menu $VK_ESCAPE
+        } else {
+            for ($i = 0; $i -le $at; $i++) { if ($labels[$i]) { Key $menu $VK_DOWN } }
+            Key $menu $VK_RETURN
+        }
+        if (-not (WaitFor { [Native.Win]::FindWindow('#32768', [NullString]::Value) -eq [IntPtr]::Zero } 3)) {
+            # where the menu does not take posted keys: real keystrokes, the app in front
+            [void][Native.Win]::SetForegroundWindow($main)
+            $keys = if ($at -lt 0) { '{ESC}' } else { ('{DOWN}' * @($labels[0..$at] | Where-Object { $_ }).Count) + '{ENTER}' }
+            [System.Windows.Forms.SendKeys]::SendWait($keys)
+            [void](WaitFor { [Native.Win]::FindWindow('#32768', [NullString]::Value) -eq [IntPtr]::Zero } 5)
+        }
+        $labels
+    }
+    $labels = & $reactionMenu 'Open Reaction Email' 'reactions-3-menu'
+    Check (($labels -contains 'Open Reaction Email') -and ($labels -contains 'Show as Email') -and @($labels | Where-Object { $_ -like 'Reacted *' }).Count -eq 1) "the line's menu offers the reaction email and when ($($labels -join ' | '))"
+    $reactionWindow = WaitWindow 'InboxClassicMessage' "Re: $reacted - Inbox Classic" 15
+    Check ($null -ne $reactionWindow) 'Open Reaction Email shows the email in a message window'
+    if ($reactionWindow) {
+        Shot $reactionWindow 'reactions-4-email'
+        [void][Native.Win]::PostMessage($reactionWindow, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        [void](WaitFor { [Native.Win]::FindWindow('InboxClassicMessage', "Re: $reacted - Inbox Classic") -eq [IntPtr]::Zero } 5)
+    }
+    [void](& $reactionMenu 'Show as Email' $null)
+    Check ([bool](WaitFor { & $listedAgain } 20)) 'Show as Email lists the reaction email again'
+    Check ([bool](WaitFor { -not (Visible $main $IDC_REACTIONS) } 10)) 'and the Reactions line goes'
+    Check ([Native.Win]::SendText($main, $kTestReactionBadge, "$reacted`n") -eq 1) 'and so does the badge'
+    foreach ($pattern in 'Message-ID: <furniture-prices@example\.com>', 'Message-ID: <furniture-reaction@example\.com>') {
+        $added = Find 'INBOX' $pattern
+        if ($added) { [void](Invoke-RestMethod -Method Delete "$rest/INBOX/messages/$($added.uid)") }
+    }
+    Command $main $IDM_SYNC
+    [void](WaitFor { $null -eq (& $rowOf $reacted) -and $null -eq (& $rowOf "Re: $reacted") } 20)
+
     # ---- pictures from trusted senders ----
 
     Step 'pictures from trusted senders'

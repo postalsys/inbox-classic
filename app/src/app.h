@@ -133,6 +133,10 @@ void DrawFlagMark(HDC dc, int left, int top, int size, bool selected, int color)
 // a mark of the list strip (the paper clip, the lock) of `size` pixels at `left`, `top`; on a selected row on the same
 // plate as the flag, so its smoothed edges and dark ink do not sit on the highlight
 void DrawListMark(HDC dc, HIMAGELIST strip, int icon, int left, int top, int size, bool selected);
+// a row's words on one line of `place` (centred, cut short with an ellipsis) in `font` and `ink`, the reactions'
+// `badge` after them in the list's secondary `faint`; the badge keeps its room, the words are cut first
+void DrawWordsWithBadge(HDC dc, const RECT& place, const std::wstring& words, HFONT font, COLORREF ink, const std::wstring& badge,
+                        COLORREF faint);
 // the mark of a row's protection in the list strip, as the security bar shows it: the lock for an encrypted message
 // (also when it is signed inside), the seal for a signed one; -1 for neither
 int SecurityIcon(const PeMessage& row);
@@ -685,6 +689,8 @@ void OpenMessageWindow(HWND main, PeCore* core, Mailbox* mailbox, MessageListOrd
 // account the main window has), Print and Save As; it is no folder's, so it can not be moved, flagged or deleted.
 // Brought to the front when it is open already; false with what to say over `main` for a file that is no message.
 bool OpenMessageFile(HWND main, PeCore* core, Mailbox* mailbox, const std::wstring& path, std::wstring& error);
+// the same, saying over `owner` why a file can not be shown (Open Reaction Email of a reading pane)
+void OpenMessageFileOrSay(HWND owner, HWND main, PeCore* core, Mailbox* mailbox, const std::wstring& path);
 // an event of the core for the open message windows: their message ready or failed, gone from its folder
 void MessageWindowsEvent(const UiEvent& event);
 // the readers of the open message windows, to build their views again after a setting they follow changed (the
@@ -1034,6 +1040,9 @@ public:
     // the UI test's look at the count beside a conversation's row ("subject\nlabel"): 1 the row of that subject says
     // that label, 2 it says another, 0 no such row shown
     int TestThreadLabel(const std::wstring& text);
+    // the UI test's look at the reactions' badge after a row's subject ("subject\nbadge"): 1 the row of that subject
+    // carries that badge, 2 another, 0 no such row shown
+    int TestReactionBadge(const std::wstring& text);
     // the UI test's look at where the list's top row starts: 1000 plus its top in the list's client area (the header's
     // room above it, if any); 0 for an empty list
     int TestListTop() const;
@@ -1612,6 +1621,8 @@ enum ControlId : WORD {
     // over the list when the server did not do an action on messages: why, and its close button
     IDC_UNDONE_BAR,
     IDC_UNDONE_CLOSE,
+    // the Reactions line under the message header: who reacted with which emoji, a menu on each
+    IDC_REACTIONS,
 };
 
 // the items of the Flag submenu: IDM_FLAG_COLOR + 1 (red) to + 7 (gray), and Clear Flag

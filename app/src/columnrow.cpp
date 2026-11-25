@@ -233,6 +233,9 @@ std::wstring Mailbox::ColumnsRowText(const PeMessage& row) const {
     }
     parts.push_back(RowPerson(row));
     parts.push_back(Text(row.subject));
+    if (row.reactions && *row.reactions) {
+        parts.push_back(Text(row.reactions));
+    }
     if (row.has_date) {
         parts.push_back(FormatDate(row.date));
     }
@@ -292,7 +295,9 @@ void Mailbox::DrawColumnsRow(HDC dc, int index, const PeMessage& row) {
     int folderWidth = SeveralFolders()
                           ? DrawRight(paint, 1, folderRight, (folderRight - paint.left) * 2 / 5, RowFolder(row.folder), normal_, faint)
                           : 0;
-    DrawLine(paint, 1, paint.left, folderRight - folderWidth - (folderWidth ? Scale(10) : 0), Text(row.subject), font, fore);
+    // the reactions' badge after the subject, in the secondary colour
+    RECT subject = {paint.left, paint.top + paint.line, folderRight - folderWidth - (folderWidth ? Scale(10) : 0), paint.top + 2 * paint.line};
+    DrawWordsWithBadge(dc, subject, Text(row.subject), font, fore, Text(row.reactions), faint);
     // the first words, and a conversation's count and box
     int threadRight = paint.right;
     if (row.thread_opens) {
@@ -508,6 +513,22 @@ int Mailbox::TestThreadLabel(const std::wstring& text) {
         const PeMessage* row = RowNow(index);
         if (row && row->thread_opens && Text(row->subject) == subject) {
             return Text(row->thread_label) == label ? 1 : 2;
+        }
+    }
+    return 0;
+}
+
+int Mailbox::TestReactionBadge(const std::wstring& text) {
+    size_t newline = text.find(L'\n');
+    if (newline == std::wstring::npos) {
+        return 0;
+    }
+    std::wstring subject = text.substr(0, newline), badge = text.substr(newline + 1);
+    int count = ListView_GetItemCount(list_);
+    for (int index = 0; index < count; index++) {
+        const PeMessage* row = RowNow(index);
+        if (row && Text(row->subject) == subject) {
+            return Text(row->reactions) == badge ? 1 : 2;
         }
     }
     return 0;

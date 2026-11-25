@@ -1082,6 +1082,7 @@ extension UITest {
         try await keyboardReading()
         try await conversations()
         try await bounces()
+        try await reactions()
         try await oneTimeCodes()
         try await watchAndIgnore()
     }
