@@ -312,6 +312,11 @@ mod tests {
     }
 
     #[test]
+    fn gmail_s_reaction_part_is_no_file() {
+        assert_eq!(crate::view::listed(&parsed(GMAIL).attachments).count(), 0);
+    }
+
+    #[test]
     fn only_a_signed_sender_counts() {
         assert!(signed(GMAIL, &["mx.google.com"]).is_some());
         assert!(signed(OUTLOOK_MAIL, &["mx.example.net"]).is_some());
