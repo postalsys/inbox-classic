@@ -4083,8 +4083,9 @@ fn rows_get_their_senders_pictures() {
             .unwrap()
     };
     // the background worker reads the verdicts after the sync, and tells the list of the folder, which loaded its rows
-    // before (they show the logo once it loads them again)
-    s.wait(|e| *e == Event::FolderChanged { account, folder: inbox } && row("With a logo").logo.is_some());
+    // before (they show the logo once it loads them again); it may do so before the sync's end is told, so the rows
+    // are waited on rather than its event
+    s.wait_until(|| row("With a logo").logo.is_some(), "the logo of the brand's row");
     let (kind, key) = pe_core::senders::picture(&row("With a logo"));
     assert_eq!(kind, pe_core::senders::PictureKind::Logo);
     assert_ne!(key, 0);
@@ -5205,4 +5206,96 @@ fn otp_words(code: &str) -> String {
         Text::OtpNotification,
         &[("code", code.into()), ("domain", "accounts.example.com".into())],
     )
+}
+
+#[test]
+fn a_reaction_leaves_the_inbox_and_comes_as_a_reaction() {
+    let Some(s) = setup() else { return };
+    s.server.add_message(
+        "INBOX",
+        "From: Kate Kalda <kate@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Furniture\r\n\
+         Message-ID: <furniture@example.com>\r\n\r\nThe prices are in.\r\n",
+        &["\\Seen"],
+    );
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    // Gmail's reaction from Kate, whose domain the provider says signed it
+    let reaction = s.server.add_message(
+        "INBOX",
+        "Authentication-Results: mx.example.com; dkim=pass header.d=example.com\r\n\
+         From: Kate Kalda <kate@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Re: Furniture\r\n\
+         Message-ID: <reaction@example.com>\r\nIn-Reply-To: <furniture@example.com>\r\nMIME-Version: 1.0\r\n\
+         Content-Type: multipart/alternative; boundary=\"b\"\r\n\r\n\
+         --b\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n\u{1F44D}\r\n\r\nKate Kalda reacted via Gmail\r\n\
+         --b\r\nContent-Type: text/vnd.google.email-reaction+json; charset=UTF-8\r\n\r\n{\"emoji\": \"\u{1F44D}\", \"version\": 1}\r\n\
+         --b\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n<p>\u{1F44D}</p>\r\n--b--\r\n",
+        &[],
+    );
+    let event = s.wait(|e| matches!(e, Event::NewMail { .. }));
+    let Event::NewMail { title, text, .. } = event else {
+        unreachable!()
+    };
+    assert_eq!(title, "Kate Kalda reacted \u{1F44D}");
+    assert!(text.contains("Furniture"), "{text}");
+    // read on the server, and not in the list
+    assert!(s.server.flags("INBOX", reaction).iter().any(|f| f == "\\Seen"));
+    let inbox = s
+        .core
+        .folders(account)
+        .unwrap()
+        .into_iter()
+        .find(|f| f.info.path == "INBOX")
+        .unwrap();
+    let subjects: Vec<String> = s
+        .core
+        .messages(inbox.id, Sort::default(), 0, 10)
+        .unwrap()
+        .into_iter()
+        .map(|m| m.info.subject)
+        .collect();
+    assert_eq!(subjects, ["Furniture"]);
+    // the message carries it: its row's badge, the reading pane's chip
+    let furniture = s.core.messages(inbox.id, Sort::default(), 0, 10).unwrap()[0].info.uid;
+    let rows = s
+        .core
+        .search(&pe_store::Search::folder(inbox.id), Sort::default(), 0, 10)
+        .unwrap();
+    assert_eq!(pe_core::reactions::badge(&rows[0].reactions), "\u{1F44D}");
+    let chips = s.core.reactions_of(inbox.id, furniture).unwrap();
+    assert_eq!(chips.len(), 1);
+    assert_eq!(chips[0].text, "\u{1F44D} Kate Kalda");
+    // Open Reaction Email: the email as a file
+    let file = s.core.reaction_email_file(chips[0].emails[0]).unwrap().unwrap();
+    assert!(std::fs::read_to_string(&file).unwrap().contains("Re: Furniture"));
+    // Show as Email: listed again, the reaction gone from the message
+    s.core.show_reactions_as_email(&chips[0].emails).unwrap();
+    eventually(
+        || {
+            s.core
+                .messages(inbox.id, Sort::default(), 0, 10)
+                .unwrap()
+                .iter()
+                .any(|m| m.info.subject == "Re: Furniture")
+        },
+        "the reaction email listed again",
+    );
+    assert!(s.core.reactions_of(inbox.id, furniture).unwrap().is_empty());
+    // for good: the background pass reads its first words (which start with the emoji) and leaves it listed
+    let listed = || {
+        s.core
+            .messages(inbox.id, Sort::default(), 0, 10)
+            .unwrap()
+            .into_iter()
+            .find(|m| m.info.subject == "Re: Furniture")
+    };
+    eventually(
+        || listed().is_some_and(|m| m.snippet.is_some_and(|words| !words.is_empty())),
+        "the background pass reading the email's first words",
+    );
+    let until = std::time::Instant::now() + std::time::Duration::from_secs(3);
+    while std::time::Instant::now() < until {
+        assert!(listed().is_some(), "the email shown as email stays listed");
+        std::thread::sleep(std::time::Duration::from_millis(200));
+    }
 }

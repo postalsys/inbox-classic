@@ -936,3 +936,11 @@ ui-keys-publish-now = Δημοσίευση
 ui-keys-paste = Εισαγωγή από το πρό&χειρο
 ui-keys-paste-none = Το πρόχειρο δεν περιέχει κλειδί OpenPGP.
 ui-contact-find-key = Ανα&ζήτηση κλειδιού
+# review: new
+ui-reactions-label = Αντιδράσεις:
+# review: new
+ui-reaction-open-email = Άνοιγμα του email της αντίδρασης
+# review: new
+ui-reaction-show-as-email = Εμφάνιση ως email
+# review: new
+ui-reaction-when = Αντίδραση: { $when }

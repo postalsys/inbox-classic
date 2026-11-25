@@ -796,6 +796,16 @@ Screenshots: `bounce-1-failed`, `bounce-2-delayed`, `bounce-3-list`
 - a notice that delivery is delayed shows the amber card, saying it is still being tried
 - searching for `is:bounce` finds the two notices and nothing else
 
+## 34f1. Emoji reactions
+
+Screenshots: `reactions-1-list`, `reactions-2-header`, `reactions-3-menu`
+
+- a message "Furniture" from Kate Kalda, then her Gmail reaction (👍, with the provider's verdict for her domain) as a reply to it
+- the reaction email is not in the Inbox list and is read on the server
+- the original's row shows the 👍 badge after its subject
+- selected, its header has Reactions: with "👍 Kate Kalda"
+- the chip's menu has Open Reaction Email and Show as Email; Show as Email lists the reply again and the chip goes
+
 ## 34f2. A one-time code
 
 Screenshots: `otp-1-card`

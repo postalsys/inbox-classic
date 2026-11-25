@@ -1100,3 +1100,10 @@ preview-not-printed = { $name } ({ $details }) не се отпечатва. О�
 
 pgp-error-attached-private = Този прикачен файл съдържа частен ключ. Направо от пощата могат да се импортират само публични ключове. За да възстановите свой частен ключ, запишете прикачения файл и го импортирайте от прозореца „Ключове за шифроване“.
 pgp-part-find-key = Намиране на ключ
+# review: new
+reaction-notification-title = { $name }: реакция { $emoji }
+# review: new
+reaction-notification-text = { $count ->
+    [one] към { $subject }
+   *[other] към { $subject }, общо реакции: { $count }
+}

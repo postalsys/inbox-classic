@@ -1179,3 +1179,10 @@ preview-not-printed = Fișierul „{ $name }” ({ $details }) nu este inclus la
 
 pgp-error-attached-private = Această atașare conține o cheie privată. Direct din poștă pot fi importate numai chei publice. Pentru a vă restaura propria cheie privată, salvați atașarea și importați fișierul în fereastra „Chei de criptare”.
 pgp-part-find-key = Găsire cheie
+# review: new
+reaction-notification-title = { $name } a reacționat cu { $emoji }
+# review: new
+reaction-notification-text = { $count ->
+    [one] la { $subject }
+   *[other] la { $subject }, în total reacții: { $count }
+}

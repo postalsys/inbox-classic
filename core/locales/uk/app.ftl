@@ -956,3 +956,11 @@ ui-keys-publish-now = Опублікувати
 ui-keys-paste = Імпортувати з бу&фера обміну
 ui-keys-paste-none = У буфері обміну немає ключа OpenPGP.
 ui-contact-find-key = Знайти &ключ
+# review: new
+ui-reactions-label = Реакції:
+# review: new
+ui-reaction-open-email = Відкрити лист із реакцією
+# review: new
+ui-reaction-show-as-email = Показати як лист
+# review: new
+ui-reaction-when = Реакція: { $when }

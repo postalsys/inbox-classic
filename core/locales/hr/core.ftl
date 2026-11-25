@@ -1177,3 +1177,10 @@ preview-not-printed = { $name } ({ $details }) ne ispisuje se. Otvorite datoteku
 
 pgp-error-attached-private = Ovaj privitak sadrži privatni ključ. Izravno iz pošte mogu se uvesti samo javni ključevi. Za vraćanje vlastitog privatnog ključa spremite privitak i uvezite njegovu datoteku u prozoru Ključevi za šifriranje.
 pgp-part-find-key = Pronađi ključ
+# review: new
+reaction-notification-title = { $name }: reakcija { $emoji }
+# review: new
+reaction-notification-text = { $count ->
+    [1] na { $subject }
+   *[other] na { $subject }, ukupno reakcija: { $count }
+}

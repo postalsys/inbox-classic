@@ -32,6 +32,25 @@ std::wstring HeaderText(const char* from, bool hasDate, int64_t date, const char
     return header + L"\r\n " + label(PE_TEXT_HEADER_SUBJECT) + Text(subject);
 }
 
+// how tall a line of the header is, in its font (the static control draws its lines that far apart)
+int HeaderLine(HWND header) {
+    HDC dc = GetDC(header);
+    HGDIOBJ old = SelectObject(dc, reinterpret_cast<HFONT>(SendMessageW(header, WM_GETFONT, 0, 0)));
+    TEXTMETRICW metrics = {};
+    GetTextMetricsW(dc, &metrics);
+    SelectObject(dc, old);
+    ReleaseDC(header, dc);
+    return metrics.tmHeight;
+}
+
+// the Reactions line's words: its label as the header's are written, then one chip a person
+std::wstring ReactionsLabel() {
+    return L" " + core::Plain(PE_TEXT_UI_REACTIONS_LABEL) + L"  ";
+}
+
+// the room between two people's chips
+constexpr const wchar_t* kChipGap = L"   ";
+
 // an instant as the reader's local time, or as written (floating: in no zone the invitation defines)
 bool EventTime(int64_t seconds, bool floating, SYSTEMTIME& time) {
     return UnixToSystemTime(seconds, !floating, time);
@@ -238,6 +257,11 @@ void Reader::Create(HWND parent, PeCore* core) {
     parent_ = parent;
     core_ = core;
     header_ = CreateChild(parent, L"STATIC", L"", SS_LEFT | SS_NOPREFIX | SS_SUNKEN | WS_CLIPSIBLINGS, 0, {});
+    // the Reactions line, over the header's room for a fifth line when the message has reactions: drawn here, Tab
+    // reaches it, its menu (right-click, the menu key, Shift+F10) on each person
+    reactions_ = CreateChild(parent, L"STATIC", L"", SS_OWNERDRAW | SS_NOTIFY | SS_NOPREFIX | WS_TABSTOP | WS_CLIPSIBLINGS, IDC_REACTIONS, {});
+    SetWindowSubclass(reactions_, ReactionsProc, 0, reinterpret_cast<DWORD_PTR>(this));
+    ShowWindow(reactions_, SW_HIDE);
     logo_ = CreateChild(parent, L"STATIC", L"", SS_OWNERDRAW, IDC_LOGO, {});
     ShowWindow(logo_, SW_HIDE);
     // the paper clip at the right of the header, as Outlook Express has it: the files of the message in its menu
@@ -504,6 +528,11 @@ void Reader::Layout() {
     }
     const RECT& reader = area_;
     int headerHeight = kHeaderLines * Scale(15) + Scale(8);
+    // a line more for the reactions, as tall as the header's own lines
+    int line = HeaderLine(header_);
+    if (reactionList_) {
+        headerHeight = std::max(headerHeight + Scale(15), (kHeaderLines + 1) * line + Scale(8));
+    }
     int width = reader.right - reader.left;
     bool files = IsWindowVisible(attachments_);
     RECT button = {};
@@ -519,6 +548,19 @@ void Reader::Layout() {
         MoveWindow(logo_, reader.left, reader.top, logoWidth - Scale(4), headerHeight, TRUE);
     }
     MoveWindow(header_, reader.left + logoWidth, reader.top, width - clipWidth - logoWidth, headerHeight, TRUE);
+    if (reactionList_) {
+        // inside the header's edge, where its fifth line would be: its label starts where From's does
+        RECT inside;
+        GetClientRect(header_, &inside);
+        MapWindowPoints(header_, parent_, reinterpret_cast<POINT*>(&inside), 2);
+        int top = inside.top + kHeaderLines * line;
+        // just above the header, so the header does not paint over it and Tab reaches it where the header is
+        HWND above = GetWindow(header_, GW_HWNDPREV);
+        UINT order = above == reactions_ ? SWP_NOZORDER : 0;
+        SetWindowPos(reactions_, above ? above : HWND_TOP, inside.left, top, inside.right - inside.left,
+                     std::max(0, std::min(line + Scale(2), static_cast<int>(inside.bottom) - top)), SWP_NOACTIVATE | order);
+        InvalidateRect(reactions_, nullptr, FALSE);
+    }
     if (files) {
         int buttonHeight = button.bottom - button.top;
         MoveWindow(attachments_, reader.right - clipWidth, reader.top + std::max(0, (headerHeight - buttonHeight) / 2), clipWidth, buttonHeight,
@@ -578,6 +620,7 @@ void Reader::Clear(bool loading) {
         ShowBars(false, false);
     }
     SetWindowTextW(header_, L"");
+    LoadReactions();
     unsubscribeKind_ = PE_UNSUBSCRIBE_NONE;
     ShowListBar(L"", L"");
     ShowLogo(false, 0);
@@ -677,6 +720,7 @@ void Reader::ShowInfo() {
     // what changes below (the logo, the security bar, the strip, the bars) laid out once, at the end
     holdLayout_ = true;
     ShowHeader(info);
+    LoadReactions();
     ShowSecurity(info);
     // a mailing list that says how to leave it
     unsubscribeKind_ = file ? PE_UNSUBSCRIBE_NONE : info->unsubscribe;
@@ -723,6 +767,184 @@ void Reader::ShowHeader(const PeMessageInfo* info) {
         button.pszText = label.data();
         SendMessageW(attachments_, TB_SETBUTTONINFOW, IDC_ATTACHMENTS, reinterpret_cast<LPARAM>(&button));
     }
+}
+
+void Reader::LoadReactions() {
+    std::shared_ptr<PeReactions> list;
+    if (uid_ && file_.empty()) {
+        list.reset(pe_reactions(core_, folder_, uid_), pe_reactions_free);
+    }
+    size_t count = pe_reactions_count(list.get());
+    // its words are also its name for screen readers, and what the UI test reads
+    std::wstring text;
+    for (size_t i = 0; i < count; i++) {
+        if (const PeReaction* reaction = pe_reactions_get(list.get(), i)) {
+            text += (text.empty() ? ReactionsLabel() : kChipGap) + Text(reaction->text);
+        }
+    }
+    bool was = reactionList_ != nullptr;
+    reactionList_ = text.empty() ? nullptr : std::move(list);
+    if (text != GetWindowString(reactions_)) {
+        SetWindowTextW(reactions_, text.c_str());
+        InvalidateRect(reactions_, nullptr, FALSE);
+    }
+    if (was == (reactionList_ != nullptr)) {
+        return;
+    }
+    if (!reactionList_ && GetFocus() == reactions_) {
+        // the line goes from under the keyboard: to the message
+        SetFocus(previewHost_);
+    }
+    ShowWindow(reactions_, reactionList_ ? SW_SHOW : SW_HIDE);
+    Layout();
+}
+
+void Reader::DrawReactions(const DRAWITEMSTRUCT& item) {
+    HDC dc = item.hDC;
+    FillRect(dc, &item.rcItem, GetSysColorBrush(COLOR_BTNFACE));
+    reactionSpans_.clear();
+    size_t count = pe_reactions_count(reactionList_.get());
+    if (!count) {
+        return;
+    }
+    HFONT font = reinterpret_cast<HFONT>(SendMessageW(header_, WM_GETFONT, 0, 0));
+    HGDIOBJ old = SelectObject(dc, font);
+    SetBkMode(dc, TRANSPARENT);
+    SetTextColor(dc, GetSysColor(COLOR_BTNTEXT));
+    // how wide `words` are, as DrawText draws them (the emoji in the face Windows falls back to)
+    auto width = [dc, font](const std::wstring& words) { return static_cast<int>(Measure(dc, font, words, 0, DT_NOPREFIX).cx); };
+    auto draw = [&](const std::wstring& words, int left) {
+        RECT place = {left, item.rcItem.top, item.rcItem.right, item.rcItem.bottom};
+        DrawTextW(dc, words.c_str(), static_cast<int>(words.size()), &place, DT_LEFT | DT_TOP | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
+    };
+    std::wstring label = ReactionsLabel();
+    draw(label, item.rcItem.left);
+    int x = item.rcItem.left + width(label), gap = width(kChipGap);
+    for (size_t i = 0; i < count && x < item.rcItem.right; i++) {
+        const PeReaction* reaction = pe_reactions_get(reactionList_.get(), i);
+        std::wstring chip = reaction ? Text(reaction->text) : L"";
+        int right = std::min(x + width(chip), static_cast<int>(item.rcItem.right));
+        draw(chip, x);
+        reactionSpans_.emplace_back(x, right);
+        x = right + gap;
+    }
+    SelectObject(dc, old);
+    if (GetFocus() == item.hwndItem && !reactionSpans_.empty()) {
+        RECT focus = {reactionSpans_.front().first - Scale(2), item.rcItem.top, reactionSpans_.back().second + Scale(2), item.rcItem.bottom};
+        DrawFocusRect(dc, &focus);
+    }
+}
+
+int Reader::ReactionAt(int x) const {
+    for (size_t i = 0; i < reactionSpans_.size(); i++) {
+        if (x >= reactionSpans_[i].first && x < reactionSpans_[i].second) {
+            return static_cast<int>(i);
+        }
+    }
+    return -1;
+}
+
+void Reader::ReactionsMenu(int chip, POINT screen) {
+    // the list it is made from, kept while the menu is open: a reaction coming meanwhile reads the core's list again
+    std::shared_ptr<PeReactions> list = reactionList_;
+    size_t count = pe_reactions_count(list.get());
+    if (!count) {
+        return;
+    }
+    // a person's items: Open Reaction Email (the default, as a double-click does), Show as Email, and when they reacted
+    auto items = [&](HMENU menu, size_t index) {
+        const PeReaction* reaction = pe_reactions_get(list.get(), index);
+        UINT open = static_cast<UINT>(1 + 2 * index);
+        AppendMenuW(menu, MF_STRING, open, core::T(PE_TEXT_UI_REACTION_OPEN_EMAIL).c_str());
+        AppendMenuW(menu, MF_STRING, open + 1, core::T(PE_TEXT_UI_REACTION_SHOW_AS_EMAIL).c_str());
+        if (reaction && reaction->when && *reaction->when) {
+            AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+            AppendMenuW(menu, MF_STRING | MF_GRAYED, 0, MenuText(core::T(PE_TEXT_UI_REACTION_WHEN, {{"when", Text(reaction->when)}})).c_str());
+        }
+        SetMenuDefaultItem(menu, open, FALSE);
+    };
+    HMENU menu = CreatePopupMenu();
+    if (chip >= 0 || count == 1) {
+        // the person under the mouse, or the only one
+        items(menu, chip >= 0 ? static_cast<size_t>(chip) : 0);
+    } else {
+        // a submenu a person, named by their chip
+        for (size_t i = 0; i < count; i++) {
+            const PeReaction* reaction = pe_reactions_get(list.get(), i);
+            HMENU person = CreatePopupMenu();
+            items(person, i);
+            AppendMenuW(menu, MF_POPUP, reinterpret_cast<UINT_PTR>(person), MenuText(reaction ? Text(reaction->text) : L"").c_str());
+        }
+    }
+    if (screen.x == -1 && screen.y == -1) {
+        // the keyboard's: under the chip, or under the chips
+        RECT line;
+        GetWindowRect(reactions_, &line);
+        int left = reactionSpans_.empty() ? 0 : reactionSpans_[chip >= 0 ? static_cast<size_t>(chip) : 0].first;
+        screen = {line.left + left, line.bottom};
+    }
+    UINT command = static_cast<UINT>(TrackPopupMenu(menu, TPM_RETURNCMD | TPM_RIGHTBUTTON | TPM_LEFTALIGN | TPM_TOPALIGN, screen.x,
+                                                    screen.y, 0, parent_, nullptr));
+    DestroyMenu(menu);
+    if (command == 0) {
+        return;
+    }
+    size_t index = (command - 1) / 2;
+    if ((command - 1) % 2 == 0) {
+        OpenReactionEmail(list, index);
+        return;
+    }
+    // listed again for good, the reaction off the message: the line read again at once
+    pe_reactions_show_as_email(core_, list.get(), index);
+    LoadReactions();
+}
+
+void Reader::OpenReactionEmail(const std::shared_ptr<PeReactions>& list, size_t chip) {
+    core::String path(pe_reactions_email_file(core_, list.get(), chip));
+    if (!path) {
+        // no longer kept (gone from the server)
+        MessageBoxApp(parent_, core::T(PE_TEXT_UI_NOT_SHOWN).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        return;
+    }
+    if (onOpenFile) {
+        onOpenFile(Text(path.get()));
+    }
+}
+
+// the Reactions line's own mouse and keys: the menu on a person (right-click), or the one of everyone (the menu key,
+// Shift+F10, a right-click between chips); a double-click on a person opens their reaction email; the focus drawn
+LRESULT CALLBACK Reader::ReactionsProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR, DWORD_PTR data) {
+    auto* reader = reinterpret_cast<Reader*>(data);
+    switch (message) {
+    case WM_CONTEXTMENU: {
+        POINT screen = {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)};
+        int chip = -1;
+        if (screen.x != -1 || screen.y != -1) {
+            POINT inside = screen;
+            ScreenToClient(hwnd, &inside);
+            chip = reader->ReactionAt(inside.x);
+        }
+        reader->ReactionsMenu(chip, screen);
+        return 0;
+    }
+    case WM_LBUTTONDOWN:
+    case WM_RBUTTONDOWN:
+        SetFocus(hwnd);
+        break;
+    case WM_LBUTTONDBLCLK:
+        if (int chip = reader->ReactionAt(GET_X_LPARAM(lParam)); chip >= 0 && reader->reactionList_) {
+            reader->OpenReactionEmail(reader->reactionList_, static_cast<size_t>(chip));
+        }
+        return 0;
+    case WM_SETFOCUS:
+    case WM_KILLFOCUS:
+        InvalidateRect(hwnd, nullptr, FALSE);
+        break;
+    case WM_NCDESTROY:
+        RemoveWindowSubclass(hwnd, ReactionsProc, 0);
+        break;
+    }
+    return DefSubclassProc(hwnd, message, wParam, lParam);
 }
 
 void Reader::ChooseAttachment() {
@@ -1598,6 +1820,10 @@ bool Reader::OnDrawItem(const DRAWITEMSTRUCT& item) {
         DrawSecurityBar(item.hDC, item.rcItem, securityTone_, securityLock_, GetWindowString(security_), bold_, reserved);
         return true;
     }
+    if (item.hwndItem == reactions_) {
+        DrawReactions(item);
+        return true;
+    }
     if (item.hwndItem == logo_) {
         // the logo, its own transparency kept, in the middle of its place beside the header
         FillRect(item.hDC, &item.rcItem, GetSysColorBrush(COLOR_BTNFACE));
@@ -1722,6 +1948,12 @@ void Reader::OnEvent(const UiEvent& event) {
     switch (event.kind) {
     case PE_EVENT_KIND_LISTS_CHANGED:
         ListsChanged();
+        break;
+    case PE_EVENT_KIND_FOLDER_CHANGED:
+        // a reaction came for the message shown, or was shown as an email
+        if (uid_ && file_.empty() && event.folder == folder_) {
+            LoadReactions();
+        }
         break;
     case PE_EVENT_KIND_MESSAGE_READY:
         if (uid_ && event.folder == folder_ && event.uid == uid_) {

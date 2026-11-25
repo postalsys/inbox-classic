@@ -947,3 +947,11 @@ ui-keys-publish-now = Publicēt
 ui-keys-paste = Importēt no &starpliktuves
 ui-keys-paste-none = Starpliktuvē nav OpenPGP atslēgas.
 ui-contact-find-key = &Meklēt atslēgu
+# review: new
+ui-reactions-label = Reakcijas:
+# review: new
+ui-reaction-open-email = Atvērt reakcijas e-pasta ziņojumu
+# review: new
+ui-reaction-show-as-email = Rādīt kā e-pasta ziņojumu
+# review: new
+ui-reaction-when = Reakcija: { $when }

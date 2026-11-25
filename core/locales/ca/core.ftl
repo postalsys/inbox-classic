@@ -1107,3 +1107,10 @@ preview-not-printed = { $name } ({ $details }) no s’imprimeix. Obriu-lo per im
 
 pgp-error-attached-private = Aquest fitxer adjunt conté una clau privada. Només es poden importar claus públiques directament del correu. Per restaurar la vostra clau privada, deseu el fitxer adjunt i importeu-lo a Claus de xifratge.
 pgp-part-find-key = Cerca la clau
+# review: new
+reaction-notification-title = { $name } ha reaccionat amb { $emoji }
+# review: new
+reaction-notification-text = { $count ->
+    [one] a { $subject }
+   *[other] a { $subject }, i { $count } reaccions en total
+}

@@ -89,6 +89,8 @@ pub(crate) struct Line {
     pub unread: bool,
     pub open: bool,
     pub focus: bool,
+    /// Its reactions' badge ("👍❤️ 3"), empty for none
+    pub reactions: String,
 }
 
 /// The order and the choices of a conversation shown: which message is open, which has the focus, which lines show
@@ -278,6 +280,7 @@ pub(crate) fn lines(
                 unread: !info.seen(),
                 open: *open,
                 focus: at == plan.focus,
+                reactions: crate::reactions::badge(&message.reactions),
             }
         })
         .collect()
@@ -322,6 +325,7 @@ pub(crate) fn into_view(
             // a message still downloading has no document yet: its line only
             open: line.open && !parts[line.index].is_empty(),
             focus: line.focus,
+            reactions: &line.reactions,
         })
         .collect();
     let earlier = earlier_words(plan);
@@ -447,6 +451,7 @@ mod tests {
             logo: None,
             contact: None,
             snippet_is_state: false,
+            reactions: Vec::new(),
         }
     }
 

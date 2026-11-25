@@ -1196,3 +1196,10 @@ preview-not-printed = Fails „{ $name }” ({ $details }) netiek drukāts. Atve
 
 pgp-error-attached-private = Šis pielikums satur privāto atslēgu. Tieši no pasta var importēt tikai publiskās atslēgas. Lai atjaunotu savu privāto atslēgu, saglabājiet pielikumu un importējiet tā failu logā „Šifrēšanas atslēgas”.
 pgp-part-find-key = Meklēt atslēgu
+# review: new
+reaction-notification-title = { $name }: reakcija { $emoji }
+# review: new
+reaction-notification-text = { $count ->
+    [1] uz ziņojumu { $subject }
+   *[other] uz ziņojumu { $subject }, kopā reakciju: { $count }
+}

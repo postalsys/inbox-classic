@@ -1194,3 +1194,10 @@ preview-not-printed = { $name } ({ $details }) se ne štampa. Otvorite datoteku 
 
 pgp-error-attached-private = Ovaj prilog sadrži privatni ključ. Neposredno iz pošte mogu da se uvezu samo javni ključevi. Da biste obnovili svoj privatni ključ, sačuvajte prilog i uvezite njegovu datoteku u prozoru Ključevi za šifrovanje.
 pgp-part-find-key = Pronađi ključ
+# review: new
+reaction-notification-title = { $name }: reakcija { $emoji }
+# review: new
+reaction-notification-text = { $count ->
+    [1] na { $subject }
+   *[other] na { $subject }, ukupno reakcija: { $count }
+}

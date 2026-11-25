@@ -952,3 +952,11 @@ ui-keys-publish-now = Objavi
 ui-keys-paste = Uvezi iz &ostave
 ui-keys-paste-none = Ostava ne sadrži OpenPGP ključ.
 ui-contact-find-key = Pronađi &ključ
+# review: new
+ui-reactions-label = Reakcije:
+# review: new
+ui-reaction-open-email = Otvori poruku e-pošte sa reakcijom
+# review: new
+ui-reaction-show-as-email = Prikaži kao poruku e-pošte
+# review: new
+ui-reaction-when = Reakcija: { $when }

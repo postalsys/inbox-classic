@@ -207,9 +207,16 @@ pub async fn sync_folder(client: &mut Client, store: &mut Store, folder: FolderI
     if let Some(&max_known) = known.last() {
         report.flags_changed = sync_flags(client, store, folder, since, &selected, max_known).await?;
     }
-    let from = known.last().map_or(1, |uid| uid + 1);
+    // the reaction emails taken out of the lists (pe-store reactions.rs) are known too: not fetched again, and let go
+    // when they are gone from the server
+    let hidden = store.hidden_uids(folder)?;
+    let from = known.last().max(hidden.last()).map_or(1, |uid| uid + 1);
     report.added = fetch_new(client, store, folder, &selected, from).await?;
-    let gone = find_gone(client, &known, &selected, report.added).await?;
+    let gone = if hidden.is_empty() {
+        find_gone(client, &known, &selected, report.added).await?
+    } else {
+        find_gone(client, &[&known[..], &hidden].concat(), &selected, report.added).await?
+    };
 
     let state = SyncState {
         uid_validity: selected.uid_validity,
@@ -322,6 +329,25 @@ async fn fetch_new(
         Some(error) => Err(error.into()),
         None => Ok(added),
     }
+}
+
+/// The messages `uids` of `folder` fetched into the list again (a reaction email shown as an email): selected,
+/// their summaries fetched and stored. Returns how many came.
+pub async fn fetch_uids(client: &mut Client, store: &mut Store, folder: FolderId, uids: &[u64]) -> Result<usize> {
+    if uids.is_empty() {
+        return Ok(0);
+    }
+    select_folder(client, store, folder).await?;
+    let mut found: Vec<MessageInfo> = Vec::new();
+    for set in uid_sets(uids) {
+        client
+            .fetch_each(&Messages::Uids(set), &summary_query(), &mut |message| {
+                found.extend(summary::summary(message));
+            })
+            .await?;
+    }
+    store.transaction(|store| store.add_messages(folder, &found))?;
+    Ok(found.len())
 }
 
 /// The cached UIDs the server no longer has. With every new message added, as many messages as

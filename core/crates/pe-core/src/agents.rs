@@ -469,6 +469,8 @@ pub struct AgentMessage {
     pub earlier: String,
     /// The files of the message: name, type and size
     pub attachments: Vec<(String, String, u64)>,
+    /// The emoji reactions to it, one a person: "👍 Kate Kalda" (read-only; the reaction emails stay hidden)
+    pub reactions: Vec<String>,
     /// The bounce explained, the invitation, the sender's check and the signature, as the reading pane shows them
     pub facts: Facts,
 }
@@ -1374,7 +1376,13 @@ impl Core {
             ring: ring.as_deref(),
             replies: &replies,
         };
-        Ok(Some(agent_message(&source, &context)))
+        let mut read = agent_message(&source, &context);
+        read.reactions = self
+            .reactions_of(folder, uid)?
+            .into_iter()
+            .map(|chip| chip.text)
+            .collect();
+        Ok(Some(read))
     }
 }
 

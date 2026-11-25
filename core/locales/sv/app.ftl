@@ -935,3 +935,11 @@ ui-keys-publish-now = Publicera
 ui-keys-paste = Importera från &urklipp
 ui-keys-paste-none = Urklipp innehåller ingen OpenPGP-nyckel.
 ui-contact-find-key = Sö&k nyckel
+# review: new
+ui-reactions-label = Reaktioner:
+# review: new
+ui-reaction-open-email = Öppna reaktionens e-postmeddelande
+# review: new
+ui-reaction-show-as-email = Visa som e-postmeddelande
+# review: new
+ui-reaction-when = Reaktion: { $when }

@@ -37,6 +37,7 @@ pub mod pictures;
 pub mod previews;
 pub mod protect;
 mod protect_out;
+pub mod reactions;
 mod reads;
 mod requests;
 mod rules;
@@ -1057,7 +1058,10 @@ impl Core {
     /// A page of what `search` finds (Gmail's syntax, see [`pe_store::Query`]), in the order of `sort`
     pub fn search(&self, search: &Search, sort: Sort, offset: u64, limit: u64) -> Result<Vec<Message>> {
         let sort = self.list_sort(search, sort)?;
-        Ok(encrypted_lines(self.store().search(search, sort, offset, limit)?))
+        let store = self.store();
+        let mut rows = encrypted_lines(store.search(search, sort, offset, limit)?);
+        store.add_reactions(&mut rows)?;
+        Ok(rows)
     }
 
     /// [`Core::search`] read from a row next to the page or from the end of the list (`anchor`, see
@@ -1071,9 +1075,10 @@ impl Core {
         anchor: pe_store::Anchor,
     ) -> Result<Vec<Message>> {
         let sort = self.list_sort(search, sort)?;
-        Ok(encrypted_lines(
-            self.store().search_from(search, sort, offset, limit, anchor)?,
-        ))
+        let store = self.store();
+        let mut rows = encrypted_lines(store.search_from(search, sort, offset, limit, anchor)?);
+        store.add_reactions(&mut rows)?;
+        Ok(rows)
     }
 
     /// What the store holds now: equal values mean nothing was written in between, so what was read then is still so
@@ -1907,7 +1912,9 @@ impl Core {
                 if conversation::alone(&message) {
                     return None;
                 }
-                let messages = store.conversation_messages(thread, folder).ok()?;
+                let mut messages = store.conversation_messages(thread, folder).ok()?;
+                // each line's reactions
+                let _ = store.add_reactions(&mut messages);
                 let account = store.folder_info(folder).map(|(account, _)| account).ok()?;
                 let folders: HashMap<FolderId, pe_store::FolderInfo> = store
                     .folders(account)
@@ -3507,7 +3514,7 @@ fn encrypted_lines(mut found: Vec<Message>) -> Vec<Message> {
 /// Whether a folder shows the cards and bars about a message's sender (a one-time code, the mailing-list bar): not Junk
 /// E-mail (a code may be bait, leaving a list confirms the address to a spammer), Sent Items or Drafts (the user's own
 /// mail)
-fn sender_cards_shown(folder: &pe_store::FolderInfo) -> bool {
+pub(crate) fn sender_cards_shown(folder: &pe_store::FolderInfo) -> bool {
     !matches!(folder.special_use.as_deref(), Some("\\Junk" | "\\Sent" | "\\Drafts"))
 }
 

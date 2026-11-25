@@ -120,9 +120,7 @@ void RegisterDialogClass(const wchar_t* name, WNDPROC proc) {
     RegisterClassExW(&windowClass);
 }
 
-namespace {
-// `text` without its menu letter marks, measured in `font` (the dialog font when null), wrapped at `wrapWidth` if set
-SIZE Measure(HDC dc, HFONT font, const std::wstring& text, int wrapWidth = 0, UINT flags = 0) {
+SIZE Measure(HDC dc, HFONT font, const std::wstring& text, int wrapWidth, UINT flags) {
     std::wstring plain = text;
     if (!(flags & DT_NOPREFIX)) {
         plain.erase(std::remove(plain.begin(), plain.end(), L'&'), plain.end());
@@ -135,6 +133,7 @@ SIZE Measure(HDC dc, HFONT font, const std::wstring& text, int wrapWidth = 0, UI
     return {bounds.right - bounds.left, bounds.bottom - bounds.top};
 }
 
+namespace {
 // the widest of `labels` plus `margin`, at least `least`, measured in one screen DC
 template <typename Labels>
 int Widest(const Labels& labels, int least, int margin) {

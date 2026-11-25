@@ -1078,3 +1078,10 @@ preview-not-printed = { $name } ({ $details }) yazdırılmaz. Yazdırmak için a
 
 pgp-error-attached-private = Bu ekte gizli anahtar var. Postadan doğrudan yalnızca ortak anahtarlar içe aktarılabilir. Kendi gizli anahtarınızı geri yüklemek için eki kaydedin ve dosyayı Şifreleme Anahtarları penceresinden içe aktarın.
 pgp-part-find-key = Anahtar Bul
+# review: new
+reaction-notification-title = { $name }, { $emoji } ile tepki verdi
+# review: new
+reaction-notification-text = { $count ->
+    [one] Konu: { $subject }
+   *[other] Konu: { $subject }, toplam { $count } tepki
+}

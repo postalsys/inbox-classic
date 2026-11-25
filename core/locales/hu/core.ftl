@@ -1065,3 +1065,10 @@ preview-not-printed = A melléklet tartalma nem szerepel a nyomaton: { $name } (
 
 pgp-error-attached-private = Ez a melléklet titkos kulcsot tartalmaz. Közvetlenül levélből csak nyilvános kulcsok importálhatók. Saját titkos kulcsának visszaállításához mentse a mellékletet, majd importálja a fájlt a Titkosítási kulcsok ablakban.
 pgp-part-find-key = Kulcs keresése
+# review: new
+reaction-notification-title = { $name } reagált: { $emoji }
+# review: new
+reaction-notification-text = { $count ->
+    [one] erre: { $subject }
+   *[other] erre: { $subject }, összesen { $count } reakció
+}

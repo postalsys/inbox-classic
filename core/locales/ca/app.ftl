@@ -937,3 +937,11 @@ ui-keys-publish-now = Publica
 ui-keys-paste = Importa del porta-&retalls
 ui-keys-paste-none = El porta-retalls no conté cap clau OpenPGP.
 ui-contact-find-key = C&erca la clau
+# review: new
+ui-reactions-label = Reaccions:
+# review: new
+ui-reaction-open-email = Obre el correu electrònic de la reacció
+# review: new
+ui-reaction-show-as-email = Mostra com a correu electrònic
+# review: new
+ui-reaction-when = Reacció: { $when }

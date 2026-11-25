@@ -262,6 +262,9 @@ pub struct Message {
     /// [`Message::snippet`] says the message's state ("Encrypted message"), not words its sender wrote: the apps style
     /// it as such (the core sets it)
     pub snippet_is_state: bool,
+    /// The emoji reactions to it (to its conversation's messages, for a collapsed conversation's row), each emoji with
+    /// how many sent it, most first ([`Store::add_reactions`])
+    pub reactions: Vec<(String, u32)>,
 }
 
 impl Message {
@@ -404,6 +407,7 @@ pub(crate) fn from_row(row: &Row) -> rusqlite::Result<Message> {
             _ => None,
         },
         snippet_is_state: false,
+        reactions: Vec::new(),
         info: MessageInfo {
             uid: row.get(2)?,
             modseq: row.get(3)?,
@@ -662,6 +666,8 @@ impl Store {
 
     /// Removes messages by UID, with their cached sources; returns how many there were
     pub fn remove_messages(&self, folder: FolderId, uids: &[u64]) -> Result<usize> {
+        // a hidden reaction email gone from the server goes with its reaction
+        self.remove_hidden(folder, uids)?;
         let mut statement = self
             .db
             .prepare_cached("DELETE FROM messages WHERE folder_id = ?1 AND uid = ?2")?;
@@ -678,6 +684,14 @@ impl Store {
             .db
             .prepare_cached("SELECT uid FROM messages WHERE folder_id = ?1 ORDER BY uid")?;
         statement.query_map([folder], |row| row.get(0))?.collect()
+    }
+
+    /// The UIDs of the cached messages of a folder from `first` on, ascending (the new ones of a sync)
+    pub fn uids_from(&self, folder: FolderId, first: u64) -> Result<Vec<u64>> {
+        self.db
+            .prepare_cached("SELECT uid FROM messages WHERE folder_id = ?1 AND uid >= ?2 ORDER BY uid")?
+            .query_map(params![folder, first], |row| row.get(0))?
+            .collect()
     }
 
     /// The highest cached UID of a folder

@@ -1094,3 +1094,10 @@ preview-not-printed = Tiedostoa { $name } ({ $details }) ei tulosteta. Avaa se t
 
 pgp-error-attached-private = Tämä liite sisältää yksityisen avaimen. Suoraan viestistä voi tuoda vain julkisia avaimia. Palauta oma yksityinen avaimesi tallentamalla liite ja tuomalla tiedosto Salausavaimet-ikkunassa.
 pgp-part-find-key = Etsi avain
+# review: new
+reaction-notification-title = { $name } reagoi: { $emoji }
+# review: new
+reaction-notification-text = { $count ->
+    [one] viestiin { $subject }
+   *[other] viestiin { $subject }, reaktioita yhteensä { $count }
+}

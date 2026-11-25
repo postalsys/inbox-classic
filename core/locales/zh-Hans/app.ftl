@@ -916,3 +916,11 @@ ui-keys-publish-now = 发布
 ui-keys-paste = 从剪贴板导入(&L)
 ui-keys-paste-none = 剪贴板中没有 OpenPGP 密钥。
 ui-contact-find-key = 查找密钥(&F)
+# review: new
+ui-reactions-label = 回应：
+# review: new
+ui-reaction-open-email = 打开回应邮件
+# review: new
+ui-reaction-show-as-email = 显示为邮件
+# review: new
+ui-reaction-when = 回应时间：{ $when }

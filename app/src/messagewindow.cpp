@@ -545,6 +545,10 @@ MessageWindow* CreateMessageWindow(HWND main, PeCore* core, Mailbox* mailbox, co
         ShowMain();
         state->mailbox->ShowMessage(folder, uid);
     };
+    // Open Reaction Email: the email in a message window of its own
+    state->reader.onOpenFile = [state](const std::wstring& path) {
+        OpenMessageFileOrSay(state->hwnd, state->main, state->core, state->mailbox, path);
+    };
     // the subject from the message itself once it is there
     state->reader.onShown = [state] {
         if (const PeMessageInfo* info = state->reader.Info()) {
@@ -596,6 +600,14 @@ bool OpenMessageFile(HWND main, PeCore* core, Mailbox* mailbox, const std::wstri
     Layout(state);
     ShowOpened(state);
     return true;
+}
+
+void OpenMessageFileOrSay(HWND owner, HWND main, PeCore* core, Mailbox* mailbox, const std::wstring& path) {
+    std::wstring error;
+    if (!OpenMessageFile(main, core, mailbox, path, error)) {
+        std::wstring text = core::T(PE_TEXT_UI_NOT_SHOWN) + (error.empty() ? L"" : L"\n\n" + error);
+        MessageBoxApp(owner, text.c_str(), kTitle, MB_OK | MB_ICONERROR);
+    }
 }
 
 std::vector<Reader*> MessageWindowReaders() {

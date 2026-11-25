@@ -935,3 +935,11 @@ ui-keys-publish-now = Publiceren
 ui-keys-paste = Importeren van het &klembord
 ui-keys-paste-none = Het klembord bevat geen OpenPGP-sleutel.
 ui-contact-find-key = Sleutel &zoeken
+# review: new
+ui-reactions-label = Reacties:
+# review: new
+ui-reaction-open-email = E-mail met reactie openen
+# review: new
+ui-reaction-show-as-email = Tonen als e-mail
+# review: new
+ui-reaction-when = Gereageerd: { $when }

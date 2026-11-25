@@ -922,3 +922,10 @@ preview-not-printed = 未列印{ $name }（{ $details }）。請開啟檔案以�
 
 pgp-error-attached-private = 這個附件包含私密金鑰。只有公開金鑰能直接從郵件匯入。若要還原您自己的私密金鑰，請儲存附件，再到「加密金鑰」匯入該檔案。
 pgp-part-find-key = 尋找金鑰
+# review: new
+reaction-notification-title = { $name }回應了{ $emoji }
+# review: new
+reaction-notification-text = { $count ->
+    [1] 郵件：{ $subject }
+   *[other] 郵件：{ $subject }，共{ $count }個回應
+}

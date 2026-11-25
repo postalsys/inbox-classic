@@ -1090,3 +1090,10 @@ preview-not-printed = { $name } ({ $details }) no se imprime. Ábralo para impri
 
 pgp-error-attached-private = Este adjunto contiene una clave privada. Solo se pueden importar claves públicas directamente del correo. Para restaurar su propia clave privada, guarde el adjunto e importe el archivo en Claves de cifrado.
 pgp-part-find-key = Buscar clave
+# review: new
+reaction-notification-title = { $name } reaccionó con { $emoji }
+# review: new
+reaction-notification-text = { $count ->
+    [one] a { $subject }
+   *[other] a { $subject }, y { $count } reacciones en total
+}

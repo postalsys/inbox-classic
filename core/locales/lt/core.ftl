@@ -1188,3 +1188,10 @@ preview-not-printed = Failas „{ $name }“ ({ $details }) nespausdinamas kartu
 
 pgp-error-attached-private = Šiame priede yra privatusis raktas. Tiesiai iš laiško galima importuoti tik viešuosius raktus. Norėdami atkurti savo privatųjį raktą, įrašykite priedą ir importuokite jo failą lange „Šifravimo raktai“.
 pgp-part-find-key = Rasti raktą
+# review: new
+reaction-notification-title = { $name }: reakcija { $emoji }
+# review: new
+reaction-notification-text = { $count ->
+    [1] į laišką { $subject }
+   *[other] į laišką { $subject }, iš viso reakcijų: { $count }
+}

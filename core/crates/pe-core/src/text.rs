@@ -208,6 +208,20 @@ pub fn quoted_subject(subject: &str) -> String {
 /// The title and the text of the notification of new mail (`count` messages, the newest from `from` about
 /// `subject`): who it is from over its subject, or how many over the newest; a watched conversation's says so in the
 /// title
+/// The notification of a reaction: "Kate Kalda reacted 👍" over "to “Furniture”", or with several, how many came
+pub(crate) fn reaction_words(who: &str, emoji: &str, subject: &str, count: usize) -> (String, String) {
+    let title = tr_args(
+        Text::ReactionNotificationTitle,
+        &[("name", who.into()), ("emoji", emoji.into())],
+    );
+    let subject = quoted_subject(subject);
+    let text = tr_args(
+        Text::ReactionNotificationText,
+        &[("subject", (&subject).into()), ("count", count.into())],
+    );
+    (title, text)
+}
+
 pub(crate) fn new_mail_words(count: usize, from: &str, subject: &str, watched: bool) -> (String, String) {
     let no_subject = tr(Text::UiNoSubject);
     let subject = if subject.is_empty() {

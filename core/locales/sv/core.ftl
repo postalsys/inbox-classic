@@ -1087,3 +1087,10 @@ preview-not-printed = { $name } ({ $details }) skrivs inte ut. Öppna filen för
 
 pgp-error-attached-private = Den här bilagan innehåller en privat nyckel. Endast offentliga nycklar kan importeras direkt från meddelanden. För att återställa din egen privata nyckel, spara bilagan och importera filen under Krypteringsnycklar.
 pgp-part-find-key = Sök nyckel
+# review: new
+reaction-notification-title = { $name } reagerade med { $emoji }
+# review: new
+reaction-notification-text = { $count ->
+    [one] på { $subject }
+   *[other] på { $subject }, och { $count } reaktioner totalt
+}

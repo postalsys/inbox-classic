@@ -1083,3 +1083,8 @@ preview-tile-off = Not shown until Inbox Classic starts again
 # in a printout, for a file shown in the message that is not printed (a PDF file, a tile): { $details } is its size,
 # or a PDF file's pages and size
 preview-not-printed = { $name } ({ $details }) is not printed. Open it to print it.
+reaction-notification-title = { $name } reacted { $emoji }
+reaction-notification-text = { $count ->
+    [one] to { $subject }
+   *[other] to { $subject }, and { $count } reactions in all
+}

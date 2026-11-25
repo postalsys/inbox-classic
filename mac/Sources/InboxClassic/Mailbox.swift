@@ -2005,6 +2005,12 @@ public final class Mailbox: NSObject {
         return style == .emphasized ? NSColor.alternateSelectedControlTextColor.withAlphaComponent(0.7) : ignoredColor
     }
 
+    /// the colour of a row's secondary text (a date, a snippet, the reactions' badge): lighter on the accent of a
+    /// selected row
+    static func secondaryRowColor(style: NSView.BackgroundStyle) -> NSColor {
+        style == .emphasized ? NSColor.alternateSelectedControlTextColor.withAlphaComponent(0.8) : .secondaryLabelColor
+    }
+
     func markJunk(_ junk: Bool) {
         guard hasSelection else { return }
         actAndRemove(junk ? PE_ACTION_JUNK : PE_ACTION_NOT_JUNK)
@@ -3321,15 +3327,19 @@ extension ConversationCell {
 /// count of its messages, and the messages under an open one are indented
 final class SubjectCell: NSTableCellView, ConversationCell {
     private let label = NSTextField(labelWithString: "")
+    /// the emoji reactions after the subject, in the secondary colour, kept whole while the subject is cut short
+    private let badge = NSTextField(labelWithString: "")
     let disclosure = NSButton()
     private var grey = false {
-        didSet { label.textColor = Mailbox.rowColor(grey: grey, style: backgroundStyle) }
+        didSet { paint() }
     }
 
     override var backgroundStyle: NSView.BackgroundStyle {
-        didSet { label.textColor = Mailbox.rowColor(grey: grey, style: backgroundStyle) }
+        didSet { paint() }
     }
     private var indent: NSLayoutConstraint!
+    /// the room between the subject and the badge, none without one
+    private var badgeGap: NSLayoutConstraint!
     /// the triangle clicked: open (true) or close the conversation
     var toggled: (Bool) -> Void = { _ in }
 
@@ -3344,32 +3354,53 @@ final class SubjectCell: NSTableCellView, ConversationCell {
         identifier = id
         setUpDisclosure(disclosure, action: #selector(clicked))
         disclosure.translatesAutoresizingMaskIntoConstraints = false
-        label.lineBreakMode = .byTruncatingTail
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.cell?.usesSingleLineMode = true
+        for field in [label, badge] {
+            field.lineBreakMode = .byTruncatingTail
+            field.translatesAutoresizingMaskIntoConstraints = false
+            field.cell?.usesSingleLineMode = true
+            addSubview(field)
+        }
         addSubview(disclosure)
-        addSubview(label)
+        label.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        badge.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
+        badge.setContentHuggingPriority(.required, for: .horizontal)
         indent = label.leadingAnchor.constraint(equalTo: leadingAnchor, constant: SubjectCell.inset)
+        badgeGap = badge.leadingAnchor.constraint(equalTo: label.trailingAnchor)
         NSLayoutConstraint.activate([
             disclosure.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 1),
             disclosure.centerYAnchor.constraint(equalTo: centerYAnchor),
             indent,
-            label.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -2),
+            badgeGap,
+            badge.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -2),
             label.centerYAnchor.constraint(equalTo: centerYAnchor),
+            badge.firstBaselineAnchor.constraint(equalTo: label.firstBaselineAnchor),
         ])
         textField = label
     }
 
     required init?(coder: NSCoder) { fatalError() }
 
+    /// the badge the row shows, empty for none (for the UI test)
+    var reactionsShown: String { badge.isHidden ? "" : badge.stringValue }
+
     func show(_ message: Message, grouped: Bool) {
         // the core says how many messages and how many new, "(3, 1 new)"
         label.stringValue = message.opens ? "\(message.subject) \(message.threadLabel)" : message.subject
         label.font = message.bold ? .boldSystemFont(ofSize: NSFont.systemFontSize) : .systemFont(ofSize: NSFont.systemFontSize)
+        badge.stringValue = message.reactions
+        badge.font = .systemFont(ofSize: NSFont.systemFontSize)
+        badge.isHidden = message.reactions.isEmpty
+        badgeGap.constant = message.reactions.isEmpty ? 0 : 6
         grey = message.dimmed
         disclosure.isHidden = !message.opens
         disclosure.state = message.threadExpanded ? .on : .off
         indent.constant = !grouped ? SubjectCell.inset : SubjectCell.glyph + CGFloat(message.threadDepth) * SubjectCell.step
+    }
+
+    /// the subject in the row's colour, the badge in the secondary one (lighter on the selection)
+    private func paint() {
+        label.textColor = Mailbox.rowColor(grey: grey, style: backgroundStyle)
+        badge.textColor = Mailbox.secondaryRowColor(style: backgroundStyle)
     }
 
     @objc private func clicked() {
@@ -3391,6 +3422,8 @@ final class MessageRowCell: NSTableCellView, ConversationCell {
     private let who = MessageRowCell.label(13)
     private let date = MessageRowCell.label(12)
     private let subject = MessageRowCell.label(12)
+    /// the emoji reactions right after the subject, kept whole while the subject is cut short
+    private let reactions = MessageRowCell.label(12)
     private let folder = MessageRowCell.label(11)
     private let attach = NSImageView()
     private let flag = NSImageView()
@@ -3450,9 +3483,20 @@ final class MessageRowCell: NSTableCellView, ConversationCell {
         // the sender always semibold, as Mail's: the dot and a bold subject say the row is unread
         who.font = .systemFont(ofSize: 13, weight: .semibold)
         setUpDisclosure(disclosure, action: #selector(clicked))
+        // the badge beside the subject, the room after it taken by a spacer, not by the subject
+        let subjectLine = MessageRowCell.line(subject, [folder, secure, attach, flag])
+        let spacer = NSView()
+        spacer.setContentHuggingPriority(.init(1), for: .horizontal)
+        subject.setContentHuggingPriority(.init(2), for: .horizontal)
+        reactions.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
+        reactions.setContentHuggingPriority(.required, for: .horizontal)
+        subjectLine.insertArrangedSubview(reactions, at: 1)
+        subjectLine.insertArrangedSubview(spacer, at: 2)
+        subjectLine.setCustomSpacing(4, after: subject)
+        subjectLine.setCustomSpacing(0, after: reactions)
         let text = NSStackView(views: [
             MessageRowCell.line(who, [date], baseline: true),
-            MessageRowCell.line(subject, [folder, secure, attach, flag]),
+            subjectLine,
             MessageRowCell.line(snippet, [count, disclosure]),
         ])
         text.orientation = .vertical
@@ -3529,6 +3573,8 @@ final class MessageRowCell: NSTableCellView, ConversationCell {
         date.stringValue = when
         subject.stringValue = message.subject.isEmpty ? Text.uiNoSubject.text : message.subject
         subject.font = message.bold ? .boldSystemFont(ofSize: 12) : .systemFont(ofSize: 12)
+        reactions.stringValue = message.reactions
+        reactions.isHidden = message.reactions.isEmpty
         folder.stringValue = place
         folder.isHidden = place.isEmpty
         attach.image = message.attachIcon
@@ -3558,7 +3604,9 @@ final class MessageRowCell: NSTableCellView, ConversationCell {
     private func spoken(_ message: Message, who name: String, date when: String) -> String {
         var parts: [String] = []
         if message.bold { parts.append(Text.uiRowUnread.text) }
-        parts += [name, subject.stringValue, when]
+        parts += [name, subject.stringValue]
+        if !message.reactions.isEmpty { parts.append(message.reactions) }
+        parts.append(when)
         if message.flagged { parts.append(Text.uiRowFlagged.text) }
         if message.hasAttachments { parts.append(Text.uiRowAttachments.text) }
         if let words = message.protectionWords { parts.append(words) }
@@ -3571,10 +3619,10 @@ final class MessageRowCell: NSTableCellView, ConversationCell {
     private func paint() {
         let selected = backgroundStyle == .emphasized
         let main = Mailbox.rowColor(grey: grey, style: backgroundStyle)
-        let secondary: NSColor = selected ? .alternateSelectedControlTextColor.withAlphaComponent(0.8) : .secondaryLabelColor
+        let secondary = Mailbox.secondaryRowColor(style: backgroundStyle)
         who.textColor = main
         subject.textColor = main
-        for label in [date, folder, snippet, count] {
+        for label in [date, reactions, folder, snippet, count] {
             label.textColor = secondary
         }
         dot.layer?.backgroundColor = (selected ? NSColor.alternateSelectedControlTextColor : .controlAccentColor).cgColor

@@ -278,6 +278,8 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     // Find Key of a signature: while it is looked up, and what was found, in the status bar
     reader_.onKeyLookup = [this](const std::wstring& said, bool) { Say(said); };
     reader_.onBouncedMessage = [this](int64_t folder, uint64_t uid) { ShowMessage(folder, uid); };
+    // Open Reaction Email: the email in a message window of its own
+    reader_.onOpenFile = [this](const std::wstring& path) { OpenMessageFileOrSay(parent_, parent_, core_, this, path); };
     // the keys for reading also while the message has the keyboard, sent as the accelerators send them
     reader_.SetKeys([parent](UINT key) {
         WORD id = ReadingKey(key);
@@ -1503,6 +1505,32 @@ void DrawListMark(HDC dc, HIMAGELIST strip, int icon, int left, int top, int siz
     ImageList_Draw(strip, icon, dc, left, top, ILD_TRANSPARENT);
 }
 
+void DrawWordsWithBadge(HDC dc, const RECT& place, const std::wstring& words, HFONT font, COLORREF ink, const std::wstring& badge,
+                        COLORREF faint) {
+    if (place.right <= place.left) {
+        return;
+    }
+    constexpr UINT kLine = DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX;
+    HGDIOBJ old = SelectObject(dc, font);
+    SetBkMode(dc, TRANSPARENT);
+    // how wide the words and the badge are as DrawText draws them (the emoji in the face Windows falls back to)
+    auto width = [dc, font](const std::wstring& text) { return static_cast<int>(Measure(dc, font, text, 0, DT_NOPREFIX).cx); };
+    RECT text = place;
+    int badgeWidth = badge.empty() ? 0 : width(badge), gap = badge.empty() ? 0 : Scale(6);
+    if (badgeWidth) {
+        int left = static_cast<int>(text.left);
+        text.right = std::max(left, std::min(left + width(words), static_cast<int>(place.right) - badgeWidth - gap));
+    }
+    SetTextColor(dc, ink);
+    DrawTextW(dc, words.c_str(), static_cast<int>(words.size()), &text, kLine | DT_END_ELLIPSIS);
+    if (badgeWidth) {
+        RECT after = {text.right + gap, place.top, place.right, place.bottom};
+        SetTextColor(dc, faint);
+        DrawTextW(dc, badge.c_str(), static_cast<int>(badge.size()), &after, kLine | DT_END_ELLIPSIS);
+    }
+    SelectObject(dc, old);
+}
+
 namespace {
 
 // a menu picture in `color` on the menu's background, made once: its flag, or (`checked`) a check mark in it, the mark
@@ -1591,11 +1619,9 @@ void Mailbox::DrawSubject(HDC dc, int index, const PeMessage& row) {
     if (row.thread_opens) {
         words += L" " + Text(row.thread_label);
     }
-    HGDIOBJ old = SelectObject(dc, RowFont(row));
-    SetBkMode(dc, TRANSPARENT);
-    SetTextColor(dc, GetSysColor(fore));
-    DrawTextW(dc, words.c_str(), -1, &text, DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
-    SelectObject(dc, old);
+    // the reactions' badge after it, grey but on the selected row's highlight
+    COLORREF ink = GetSysColor(fore);
+    DrawWordsWithBadge(dc, text, words, RowFont(row), ink, Text(row.reactions), selected ? ink : GetSysColor(COLOR_GRAYTEXT));
 }
 
 // the small box of a conversation, with a + (closed, `collapsed`) or a - (open), as Outlook Express draws it

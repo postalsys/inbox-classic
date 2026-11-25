@@ -16,6 +16,7 @@ mod layout;
 mod list_view;
 #[cfg(target_os = "macos")]
 mod mac;
+mod reactions;
 mod rules;
 mod selection;
 mod setup;

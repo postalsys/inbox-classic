@@ -83,6 +83,8 @@ struct Parts {
     who: gtk::Label,
     date: gtk::Label,
     subject: gtk::Label,
+    /// The message's reactions after its subject ("👍❤️ 3"), in the secondary colour
+    reactions: gtk::Label,
     folder: gtk::Label,
     attachment: gtk::Image,
     /// The lock of an encrypted message or the ribbon of a signed one, left of the paper clip
@@ -136,7 +138,10 @@ impl Parts {
         let (who, date) = (line_label(true), line_label(false));
         who.add_css_class("sender");
         small_dim(&date);
-        let (subject, folder) = (line_label(true), line_label(false));
+        // the subject as wide as its words, the reactions right after it taking the rest of the line: a long subject
+        // is cut short, never the reactions
+        let (subject, folder) = (line_label(false), line_label(false));
+        let reactions = crate::messages::reactions_label();
         small_dim(&folder);
         folder.set_max_width_chars(18);
         let attachment = gtk::Image::new();
@@ -154,6 +159,7 @@ impl Parts {
         text.append(&line(&[who.upcast_ref(), date.upcast_ref()]));
         text.append(&line(&[
             subject.upcast_ref(),
+            reactions.upcast_ref(),
             folder.upcast_ref(),
             watch.upcast_ref(),
             security.upcast_ref(),
@@ -183,6 +189,7 @@ impl Parts {
             who,
             date,
             subject,
+            reactions,
             folder,
             attachment,
             security,
@@ -257,6 +264,8 @@ fn bind(row: &gtk::Widget, parts: &Parts, m: &Message, context: &RowContext) {
     parts.subject.set_text(&m.info.subject);
     // the sender always a little heavier than the subject; the subject bold while the row is (the dot says unread)
     set_class(&parts.subject, "unread", bold);
+    let badge = pe_core::reactions::badge(&m.reactions);
+    parts.reactions.set_text(&badge);
     let several = context.several_folders.get();
     parts.folder.set_visible(several);
     if several {
@@ -278,7 +287,15 @@ fn bind(row: &gtk::Widget, parts: &Parts, m: &Message, context: &RowContext) {
         format!("{}, ", t!(UiRowUnread))
     };
     let security = security_tip(m).map(|said| format!("{said}, ")).unwrap_or_default();
-    let label = format!("{unread}{security}{who}, {}, {date}, {snippet}", m.info.subject);
+    let reactions = if badge.is_empty() {
+        String::new()
+    } else {
+        format!(", {badge}")
+    };
+    let label = format!(
+        "{unread}{security}{who}, {}{reactions}, {date}, {snippet}",
+        m.info.subject
+    );
     row.update_property(&[gtk::accessible::Property::Label(&label)]);
 }
 

@@ -899,3 +899,11 @@ ui-keys-publish-now = 公開
 ui-keys-paste = クリップボードからインポート(&L)
 ui-keys-paste-none = クリップボードにOpenPGPのキーがありません。
 ui-contact-find-key = キーを検索(&F)
+# review: new
+ui-reactions-label = リアクション:
+# review: new
+ui-reaction-open-email = リアクションのメールを開く
+# review: new
+ui-reaction-show-as-email = メールとして表示
+# review: new
+ui-reaction-when = リアクション日時: { $when }

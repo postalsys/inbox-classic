@@ -1115,3 +1115,10 @@ preview-not-printed = { $name } ({ $details }) non viene stampato. Aprilo per st
 
 pgp-error-attached-private = Questo allegato contiene una chiave privata. Dalla posta si possono importare direttamente solo chiavi pubbliche. Per ripristinare la tua chiave privata, salva l’allegato e importa il file in Chiavi di crittografia.
 pgp-part-find-key = Trova chiave
+# review: new
+reaction-notification-title = { $name } ha reagito con { $emoji }
+# review: new
+reaction-notification-text = { $count ->
+    [one] a { $subject }
+   *[other] a { $subject }, e { $count } reazioni in tutto
+}

@@ -928,3 +928,10 @@ preview-not-printed = { $name }（{ $details }）未打印。请打开它进行�
 
 pgp-error-attached-private = 此附件包含私钥。只能从邮件直接导入公钥。要恢复您自己的私钥，请保存附件，然后在“加密密钥”中导入该文件。
 pgp-part-find-key = 查找密钥
+# review: new
+reaction-notification-title = { $name }回应了{ $emoji }
+# review: new
+reaction-notification-text = { $count ->
+    [1] 邮件：{ $subject }
+   *[other] 邮件：{ $subject }，共{ $count }个回应
+}

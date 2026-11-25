@@ -936,3 +936,11 @@ ui-keys-publish-now = Pubblica
 ui-keys-paste = Importa da&gli appunti
 ui-keys-paste-none = Gli appunti non contengono alcuna chiave OpenPGP.
 ui-contact-find-key = &Trova chiave
+# review: new
+ui-reactions-label = Reazioni:
+# review: new
+ui-reaction-open-email = Apri l’e-mail della reazione
+# review: new
+ui-reaction-show-as-email = Mostra come e-mail
+# review: new
+ui-reaction-when = Reazione: { $when }

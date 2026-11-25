@@ -260,12 +260,14 @@ pub(crate) fn calendar_part(attachments: &[Attachment]) -> Option<&Attachment> {
         .find(|a| matches!(a.mime_type.as_str(), "text/calendar" | "application/ics"))
 }
 
-/// The parts of a delivery report written for mail servers (RFC 3464 and 6533): the bounce's card says what they say
-const REPORT_PARTS: [&str; 4] = [
+/// Parts written for mail programs, never files: a delivery report's for servers (RFC 3464 and 6533; the bounce's
+/// card says what they say) and Gmail's emoji reaction (crate::reactions)
+const REPORT_PARTS: [&str; 5] = [
     "message/delivery-status",
     "message/global-delivery-status",
     "text/rfc822-headers",
     "message/global-headers",
+    "text/vnd.google.email-reaction+json",
 ];
 
 /// The attachments the attachment bar lists: not the images of an HTML body, nor a delivery report's parts for servers

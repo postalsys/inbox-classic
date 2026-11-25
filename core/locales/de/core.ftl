@@ -1063,3 +1063,10 @@ preview-not-printed = { $name } ({ $details }) wird nicht gedruckt. Öffnen Sie 
 
 pgp-error-attached-private = Dieser Anhang enthält einen privaten Schlüssel. Direkt aus E-Mails können nur öffentliche Schlüssel importiert werden. Um Ihren eigenen privaten Schlüssel wiederherzustellen, speichern Sie den Anhang und importieren Sie die Datei unter Verschlüsselungsschlüssel.
 pgp-part-find-key = Schlüssel suchen
+# review: new
+reaction-notification-title = { $name } hat mit { $emoji } reagiert
+# review: new
+reaction-notification-text = { $count ->
+    [one] auf { $subject }
+   *[other] auf { $subject }, insgesamt { $count } Reaktionen
+}

@@ -1088,3 +1088,10 @@ preview-not-printed = { $name } ({ $details }) skrives ikke ut. Åpne filen for 
 
 pgp-error-attached-private = Dette vedlegget inneholder en privat nøkkel. Bare offentlige nøkler kan importeres direkte fra e-post. For å gjenopprette din egen private nøkkel må du lagre vedlegget og importere filen under Krypteringsnøkler.
 pgp-part-find-key = Finn nøkkel
+# review: new
+reaction-notification-title = { $name } reagerte med { $emoji }
+# review: new
+reaction-notification-text = { $count ->
+    [one] på { $subject }
+   *[other] på { $subject }, og { $count } reaksjoner totalt
+}

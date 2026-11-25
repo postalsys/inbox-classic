@@ -948,3 +948,11 @@ ui-keys-publish-now = Zverejniť
 ui-keys-paste = Importovať zo &schránky
 ui-keys-paste-none = Schránka neobsahuje žiadny kľúč OpenPGP.
 ui-contact-find-key = Nájsť &kľúč
+# review: new
+ui-reactions-label = Reakcie:
+# review: new
+ui-reaction-open-email = Otvoriť e-mail s reakciou
+# review: new
+ui-reaction-show-as-email = Zobraziť ako e-mail
+# review: new
+ui-reaction-when = Reakcia: { $when }

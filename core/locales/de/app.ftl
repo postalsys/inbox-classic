@@ -931,3 +931,11 @@ ui-keys-publish-now = Veröffentlichen
 ui-keys-paste = Aus der &Zwischenablage importieren
 ui-keys-paste-none = Die Zwischenablage enthält keinen OpenPGP-Schlüssel.
 ui-contact-find-key = Schlüssel s&uchen
+# review: new
+ui-reactions-label = Reaktionen:
+# review: new
+ui-reaction-open-email = Reaktions-E-Mail öffnen
+# review: new
+ui-reaction-show-as-email = Als E-Mail anzeigen
+# review: new
+ui-reaction-when = Reagiert: { $when }

@@ -799,6 +799,9 @@ typedef struct PePositions PePositions;
 // The answer to an ask: its picture (`pe_preview_answer_picture`); free with `pe_preview_answer_free`
 typedef struct PePreviewAnswer PePreviewAnswer;
 
+// The reactions to a message; free with `pe_reactions_free`
+typedef struct PeReactions PeReactions;
+
 // The messages that were being written when Inbox Classic last ended without closing their windows; free with
 // `pe_recovered_free`
 typedef struct PeRecovered PeRecovered;
@@ -1419,6 +1422,9 @@ typedef struct PeMessage {
   // `snippet` says the message's state ("Encrypted message"), not words its sender wrote: shown in the list's
   // secondary style for a state (italic)
   bool snippet_is_state;
+  // Its emoji reactions' badge, after the subject ("👍❤️ 3"; a collapsed conversation's are its messages'); empty
+  // for none
+  const char *reactions;
 } PeMessage;
 
 // Words an instant (seconds since the Unix epoch) for the event cards: its day in full (`time` false) or its time of
@@ -1858,6 +1864,14 @@ typedef struct PeListLoadInfo {
   // The row to focus and scroll to, -1 to leave the scrolling as it is
   int64_t focus;
 } PeListLoadInfo;
+
+// One person's reactions to a message
+typedef struct PeReaction {
+  // Their emoji, then their name: "👍❤️ Kate Kalda"
+  const char *text;
+  // When their last reaction came, in words
+  const char *when;
+} PeReaction;
 
 // A message rule: a search query and what to do with the new mail of an Inbox that matches it
 typedef struct PeRule {
@@ -5145,6 +5159,43 @@ struct PeMessageList *pe_list_load_messages(const struct PeListLoad *load);
 // # Safety
 // `load` must be NULL or a load that was not freed yet.
 void pe_list_load_free(struct PeListLoad *load);
+
+// The reactions to the message `folder`/`uid`, one a person, in the order they first reacted (none: an empty list)
+//
+// # Safety
+// `core` must be live.
+struct PeReactions *pe_reactions(const struct PeCore *core,
+                                 int64_t folder,
+                                 uint64_t uid);
+
+// # Safety
+// `list` must be NULL or live.
+size_t pe_reactions_count(const struct PeReactions *list);
+
+// # Safety
+// `list` must be NULL or live.
+const struct PeReaction *pe_reactions_get(const struct PeReactions *list, size_t index);
+
+// # Safety
+// `list` must be NULL or a list not freed yet.
+void pe_reactions_free(struct PeReactions *list);
+
+// Open Reaction Email: the newest email of the chip `index` written to a private file, its path (UTF-8, free with
+// `pe_string_free`) for the message window that opens files; NULL when it is not kept any longer
+//
+// # Safety
+// `core` and `list` must be live.
+char *pe_reactions_email_file(const struct PeCore *core,
+                              const struct PeReactions *list,
+                              size_t index);
+
+// Show as Email: the emails of the chip `index` listed again for good, their reactions taken off the message
+//
+// # Safety
+// `core` and `list` must be live.
+void pe_reactions_show_as_email(const struct PeCore *core,
+                                const struct PeReactions *list,
+                                size_t index);
 
 // The message rules, in their order; NULL on failure
 //

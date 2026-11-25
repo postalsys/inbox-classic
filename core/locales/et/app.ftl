@@ -932,3 +932,11 @@ ui-keys-publish-now = Avalda
 ui-keys-paste = Impordi &lõikelaualt
 ui-keys-paste-none = Lõikelaual pole OpenPGP võtit.
 ui-contact-find-key = &Otsi võtit
+# review: new
+ui-reactions-label = Reaktsioonid:
+# review: new
+ui-reaction-open-email = Ava reaktsiooni e-kiri
+# review: new
+ui-reaction-show-as-email = Näita tavalise kirjana
+# review: new
+ui-reaction-when = Reaktsioon: { $when }
