@@ -643,7 +643,6 @@ void Reader::Open(int64_t folder, uint64_t uid, int64_t account, const PeMessage
     if (row) {
         SetWindowTextW(header_, HeaderText(row->from, row->has_date, row->date, row->recipients, nullptr, row->subject).c_str());
     }
-    LoadReactions();
     SetTimer(parent_, TIMER_DOWNLOADING, 250, nullptr);
     // MessageReady follows, right away when the message is cached, or MessageFailed
     pe_message_open(core_, folder, uid);
@@ -808,15 +807,12 @@ void Reader::DrawReactions(const DRAWITEMSTRUCT& item) {
     if (!count) {
         return;
     }
-    HGDIOBJ old = SelectObject(dc, reinterpret_cast<HFONT>(SendMessageW(header_, WM_GETFONT, 0, 0)));
+    HFONT font = reinterpret_cast<HFONT>(SendMessageW(header_, WM_GETFONT, 0, 0));
+    HGDIOBJ old = SelectObject(dc, font);
     SetBkMode(dc, TRANSPARENT);
     SetTextColor(dc, GetSysColor(COLOR_BTNTEXT));
     // how wide `words` are, as DrawText draws them (the emoji in the face Windows falls back to)
-    auto width = [dc](const std::wstring& words) {
-        RECT measured = {0, 0, 0, 0};
-        DrawTextW(dc, words.c_str(), static_cast<int>(words.size()), &measured, DT_SINGLELINE | DT_NOPREFIX | DT_CALCRECT);
-        return static_cast<int>(measured.right);
-    };
+    auto width = [dc, font](const std::wstring& words) { return static_cast<int>(Measure(dc, font, words, 0, DT_NOPREFIX).cx); };
     auto draw = [&](const std::wstring& words, int left) {
         RECT place = {left, item.rcItem.top, item.rcItem.right, item.rcItem.bottom};
         DrawTextW(dc, words.c_str(), static_cast<int>(words.size()), &place, DT_LEFT | DT_TOP | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);

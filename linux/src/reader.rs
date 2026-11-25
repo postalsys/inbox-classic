@@ -1315,6 +1315,11 @@ impl Reader {
         *self.chips.borrow_mut() = chips;
     }
 
+    /// The chip of the Reactions row at `index`, if it is still there
+    fn chip(&self, index: u32) -> Option<pe_core::reactions::ReactionChip> {
+        self.chips.borrow().get(index as usize).cloned()
+    }
+
     /// The actions of a reaction chip's menu, on the chip's number: Open Reaction Email, Show as Email, and the
     /// dimmed line of when (an action that is never on)
     fn add_reaction_actions(self: &Rc<Self>, group: &gio::SimpleActionGroup) {
@@ -1324,11 +1329,7 @@ impl Reader {
             let (Some(this), Some(index)) = (this.upgrade(), index.and_then(|i| i.get::<u32>())) else {
                 return;
             };
-            let newest = this
-                .chips
-                .borrow()
-                .get(index as usize)
-                .and_then(|chip| chip.emails.last().copied());
+            let newest = this.chip(index).and_then(|chip| chip.newest());
             let file = newest.and_then(|at| shell().core.reaction_email_file(at).ok().flatten());
             if let Some(path) = file {
                 spawn(async move { crate::message_window::open_file(&path).await });
@@ -1340,14 +1341,11 @@ impl Reader {
             let (Some(this), Some(index)) = (this.upgrade(), index.and_then(|i| i.get::<u32>())) else {
                 return;
             };
-            let emails = this
-                .chips
-                .borrow()
-                .get(index as usize)
-                .map(|chip| chip.emails.clone())
-                .unwrap_or_default();
-            if !emails.is_empty() {
-                let _ = shell().core.show_reactions_as_email(&emails);
+            let Some(chip) = this.chip(index) else {
+                return;
+            };
+            if !chip.emails.is_empty() {
+                let _ = shell().core.show_reactions_as_email(&chip.emails);
                 this.show_reactions();
             }
         });
@@ -1362,11 +1360,12 @@ impl Reader {
     #[cfg(feature = "e2e")]
     pub fn reaction_chips(&self) -> Vec<gtk::MenuButton> {
         let mut chips = Vec::new();
+        if !self.reactions_row.is_visible() {
+            return chips;
+        }
         let mut child = self.reactions.first_child();
         while let Some(at) = child {
-            if let Some(chip) = at.first_child().and_downcast::<gtk::MenuButton>()
-                && self.reactions_row.is_visible()
-            {
+            if let Some(chip) = at.first_child().and_downcast::<gtk::MenuButton>() {
                 chips.push(chip);
             }
             child = at.next_sibling();

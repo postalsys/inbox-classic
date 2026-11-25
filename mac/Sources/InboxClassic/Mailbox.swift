@@ -2005,6 +2005,12 @@ public final class Mailbox: NSObject {
         return style == .emphasized ? NSColor.alternateSelectedControlTextColor.withAlphaComponent(0.7) : ignoredColor
     }
 
+    /// the colour of a row's secondary text (a date, a snippet, the reactions' badge): lighter on the accent of a
+    /// selected row
+    static func secondaryRowColor(style: NSView.BackgroundStyle) -> NSColor {
+        style == .emphasized ? NSColor.alternateSelectedControlTextColor.withAlphaComponent(0.8) : .secondaryLabelColor
+    }
+
     func markJunk(_ junk: Bool) {
         guard hasSelection else { return }
         actAndRemove(junk ? PE_ACTION_JUNK : PE_ACTION_NOT_JUNK)
@@ -3394,8 +3400,7 @@ final class SubjectCell: NSTableCellView, ConversationCell {
     /// the subject in the row's colour, the badge in the secondary one (lighter on the selection)
     private func paint() {
         label.textColor = Mailbox.rowColor(grey: grey, style: backgroundStyle)
-        badge.textColor = backgroundStyle == .emphasized ? .alternateSelectedControlTextColor.withAlphaComponent(0.8)
-            : .secondaryLabelColor
+        badge.textColor = Mailbox.secondaryRowColor(style: backgroundStyle)
     }
 
     @objc private func clicked() {
@@ -3614,7 +3619,7 @@ final class MessageRowCell: NSTableCellView, ConversationCell {
     private func paint() {
         let selected = backgroundStyle == .emphasized
         let main = Mailbox.rowColor(grey: grey, style: backgroundStyle)
-        let secondary: NSColor = selected ? .alternateSelectedControlTextColor.withAlphaComponent(0.8) : .secondaryLabelColor
+        let secondary = Mailbox.secondaryRowColor(style: backgroundStyle)
         who.textColor = main
         subject.textColor = main
         for label in [date, reactions, folder, snippet, count] {

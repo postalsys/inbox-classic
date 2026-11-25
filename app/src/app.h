@@ -156,6 +156,9 @@ HBITMAP CoreBitmap(uint8_t* pixels, size_t length, int size);
 void DrawPremultiplied(HDC dc, int x, int y, HBITMAP bitmap, int size, HDC memory = nullptr);
 // a tooltip of `text` over the child `tool` of `owner`
 void AddTip(HWND owner, HWND tool, const std::wstring& text);
+// how big `text` is in `dc` in `font` (the dialog font when NULL), its & left out unless `flags` has DT_NOPREFIX: one
+// line, or wrapped at `wrapWidth` when it is not 0; `flags` are DrawText's more
+SIZE Measure(HDC dc, HFONT font, const std::wstring& text, int wrapWidth = 0, UINT flags = 0);
 // how wide the words of a control are in `font` (the dialog font when NULL), its & left out
 int TextWidth(HWND control, HFONT font);
 
@@ -1037,12 +1040,10 @@ public:
     // the UI test's look at the row of the message `subject`: 12 its picture drawn, 11 its initials, 10 neither, 0 no
     // such row shown
     int TestRowPicture(const std::wstring& subject);
-    // the UI test's look at the count beside a conversation's row ("subject\nlabel"): 1 the row of that subject says
-    // that label, 2 it says another, 0 no such row shown
-    int TestThreadLabel(const std::wstring& text);
-    // the UI test's look at the reactions' badge after a row's subject ("subject\nbadge"): 1 the row of that subject
-    // carries that badge, 2 another, 0 no such row shown
-    int TestReactionBadge(const std::wstring& text);
+    // the UI test's look at a field of a row ("subject\nfield\nvalue"; the field thread_label, the count beside a
+    // conversation's row, or reactions, the badge after its subject): 1 the row of that subject has that value, 2
+    // another, 0 no such row shown or no such field
+    int TestRowField(const std::wstring& text);
     // the UI test's look at where the list's top row starts: 1000 plus its top in the list's client area (the header's
     // room above it, if any); 0 for an empty list
     int TestListTop() const;

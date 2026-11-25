@@ -502,33 +502,22 @@ int Mailbox::TestListTop() const {
     return 1000 + row.top;
 }
 
-int Mailbox::TestThreadLabel(const std::wstring& text) {
-    size_t newline = text.find(L'\n');
-    if (newline == std::wstring::npos) {
+int Mailbox::TestRowField(const std::wstring& text) {
+    size_t first = text.find(L'\n'), second = first == std::wstring::npos ? first : text.find(L'\n', first + 1);
+    if (second == std::wstring::npos) {
         return 0;
     }
-    std::wstring subject = text.substr(0, newline), label = text.substr(newline + 1);
+    std::wstring subject = text.substr(0, first), field = text.substr(first + 1, second - first - 1), value = text.substr(second + 1);
+    bool label = field == L"thread_label";
+    if (!label && field != L"reactions") {
+        return 0;
+    }
     int count = ListView_GetItemCount(list_);
     for (int index = 0; index < count; index++) {
         const PeMessage* row = RowNow(index);
-        if (row && row->thread_opens && Text(row->subject) == subject) {
-            return Text(row->thread_label) == label ? 1 : 2;
-        }
-    }
-    return 0;
-}
-
-int Mailbox::TestReactionBadge(const std::wstring& text) {
-    size_t newline = text.find(L'\n');
-    if (newline == std::wstring::npos) {
-        return 0;
-    }
-    std::wstring subject = text.substr(0, newline), badge = text.substr(newline + 1);
-    int count = ListView_GetItemCount(list_);
-    for (int index = 0; index < count; index++) {
-        const PeMessage* row = RowNow(index);
-        if (row && Text(row->subject) == subject) {
-            return Text(row->reactions) == badge ? 1 : 2;
+        // the count is beside a conversation's own row only
+        if (row && (!label || row->thread_opens) && Text(row->subject) == subject) {
+            return Text(label ? row->thread_label : row->reactions) == value ? 1 : 2;
         }
     }
     return 0;

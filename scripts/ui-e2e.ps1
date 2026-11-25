@@ -6010,10 +6010,10 @@ public static class Dragger {
             uids = $coastUids; flags = @('\Seen'); mode = 'remove' } | ConvertTo-Json))
         Command $main $IDM_SYNC
         # the count drawn beside the subject (not the row's text): what the core says for three, three of them new
-        $kTestThreadLabel = 0x544C424C
+        $kTestRowField = 0x544C424C
         $label = '(3, 3 new)'
-        $labelled = WaitFor { if ((& $coastSeen) -eq 0 -and [Native.Win]::SendText($main, $kTestThreadLabel, "$topic`n$label") -eq 1) { 1 } } 20
-        Check ($null -ne $labelled) "with the count of its messages and of the new ones ($($label): $([Native.Win]::SendText($main, $kTestThreadLabel, "$topic`n$label")))"
+        $labelled = WaitFor { if ((& $coastSeen) -eq 0 -and [Native.Win]::SendText($main, $kTestRowField, "$topic`nthread_label`n$label") -eq 1) { 1 } } 20
+        Check ($null -ne $labelled) "with the count of its messages and of the new ones ($($label): $([Native.Win]::SendText($main, $kTestRowField, "$topic`nthread_label`n$label")))"
         SelectRow $at
         Check ((SelectedRow) -eq $at) "its row can be selected ($(SelectedRow))"
         # the whole conversation in the reading pane: all three unread, so all three open, each a frame sized to it
@@ -6577,7 +6577,7 @@ public static class Dragger {
     # ---- emoji reactions ----
 
     Step 'emoji reactions'
-    $IDC_REACTIONS = 246; $kTestReactionBadge = 0x52454143
+    $IDC_REACTIONS = 246; $kTestRowField = 0x544C424C
     $thumb = [char]::ConvertFromUtf32(0x1F44D)
     $reacted = 'Furniture'
     AddMessage ("From: Kate Kalda <kate@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: $reacted`r`n" +
@@ -6598,11 +6598,10 @@ public static class Dragger {
         "{`"emoji`": `"=F0=9F=91=8D`", `"version`": 1}`r`n" +
         "--r`r`nContent-Type: text/html; charset=UTF-8`r`n`r`n<p style=`"font-size:50px`">&#x1F44D;</p><p>Kate Kalda reacted via Gmail</p>`r`n--r--`r`n")
     Command $main $IDM_SYNC
-    $badged = WaitFor { if ([Native.Win]::SendText($main, $kTestReactionBadge, "$reacted`n$thumb") -eq 1) { $true } } 30
-    Check ([bool]$badged) "the message's row carries the reaction's badge ($([Native.Win]::SendText($main, $kTestReactionBadge, "$reacted`n$thumb")))"
+    $badged = WaitFor { if ([Native.Win]::SendText($main, $kTestRowField, "$reacted`nreactions`n$thumb") -eq 1) { $true } } 30
+    Check ([bool]$badged) "the message's row carries the reaction's badge ($([Native.Win]::SendText($main, $kTestRowField, "$reacted`nreactions`n$thumb")))"
     # grouped by conversation, a reply listed would make the message's row a conversation's
-    $kTestThreadLabel = 0x544C424C
-    $listedAgain = { $null -ne (& $rowOf "Re: $reacted") -or [Native.Win]::SendText($main, $kTestThreadLabel, "$reacted`n-") -ne 0 }
+    $listedAgain = { $null -ne (& $rowOf "Re: $reacted") -or [Native.Win]::SendText($main, $kTestRowField, "$reacted`nthread_label`n-") -ne 0 }
     Check (-not (& $listedAgain)) 'the reaction email is not in the Inbox list'
     Check ([bool](WaitFor { Seen 'Message-ID: <furniture-reaction@example\.com>' } 20)) 'and it is read on the server'
     Shot $main 'reactions-1-list'
@@ -6647,7 +6646,7 @@ public static class Dragger {
     [void](& $reactionMenu 'Show as Email' $null)
     Check ([bool](WaitFor { & $listedAgain } 20)) 'Show as Email lists the reaction email again'
     Check ([bool](WaitFor { -not (Visible $main $IDC_REACTIONS) } 10)) 'and the Reactions line goes'
-    Check ([Native.Win]::SendText($main, $kTestReactionBadge, "$reacted`n") -eq 1) 'and so does the badge'
+    Check ([Native.Win]::SendText($main, $kTestRowField, "$reacted`nreactions`n") -eq 1) 'and so does the badge'
     foreach ($pattern in 'Message-ID: <furniture-prices@example\.com>', 'Message-ID: <furniture-reaction@example\.com>') {
         $added = Find 'INBOX' $pattern
         if ($added) { [void](Invoke-RestMethod -Method Delete "$rest/INBOX/messages/$($added.uid)") }

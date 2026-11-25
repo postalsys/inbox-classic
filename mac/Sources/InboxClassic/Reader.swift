@@ -1644,15 +1644,21 @@ final class ReactionChip: NSButton {
     private static let font = NSFont.systemFont(ofSize: NSFont.systemFontSize - 1)
     private static let height: CGFloat = 20
     private static let padding: CGFloat = 8
+    /// the title as drawn: centred in the token, cut short with an ellipsis
+    private let drawnTitle: NSAttributedString
 
     init(text: String, when: String, index: Int) {
         self.index = index
         self.when = when
+        let style = NSMutableParagraphStyle()
+        style.lineBreakMode = .byTruncatingTail
+        style.alignment = .center
+        drawnTitle = NSAttributedString(string: text, attributes: [
+            .font: ReactionChip.font, .foregroundColor: NSColor.labelColor, .paragraphStyle: style,
+        ])
         super.init(frame: .zero)
         isBordered = false
         setButtonType(.momentaryChange)
-        font = ReactionChip.font
-        title = text
         attributedTitle = NSAttributedString(string: text, attributes: [
             .font: ReactionChip.font, .foregroundColor: NSColor.labelColor,
         ])
@@ -1683,12 +1689,7 @@ final class ReactionChip: NSButton {
         let size = attributedTitle.size()
         let room = bounds.insetBy(dx: ReactionChip.padding, dy: 0)
         let line = NSRect(x: room.minX, y: (bounds.height - size.height) / 2, width: room.width, height: size.height)
-        let style = NSMutableParagraphStyle()
-        style.lineBreakMode = .byTruncatingTail
-        style.alignment = .center
-        let title = NSMutableAttributedString(attributedString: attributedTitle)
-        title.addAttribute(.paragraphStyle, value: style, range: NSRange(location: 0, length: title.length))
-        title.draw(with: line, options: [.usesLineFragmentOrigin, .truncatesLastVisibleLine])
+        drawnTitle.draw(with: line, options: [.usesLineFragmentOrigin, .truncatesLastVisibleLine])
     }
 
     override var focusRingMaskBounds: NSRect { bounds }

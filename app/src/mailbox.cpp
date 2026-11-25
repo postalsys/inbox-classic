@@ -1514,11 +1514,7 @@ void DrawWordsWithBadge(HDC dc, const RECT& place, const std::wstring& words, HF
     HGDIOBJ old = SelectObject(dc, font);
     SetBkMode(dc, TRANSPARENT);
     // how wide the words and the badge are as DrawText draws them (the emoji in the face Windows falls back to)
-    auto width = [dc](const std::wstring& text) {
-        RECT measured = {0, 0, 0, 0};
-        DrawTextW(dc, text.c_str(), static_cast<int>(text.size()), &measured, DT_SINGLELINE | DT_NOPREFIX | DT_CALCRECT);
-        return static_cast<int>(measured.right);
-    };
+    auto width = [dc, font](const std::wstring& text) { return static_cast<int>(Measure(dc, font, text, 0, DT_NOPREFIX).cx); };
     RECT text = place;
     int badgeWidth = badge.empty() ? 0 : width(badge), gap = badge.empty() ? 0 : Scale(6);
     if (badgeWidth) {
