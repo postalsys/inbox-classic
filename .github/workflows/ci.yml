@@ -255,7 +255,8 @@ jobs:
         runs-on: ubuntu-latest
         # the base of linux/Dockerfile, so CI and scripts/linux-*.sh build in the same system
         container: ubuntu:26.04
-        timeout-minutes: 45
+        # the build and the UI test take about 45 minutes; the Arch job has the same room
+        timeout-minutes: 60
         defaults:
             run:
                 working-directory: linux
