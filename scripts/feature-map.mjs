@@ -753,6 +753,18 @@ const sections = [
                 checked: ['The delay card says it is still being tried']
             },
             {
+                shot: 'reactions-2-header',
+                name: 'Emoji reactions',
+                what: "A Gmail, Outlook or RFC 9078 emoji reaction to a message is shown on that message: a badge after the subject of its row (up to three emoji and how many), a Reactions line in its header with a chip a person, the line in a conversation, and a notification. The reaction email is read on the server and kept out of the lists; a chip's menu opens it or lists it again. Only a reply to a message here from someone in it, whose domain the provider says signed it, counts.",
+                how: 'Receive a reaction to a message; select the message; right-click a chip.',
+                checked: [
+                    'The reaction email leaves the Inbox and is read on the server',
+                    "The message's row shows the badge",
+                    'The header shows who reacted with what',
+                    'Show as Email lists the email again'
+                ]
+            },
+            {
                 shot: 'otp-1-card',
                 name: 'One-time codes',
                 what: "A message with a sign-in or verification code has a card above it with the code in large type, the domain it is for, and Copy. The code comes from the sender's OTP-Token header, or from the text, found by a model trained on real mail (pe-otp, a port of otp-detect). It is shown only when the provider of the account says that domain signed the message, and never in Junk E-mail, Sent Items or Drafts; an old code says it has probably expired.",
