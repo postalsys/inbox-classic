@@ -37,6 +37,7 @@ pub mod pictures;
 pub mod previews;
 pub mod protect;
 mod protect_out;
+pub mod reactions;
 mod reads;
 mod requests;
 mod rules;
