@@ -1,0 +1,20 @@
+<!--review--><h1>컴퓨터 간 동기화</h1>
+<p class="summary">직접 관리하는 폴더나 스토리지를 통해 모든 컴퓨터에서 계정, 키, 연락처, 규칙, 설정을 똑같이 유지합니다.</p>
+<p>동기화는 선택한 위치에 설정 저장소를 둡니다. 그 위치는 Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud 또는 Syncthing이 컴퓨터 간에 복사하는 폴더이거나 S3 호환 스토리지입니다. 저장소의 모든 내용은 컴퓨터를 떠나기 전에 동기화 암호 문구로 암호화됩니다. 메시지는 저장소에 들어 있지 않으며 메일 서버에 그대로 남습니다.</p>
+<h2>첫 번째 컴퓨터에서 동기화 설정</h2>
+<ol>
+    <li><b data-settings="sync"></b> 페이지를 열고 <b data-text="ui-sync-set-up"></b> 단추를 클릭합니다.</li>
+    <li><b data-text="ui-sync-folder"></b>를 선택하고 <b data-text="ui-sync-choose-folder"></b> 단추를 클릭하거나, <b data-text="ui-sync-bucket"></b>를 선택하고 세부 정보를 입력합니다. <b data-text="ui-sync-next"></b> 단추를 클릭합니다.</li>
+    <li>동기화 암호 문구를 두 번 입력하고 이 컴퓨터의 이름을 입력합니다. 동기화할 항목을 선택한 다음 <b data-text="ui-sync-turn-on"></b> 단추를 클릭합니다.</li>
+</ol>
+<aside class="warning">동기화 암호 문구를 안전한 곳에 보관하십시오. 암호 문구가 없으면 다른 컴퓨터가 참여할 수 없습니다.</aside>
+<h2>다른 컴퓨터 추가</h2>
+<ol>
+    <li>다른 컴퓨터에서 <b data-settings="sync"></b> 페이지를 열고 <b data-text="ui-sync-set-up"></b> 단추를 클릭한 다음 같은 폴더나 스토리지를 선택합니다.</li>
+    <li>첫 번째 컴퓨터에서 정한 동기화 암호 문구를 입력하고 <b data-text="ui-sync-turn-on"></b> 단추를 클릭합니다.</li>
+</ol>
+<p>그 컴퓨터에 이미 있는 항목과 동기화에 있는 항목이 합쳐집니다. 양쪽에 모두 있는 계정이나 연락처는 하나가 됩니다. 메시지는 서버에서 다시 다운로드됩니다.</p>
+<h2>동기화하는 동안</h2>
+<p>각 컴퓨터는 몇 분마다, 그리고 <b data-text="ui-sync-now"></b> 단추를 클릭할 때 동기화합니다. 같은 항목이 두 컴퓨터에서 동시에 변경되면 마지막으로 이루어진 변경 내용이 유지되고 다른 변경 내용은 <b data-text="ui-sync-history"></b>으로 옮겨지며, 거기에서 복원할 수 있습니다. 다른 컴퓨터에서 계정을 제거하면 기본 창에 그 사실이 표시됩니다.</p>
+<p>더 이상 사용하지 않는 컴퓨터의 동기화를 중지하려면 <b data-text="ui-sync-computers"></b> 단추를 클릭하고 그 컴퓨터를 제거합니다. 이 컴퓨터의 동기화를 중지하려면 <b data-text="ui-sync-turn-off"></b> 단추를 클릭합니다. 모든 항목은 그대로 유지됩니다.</p>
+<nav class="related"><a href="topic:move-computer"></a> <a href="topic:manage-accounts"></a> <a href="topic:encryption-keys"></a></nav><!--/review-->

@@ -224,6 +224,8 @@ func busySpinner() -> NSProgressIndicator {
 final class PassphrasePair: NSObject, NSTextFieldDelegate {
     let fields = [NSSecureTextField(string: ""), NSSecureTextField(string: "")]
     let view: NSStackView
+    /// the fields with their labels, for a window that lines its other fields up with them
+    let grid: NSGridView
     private let feedback = NSTextField(wrappingLabelWithString: "")
     /// 8 characters or more, the same twice
     private(set) var acceptable = false
@@ -232,7 +234,7 @@ final class PassphrasePair: NSObject, NSTextFieldDelegate {
 
     init(id: String, width: CGFloat) {
         let labels = [Text.uiKeysPassphrase.text, Text.uiKeysPassphraseAgain.text]
-        let grid = NSGridView(views: zip(labels, fields).map { [formLabel($0.0), $0.1] })
+        grid = NSGridView(views: zip(labels, fields).map { [formLabel($0.0), $0.1] })
         grid.column(at: 0).xPlacement = .trailing
         grid.column(at: 1).xPlacement = .fill
         grid.rowAlignment = .firstBaseline

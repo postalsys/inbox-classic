@@ -445,6 +445,141 @@ ui-settings-encryption = Titkosítás
 ui-settings-language = Nyelv
 ui-settings-label = { $label }:
 ui-apply = Al&kalmaz
+# review: new
+ui-settings-sync = Szinkronizálás
+# review: new
+ui-sync-note = Fiókjai, kulcsai, címjegyzéke, szabályai és beállításai minden számítógépen ugyanazok maradnak, egy saját mappán vagy tárhelyen keresztül. Mielőtt bármi elhagyná ezt a számítógépet, a szinkronizálási jelmondat titkosítja.
+# review: new
+ui-sync-place = Szinkronizálás helye:
+# review: new
+ui-sync-status = Állapot:
+# review: new
+ui-sync-set-up = &Szinkronizálás beállítása…
+# review: new
+ui-sync-now = Szinkronizálás &most
+# review: new
+ui-sync-computers = Számító&gépek…
+# review: new
+ui-sync-history = &Előzmények…
+# review: new
+ui-sync-turn-off = Szinkronizálás k&ikapcsolása…
+# review: new
+ui-sync-what = Szinkronizálandó adatok
+# review: new
+ui-sync-what-note = A jelszavak, a bejelentkezési adatok és a titkos kulcsok csak titkosítva kerülnek át. Hagyja ki, aminek csak ezen a számítógépen kell maradnia.
+# review: new
+ui-sync-accounts = &Fiókok
+# review: new
+ui-sync-passwords = &Jelszavak
+# review: new
+ui-sync-sign-ins = Bejelentkezési &adatok (Google, Microsoft, bejelentkezési alkalmazások)
+# review: new
+ui-sync-sign-in-apps = Bejelentkezési a&lkalmazások
+# review: new
+ui-sync-app-secrets = &Titkos ügyfélkulcsok
+# review: new
+ui-sync-contacts = &Címjegyzék
+# review: new
+ui-sync-keys = Kulcs&ok
+# review: new
+ui-sync-private-keys = Saját titkos k&ulcsok
+# review: new
+ui-sync-rules = S&zabályok
+# review: new
+ui-sync-trusted = Megbízható fela&dók
+# review: new
+ui-sync-settings = &Beállítások
+# review: new
+ui-sync-preferences = Elrendezés és &nézet
+# review: new
+ui-sync-everything = Minden
+# review: new
+ui-sync-some-left-out = Néhány elem kimarad
+# review: new
+ui-sync-where = Tárolás helye
+# review: new
+ui-sync-folder = Mappa
+# review: new
+ui-sync-folder-note = A Dropbox, a OneDrive, az iCloud Drive, a Google Drive, a Nextcloud vagy a Syncthing átmásolja a többi számítógépére.
+# review: new
+ui-sync-bucket = S3-kompatibilis tárhely
+# review: new
+ui-sync-bucket-note = Amazon S3, Cloudflare R2, Backblaze B2, MinIO vagy más, az S3-hoz hasonlóan működő tárhely.
+# review: new
+ui-sync-folder-label = &Mappa:
+# review: new
+ui-sync-folder-none = Még nincs kiválasztva
+# review: new
+ui-sync-choose-folder = &Kiválasztás…
+# review: new
+ui-sync-choose-folder-title = A szinkronizálás mappájának kiválasztása
+# review: new
+ui-sync-endpoint = Vé&gpont:
+# review: new
+ui-sync-region = &Régió:
+# review: new
+ui-sync-bucket-name = &Tároló (bucket):
+# review: new
+ui-sync-prefix = Mappa a tár&olóban:
+# review: new
+ui-sync-access-key = &Hozzáférési kulcs azonosítója:
+# review: new
+ui-sync-secret-key = Titko&s hozzáférési kulcs:
+# review: new
+ui-sync-next = Tová&bb
+# review: new
+ui-sync-join-title = Csatlakozás a szinkronizáláshoz
+# review: new
+ui-sync-join-note = Ezen a helyen már ott van a többi számítógépének szinkronizálása. Írja be a szinkronizálási jelmondatot, amelyet az első számítógépen választott.
+# review: new
+ui-sync-start-title = Szinkronizálás indítása
+# review: new
+ui-sync-start-note = Válasszon szinkronizálási jelmondatot. Minden hozzáadott számítógépen egyszer kell beírnia. Tartsa biztonságos helyen: nélküle egyetlen további számítógép sem csatlakozhat.
+# review: new
+ui-sync-name = A számítógép &neve:
+# review: new
+ui-sync-merge-note = A számítógépen lévő és a szinkronizált adatok egyesülnek: a mindkét helyen meglévő fiók vagy névjegy eggyé válik.
+# review: new
+ui-sync-turn-on = Szinkronizálás b&ekapcsolása
+# review: new
+ui-sync-on = A szinkronizálás be van kapcsolva.
+# review: new
+ui-sync-turn-off-ask = Kikapcsolja a szinkronizálást ezen a számítógépen? Minden úgy marad, ahogy van, itt és a többi számítógépen is. Ez a számítógép egyszerűen nem szinkronizál tovább.
+# review: new
+ui-sync-turn-off-button = Kikapcsolás
+# review: new
+ui-sync-computers-title = Számítógépek
+# review: new
+ui-sync-computers-note = Az ezen a helyen keresztül szinkronizáló számítógépek. Távolítsa el, amelyiket már nem használja: leáll a szinkronizálása, a már szinkronizált adatai megmaradnak.
+# review: new
+ui-sync-this-computer = Ez a számítógép
+# review: new
+ui-sync-seen = Utolsó szinkronizálás: { $when }
+# review: new
+ui-sync-remove-ask = Eltávolítja a szinkronizálásból ezt a számítógépet: „{ $name }”? A következő próbálkozáskor leáll a szinkronizálása. Az újbóli szinkronizáláshoz állítsa be rajta ismét a szinkronizálást.
+# review: new
+ui-sync-loading = Beolvasás…
+# review: new
+ui-sync-history-title = Előzmények
+# review: new
+ui-sync-history-note = Ha ugyanazt két számítógépen egyszerre módosították, a legutoljára végzett módosítás maradt meg, a másik pedig itt látható. Állítson vissza egyet, ha inkább azt szeretné használni.
+# review: new
+ui-sync-history-empty = Nem lett felülírva módosítás.
+# review: new
+ui-sync-history-row = Forrás: { $source }, { $when }
+# review: new
+ui-sync-restore = &Visszaállítás
+# review: new
+ui-sync-restore-points = Visszaállítási pontok
+# review: new
+ui-sync-restore-points-note = Mielőtt a szinkronizálás eltávolítana itt valamit, az alkalmazás menti a korábbi állapotot. Nyisson meg egy visszaállítási pontot, hogy visszahozza belőle, amit kiválaszt.
+# review: new
+ui-sync-restore-points-empty = Még nincs.
+# review: new
+ui-sync-open-point = &Megnyitás…
+# Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
+# review: new
+win-sync-back = < &Vissza
 ui-language-label = &Nyelv:
 ui-restart-note = A nyelv módosításához indítsa újra az Inbox Classicot.
 ui-restart-ask = Az Inbox Classic újraindítás után ezen a nyelven jelenik meg: { $language }. Újraindítja most?
@@ -782,6 +917,12 @@ ui-setup-from = Mentette: Inbox Classic { $version }, dátum: { $date }.
 ui-setup-import-button = &Importálás
 ui-setup-done = Kész
 ui-setup-first-run = Beállítások és fiókok importálása egy másik számítógépről...
+# review: new
+ui-first-run-other = Már használja az Inbox Classicot egy másik számítógépen? Hozza át ide a fiókjait és beállításait.
+# review: new
+ui-first-run-sync = Csatlakozás a szinkronizálásához…
+# review: new
+ui-first-run-import = Importálás fájlból…
 
 ui-field-verifiers = Megbízható feladóellenőrzési források:
 ui-attachment-import-key = Kulcs importálása...

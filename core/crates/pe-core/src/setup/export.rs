@@ -69,7 +69,7 @@ impl Core {
     }
 
     /// The document of `parts`, with the secrets when `secrets`, and how much each part holds
-    fn setup_document(
+    pub(crate) fn setup_document(
         &self,
         parts: Parts,
         secrets: bool,

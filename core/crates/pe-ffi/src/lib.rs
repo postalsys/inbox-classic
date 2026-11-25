@@ -19,6 +19,7 @@ mod mac;
 mod rules;
 mod selection;
 mod setup;
+mod sync;
 mod texts;
 #[cfg(windows)]
 mod windows;

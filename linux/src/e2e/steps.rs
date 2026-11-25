@@ -4428,18 +4428,23 @@ fn preferences_pages(d: &Driver, dialog: &adw::Dialog) {
     let wanted: Vec<&str> = SettingsPage::ALL.iter().map(|page| page.name()).collect();
     d.check(
         names == wanted,
-        &format!("Preferences has the pages General, Reading and Downloading in this order ({names:?})"),
+        &format!("Preferences has the pages General, Reading, Downloading and Sync in this order ({names:?})"),
     );
+    // a page's first group may go without a title (the page titles it: Downloading's only one, Sync's main one);
+    // every group after it has one
     let untitled: Vec<String> = pages
         .iter()
-        .filter(|page| page.name().as_deref() != Some(SettingsPage::Downloading.name()))
-        .flat_map(|page| descendants::<adw::PreferencesGroup>(page.upcast_ref()))
+        .flat_map(|page| {
+            descendants::<adw::PreferencesGroup>(page.upcast_ref())
+                .into_iter()
+                .skip(1)
+        })
         .filter(|group| group.title().is_empty())
         .map(|group| group.description().map(|d| d.to_string()).unwrap_or_default())
         .collect();
     d.check(
         untitled.is_empty(),
-        &format!("each group of General and Reading has its title ({untitled:?})"),
+        &format!("each group after a page's first has its title ({untitled:?})"),
     );
 }
 

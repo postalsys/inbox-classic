@@ -1007,6 +1007,55 @@ setup-error-newer = Tieto nastavenia uložila novšia verzia Inbox Classic ({ $v
 setup-error-needs-passphrase = Tieto nastavenia sú chránené prístupovou frázou. Zadajte frázu, s ktorou boli uložené.
 setup-error-wrong-passphrase = To nie je prístupová fráza, s ktorou boli tieto nastavenia uložené.
 setup-error-changed = Nepodarilo sa potvrdiť celistvosť súboru nastavení, preto ho nemožno importovať.
+# review: new
+sync-wrong-passphrase = To nie je prístupová fráza synchronizácie tohto trezoru. Zadajte tú, ktorú ste zvolili pri nastavení synchronizácie na prvom počítači.
+# review: new
+sync-place = { $place }, ako „{ $name }“
+# review: new
+sync-news-removed = { $count ->
+    [one] Synchronizácia odstránila konto { $accounts }, pretože bolo odstránené na inom počítači.
+   *[other] Synchronizácia odstránila kontá, pretože boli odstránené na inom počítači: { $accounts }
+}
+# review: new
+sync-news-lost = { $count ->
+    [one] Zmena vykonaná v rovnakom čase na inom počítači bola nahradená zmenou vykonanou tu. História synchronizácie ju uchováva.
+    [few] { $count } zmeny vykonané v rovnakom čase na iných počítačoch boli nahradené zmenami vykonanými tu. História synchronizácie ich uchováva.
+   *[other] { $count } zmien vykonaných v rovnakom čase na iných počítačoch bolo nahradených zmenami vykonanými tu. História synchronizácie ich uchováva.
+}
+# review: new
+sync-status-busy = Synchronizuje sa…
+# review: new
+sync-status-never = Zatiaľ nesynchronizované.
+# review: new
+sync-status-last = Naposledy synchronizované: { $when }.
+# review: new
+sync-status-today = Naposledy synchronizované dnes o { $time }.
+# review: new
+sync-when-today = dnes o { $time }
+# review: new
+sync-status-problem = Synchronizácia zlyhala: { $problem }
+# review: new
+sync-removed-here = Tento počítač bol zo synchronizácie odstránený na inom počítači. Vypnite synchronizáciu a potom ju znova nastavte, aby ste sa pripojili.
+# review: new
+sync-item-account = Konto { $name }
+# review: new
+sync-item-contact = Kontakt { $name }
+# review: new
+sync-item-group = Skupina { $name }
+# review: new
+sync-item-key = Kľúč { $name }
+# review: new
+sync-item-rule = Pravidlo { $name }
+# review: new
+sync-item-trusted = Dôveryhodný odosielateľ { $name }
+# review: new
+sync-item-sign-in-app = Prihlasovacia aplikácia { $name }
+# review: new
+sync-item-settings = Nastavenia
+# review: new
+sync-another-computer = iný počítač
+# review: new
+sync-no-key = Tento počítač už nemá kľúč trezoru synchronizácie. Vypnite synchronizáciu a znova ju zapnite s prístupovou frázou synchronizácie.
 setup-error-read = Súbor nastavení sa nepodarilo prečítať: { $error }
 setup-error-write = Nastavenia sa nepodarilo uložiť: { $error }
 setup-error-no-parts = Vyberte aspoň jednu časť.

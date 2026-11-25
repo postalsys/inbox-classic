@@ -2898,6 +2898,7 @@ dependencies = [
  "pe-store",
  "pe-sync",
  "psl",
+ "quick-xml",
  "resvg",
  "ring",
  "serde",

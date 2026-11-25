@@ -785,6 +785,53 @@ setup-error-newer = 이 설정은 현재보다 새 버전의 Inbox Classic({ $ve
 setup-error-needs-passphrase = 이 설정은 암호 문구로 보호되어 있습니다. 저장할 때 사용한 암호 문구를 입력하십시오.
 setup-error-wrong-passphrase = 이 설정을 저장할 때 사용한 암호 문구가 아닙니다.
 setup-error-changed = 설정 파일이 무결성 검사를 통과하지 못했습니다. 변조되었거나 손상되었을 수 있으므로 가져올 수 없습니다.
+# review: new
+sync-wrong-passphrase = 이 동기화 저장소의 동기화 암호 문구가 아닙니다. 첫 번째 컴퓨터에서 동기화를 설정할 때 정한 암호 문구를 입력하십시오.
+# review: new
+sync-place = { $place }, 컴퓨터 이름 “{ $name }”
+# review: new
+sync-news-removed = { $count ->
+   *[other] 다른 컴퓨터에서 제거되었으므로 동기화가 계정 { $accounts }을(를) 제거했습니다.
+}
+# review: new
+sync-news-lost = { $count ->
+    [1] 다른 컴퓨터에서 동시에 변경된 내용이 이 컴퓨터의 변경 내용으로 대체되었습니다. 동기화 기록에 보관되어 있습니다.
+   *[other] 다른 컴퓨터에서 동시에 변경된 내용 { $count }개가 이 컴퓨터의 변경 내용으로 대체되었습니다. 동기화 기록에 보관되어 있습니다.
+}
+# review: new
+sync-status-busy = 동기화 중…
+# review: new
+sync-status-never = 아직 동기화하지 않았습니다.
+# review: new
+sync-status-last = { $when }에 마지막으로 동기화했습니다.
+# review: new
+sync-status-today = 오늘 { $time }에 마지막으로 동기화했습니다.
+# review: new
+sync-when-today = 오늘 { $time }
+# review: new
+sync-status-problem = 동기화할 수 없습니다: { $problem }
+# review: new
+sync-removed-here = 다른 컴퓨터에서 이 컴퓨터를 동기화에서 제거했습니다. 다시 참여하려면 동기화를 끈 다음 다시 설정하십시오.
+# review: new
+sync-item-account = 계정 { $name }
+# review: new
+sync-item-contact = 연락처 { $name }
+# review: new
+sync-item-group = 그룹 { $name }
+# review: new
+sync-item-key = 키 { $name }
+# review: new
+sync-item-rule = 규칙 { $name }
+# review: new
+sync-item-trusted = 신뢰할 수 있는 보낸 사람 { $name }
+# review: new
+sync-item-sign-in-app = 로그인 앱 { $name }
+# review: new
+sync-item-settings = 설정
+# review: new
+sync-another-computer = 다른 컴퓨터
+# review: new
+sync-no-key = 이 컴퓨터에 더 이상 동기화 저장소의 키가 없습니다. 동기화 암호 문구로 동기화를 껐다가 다시 켜십시오.
 setup-error-read = 설정 파일을 읽을 수 없습니다: { $error }
 setup-error-write = 설정을 저장할 수 없습니다: { $error }
 setup-error-no-parts = 항목을 하나 이상 선택하십시오.

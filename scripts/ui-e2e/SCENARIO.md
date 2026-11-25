@@ -1162,6 +1162,20 @@ Screenshots: `setup-1-export`, `setup-2-passphrase`, `setup-3-import-choose`, `s
 - the right one shows what the file holds: the accounts (both marked as already here), the contacts, the rules and the other parts, with when and by which version it was saved
 - a contact deleted before importing Contacts alone comes back; the accounts are left as they are, and the summary says what was added and skipped
 
+## 45b. Settings sync
+
+Screenshots: `sync-1-off`, `sync-2-where`, `sync-3-start`, `sync-4-on`, `sync-5-computers`, `sync-6-history`
+
+- while sync is off, the Sync page of the settings says what sync is for and offers Set Up Sync, nothing else
+- Set Up Sync asks where to keep the vault (a folder, or S3-compatible storage), Next off until a folder is chosen
+- an empty folder asks for a new sync passphrase twice, the name of this computer and what to sync (everything on)
+- Turn On Sync closes the dialog; the first sync writes the vault (`vault.json` and this computer's folder) into the folder
+- while on, the page shows where it syncs through and as what computer, how the last sync went, Sync Now, Computers, History, Turn Off Sync and what to sync
+- a second computer (another core sharing the folder) is refused with a wrong passphrase, joins with the right one and gets the account
+- a contact added on the second computer arrives on Sync Now
+- Computers lists both; History says no change was replaced
+- Turn Off Sync asks first, then the page offers Set Up Sync again
+
 ## 46. Options and the language
 
 Screenshots: `options-1-language` (the General page), `options-2-reading` (the Reading page), `options-4-encryption` (the Reading page's Encryption group, both switches), `lang-1-german`, `lang-1b-german-form`, `lang-1c-french-form`, `lang-2-pseudo-main`, `lang-3-pseudo-form`; for long words, not features: `lang-4-pseudo-options`, `lang-4b-pseudo-options-reading`, `lang-4c-pseudo-options-downloading` (Windows, the Mac), `tour-<language>-5-preferences`, `tour-<language>-5b-preferences-reading`, `tour-<language>-5c-preferences-downloading` (Linux)

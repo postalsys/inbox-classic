@@ -441,6 +441,141 @@ ui-settings-encryption = Chiffrement
 ui-settings-language = Langue
 ui-settings-label = { $label } :
 ui-apply = &Appliquer
+# review: new
+ui-settings-sync = Synchronisation
+# review: new
+ui-sync-note = Gardez vos comptes, clés, carnet d’adresses, règles et paramètres identiques sur chaque ordinateur, grâce à un dossier ou un stockage qui vous appartient. Tout est chiffré avec votre phrase secrète de synchronisation avant de quitter cet ordinateur.
+# review: new
+ui-sync-place = Synchronisé via :
+# review: new
+ui-sync-status = État :
+# review: new
+ui-sync-set-up = &Configurer la synchronisation…
+# review: new
+ui-sync-now = Synchroniser &maintenant
+# review: new
+ui-sync-computers = &Ordinateurs…
+# review: new
+ui-sync-history = &Historique…
+# review: new
+ui-sync-turn-off = &Désactiver la synchronisation…
+# review: new
+ui-sync-what = Éléments à synchroniser
+# review: new
+ui-sync-what-note = Les mots de passe, les données de connexion et les clés privées ne circulent que chiffrés. Excluez ce qui doit rester sur cet ordinateur.
+# review: new
+ui-sync-accounts = Comp&tes
+# review: new
+ui-sync-passwords = Mots de pa&sse
+# review: new
+ui-sync-sign-ins = Co&nnexions avec Google, Microsoft et les applications de connexion
+# review: new
+ui-sync-sign-in-apps = Applications de conne&xion
+# review: new
+ui-sync-app-secrets = S&ecrets des applications de connexion
+# review: new
+ui-sync-contacts = Ca&rnet d’adresses
+# review: new
+ui-sync-keys = C&lés
+# review: new
+ui-sync-private-keys = &Vos clés privées
+# review: new
+ui-sync-rules = Rè&gles
+# review: new
+ui-sync-trusted = Expéd&iteurs de confiance
+# review: new
+ui-sync-settings = &Paramètres
+# review: new
+ui-sync-preferences = Disposition et a&ffichage
+# review: new
+ui-sync-everything = Tout
+# review: new
+ui-sync-some-left-out = Certains éléments exclus
+# review: new
+ui-sync-where = Emplacement de stockage
+# review: new
+ui-sync-folder = Un dossier
+# review: new
+ui-sync-folder-note = Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud ou Syncthing le copie sur vos autres ordinateurs.
+# review: new
+ui-sync-bucket = Stockage compatible S3
+# review: new
+ui-sync-bucket-note = Amazon S3, Cloudflare R2, Backblaze B2, MinIO ou un autre stockage qui fonctionne comme S3.
+# review: new
+ui-sync-folder-label = &Dossier :
+# review: new
+ui-sync-folder-none = Aucun dossier choisi
+# review: new
+ui-sync-choose-folder = C&hoisir…
+# review: new
+ui-sync-choose-folder-title = Choisir le dossier de synchronisation
+# review: new
+ui-sync-endpoint = Point de &terminaison :
+# review: new
+ui-sync-region = &Région :
+# review: new
+ui-sync-bucket-name = Co&mpartiment :
+# review: new
+ui-sync-prefix = Dossier dans le compart&iment :
+# review: new
+ui-sync-access-key = ID de &clé d’accès :
+# review: new
+ui-sync-secret-key = Clé d’accès secrèt&e :
+# review: new
+ui-sync-next = &Suivant
+# review: new
+ui-sync-join-title = Rejoindre la synchronisation
+# review: new
+ui-sync-join-note = Cet emplacement contient la synchronisation de vos autres ordinateurs. Saisissez la phrase secrète de synchronisation choisie sur le premier.
+# review: new
+ui-sync-start-title = Démarrer la synchronisation
+# review: new
+ui-sync-start-note = Choisissez une phrase secrète de synchronisation. Vous la saisirez une fois sur chaque ordinateur que vous ajoutez. Conservez-la en lieu sûr : sans elle, aucun autre ordinateur ne peut rejoindre la synchronisation.
+# review: new
+ui-sync-name = &Nom de cet ordinateur :
+# review: new
+ui-sync-merge-note = Les données de cet ordinateur et celles de la synchronisation sont réunies : un compte ou un contact présent des deux côtés n’en forme plus qu’un.
+# review: new
+ui-sync-turn-on = &Activer la synchronisation
+# review: new
+ui-sync-on = La synchronisation est activée.
+# review: new
+ui-sync-turn-off-ask = Désactiver la synchronisation sur cet ordinateur ? Tout reste en l’état, ici et sur vos autres ordinateurs. Cet ordinateur cesse simplement de se synchroniser.
+# review: new
+ui-sync-turn-off-button = Désactiver
+# review: new
+ui-sync-computers-title = Ordinateurs
+# review: new
+ui-sync-computers-note = Les ordinateurs qui se synchronisent via cet emplacement. Retirez celui que vous n’utilisez plus : il cesse de se synchroniser, et ce qu’il a synchronisé est conservé.
+# review: new
+ui-sync-this-computer = Cet ordinateur
+# review: new
+ui-sync-seen = Dernière synchronisation : { $when }
+# review: new
+ui-sync-remove-ask = Retirer « { $name } » de la synchronisation ? Il cessera de se synchroniser à sa prochaine tentative. Pour le synchroniser à nouveau, configurez-y de nouveau la synchronisation.
+# review: new
+ui-sync-loading = Lecture…
+# review: new
+ui-sync-history-title = Historique
+# review: new
+ui-sync-history-note = Lorsqu’un même élément a été modifié en même temps sur deux ordinateurs, la dernière modification effectuée a été conservée et l’autre se trouve ici. Restaurez-en une pour l’utiliser à la place.
+# review: new
+ui-sync-history-empty = Aucune modification n’a été remplacée.
+# review: new
+ui-sync-history-row = Depuis { $source }, { $when }
+# review: new
+ui-sync-restore = &Restaurer
+# review: new
+ui-sync-restore-points = Points de restauration
+# review: new
+ui-sync-restore-points-note = Avant qu’une synchronisation ne retire quelque chose ici, l’état précédent est enregistré. Ouvrez-en un pour récupérer ce que vous voulez.
+# review: new
+ui-sync-restore-points-empty = Aucun pour l’instant.
+# review: new
+ui-sync-open-point = &Ouvrir…
+# Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
+# review: new
+win-sync-back = < &Précédent
 ui-language-label = &Langue :
 ui-restart-note = Redémarrez Inbox Classic pour appliquer la nouvelle langue.
 ui-restart-ask = Inbox Classic s'affichera dans la langue choisie ({ $language }) après un redémarrage. Redémarrer maintenant ?
@@ -779,6 +914,12 @@ ui-setup-from = Enregistré avec Inbox Classic { $version } le { $date }.
 ui-setup-import-button = &Importer
 ui-setup-done = Terminé
 ui-setup-first-run = Importer les paramètres et comptes d’un autre ordinateur...
+# review: new
+ui-first-run-other = Vous utilisez déjà Inbox Classic sur un autre ordinateur ? Transférez ici ses comptes et ses paramètres.
+# review: new
+ui-first-run-sync = Rejoindre sa synchronisation…
+# review: new
+ui-first-run-import = Importer depuis un fichier…
 
 ui-field-verifiers = Serveurs de confiance pour les vérifications d’expéditeur :
 ui-attachment-import-key = Importer une clé...

@@ -8,10 +8,11 @@ pub enum SettingsPage {
     General,
     Reading,
     Downloading,
+    Sync,
 }
 
 impl SettingsPage {
-    pub const ALL: &[SettingsPage] = &[SettingsPage::General, SettingsPage::Reading, SettingsPage::Downloading];
+    pub const ALL: &[SettingsPage] = &[SettingsPage::General, SettingsPage::Reading, SettingsPage::Downloading, SettingsPage::Sync];
 
     /// Its name as the dialog knows it (`set_visible_page_name`)
     pub fn name(self) -> &'static str {
@@ -19,6 +20,7 @@ impl SettingsPage {
             SettingsPage::General => "general",
             SettingsPage::Reading => "reading",
             SettingsPage::Downloading => "downloading",
+            SettingsPage::Sync => "sync",
         }
     }
 
@@ -28,6 +30,7 @@ impl SettingsPage {
             SettingsPage::General => Text::UiSettingsGeneral,
             SettingsPage::Reading => Text::UiSettingsReading,
             SettingsPage::Downloading => Text::UiDownloadHeading,
+            SettingsPage::Sync => Text::UiSettingsSync,
         }
     }
 
@@ -37,6 +40,7 @@ impl SettingsPage {
             SettingsPage::General => "emblem-system-symbolic",
             SettingsPage::Reading => "mail-read-symbolic",
             SettingsPage::Downloading => "folder-download-symbolic",
+            SettingsPage::Sync => "emblem-synchronizing-symbolic",
         }
     }
 
@@ -46,6 +50,7 @@ impl SettingsPage {
             SettingsPage::General => &[SettingsGroup::Language, SettingsGroup::NewMail, SettingsGroup::Sending, SettingsGroup::DefaultApps],
             SettingsPage::Reading => &[SettingsGroup::MessageList, SettingsGroup::Messages, SettingsGroup::Encryption],
             SettingsPage::Downloading => &[SettingsGroup::Downloading],
+            SettingsPage::Sync => &[SettingsGroup::Sync, SettingsGroup::SyncWhat],
         }
     }
 }
@@ -61,6 +66,8 @@ pub enum SettingsGroup {
     Messages,
     Encryption,
     Downloading,
+    Sync,
+    SyncWhat,
 }
 
 impl SettingsGroup {
@@ -75,6 +82,8 @@ impl SettingsGroup {
             SettingsGroup::Messages => Some(Text::UiSettingsMessages),
             SettingsGroup::Encryption => Some(Text::UiSettingsEncryption),
             SettingsGroup::Downloading => None,
+            SettingsGroup::Sync => None,
+            SettingsGroup::SyncWhat => Some(Text::UiSyncWhat),
         }
     }
 
@@ -89,6 +98,8 @@ impl SettingsGroup {
             SettingsGroup::Messages => None,
             SettingsGroup::Encryption => None,
             SettingsGroup::Downloading => Some(Text::UiDownloadNote),
+            SettingsGroup::Sync => Some(Text::UiSyncNote),
+            SettingsGroup::SyncWhat => Some(Text::UiSyncWhatNote),
         }
     }
 
@@ -103,6 +114,8 @@ impl SettingsGroup {
             SettingsGroup::Messages => &[Setting::DarkMessages, Setting::ShowPreviews, Setting::PdfPreviews, Setting::PicturesAlways, Setting::TrustedSenders],
             SettingsGroup::Encryption => &[Setting::SearchEncrypted, Setting::Keyserver],
             SettingsGroup::Downloading => &[Setting::DownloadAhead, Setting::DownloadLimit],
+            SettingsGroup::Sync => &[Setting::SyncPlace, Setting::SyncStatus, Setting::SyncSetUp, Setting::SyncNow, Setting::SyncComputers, Setting::SyncHistory, Setting::SyncTurnOff],
+            SettingsGroup::SyncWhat => &[Setting::SyncAccounts, Setting::SyncPasswords, Setting::SyncSignIns, Setting::SyncSignInApps, Setting::SyncAppSecrets, Setting::SyncContacts, Setting::SyncKeys, Setting::SyncPrivateKeys, Setting::SyncRules, Setting::SyncTrusted, Setting::SyncSettings, Setting::SyncPreferences],
         }
     }
 }
@@ -113,6 +126,7 @@ pub enum SettingKind {
     Switch,
     Choice,
     Button,
+    Status,
 }
 
 /// A setting of Preferences
@@ -138,6 +152,25 @@ pub enum Setting {
     Keyserver,
     DownloadAhead,
     DownloadLimit,
+    SyncPlace,
+    SyncStatus,
+    SyncSetUp,
+    SyncNow,
+    SyncComputers,
+    SyncHistory,
+    SyncTurnOff,
+    SyncAccounts,
+    SyncPasswords,
+    SyncSignIns,
+    SyncSignInApps,
+    SyncAppSecrets,
+    SyncContacts,
+    SyncKeys,
+    SyncPrivateKeys,
+    SyncRules,
+    SyncTrusted,
+    SyncSettings,
+    SyncPreferences,
 }
 
 impl Setting {
@@ -164,6 +197,25 @@ impl Setting {
             Setting::Keyserver => "keyserver",
             Setting::DownloadAhead => "download_ahead",
             Setting::DownloadLimit => "download_limit",
+            Setting::SyncPlace => "sync_place",
+            Setting::SyncStatus => "sync_status",
+            Setting::SyncSetUp => "sync_set_up",
+            Setting::SyncNow => "sync_now",
+            Setting::SyncComputers => "sync_computers",
+            Setting::SyncHistory => "sync_history",
+            Setting::SyncTurnOff => "sync_turn_off",
+            Setting::SyncAccounts => "sync_accounts",
+            Setting::SyncPasswords => "sync_passwords",
+            Setting::SyncSignIns => "sync_sign_ins",
+            Setting::SyncSignInApps => "sync_sign_in_apps",
+            Setting::SyncAppSecrets => "sync_app_secrets",
+            Setting::SyncContacts => "sync_contacts",
+            Setting::SyncKeys => "sync_keys",
+            Setting::SyncPrivateKeys => "sync_private_keys",
+            Setting::SyncRules => "sync_rules",
+            Setting::SyncTrusted => "sync_trusted",
+            Setting::SyncSettings => "sync_settings",
+            Setting::SyncPreferences => "sync_preferences",
         }
     }
 
@@ -189,6 +241,25 @@ impl Setting {
             Setting::Keyserver => SettingKind::Switch,
             Setting::DownloadAhead => SettingKind::Choice,
             Setting::DownloadLimit => SettingKind::Choice,
+            Setting::SyncPlace => SettingKind::Status,
+            Setting::SyncStatus => SettingKind::Status,
+            Setting::SyncSetUp => SettingKind::Button,
+            Setting::SyncNow => SettingKind::Button,
+            Setting::SyncComputers => SettingKind::Button,
+            Setting::SyncHistory => SettingKind::Button,
+            Setting::SyncTurnOff => SettingKind::Button,
+            Setting::SyncAccounts => SettingKind::Switch,
+            Setting::SyncPasswords => SettingKind::Switch,
+            Setting::SyncSignIns => SettingKind::Switch,
+            Setting::SyncSignInApps => SettingKind::Switch,
+            Setting::SyncAppSecrets => SettingKind::Switch,
+            Setting::SyncContacts => SettingKind::Switch,
+            Setting::SyncKeys => SettingKind::Switch,
+            Setting::SyncPrivateKeys => SettingKind::Switch,
+            Setting::SyncRules => SettingKind::Switch,
+            Setting::SyncTrusted => SettingKind::Switch,
+            Setting::SyncSettings => SettingKind::Switch,
+            Setting::SyncPreferences => SettingKind::Switch,
         }
     }
 
@@ -215,6 +286,25 @@ impl Setting {
             Setting::Keyserver => Text::UiPgpKeyserver,
             Setting::DownloadAhead => Text::UiDownloadAhead,
             Setting::DownloadLimit => Text::UiDownloadLimit,
+            Setting::SyncPlace => Text::UiSyncPlace,
+            Setting::SyncStatus => Text::UiSyncStatus,
+            Setting::SyncSetUp => Text::UiSyncSetUp,
+            Setting::SyncNow => Text::UiSyncNow,
+            Setting::SyncComputers => Text::UiSyncComputers,
+            Setting::SyncHistory => Text::UiSyncHistory,
+            Setting::SyncTurnOff => Text::UiSyncTurnOff,
+            Setting::SyncAccounts => Text::UiSyncAccounts,
+            Setting::SyncPasswords => Text::UiSyncPasswords,
+            Setting::SyncSignIns => Text::UiSyncSignIns,
+            Setting::SyncSignInApps => Text::UiSyncSignInApps,
+            Setting::SyncAppSecrets => Text::UiSyncAppSecrets,
+            Setting::SyncContacts => Text::UiSyncContacts,
+            Setting::SyncKeys => Text::UiSyncKeys,
+            Setting::SyncPrivateKeys => Text::UiSyncPrivateKeys,
+            Setting::SyncRules => Text::UiSyncRules,
+            Setting::SyncTrusted => Text::UiSyncTrusted,
+            Setting::SyncSettings => Text::UiSyncSettings,
+            Setting::SyncPreferences => Text::UiSyncPreferences,
         }
     }
 
@@ -241,6 +331,25 @@ impl Setting {
             Setting::Keyserver => Some(Text::UiPgpKeyserverNote),
             Setting::DownloadAhead => None,
             Setting::DownloadLimit => None,
+            Setting::SyncPlace => None,
+            Setting::SyncStatus => None,
+            Setting::SyncSetUp => None,
+            Setting::SyncNow => None,
+            Setting::SyncComputers => None,
+            Setting::SyncHistory => None,
+            Setting::SyncTurnOff => None,
+            Setting::SyncAccounts => None,
+            Setting::SyncPasswords => None,
+            Setting::SyncSignIns => None,
+            Setting::SyncSignInApps => None,
+            Setting::SyncAppSecrets => None,
+            Setting::SyncContacts => None,
+            Setting::SyncKeys => None,
+            Setting::SyncPrivateKeys => None,
+            Setting::SyncRules => None,
+            Setting::SyncTrusted => None,
+            Setting::SyncSettings => None,
+            Setting::SyncPreferences => None,
         }
     }
 
@@ -267,6 +376,25 @@ impl Setting {
             Setting::Keyserver => None,
             Setting::DownloadAhead => None,
             Setting::DownloadLimit => None,
+            Setting::SyncPlace => None,
+            Setting::SyncStatus => None,
+            Setting::SyncSetUp => None,
+            Setting::SyncNow => None,
+            Setting::SyncComputers => None,
+            Setting::SyncHistory => None,
+            Setting::SyncTurnOff => None,
+            Setting::SyncAccounts => None,
+            Setting::SyncPasswords => Some(Setting::SyncAccounts),
+            Setting::SyncSignIns => Some(Setting::SyncAccounts),
+            Setting::SyncSignInApps => None,
+            Setting::SyncAppSecrets => Some(Setting::SyncSignInApps),
+            Setting::SyncContacts => None,
+            Setting::SyncKeys => None,
+            Setting::SyncPrivateKeys => Some(Setting::SyncKeys),
+            Setting::SyncRules => None,
+            Setting::SyncTrusted => None,
+            Setting::SyncSettings => None,
+            Setting::SyncPreferences => None,
         }
     }
 }

@@ -938,6 +938,54 @@ setup-error-newer = Questa configurazione è stata salvata da una versione più 
 setup-error-needs-passphrase = Questa configurazione è protetta da una passphrase. Inserisci la passphrase con cui è stata salvata.
 setup-error-wrong-passphrase = Non è la passphrase con cui è stata salvata questa configurazione.
 setup-error-changed = La verifica dell’integrità del file di configurazione non è riuscita, quindi il file non può essere importato.
+# review: new
+sync-wrong-passphrase = Non è la passphrase di sincronizzazione di questa cassaforte. Inserisci quella che hai scelto quando hai configurato la sincronizzazione sul primo computer.
+# review: new
+sync-place = { $place }, come “{ $name }”
+# review: new
+sync-news-removed = { $count ->
+    [one] La sincronizzazione ha rimosso l’account { $accounts }, perché è stato rimosso su un altro computer.
+   *[other] La sincronizzazione ha rimosso gli account { $accounts }, perché sono stati rimossi su un altro computer.
+}
+# review: new
+sync-news-lost = { $count ->
+    [one] Una modifica fatta nello stesso momento su un altro computer è stata sostituita da quella fatta qui. La cronologia della sincronizzazione la conserva.
+   *[other] { $count } modifiche fatte nello stesso momento su altri computer sono state sostituite da quelle fatte qui. La cronologia della sincronizzazione le conserva.
+}
+# review: new
+sync-status-busy = Sincronizzazione…
+# review: new
+sync-status-never = Non ancora sincronizzato.
+# review: new
+sync-status-last = Ultima sincronizzazione: { $when }.
+# review: new
+sync-status-today = Ultima sincronizzazione: oggi alle { $time }.
+# review: new
+sync-when-today = oggi alle { $time }
+# review: new
+sync-status-problem = Impossibile sincronizzare: { $problem }
+# review: new
+sync-removed-here = Questo computer è stato rimosso dalla sincronizzazione da un altro computer. Disattiva la sincronizzazione, poi configurala di nuovo per unirti.
+# review: new
+sync-item-account = Account { $name }
+# review: new
+sync-item-contact = Contatto { $name }
+# review: new
+sync-item-group = Gruppo { $name }
+# review: new
+sync-item-key = Chiave { $name }
+# review: new
+sync-item-rule = Regola { $name }
+# review: new
+sync-item-trusted = Mittente attendibile { $name }
+# review: new
+sync-item-sign-in-app = App di accesso { $name }
+# review: new
+sync-item-settings = Impostazioni
+# review: new
+sync-another-computer = un altro computer
+# review: new
+sync-no-key = Questo computer non ha più la chiave della cassaforte di sincronizzazione. Disattiva e riattiva la sincronizzazione con la passphrase di sincronizzazione.
 setup-error-read = Impossibile leggere il file di configurazione: { $error }
 setup-error-write = Impossibile salvare la configurazione: { $error }
 setup-error-no-parts = Scegli almeno un elemento da importare o esportare.

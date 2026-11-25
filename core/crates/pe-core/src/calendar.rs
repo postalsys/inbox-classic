@@ -482,6 +482,11 @@ pub(crate) fn local_date_time(seconds: i64) -> String {
     )
 }
 
+/// A time of day as the reader writes it: "12:00"
+pub(crate) fn local_time(seconds: i64) -> String {
+    instant(seconds, false, InstantPart::Time)
+}
+
 /// A day as the reader writes it: "3 May 2027" (when a key expires)
 pub(crate) fn local_date(seconds: i64) -> String {
     instant(seconds, false, InstantPart::Date)

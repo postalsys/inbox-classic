@@ -121,8 +121,10 @@ enum Start {
     Cancel,
     Next,
     SignIn(SignInWith),
-    /// The link of the first run: Import Settings and Accounts
+    /// The first run's Import from a File: Import Settings and Accounts
     ImportSetup,
+    /// The first run's Join Sync: Set Up Sync, its accounts waited for
+    JoinSync,
     /// Accounts imported from a setup file: the first of them
     Imported(i64),
 }
@@ -248,16 +250,20 @@ async fn start_page(parent: &gtk::Widget, apps: &Apps, offer: Offer, name: &mut 
         content.append(&group);
     }
     if offer.import {
-        let import = gtk::Button::with_label(&t!(UiSetupFirstRun));
-        import.add_css_class("flat");
-        import.set_halign(gtk::Align::Start);
-        import.set_widget_name("setup-first-run");
-        let chosen = send.clone();
-        import.connect_clicked(move |_| {
-            let _ = chosen.try_send(Start::ImportSetup);
-        });
+        // the setup of another computer: its sync joined, or a file of it imported
         content.append(&gtk::Separator::new(gtk::Orientation::Horizontal));
-        content.append(&import);
+        content.append(&ui::wrapped_label(&t!(UiFirstRunOther)));
+        let buttons = gtk::Box::new(gtk::Orientation::Horizontal, 6);
+        buttons.append(&first_run_button(&t!(UiFirstRunSync), "sync-first-run", &send, || {
+            Start::JoinSync
+        }));
+        buttons.append(&first_run_button(
+            &t!(UiFirstRunImport),
+            "setup-first-run",
+            &send,
+            || Start::ImportSetup,
+        ));
+        content.append(&buttons);
     }
     let (dialog, next) = ui::dialog_with_buttons(&t!(UiAddAccountTitle), &content, &offer.next, 500);
     dialog.set_widget_name("account-start");
@@ -288,6 +294,16 @@ async fn start_page(parent: &gtk::Widget, apps: &Apps, offer: Offer, name: &mut 
                     break Start::Imported(*first);
                 }
             }
+            // sync turned on over this window; it closes once the first sync brought an account
+            Start::JoinSync => {
+                if crate::sync::set_up(&dialog).await {
+                    dialog.set_sensitive(false);
+                    if let Some(first) = crate::sync::first_account().await {
+                        break Start::Imported(first);
+                    }
+                    break Start::Cancel;
+                }
+            }
             other => break other,
         }
     };
@@ -297,6 +313,17 @@ async fn start_page(parent: &gtk::Widget, apps: &Apps, offer: Offer, name: &mut 
     }
     dialog.close();
     result
+}
+
+/// A button of the first run that answers the window with what `start` makes
+fn first_run_button(label: &str, name: &str, send: &async_channel::Sender<Start>, start: fn() -> Start) -> gtk::Button {
+    let button = gtk::Button::with_label(label);
+    button.set_widget_name(name);
+    let chosen = send.clone();
+    button.connect_clicked(move |_| {
+        let _ = chosen.try_send(start());
+    });
+    button
 }
 
 /// A provider's sign-in button: its own picture, unchanged; when its client is turned off, faded and turned off, with
@@ -534,7 +561,7 @@ pub async fn new_account(parent: &impl IsA<gtk::Widget>) -> i64 {
         import: shell().core.accounts().map(|a| a.is_empty()).unwrap_or(false),
     };
     match start_page(&parent, &apps, first, &mut name, &mut email).await {
-        Start::Cancel | Start::ImportSetup => return 0,
+        Start::Cancel | Start::ImportSetup | Start::JoinSync => return 0,
         Start::Imported(account) => return account,
         Start::SignIn(with) => return add_signed_in(&parent, with, &name, &email).await,
         Start::Next => {}
@@ -561,7 +588,7 @@ pub async fn new_account(parent: &impl IsA<gtk::Widget>) -> i64 {
             import: false,
         };
         match start_page(&parent, &apps, offer, &mut name, &mut email).await {
-            Start::Cancel | Start::ImportSetup => return 0,
+            Start::Cancel | Start::ImportSetup | Start::JoinSync => return 0,
             Start::Imported(account) => return account,
             Start::SignIn(with) => return add_signed_in(&parent, with, &name, &email).await,
             Start::Next => {}

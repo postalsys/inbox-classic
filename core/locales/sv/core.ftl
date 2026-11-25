@@ -910,6 +910,54 @@ setup-error-newer = Konfigurationen sparades av en nyare Inbox Classic ({ $versi
 setup-error-needs-passphrase = Konfigurationen skyddas med en lösenfras. Skriv lösenfrasen som den sparades med.
 setup-error-wrong-passphrase = Det är inte lösenfrasen som konfigurationen sparades med.
 setup-error-changed = Konfigurationsfilens integritet kunde inte bekräftas. Filen kan inte importeras.
+# review: new
+sync-wrong-passphrase = Det är inte synkroniseringslösenfrasen för det här valvet. Skriv den som du valde när du konfigurerade synkronisering på din första dator.
+# review: new
+sync-place = { $place }, som ”{ $name }”
+# review: new
+sync-news-removed = { $count ->
+    [one] Synkroniseringen tog bort kontot { $accounts } eftersom det togs bort på en annan dator.
+   *[other] Synkroniseringen tog bort kontona { $accounts } eftersom de togs bort på en annan dator.
+}
+# review: new
+sync-news-lost = { $count ->
+    [one] En ändring som gjordes samtidigt på en annan dator ersattes av den som gjordes här. Synkroniseringshistoriken sparar den.
+   *[other] { $count } ändringar som gjordes samtidigt på andra datorer ersattes av dem som gjordes här. Synkroniseringshistoriken sparar dem.
+}
+# review: new
+sync-status-busy = Synkroniserar…
+# review: new
+sync-status-never = Inte synkroniserad ännu.
+# review: new
+sync-status-last = Senast synkroniserad: { $when }.
+# review: new
+sync-status-today = Senast synkroniserad: i dag kl. { $time }.
+# review: new
+sync-when-today = i dag kl. { $time }
+# review: new
+sync-status-problem = Det gick inte att synkronisera: { $problem }
+# review: new
+sync-removed-here = Den här datorn togs bort från synkroniseringen på en annan dator. Stäng av synkronisering och konfigurera den sedan igen för att ansluta.
+# review: new
+sync-item-account = Konto { $name }
+# review: new
+sync-item-contact = Kontakt { $name }
+# review: new
+sync-item-group = Grupp { $name }
+# review: new
+sync-item-key = Nyckel { $name }
+# review: new
+sync-item-rule = Regel { $name }
+# review: new
+sync-item-trusted = Betrodd avsändare { $name }
+# review: new
+sync-item-sign-in-app = Inloggningsapp { $name }
+# review: new
+sync-item-settings = Inställningar
+# review: new
+sync-another-computer = en annan dator
+# review: new
+sync-no-key = Den här datorn har inte längre nyckeln till synkroniseringsvalvet. Stäng av synkronisering och slå på den igen med synkroniseringslösenfrasen.
 setup-error-read = Konfigurationsfilen kunde inte läsas: { $error }
 setup-error-write = Konfigurationen kunde inte sparas: { $error }
 setup-error-no-parts = Välj minst en del.

@@ -54,7 +54,7 @@ Confirmed on 15 November 2026:
 - **A failed signature is not an alarm.** Its frame is amber and says in plain words what is wrong ("The signature does not match this text"); it never looks more dangerous than unsigned mail, which most mail is (RFC 9787 6.4).
 - **Pictures from the internet in a decrypted part load only on a click.** The "Download Pictures" bar stays, but the sender's trust and "always download" never apply to a decrypted part, the choice is for that message that one time and is not remembered, and once they are loaded the part no longer says "Encrypted": its label and the bar say "Pictures were loaded from the internet" (RFC 9787 9.9: fetch and stop calling it protected). A signature's verdict is not changed by it.
 - **Agents (MCP) see no decrypted mail**: not the text, not the snippet, not through search. They can not sign, encrypt, decrypt or touch keys.
-- **A backup is offered right after a key is made or imported**: "Save a Backup…" writes the private key protected by a passphrase of the user's choice (the only place a passphrase is typed). The private key never leaves the app unprotected.
+- **A backup is offered right after a key is made or imported**: "Save a Backup…" writes the private key protected by a passphrase of the user's choice (the only place a passphrase is typed). The private key never leaves the app unprotected: in a backup or a setup file it is under a passphrase, in the settings sync vault under the vault key (`docs/sync-plan.md`), and only when the user leaves Your private keys on in What to sync.
 - **Publishing to keys.openpgp.org is a button**, never automatic: My Keys > Publish uploads the public key and asks the server to send its confirmation mail, which arrives in the user's own inbox.
 
 ## The design

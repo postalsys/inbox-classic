@@ -26,7 +26,8 @@
 #   id              the name in code (snake_case here, PE_SETTING_SEND_DELAY in C, sendDelay in Swift, SendDelay in
 #                   Rust)
 #   kind            switch (a check box, AdwSwitchRow), choice (a list, pop-up or combo row with its label), button
-#                   (opens a window or acts at once)
+#                   (opens a window or acts at once), status (a line of state the core words, with its label: a
+#                   static text, a label in the content column, an AdwActionRow's subtitle)
 #   label           its catalog message; & marks its Windows access key, unique within its page with OK, Cancel and
 #                   Apply in every language (pe-ffi tests/settings.rs)
 #   note            a note under it (Linux: the row's subtitle or the group's description)
@@ -205,3 +206,119 @@ label = "ui-download-ahead"
 id = "download_limit"
 kind = "choice"
 label = "ui-download-limit"
+
+# Settings sync (pe-core sync, docs/sync-plan.md). While sync is off only its note and Set Up Sync show; while it is
+# on, the place, the status, its buttons and what it syncs (each app hides the others).
+[[page]]
+id = "sync"
+label = "ui-settings-sync"
+mac_symbol = "arrow.triangle.2.circlepath"
+linux_icon = "emblem-synchronizing-symbolic"
+
+[[page.group]]
+id = "sync"
+note = "ui-sync-note"
+
+[[page.group.setting]]
+id = "sync_place"
+kind = "status"
+label = "ui-sync-place"
+
+[[page.group.setting]]
+id = "sync_status"
+kind = "status"
+label = "ui-sync-status"
+
+[[page.group.setting]]
+id = "sync_set_up"
+kind = "button"
+label = "ui-sync-set-up"
+
+[[page.group.setting]]
+id = "sync_now"
+kind = "button"
+label = "ui-sync-now"
+
+[[page.group.setting]]
+id = "sync_computers"
+kind = "button"
+label = "ui-sync-computers"
+
+[[page.group.setting]]
+id = "sync_history"
+kind = "button"
+label = "ui-sync-history"
+
+[[page.group.setting]]
+id = "sync_turn_off"
+kind = "button"
+label = "ui-sync-turn-off"
+
+[[page.group]]
+id = "sync_what"
+label = "ui-sync-what"
+note = "ui-sync-what-note"
+
+[[page.group.setting]]
+id = "sync_accounts"
+kind = "switch"
+label = "ui-sync-accounts"
+
+[[page.group.setting]]
+id = "sync_passwords"
+kind = "switch"
+label = "ui-sync-passwords"
+depends_on = "sync_accounts"
+
+[[page.group.setting]]
+id = "sync_sign_ins"
+kind = "switch"
+label = "ui-sync-sign-ins"
+depends_on = "sync_accounts"
+
+[[page.group.setting]]
+id = "sync_sign_in_apps"
+kind = "switch"
+label = "ui-sync-sign-in-apps"
+
+[[page.group.setting]]
+id = "sync_app_secrets"
+kind = "switch"
+label = "ui-sync-app-secrets"
+depends_on = "sync_sign_in_apps"
+
+[[page.group.setting]]
+id = "sync_contacts"
+kind = "switch"
+label = "ui-sync-contacts"
+
+[[page.group.setting]]
+id = "sync_keys"
+kind = "switch"
+label = "ui-sync-keys"
+
+[[page.group.setting]]
+id = "sync_private_keys"
+kind = "switch"
+label = "ui-sync-private-keys"
+depends_on = "sync_keys"
+
+[[page.group.setting]]
+id = "sync_rules"
+kind = "switch"
+label = "ui-sync-rules"
+
+[[page.group.setting]]
+id = "sync_trusted"
+kind = "switch"
+label = "ui-sync-trusted"
+
+[[page.group.setting]]
+id = "sync_settings"
+kind = "switch"
+label = "ui-sync-settings"
+
+[[page.group.setting]]
+id = "sync_preferences"
+kind = "switch"
+label = "ui-sync-preferences"

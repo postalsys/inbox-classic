@@ -789,6 +789,53 @@ setup-error-newer = Tệp thiết lập này được lưu bởi một phiên b�
 setup-error-needs-passphrase = Tệp thiết lập này được bảo vệ bằng cụm mật khẩu. Hãy nhập cụm mật khẩu đã dùng khi lưu.
 setup-error-wrong-passphrase = Đó không phải là cụm mật khẩu đã dùng khi lưu tệp thiết lập này.
 setup-error-changed = Tệp thiết lập không qua được kiểm tra tính toàn vẹn. Có thể tệp đã bị sửa đổi hoặc bị hỏng nên không thể nhập.
+# review: new
+sync-wrong-passphrase = Đó không phải là cụm mật khẩu đồng bộ của kho đồng bộ này. Hãy nhập cụm mật khẩu bạn đã chọn khi thiết lập đồng bộ trên máy tính đầu tiên.
+# review: new
+sync-place = { $place }, với tên “{ $name }”
+# review: new
+sync-news-removed = { $count ->
+   *[other] Đồng bộ đã gỡ tài khoản { $accounts } vì tài khoản đã bị gỡ trên một máy tính khác.
+}
+# review: new
+sync-news-lost = { $count ->
+    [1] Một thay đổi được thực hiện cùng lúc trên một máy tính khác đã bị thay thế bằng thay đổi thực hiện ở đây. Lịch sử đồng bộ vẫn giữ nó.
+   *[other] { $count } thay đổi được thực hiện cùng lúc trên các máy tính khác đã bị thay thế bằng các thay đổi thực hiện ở đây. Lịch sử đồng bộ vẫn giữ chúng.
+}
+# review: new
+sync-status-busy = Đang đồng bộ…
+# review: new
+sync-status-never = Chưa đồng bộ lần nào.
+# review: new
+sync-status-last = Đồng bộ lần cuối { $when }.
+# review: new
+sync-status-today = Đồng bộ lần cuối hôm nay lúc { $time }.
+# review: new
+sync-when-today = hôm nay lúc { $time }
+# review: new
+sync-status-problem = Không thể đồng bộ: { $problem }
+# review: new
+sync-removed-here = Máy tính này đã bị gỡ khỏi đồng bộ trên một máy tính khác. Hãy tắt đồng bộ, rồi thiết lập lại để tham gia.
+# review: new
+sync-item-account = Tài khoản { $name }
+# review: new
+sync-item-contact = Liên hệ { $name }
+# review: new
+sync-item-group = Nhóm { $name }
+# review: new
+sync-item-key = Khóa { $name }
+# review: new
+sync-item-rule = Quy tắc { $name }
+# review: new
+sync-item-trusted = Người gửi tin cậy { $name }
+# review: new
+sync-item-sign-in-app = Ứng dụng đăng nhập { $name }
+# review: new
+sync-item-settings = Cài đặt
+# review: new
+sync-another-computer = một máy tính khác
+# review: new
+sync-no-key = Máy tính này không còn khóa của kho đồng bộ. Hãy tắt đồng bộ rồi bật lại bằng cụm mật khẩu đồng bộ.
 setup-error-read = Không thể đọc tệp thiết lập: { $error }
 setup-error-write = Không thể lưu tệp thiết lập: { $error }
 setup-error-no-parts = Hãy chọn ít nhất một phần.

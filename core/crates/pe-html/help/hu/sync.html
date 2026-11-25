@@ -1,0 +1,20 @@
+<!--review--><h1>Számítógépek szinkronizálása</h1>
+<p class="summary">Fiókjai, kulcsai, névjegyei, szabályai és beállításai minden számítógépen ugyanazok maradnak, egy saját mappán vagy tárhelyen keresztül.</p>
+<p>A szinkronizálás az alkalmazás beállításait egy titkosított tárban őrzi, az Ön által választott helyen: egy mappában, amelyet a Dropbox, a OneDrive, az iCloud Drive, a Google Drive, a Nextcloud vagy a Syncthing másol a számítógépei között, vagy S3-kompatibilis tárhelyen. Mielőtt bármi elhagyná a számítógépet, a szinkronizálási jelmondat titkosítja. Az üzenetek nincsenek benne: a levelezőkiszolgálókon maradnak.</p>
+<h2>A szinkronizálás beállítása az első számítógépen</h2>
+<ol>
+    <li>Nyissa meg ezt: <b data-settings="sync"></b>, és kattintson a <b data-text="ui-sync-set-up"></b> gombra.</li>
+    <li>Válassza a <b data-text="ui-sync-folder"></b> lehetőséget, és kattintson a <b data-text="ui-sync-choose-folder"></b> gombra, vagy válassza az <b data-text="ui-sync-bucket"></b> lehetőséget, és adja meg az adatait. Kattintson a <b data-text="ui-sync-next"></b> gombra.</li>
+    <li>Írjon be kétszer egy szinkronizálási jelmondatot, és adjon nevet ennek a számítógépnek. Válassza ki, mit szinkronizáljon, majd kattintson a <b data-text="ui-sync-turn-on"></b> gombra.</li>
+</ol>
+<aside class="warning">A szinkronizálási jelmondatot tartsa biztonságos helyen. Nélküle egyetlen további számítógép sem csatlakozhat.</aside>
+<h2>Újabb számítógép hozzáadása</h2>
+<ol>
+    <li>A másik számítógépen nyissa meg ezt: <b data-settings="sync"></b>, kattintson a <b data-text="ui-sync-set-up"></b> gombra, és válassza ugyanazt a mappát vagy tárhelyet.</li>
+    <li>Írja be az első számítógépen választott szinkronizálási jelmondatot, és kattintson a <b data-text="ui-sync-turn-on"></b> gombra.</li>
+</ol>
+<p>A számítógépen már meglévő és a szinkronizált adatok egyesülnek: a mindkét helyen meglévő fiók vagy névjegy eggyé válik. Az üzenetek újra letöltődnek a kiszolgálókról.</p>
+<h2>Szinkronizálás közben</h2>
+<p>Minden számítógép néhány percenként szinkronizál, valamint akkor, amikor a <b data-text="ui-sync-now"></b> gombra kattint. Ha ugyanazt két számítógépen egyszerre módosították, a legutoljára végzett módosítás marad meg, a másik pedig az <b data-text="ui-sync-history"></b> ablakba kerül, ahol visszaállíthatja. Ha egy másik számítógépen eltávolítanak egy fiókot, ezt a főablak jelzi.</p>
+<p>Egy már nem használt számítógép szinkronizálásának leállításához kattintson a <b data-text="ui-sync-computers"></b> gombra, és távolítsa el a számítógépet. Ennek a számítógépnek a szinkronizálását úgy állíthatja le, hogy rákattint a <b data-text="ui-sync-turn-off"></b> gombra: minden úgy marad, ahogy van.</p>
+<nav class="related"><a href="topic:move-computer"></a> <a href="topic:manage-accounts"></a> <a href="topic:encryption-keys"></a></nav><!--/review-->

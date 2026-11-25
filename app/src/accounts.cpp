@@ -251,7 +251,7 @@ namespace {
 
 // ---- the first page: the providers' sign-in buttons, or the name and address of any other account ----
 
-enum class Start { Cancel, Next, SignIn, Import };
+enum class Start { Cancel, Next, SignIn, Import, JoinSync };
 
 // the ids of the first page: the name and address as the server form has them, the sign-in buttons, the "Why?" under
 // each, and More sign-in options
@@ -426,6 +426,8 @@ bool Choose(HWND hwnd, StartState& state, int id) {
         }
     } else if (id == IDC_SETUP_FIRST_RUN) {
         state.choice = Start::Import;
+    } else if (id == IDC_SYNC_FIRST_RUN) {
+        state.choice = Start::JoinSync;
     } else if (id == IDOK) {
         // the page of another account wants an address to look up
         if (state.emailInput && GetWindowString(state.emailInput).find(L'@') == std::wstring::npos) {
@@ -485,7 +487,8 @@ struct StartOffer {
     std::vector<PeOAuthProvider> providers;
     bool more = false;
     bool fields = false;
-    // before the first account: the link to import the settings and accounts of another computer
+    // before the first account: what brings the settings and accounts of another computer here, its sync joined or a
+    // file of it imported
     bool importLink = false;
     std::wstring nextLabel = core::T(PE_TEXT_WIN_NEXT);
 };
@@ -555,12 +558,13 @@ Start StartPage(HWND owner, PeCore* core, const SignInApps& apps, const StartOff
     int moreHeight = offer.more ? pushHeight + Scale(6) : 0;
     int otherHeight = offer.fields ? Scale(12) + otherTextHeight + 2 * (rowHeight + Scale(6)) : 0;
     int buttonWidth = ButtonWidth({offer.nextLabel}, 110), cancelWidth = ButtonWidth({cancel});
-    // the import button at the left of the button row, or over it when it does not fit beside Next and Cancel
-    std::wstring importText = core::T(PE_TEXT_UI_SETUP_FIRST_RUN);
-    int importWidth = offer.importLink ? ButtonWidth({importText}) : 0;
-    bool importAbove = offer.importLink && pad + importWidth + Scale(12) > width - pad - buttonWidth - cancelWidth - Scale(6);
-    int importHeight = importAbove ? pushHeight + Scale(8) : 0;
-    int height = pad + introHeight + Scale(8) + buttonsHeight + moreHeight + Scale(6) + otherHeight + importHeight + Scale(25) + pad;
+    // before the first account, under a line: the question of another computer, Join Its Sync and Import from a File
+    std::wstring question = core::T(PE_TEXT_UI_FIRST_RUN_OTHER);
+    std::wstring joinText = core::T(PE_TEXT_UI_FIRST_RUN_SYNC), importText = core::T(PE_TEXT_UI_FIRST_RUN_IMPORT);
+    int questionHeight = static_cast<int>(MeasureText(question, width - 2 * pad).cy);
+    int joinWidth = ButtonWidth({joinText}), importWidth = ButtonWidth({importText});
+    int firstRunHeight = offer.importLink ? 2 + Scale(10) + questionHeight + Scale(6) + pushHeight + Scale(12) : 0;
+    int height = pad + introHeight + Scale(8) + buttonsHeight + moreHeight + Scale(6) + otherHeight + firstRunHeight + Scale(25) + pad;
     HWND dialog = CreateModalWindow(owner, kStartClass, core::Plain(PE_TEXT_UI_ADD_ACCOUNT_TITLE).c_str(), width, height);
     StartState state{core, &apps};
 
@@ -616,19 +620,24 @@ Start StartPage(HWND owner, PeCore* core, const SignInApps& apps, const StartOff
                                        {pad + labelWidth, top, width - pad, top + rowHeight}, WS_EX_CLIENTEDGE);
         state.name = &name;
         state.email = &email;
+        top += rowHeight;
+    }
+    if (offer.importLink) {
+        top += Scale(6);
+        CreateChild(dialog, L"STATIC", L"", SS_ETCHEDHORZ, 0, {pad, top, width - pad, top + 2});
+        top += 2 + Scale(10);
+        CreateChild(dialog, L"STATIC", question.c_str(), SS_LEFT | SS_NOPREFIX, 0, {pad, top, width - pad, top + questionHeight});
+        top += questionHeight + Scale(6);
+        CreateChild(dialog, L"BUTTON", joinText.c_str(), WS_TABSTOP | BS_PUSHBUTTON, IDC_SYNC_FIRST_RUN, {pad, top, pad + joinWidth, top + pushHeight});
+        int importLeft = pad + joinWidth + Scale(6);
+        CreateChild(dialog, L"BUTTON", importText.c_str(), WS_TABSTOP | BS_PUSHBUTTON, IDC_SETUP_FIRST_RUN,
+                    {importLeft, top, importLeft + importWidth, top + pushHeight});
     }
     int buttonTop = height - pad - Scale(25);
     // the default where it goes on with what was typed; beside a provider's button, the other way only
     CreateChild(dialog, L"BUTTON", offer.nextLabel.c_str(), WS_TABSTOP | (offer.fields ? BS_DEFPUSHBUTTON : BS_PUSHBUTTON), IDOK,
                 {width - pad - buttonWidth - cancelWidth - Scale(6), buttonTop, width - pad - cancelWidth - Scale(6), buttonTop + Scale(25)});
     CreateChild(dialog, L"BUTTON", cancel.c_str(), WS_TABSTOP, IDCANCEL, {width - pad - cancelWidth, buttonTop, width - pad, buttonTop + Scale(25)});
-    if (offer.importLink) {
-        int importTop = importAbove ? buttonTop - importHeight : buttonTop;
-        HWND import = CreateChild(dialog, L"BUTTON", importText.c_str(), WS_TABSTOP | BS_PUSHBUTTON, IDC_SETUP_FIRST_RUN,
-                                  {pad, importTop, pad + importWidth, importTop + pushHeight});
-        // after the fields and before Next in the Tab order, as it is placed
-        SetWindowPos(import, state.emailInput ? state.emailInput : HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-    }
 
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
     // typing comes first on the page with the fields; the provider's button on the page that offers it
@@ -718,6 +727,15 @@ int64_t NewAccountDialog(HWND owner, PeCore* core) {
         core::AccountList accounts(pe_accounts(core));
         first.importLink = pe_account_list_count(accounts.get()) == 0;
         start = StartPage(owner, core, apps, first, name, email, chosen);
+        if (start == Start::JoinSync) {
+            // the sync of another computer joined: done once its first sync brought an account, else the page again
+            if (SetUpSyncDialog(owner, core)) {
+                if (int64_t synced = WaitForSyncedAccount(owner, core)) {
+                    return synced;
+                }
+            }
+            continue;
+        }
         if (start != Start::Import) {
             break;
         }

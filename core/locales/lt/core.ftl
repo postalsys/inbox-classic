@@ -993,6 +993,54 @@ setup-error-newer = Šią sąranką įrašė naujesnė Inbox Classic versija ({ 
 setup-error-needs-passphrase = Sąrankos failas apsaugotas slaptafraze. Įveskite ją, kad atrakintumėte failą.
 setup-error-wrong-passphrase = Sąrankos failo slaptafrazė neteisinga.
 setup-error-changed = Nepavyko patikrinti sąrankos failo vientisumo. Failas gali būti pakeistas arba sugadintas, todėl jo importuoti negalima.
+# review: new
+sync-wrong-passphrase = Tai ne šių sinchronizavimo duomenų slaptafrazė. Įveskite tą, kurią pasirinkote nustatydami sinchronizavimą pirmajame kompiuteryje.
+# review: new
+sync-place = { $place }, pavadinimu „{ $name }“
+# review: new
+sync-news-removed = { $count ->
+    [1] Sinchronizavimas pašalino paskyrą { $accounts }, nes ji buvo pašalinta kitame kompiuteryje.
+   *[other] Sinchronizavimas pašalino paskyras, nes jos buvo pašalintos kitame kompiuteryje: { $accounts }
+}
+# review: new
+sync-news-lost = { $count ->
+    [1] Tuo pat metu kitame kompiuteryje atliktas pakeitimas buvo pakeistas čia atliktu pakeitimu. Jį saugo sinchronizavimo istorija.
+   *[other] Tuo pat metu kituose kompiuteriuose atlikti pakeitimai buvo pakeisti čia atliktais, iš viso: { $count }. Juos saugo sinchronizavimo istorija.
+}
+# review: new
+sync-status-busy = Sinchronizuojama…
+# review: new
+sync-status-never = Dar nesinchronizuota.
+# review: new
+sync-status-last = Paskutinį kartą sinchronizuota: { $when }.
+# review: new
+sync-status-today = Paskutinį kartą sinchronizuota šiandien { $time }.
+# review: new
+sync-when-today = šiandien { $time }
+# review: new
+sync-status-problem = Nepavyko sinchronizuoti: { $problem }
+# review: new
+sync-removed-here = Šis kompiuteris buvo pašalintas iš sinchronizavimo kitame kompiuteryje. Išjunkite sinchronizavimą, tada vėl jį nustatykite, kad prisijungtumėte.
+# review: new
+sync-item-account = Paskyra { $name }
+# review: new
+sync-item-contact = Kontaktas { $name }
+# review: new
+sync-item-group = Grupė { $name }
+# review: new
+sync-item-key = Raktas { $name }
+# review: new
+sync-item-rule = Taisyklė { $name }
+# review: new
+sync-item-trusted = Patikimas siuntėjas { $name }
+# review: new
+sync-item-sign-in-app = Prisijungimo programa { $name }
+# review: new
+sync-item-settings = Nustatymai
+# review: new
+sync-another-computer = kitas kompiuteris
+# review: new
+sync-no-key = Šiame kompiuteryje nebėra sinchronizavimo duomenų rakto. Išjunkite sinchronizavimą ir vėl jį įjunkite su sinchronizavimo slaptafraze.
 setup-error-read = Sąrankos failo perskaityti nepavyko: { $error }
 setup-error-write = Sąrankos failo įrašyti nepavyko: { $error }
 setup-error-no-parts = Pasirinkite bent vieną dalį.

@@ -343,6 +343,10 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
             reloadMessagesShown()
             ContactKeys.refreshAll()
             AddressBookWindow.refresh()
+        case PE_EVENT_KIND_SETTINGS_SYNC_READY:
+            SyncEvents.ready(core)
+        case PE_EVENT_KIND_SETTINGS_SYNC_CHANGED:
+            SyncEvents.changed(core, main: self)
         case PE_EVENT_KIND_KEY_PUBLISHED:
             KeyActions.published(core: core, event.uid)
         case PE_EVENT_KIND_FAILED:

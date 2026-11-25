@@ -2,7 +2,7 @@
 //! certificates (plain HTTP only to the loopback address, for test servers, or where a [`Request`] asks for it),
 //! HTTP/1.0 so there is no chunked encoding, no redirects (the caller reads `Location` itself), a size limit and a
 //! time limit. Responses are parsed here, in Rust. A request carrying an `Authorization` header only goes over
-//! HTTPS. A TLS connection closed without close_notify after a complete head ends the response, as browsers take
+//! HTTPS, or in plain HTTP to 127.0.0.1, where it never leaves the machine (test servers). A TLS connection closed without close_notify after a complete head ends the response, as browsers take
 //! it; a Content-Length is then still checked.
 
 use std::time::Duration;
@@ -171,6 +171,29 @@ impl Response {
 pub enum Method {
     Get,
     Post,
+    /// Sends its body as POST does
+    Put,
+    /// Sends no body
+    Delete,
+    /// Its response has no body, whatever its Content-Length says
+    Head,
+}
+
+impl Method {
+    pub fn name(self) -> &'static str {
+        match self {
+            Method::Get => "GET",
+            Method::Post => "POST",
+            Method::Put => "PUT",
+            Method::Delete => "DELETE",
+            Method::Head => "HEAD",
+        }
+    }
+
+    /// POST and PUT send a body and its Content-Length
+    fn has_body(self) -> bool {
+        matches!(self, Method::Post | Method::Put)
+    }
 }
 
 /// A request for [`send`]
@@ -181,12 +204,13 @@ pub struct Request<'a> {
     /// Header fields besides `Host`, `User-Agent`, `Connection` and `Content-Length`; an `Accept` here replaces the
     /// default `*/*`
     pub headers: &'a [(&'a str, &'a str)],
-    /// Sent with a POST
+    /// Sent with a POST or a PUT
     pub body: &'a [u8],
     pub timeout: Duration,
     /// The largest response read; a longer one is [`HttpError::TooLarge`]
     pub max_response: usize,
-    /// `http://` to any host. Never with an `Authorization` header: credentials only go over HTTPS.
+    /// `http://` to any host. Never with an `Authorization` header but to 127.0.0.1: credentials only go over HTTPS
+    /// or stay on this machine.
     pub plain_http: bool,
 }
 
@@ -233,6 +257,12 @@ impl std::error::Error for HttpError {}
 
 /// The status and the body of a response read to its end
 pub fn parse_response(raw: &[u8]) -> Result<Response, HttpError> {
+    parse_response_to(raw, Method::Get)
+}
+
+/// [`parse_response`] of the answer to `method`: the answer to a HEAD has no body, its Content-Length is the one a GET
+/// would have
+fn parse_response_to(raw: &[u8], method: Method) -> Result<Response, HttpError> {
     let head_end = raw
         .windows(4)
         .position(|w| w == b"\r\n\r\n")
@@ -262,10 +292,13 @@ pub fn parse_response(raw: &[u8]) -> Result<Response, HttpError> {
     if let Some((_, value)) = length {
         // a length that is no number is no HTTP
         let length: usize = value.trim().parse().map_err(|_| HttpError::Malformed)?;
-        if body.len() < length {
+        if body.len() < length && method != Method::Head {
             return Err(HttpError::Malformed);
         }
         body.truncate(length);
+    }
+    if method == Method::Head {
+        body.clear();
     }
     Ok(Response { status, headers, body })
 }
@@ -298,10 +331,7 @@ fn valid_header(name: &str, value: &str) -> bool {
 
 /// The request line, the headers and the body of a request
 fn request_bytes(url: &Url, method: Method, headers: &[(&str, &str)], body: &[u8]) -> Vec<u8> {
-    let method_name = match method {
-        Method::Get => "GET",
-        Method::Post => "POST",
-    };
+    let method_name = method.name();
     let host = url.authority();
     let mut head = format!(
         "{method_name} {} HTTP/1.0\r\nHost: {host}\r\nUser-Agent: InboxClassic\r\n",
@@ -314,12 +344,12 @@ fn request_bytes(url: &Url, method: Method, headers: &[(&str, &str)], body: &[u8
     for (name, value) in headers {
         head.push_str(&format!("{name}: {value}\r\n"));
     }
-    if method == Method::Post {
+    if method.has_body() {
         head.push_str(&format!("Content-Length: {}\r\n", body.len()));
     }
     head.push_str("\r\n");
     let mut bytes = head.into_bytes();
-    if method == Method::Post {
+    if method.has_body() {
         bytes.extend_from_slice(body);
     }
     bytes
@@ -339,7 +369,7 @@ pub async fn send(request: Request<'_>) -> Result<Response, HttpError> {
         .headers
         .iter()
         .any(|(name, _)| name.eq_ignore_ascii_case("authorization"));
-    if credentials && !url.https {
+    if credentials && !url.https && url.host != "127.0.0.1" {
         return Err(HttpError::BadRequest);
     }
     let bytes = request_bytes(&url, request.method, request.headers, request.body);
@@ -374,7 +404,8 @@ pub async fn send(request: Request<'_>) -> Result<Response, HttpError> {
             }
         }
         stream.shutdown().await;
-        parse_response(&raw)
+        let method = request.method;
+        parse_response_to(&raw, method)
     };
     tokio::time::timeout(timeout, work)
         .await
@@ -515,6 +546,80 @@ mod tests {
         assert!(sent.contains("\r\nContent-Type: text/xml; charset=utf-8\r\nContent-Length: 4\r\n\r\n<x/>"));
     }
 
+    #[tokio::test]
+    async fn credentials_stay_on_this_machine() {
+        let (base, server) = serve("HTTP/1.0 204 No Content\r\n\r\n", b"").await;
+        let url = format!("{base}/x");
+        let request = Request {
+            headers: &[("Authorization", "AWS4-HMAC-SHA256 x")],
+            plain_http: true,
+            ..Request::get(&url, Duration::from_secs(5))
+        };
+        assert_eq!(send(request).await.unwrap().status, 204);
+        let sent = String::from_utf8(server.await.unwrap()).unwrap();
+        assert!(sent.contains("\r\nAuthorization: AWS4-HMAC-SHA256 x\r\n"), "{sent}");
+    }
+
+    #[tokio::test]
+    async fn put_sends_its_body() {
+        let (base, server) = serve("HTTP/1.1 200 OK\r\nETag: \"1\"\r\nContent-Length: 0\r\n\r\n", b"").await;
+        let url = format!("{base}/bucket/a/b");
+        let request = Request {
+            method: Method::Put,
+            headers: &[("If-None-Match", "*")],
+            body: b"hello",
+            ..Request::get(&url, Duration::from_secs(5))
+        };
+        let response = send(request).await.unwrap();
+        assert_eq!((response.status, response.header("etag")), (200, Some("\"1\"")));
+        let sent = String::from_utf8(server.await.unwrap()).unwrap();
+        assert!(sent.starts_with("PUT /bucket/a/b HTTP/1.0\r\n"), "{sent}");
+        assert!(
+            sent.ends_with("\r\nIf-None-Match: *\r\nContent-Length: 5\r\n\r\nhello"),
+            "{sent}"
+        );
+    }
+
+    #[tokio::test]
+    async fn delete_sends_no_body() {
+        let (base, server) = serve("HTTP/1.1 204 No Content\r\n\r\n", b"").await;
+        let url = format!("{base}/bucket/a");
+        let request = Request {
+            method: Method::Delete,
+            body: b"ignored",
+            ..Request::get(&url, Duration::from_secs(5))
+        };
+        let response = send(request).await.unwrap();
+        assert_eq!((response.status, response.body.len()), (204, 0));
+        let sent = String::from_utf8(server.await.unwrap()).unwrap();
+        assert_eq!(
+            sent,
+            format!(
+                "DELETE /bucket/a HTTP/1.0\r\nHost: {}\r\nUser-Agent: InboxClassic\r\nAccept: */*\r\nConnection: close\r\n\r\n",
+                base.trim_start_matches("http://")
+            )
+        );
+    }
+
+    #[tokio::test]
+    async fn head_has_no_body_whatever_its_length() {
+        let (base, server) = serve("HTTP/1.1 200 OK\r\nContent-Length: 1234\r\n\r\n", b"").await;
+        let url = format!("{base}/bucket/a");
+        let request = Request {
+            method: Method::Head,
+            ..Request::get(&url, Duration::from_secs(5))
+        };
+        let response = send(request).await.unwrap();
+        assert_eq!(
+            (response.status, response.header("content-length")),
+            (200, Some("1234"))
+        );
+        assert!(response.body.is_empty());
+        let sent = String::from_utf8(server.await.unwrap()).unwrap();
+        assert!(sent.starts_with("HEAD /bucket/a HTTP/1.0\r\n"), "{sent}");
+        assert!(!sent.contains("Content-Length"), "{sent}");
+    }
+
     #[test]
     fn header_fields_are_checked() {
         assert!(valid_header("Authorization", "Basic dXNlcjpwYXNz"));
@@ -525,13 +630,15 @@ mod tests {
 
     #[tokio::test]
     async fn no_credentials_over_plain_http() {
-        // refused before anything is sent: there is nothing listening at this address
-        let request = Request {
-            headers: &[("Authorization", "Basic dXNlcjpwYXNz")],
-            plain_http: true,
-            ..Request::get("http://127.0.0.1:9/autodiscover", Duration::from_secs(1))
-        };
-        assert!(matches!(send(request).await, Err(HttpError::BadRequest)));
+        // refused before anything is sent: nothing goes to these hosts
+        for url in ["http://example.com/autodiscover", "http://localhost:9/autodiscover"] {
+            let request = Request {
+                headers: &[("Authorization", "Basic dXNlcjpwYXNz")],
+                plain_http: true,
+                ..Request::get(url, Duration::from_secs(1))
+            };
+            assert!(matches!(send(request).await, Err(HttpError::BadRequest)), "{url}");
+        }
         let injected = Request {
             headers: &[("X-A", "a\r\nb")],
             ..Request::get("https://127.0.0.1:9/", Duration::from_secs(1))
@@ -571,5 +678,23 @@ mod tests {
         assert!(parse_response(b"HTTP/1.1 999 What\r\n\r\n").is_err());
         assert!(parse_response(b"no head end").is_err());
         assert!(parse_response(b"HTTP/1.1 200 OK\r\nContent-Length: x\r\nContent-Length: 2\r\n\r\nab").is_err());
+        // the answer to a HEAD: a length and no body, and whatever follows the head is not one
+        let head = b"HTTP/1.1 200 OK\r\nContent-Length: 50\r\n\r\n";
+        assert!(parse_response_to(head, Method::Head).unwrap().body.is_empty());
+        assert!(parse_response_to(head, Method::Get).is_err());
+        assert!(
+            parse_response_to(b"HTTP/1.1 200 OK\r\n\r\nstray", Method::Head)
+                .unwrap()
+                .body
+                .is_empty()
+        );
+        assert!(parse_response_to(b"HTTP/1.1 200 OK\r\nContent-Length: x\r\n\r\n", Method::Head).is_err());
+        let put = request_bytes(
+            &parse_url("https://s3.example.com/b/k").unwrap(),
+            Method::Put,
+            &[],
+            b"ab",
+        );
+        assert!(put.ends_with(b"\r\nContent-Length: 2\r\n\r\nab"));
     }
 }

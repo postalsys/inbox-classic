@@ -451,6 +451,141 @@ ui-settings-encryption = Criptare
 ui-settings-language = Limbă
 ui-settings-label = { $label }:
 ui-apply = &Aplicare
+# review: new
+ui-settings-sync = Sincronizare
+# review: new
+ui-sync-note = Păstrați conturile, cheile, agenda, regulile și setările la fel pe fiecare computer, printr-un folder sau un spațiu de stocare care vă aparține. Totul este criptat cu fraza-parolă de sincronizare înainte să părăsească acest computer.
+# review: new
+ui-sync-place = Sincronizat prin:
+# review: new
+ui-sync-status = Stare:
+# review: new
+ui-sync-set-up = Configurare &sincronizare…
+# review: new
+ui-sync-now = Sincronizare a&cum
+# review: new
+ui-sync-computers = Co&mputere…
+# review: new
+ui-sync-history = &Istoric…
+# review: new
+ui-sync-turn-off = &Dezactivare sincronizare…
+# review: new
+ui-sync-what = Ce se sincronizează
+# review: new
+ui-sync-what-note = Parolele, conectările și cheile private circulă numai criptate. Excludeți ce trebuie să rămână pe acest computer.
+# review: new
+ui-sync-accounts = C&onturi
+# review: new
+ui-sync-passwords = &Parole
+# review: new
+ui-sync-sign-ins = Co&nectări cu Google, Microsoft și aplicații de conectare
+# review: new
+ui-sync-sign-in-apps = Ap&licații de conectare
+# review: new
+ui-sync-app-secrets = S&ecretele aplicațiilor de conectare
+# review: new
+ui-sync-contacts = A&gendă
+# review: new
+ui-sync-keys = C&hei
+# review: new
+ui-sync-private-keys = Cheile dvs. p&rivate
+# review: new
+ui-sync-rules = Reg&uli
+# review: new
+ui-sync-trusted = E&xpeditori de încredere
+# review: new
+ui-sync-settings = Se&tări
+# review: new
+ui-sync-preferences = Aspect și &vizualizare
+# review: new
+ui-sync-everything = Totul
+# review: new
+ui-sync-some-left-out = Unele elemente sunt excluse
+# review: new
+ui-sync-where = Unde se păstrează
+# review: new
+ui-sync-folder = Un folder
+# review: new
+ui-sync-folder-note = Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud sau Syncthing îl copiază pe celelalte computere ale dvs.
+# review: new
+ui-sync-bucket = Stocare compatibilă S3
+# review: new
+ui-sync-bucket-note = Amazon S3, Cloudflare R2, Backblaze B2, MinIO sau alt spațiu de stocare care funcționează ca S3.
+# review: new
+ui-sync-folder-label = &Folder:
+# review: new
+ui-sync-folder-none = Niciunul ales încă
+# review: new
+ui-sync-choose-folder = Ale&gere…
+# review: new
+ui-sync-choose-folder-title = Alegerea folderului de sincronizare
+# review: new
+ui-sync-endpoint = &Endpoint:
+# review: new
+ui-sync-region = &Regiune:
+# review: new
+ui-sync-bucket-name = &Bucket:
+# review: new
+ui-sync-prefix = Folder în b&ucket:
+# review: new
+ui-sync-access-key = ID cheie de &acces:
+# review: new
+ui-sync-secret-key = Cheie de acces &secretă:
+# review: new
+ui-sync-next = Urmă&torul
+# review: new
+ui-sync-join-title = Alăturare la sincronizare
+# review: new
+ui-sync-join-note = Aici se află sincronizarea celorlalte computere ale dvs. Introduceți fraza-parolă de sincronizare pe care ați ales-o pe primul.
+# review: new
+ui-sync-start-title = Pornirea sincronizării
+# review: new
+ui-sync-start-note = Alegeți o frază-parolă de sincronizare. O introduceți o singură dată pe fiecare computer pe care îl adăugați. Păstrați-o într-un loc sigur: fără ea, niciun alt computer nu se poate alătura.
+# review: new
+ui-sync-name = &Numele acestui computer:
+# review: new
+ui-sync-merge-note = Ce are acest computer și ce conține sincronizarea se combină: un cont sau un contact existent în ambele devine unul singur.
+# review: new
+ui-sync-turn-on = Activare sin&cronizare
+# review: new
+ui-sync-on = Sincronizarea este activată.
+# review: new
+ui-sync-turn-off-ask = Dezactivați sincronizarea pe acest computer? Totul rămâne cum este, aici și pe celelalte computere ale dvs. Doar acest computer nu se mai sincronizează.
+# review: new
+ui-sync-turn-off-button = Dezactivare
+# review: new
+ui-sync-computers-title = Computere
+# review: new
+ui-sync-computers-note = Computerele care se sincronizează prin acest loc. Eliminați unul pe care nu îl mai folosiți: nu se mai sincronizează, iar ce a sincronizat rămâne.
+# review: new
+ui-sync-this-computer = Acest computer
+# review: new
+ui-sync-seen = Ultima sincronizare: { $when }
+# review: new
+ui-sync-remove-ask = Eliminați „{ $name }” din sincronizare? Se oprește data viitoare când încearcă să se sincronizeze. Pentru a-l sincroniza din nou, configurați încă o dată sincronizarea pe el.
+# review: new
+ui-sync-loading = Se citește…
+# review: new
+ui-sync-history-title = Istoric
+# review: new
+ui-sync-history-note = Când același element a fost modificat pe două computere în același timp, s-a păstrat ultima modificare făcută, iar cealaltă se află aici. Restaurați una pentru a o folosi în locul celei actuale.
+# review: new
+ui-sync-history-empty = Nicio modificare nu a fost înlocuită.
+# review: new
+ui-sync-history-row = Sursa: { $source }, { $when }
+# review: new
+ui-sync-restore = &Restaurare
+# review: new
+ui-sync-restore-points = Puncte de restaurare
+# review: new
+ui-sync-restore-points-note = Înainte ca sincronizarea să elimine ceva de aici, starea anterioară este salvată. Deschideți un punct pentru a recupera ce alegeți din el.
+# review: new
+ui-sync-restore-points-empty = Niciunul încă.
+# review: new
+ui-sync-open-point = &Deschidere…
+# Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
+# review: new
+win-sync-back = < Îna&poi
 ui-language-label = &Limbă:
 ui-restart-note = Reporniți Inbox Classic pentru a schimba limba.
 ui-restart-ask = După repornire, limba aplicației Inbox Classic va fi „{ $language }”. Reporniți acum?
@@ -797,6 +932,12 @@ ui-setup-from = Salvat de Inbox Classic { $version } pe { $date }.
 ui-setup-import-button = &Import
 ui-setup-done = Gata
 ui-setup-first-run = Import setări și conturi de pe alt computer...
+# review: new
+ui-first-run-other = Folosiți deja Inbox Classic pe alt computer? Aduceți aici conturile și setările de pe acesta.
+# review: new
+ui-first-run-sync = Alăturare la sincronizarea acestuia…
+# review: new
+ui-first-run-import = Import dintr-un fișier…
 
 ui-field-verifiers = Surse de încredere pentru verificarea expeditorului:
 ui-attachment-import-key = Import cheie...

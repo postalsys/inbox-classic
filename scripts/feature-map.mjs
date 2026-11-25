@@ -222,6 +222,34 @@ const sections = [
                 checked: ['The import is a push button that opens it']
             },
             {
+                shot: 'sync-1-off',
+                name: 'Settings sync',
+                what: "The Sync page of the settings keeps accounts, keys, the Address Book, rules and settings the same on every computer, through a folder a sync app copies (Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud, Syncthing) or S3-compatible storage the user owns. No service of ours is in between: everything in the vault is encrypted with the sync passphrase.",
+                how: 'The settings, Sync page.',
+                checked: ['While off, it says what sync is for and offers Set Up Sync only']
+            },
+            {
+                shot: 'sync-3-start',
+                name: 'Set Up Sync',
+                what: 'Set Up Sync asks where to keep the vault, looks at it, then asks for a new sync passphrase (twice) when the place is empty, or the one chosen on the first computer when it holds a vault, the name of this computer and what to sync, each kind of data and secret on its own.',
+                how: 'The settings, Sync page, Set Up Sync.',
+                checked: ['Next is off until a place is given', 'An empty folder asks for a new passphrase twice', 'The first sync writes the vault', 'A wrong passphrase does not join']
+            },
+            {
+                shot: 'sync-4-on',
+                name: 'Sync on',
+                what: 'While sync is on, the page shows where it syncs through and as what computer, how the last sync went, Sync Now, Computers, History, Turn Off Sync and the switches of what to sync. What another computer changes is applied by itself; a change made at the same time on two computers keeps the later one and puts the other in History.',
+                how: 'The settings, Sync page.',
+                checked: ['A second computer joins and gets the account', 'A contact it adds arrives on Sync Now', 'Turn Off Sync asks first']
+            },
+            {
+                shot: 'sync-5-computers',
+                name: 'Computers of the sync',
+                what: 'Computers lists the computers that sync through the place, with when each last synced; Remove takes one that is lost or given away out of the sync, keeping what it synced.',
+                how: 'The settings, Sync page, Computers.',
+                checked: ['Both computers are listed, this one marked']
+            },
+            {
                 shot: 'all-inboxes-1-list',
                 name: 'All Inboxes',
                 what: "With two or more accounts, All Inboxes at the top of the folder tree lists the mail of every account's Inbox in one list, newest first, with an Account column naming the account of each message and the unread count of all of them. The app opens on it, with the newest message selected. Reply, Forward, Move and Delete act on the message in its own account, and Create Mail starts from the account of the selected message. Mark All Read on it marks every Inbox read. It goes when only one account is left.",

@@ -14,8 +14,8 @@
 //! agents are on (decided on each computer), the store's profile id, and any secret without a passphrase.
 
 mod export;
-mod file;
-mod import;
+pub(crate) mod file;
+pub(crate) mod import;
 #[cfg(test)]
 mod round_trips;
 

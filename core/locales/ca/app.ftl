@@ -447,6 +447,141 @@ ui-settings-encryption = Xifratge
 ui-settings-language = Llengua
 ui-settings-label = { $label }:
 ui-apply = &Aplica
+# review: new
+ui-settings-sync = Sincronització
+# review: new
+ui-sync-note = Mantingueu iguals a tots els ordinadors els comptes, les claus, la Llibreta d’adreces, les regles i la configuració, mitjançant una carpeta o un emmagatzematge que sigui vostre. Tot es xifra amb la frase de pas de sincronització abans de sortir d’aquest ordinador.
+# review: new
+ui-sync-place = Sincronitzat mitjançant:
+# review: new
+ui-sync-status = Estat:
+# review: new
+ui-sync-set-up = &Configura la sincronització…
+# review: new
+ui-sync-now = Sincronitza a&ra
+# review: new
+ui-sync-computers = &Ordinadors…
+# review: new
+ui-sync-history = &Historial…
+# review: new
+ui-sync-turn-off = &Desactiva la sincronització…
+# review: new
+ui-sync-what = Què cal sincronitzar
+# review: new
+ui-sync-what-note = Les contrasenyes, els inicis de sessió i les claus privades només viatgen xifrats. Excloeu el que s’hagi de quedar en aquest ordinador.
+# review: new
+ui-sync-accounts = Co&mptes
+# review: new
+ui-sync-passwords = Contra&senyes
+# review: new
+ui-sync-sign-ins = &Inicis de sessió amb Google, Microsoft i aplicacions d’inici de sessió
+# review: new
+ui-sync-sign-in-apps = A&plicacions d’inici de sessió
+# review: new
+ui-sync-app-secrets = S&ecrets de les aplicacions d’inici de sessió
+# review: new
+ui-sync-contacts = &Llibreta d’adreces
+# review: new
+ui-sync-keys = Cla&us
+# review: new
+ui-sync-private-keys = Les vos&tres claus privades
+# review: new
+ui-sync-rules = Re&gles
+# review: new
+ui-sync-trusted = Remitents de con&fiança
+# review: new
+ui-sync-settings = Opcio&ns
+# review: new
+ui-sync-preferences = Disposició i &visualització
+# review: new
+ui-sync-everything = Tot
+# review: new
+ui-sync-some-left-out = S’han exclòs alguns elements
+# review: new
+ui-sync-where = On desar-la
+# review: new
+ui-sync-folder = Una carpeta
+# review: new
+ui-sync-folder-note = Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud o Syncthing la copia als altres ordinadors.
+# review: new
+ui-sync-bucket = Emmagatzematge compatible amb S3
+# review: new
+ui-sync-bucket-note = Amazon S3, Cloudflare R2, Backblaze B2, MinIO o un altre emmagatzematge que funcioni com S3.
+# review: new
+ui-sync-folder-label = &Carpeta:
+# review: new
+ui-sync-folder-none = Encara no se n’ha triat cap
+# review: new
+ui-sync-choose-folder = &Tria…
+# review: new
+ui-sync-choose-folder-title = Tria la carpeta de sincronització
+# review: new
+ui-sync-endpoint = &Punt de connexió:
+# review: new
+ui-sync-region = &Regió:
+# review: new
+ui-sync-bucket-name = &Bucket:
+# review: new
+ui-sync-prefix = Carpeta dins del b&ucket:
+# review: new
+ui-sync-access-key = &Identificador de la clau d’accés:
+# review: new
+ui-sync-secret-key = C&lau d’accés secreta:
+# review: new
+ui-sync-next = &Següent
+# review: new
+ui-sync-join-title = Uneix-te a la sincronització
+# review: new
+ui-sync-join-note = Aquesta ubicació conté la sincronització dels vostres altres ordinadors. Escriviu la frase de pas de sincronització que vau triar al primer.
+# review: new
+ui-sync-start-title = Inicia la sincronització
+# review: new
+ui-sync-start-note = Trieu una frase de pas de sincronització. L’escriureu una vegada a cada ordinador que afegiu. Deseu-la en un lloc segur: sense ella, cap altre ordinador no s’hi podrà unir.
+# review: new
+ui-sync-name = &Nom d’aquest ordinador:
+# review: new
+ui-sync-merge-note = El que té aquest ordinador i el que conté la sincronització s’uneixen: un compte o un contacte que sigui a tots dos passa a ser-ne un de sol.
+# review: new
+ui-sync-turn-on = &Activa la sincronització
+# review: new
+ui-sync-on = La sincronització està activada.
+# review: new
+ui-sync-turn-off-ask = Voleu desactivar la sincronització en aquest ordinador? Tot queda com està, aquí i als altres ordinadors. Aquest ordinador simplement deixa de sincronitzar-se.
+# review: new
+ui-sync-turn-off-button = Desactiva
+# review: new
+ui-sync-computers-title = Ordinadors
+# review: new
+ui-sync-computers-note = Els ordinadors que se sincronitzen mitjançant aquesta ubicació. Traieu-ne un que ja no feu servir: deixa de sincronitzar-se i el que ha sincronitzat es manté.
+# review: new
+ui-sync-this-computer = Aquest ordinador
+# review: new
+ui-sync-seen = Darrera sincronització: { $when }
+# review: new
+ui-sync-remove-ask = Voleu treure «{ $name }» de la sincronització? Deixarà de sincronitzar-se el proper cop que ho intenti. Per tornar-lo a sincronitzar, torneu a configurar-hi la sincronització.
+# review: new
+ui-sync-loading = S’està llegint…
+# review: new
+ui-sync-history-title = Historial
+# review: new
+ui-sync-history-note = Quan el mateix element s’ha modificat en dos ordinadors alhora, s’ha conservat el darrer canvi fet i l’altre és aquí. Restaureu-ne un per fer-lo servir en lloc de l’altre.
+# review: new
+ui-sync-history-empty = No s’ha substituït cap canvi.
+# review: new
+ui-sync-history-row = Origen: { $source }, { $when }
+# review: new
+ui-sync-restore = &Restaura
+# review: new
+ui-sync-restore-points = Punts de restauració
+# review: new
+ui-sync-restore-points-note = Abans que una sincronització tregui alguna cosa d’aquí, es desa com estava tot. Obriu-ne un per recuperar-ne el que trieu.
+# review: new
+ui-sync-restore-points-empty = Encara no n’hi ha cap.
+# review: new
+ui-sync-open-point = &Obre…
+# Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
+# review: new
+win-sync-back = < &Enrere
 ui-language-label = &Llengua:
 ui-restart-note = Reinicieu Inbox Classic per canviar la llengua.
 ui-restart-ask = Inbox Classic es mostrarà en { $language } quan es reiniciï. Voleu reiniciar-lo ara?
@@ -785,6 +920,12 @@ ui-setup-from = Desat per Inbox Classic { $version } el { $date }.
 ui-setup-import-button = &Importa
 ui-setup-done = Fet
 ui-setup-first-run = Importa la configuració i els comptes d’un altre ordinador...
+# review: new
+ui-first-run-other = Ja feu servir Inbox Classic en un altre ordinador? Porteu-ne aquí els comptes i la configuració.
+# review: new
+ui-first-run-sync = Uneix-te a la seva sincronització…
+# review: new
+ui-first-run-import = Importa des d’un fitxer…
 
 ui-field-verifiers = Confia en les comprovacions del remitent fetes per:
 ui-attachment-import-key = Importa una clau...

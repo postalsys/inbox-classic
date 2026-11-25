@@ -456,6 +456,141 @@ ui-settings-encryption = Šifriranje
 ui-settings-language = Jezik
 ui-settings-label = { $label }:
 ui-apply = &Uporabi
+# review: new
+ui-settings-sync = Sinhronizacija
+# review: new
+ui-sync-note = Ohranite račune, ključe, Imenik, pravila in nastavitve enake v vseh računalnikih, prek mape ali shrambe, ki je vaša. Vse se šifrira z zaščitnim geslom za sinhronizacijo, preden zapusti ta računalnik.
+# review: new
+ui-sync-place = Sinhronizirano prek:
+# review: new
+ui-sync-status = Stanje:
+# review: new
+ui-sync-set-up = Nastavi &sinhronizacijo…
+# review: new
+ui-sync-now = Sinhroniziraj &zdaj
+# review: new
+ui-sync-computers = &Računalniki…
+# review: new
+ui-sync-history = Zgo&dovina…
+# review: new
+ui-sync-turn-off = &Izklopi sinhronizacijo…
+# review: new
+ui-sync-what = Kaj sinhronizirati
+# review: new
+ui-sync-what-note = Gesla, prijave in zasebni ključi potujejo samo šifrirani. Izpustite, kar naj ostane samo v tem računalniku.
+# review: new
+ui-sync-accounts = Raču&ni
+# review: new
+ui-sync-passwords = &Gesla
+# review: new
+ui-sync-sign-ins = Prijave z Googlom, Microsoftom in &aplikacijami za prijavo
+# review: new
+ui-sync-sign-in-apps = A&plikacije za prijavo
+# review: new
+ui-sync-app-secrets = Skri&vnosti aplikacij za prijavo
+# review: new
+ui-sync-contacts = I&menik
+# review: new
+ui-sync-keys = &Ključi
+# review: new
+ui-sync-private-keys = Vaši zase&bni ključi
+# review: new
+ui-sync-rules = Pravi&la
+# review: new
+ui-sync-trusted = Zaupanja vredni p&ošiljatelji
+# review: new
+ui-sync-settings = Nas&tavitve
+# review: new
+ui-sync-preferences = Postavitev in pogl&ed
+# review: new
+ui-sync-everything = Vse
+# review: new
+ui-sync-some-left-out = Nekaj je izpuščeno
+# review: new
+ui-sync-where = Kje naj se hrani
+# review: new
+ui-sync-folder = Mapa
+# review: new
+ui-sync-folder-note = Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud ali Syncthing jo kopira v vaše druge računalnike.
+# review: new
+ui-sync-bucket = Shramba, združljiva s S3
+# review: new
+ui-sync-bucket-note = Amazon S3, Cloudflare R2, Backblaze B2, MinIO ali druga shramba, ki deluje kot S3.
+# review: new
+ui-sync-folder-label = &Mapa:
+# review: new
+ui-sync-folder-none = Še ni izbrana
+# review: new
+ui-sync-choose-folder = Iz&beri…
+# review: new
+ui-sync-choose-folder-title = Izberite mapo za sinhronizacijo
+# review: new
+ui-sync-endpoint = &Končna točka:
+# review: new
+ui-sync-region = &Regija:
+# review: new
+ui-sync-bucket-name = Ve&dro:
+# review: new
+ui-sync-prefix = Mapa v v&edru:
+# review: new
+ui-sync-access-key = &ID dostopnega ključa:
+# review: new
+ui-sync-secret-key = &Skrivni dostopni ključ:
+# review: new
+ui-sync-next = &Naprej
+# review: new
+ui-sync-join-title = Pridružitev sinhronizaciji
+# review: new
+ui-sync-join-note = Na tem mestu je sinhronizacija vaših drugih računalnikov. Vnesite zaščitno geslo za sinhronizacijo, ki ste ga izbrali v prvem računalniku.
+# review: new
+ui-sync-start-title = Začetek sinhronizacije
+# review: new
+ui-sync-start-note = Izberite zaščitno geslo za sinhronizacijo. Vnesete ga enkrat v vsakem računalniku, ki ga dodate. Hranite ga na varnem: brez njega se ne more pridružiti noben drug računalnik.
+# review: new
+ui-sync-name = Ime &tega računalnika:
+# review: new
+ui-sync-merge-note = Kar ima ta računalnik, in kar ima sinhronizacija, se združi: račun ali stik, ki je na obeh straneh, postane eden.
+# review: new
+ui-sync-turn-on = &Vklopi sinhronizacijo
+# review: new
+ui-sync-on = Sinhronizacija je vklopljena.
+# review: new
+ui-sync-turn-off-ask = Želite izklopiti sinhronizacijo v tem računalniku? Vse ostane, kot je, tukaj in v vaših drugih računalnikih. Ta računalnik se le neha sinhronizirati.
+# review: new
+ui-sync-turn-off-button = Izklopi
+# review: new
+ui-sync-computers-title = Računalniki
+# review: new
+ui-sync-computers-note = Računalniki, ki se sinhronizirajo prek tega mesta. Odstranite računalnik, ki ga ne uporabljate več: neha se sinhronizirati, kar je sinhroniziral, pa ostane.
+# review: new
+ui-sync-this-computer = Ta računalnik
+# review: new
+ui-sync-seen = Zadnja sinhronizacija: { $when }
+# review: new
+ui-sync-remove-ask = Želite računalnik »{ $name }« odstraniti iz sinhronizacije? Ob naslednjem poskusu se neha sinhronizirati. Če ga želite znova sinhronizirati, v njem še enkrat nastavite sinhronizacijo.
+# review: new
+ui-sync-loading = Branje…
+# review: new
+ui-sync-history-title = Zgodovina
+# review: new
+ui-sync-history-note = Ko je bila ista stvar hkrati spremenjena v dveh računalnikih, je bila ohranjena zadnja narejena sprememba, druga pa je tukaj. Obnovite jo, če želite namesto ohranjene uporabiti njo.
+# review: new
+ui-sync-history-empty = Nobena sprememba ni bila nadomeščena.
+# review: new
+ui-sync-history-row = Vir: { $source }, { $when }
+# review: new
+ui-sync-restore = &Obnovi
+# review: new
+ui-sync-restore-points = Točke obnovitve
+# review: new
+ui-sync-restore-points-note = Preden sinhronizacija tukaj kaj odstrani, se shrani prejšnje stanje. Odprite točko obnovitve, da iz nje vrnete, kar izberete.
+# review: new
+ui-sync-restore-points-empty = Še nobene.
+# review: new
+ui-sync-open-point = O&dpri…
+# Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
+# review: new
+win-sync-back = < Na&zaj
 ui-language-label = &Jezik:
 ui-restart-note = Za spremembo jezika znova zaženite Inbox Classic.
 ui-restart-ask = Po ponovnem zagonu bo Inbox Classic uporabljal jezik: { $language }. Želite program zdaj znova zagnati?
@@ -811,6 +946,12 @@ ui-setup-from = Shranjeno s programom Inbox Classic { $version }. Datum: { $date
 ui-setup-import-button = &Uvozi
 ui-setup-done = Končano
 ui-setup-first-run = Uvozi nastavitve in račune iz drugega računalnika...
+# review: new
+ui-first-run-other = Inbox Classic že uporabljate v drugem računalniku? Prenesite njegove račune in nastavitve sem.
+# review: new
+ui-first-run-sync = Pridruži se njegovi sinhronizaciji…
+# review: new
+ui-first-run-import = Uvozi iz datoteke…
 
 ui-field-verifiers = Zaupanja vredni viri preverjanja pošiljatelja:
 ui-attachment-import-key = Uvozi ključ...

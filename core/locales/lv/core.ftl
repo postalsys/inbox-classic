@@ -1006,6 +1006,54 @@ setup-error-newer = Šos iestatījumus saglabāja jaunāka Inbox Classic versija
 setup-error-needs-passphrase = Šos iestatījumus aizsargā paroles frāze. Ierakstiet paroles frāzi, ar kuru tie tika saglabāti.
 setup-error-wrong-passphrase = Tā nav paroles frāze, ar kuru šie iestatījumi tika saglabāti.
 setup-error-changed = Neizdevās apstiprināt iestatījumu faila integritāti. Fails var būt mainīts vai bojāts, tāpēc to nevar importēt.
+# review: new
+sync-wrong-passphrase = Tā nav šīs glabātuves sinhronizācijas paroles frāze. Ievadiet to, ko izvēlējāties, iestatot sinhronizāciju pirmajā datorā.
+# review: new
+sync-place = { $place }, ar nosaukumu „{ $name }”
+# review: new
+sync-news-removed = { $count ->
+    [1] Sinhronizācija noņēma kontu, jo tas tika noņemts citā datorā: { $accounts }
+   *[other] Sinhronizācija noņēma kontus, jo tie tika noņemti citā datorā: { $accounts }
+}
+# review: new
+sync-news-lost = { $count ->
+    [1] Izmaiņa, kas vienlaikus tika veikta citā datorā, tika aizstāta ar šeit veikto. Tā ir saglabāta sinhronizācijas vēsturē.
+   *[other] Vienlaikus citos datoros veiktās izmaiņas tika aizstātas ar šeit veiktajām (kopā: { $count }). Tās ir saglabātas sinhronizācijas vēsturē.
+}
+# review: new
+sync-status-busy = Notiek sinhronizācija…
+# review: new
+sync-status-never = Vēl nav sinhronizēts.
+# review: new
+sync-status-last = Pēdējā sinhronizācija: { $when }.
+# review: new
+sync-status-today = Pēdējā sinhronizācija: šodien plkst. { $time }.
+# review: new
+sync-when-today = šodien plkst. { $time }
+# review: new
+sync-status-problem = Neizdevās sinhronizēt: { $problem }
+# review: new
+sync-removed-here = Šis dators tika noņemts no sinhronizācijas citā datorā. Izslēdziet sinhronizāciju un pēc tam iestatiet to vēlreiz, lai pievienotos.
+# review: new
+sync-item-account = Konts „{ $name }”
+# review: new
+sync-item-contact = Kontaktpersona „{ $name }”
+# review: new
+sync-item-group = Grupa „{ $name }”
+# review: new
+sync-item-key = Atslēga „{ $name }”
+# review: new
+sync-item-rule = Kārtula „{ $name }”
+# review: new
+sync-item-trusted = Uzticamais sūtītājs „{ $name }”
+# review: new
+sync-item-sign-in-app = Pierakstīšanās lietotne „{ $name }”
+# review: new
+sync-item-settings = Iestatījumi
+# review: new
+sync-another-computer = cits dators
+# review: new
+sync-no-key = Šajā datorā vairs nav sinhronizācijas glabātuves atslēgas. Izslēdziet sinhronizāciju un ieslēdziet to vēlreiz ar sinhronizācijas paroles frāzi.
 setup-error-read = Iestatījumu failu nevarēja nolasīt: { $error }
 setup-error-write = Iestatījumus nevarēja saglabāt: { $error }
 setup-error-no-parts = Izvēlieties vismaz vienu daļu.

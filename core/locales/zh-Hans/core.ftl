@@ -786,6 +786,53 @@ setup-error-newer = 此设置文件由较新版本的 Inbox Classic（{ $version
 setup-error-needs-passphrase = 此设置文件受密码短语保护。请键入保存时使用的密码短语。
 setup-error-wrong-passphrase = 这不是保存此设置文件时使用的密码短语。
 setup-error-changed = 设置文件未通过完整性检查。它可能已被篡改或损坏，无法导入。
+# review: new
+sync-wrong-passphrase = 这不是此保管库的同步密码短语。请键入您在第一台计算机上设置同步时选择的密码短语。
+# review: new
+sync-place = { $place }，名称为“{ $name }”
+# review: new
+sync-news-removed = { $count ->
+   *[other] 由于帐户{ $accounts }已在另一台计算机上删除，同步已将其删除。
+}
+# review: new
+sync-news-lost = { $count ->
+    [1] 另一台计算机上同时进行的一项更改已被这里的更改替换。同步历史记录保存了它。
+   *[other] 其他计算机上同时进行的{ $count }项更改已被这里的更改替换。同步历史记录保存了它们。
+}
+# review: new
+sync-status-busy = 正在同步…
+# review: new
+sync-status-never = 尚未同步。
+# review: new
+sync-status-last = 上次同步时间：{ $when }。
+# review: new
+sync-status-today = 上次同步时间：今天{ $time }。
+# review: new
+sync-when-today = 今天{ $time }
+# review: new
+sync-status-problem = 无法同步：{ $problem }
+# review: new
+sync-removed-here = 这台计算机已在另一台计算机上被移出同步。请关闭同步，然后重新设置以加入。
+# review: new
+sync-item-account = 帐户{ $name }
+# review: new
+sync-item-contact = 联系人{ $name }
+# review: new
+sync-item-group = 组{ $name }
+# review: new
+sync-item-key = 密钥{ $name }
+# review: new
+sync-item-rule = 规则{ $name }
+# review: new
+sync-item-trusted = 受信任的发件人{ $name }
+# review: new
+sync-item-sign-in-app = 登录应用{ $name }
+# review: new
+sync-item-settings = 设置
+# review: new
+sync-another-computer = 另一台计算机
+# review: new
+sync-no-key = 这台计算机上已没有同步保管库的密钥。请使用同步密码短语关闭同步，然后重新打开。
 setup-error-read = 无法读取设置文件：{ $error }
 setup-error-write = 无法保存设置：{ $error }
 setup-error-no-parts = 请至少选择一项。

@@ -930,6 +930,54 @@ setup-error-newer = Le fichier a été exporté avec une version plus récente d
 setup-error-needs-passphrase = Ce fichier est protégé par une phrase secrète. Saisissez celle que vous avez choisie lors de l’exportation.
 setup-error-wrong-passphrase = Cette phrase secrète ne permet pas d’ouvrir le fichier.
 setup-error-changed = L’intégrité du fichier de configuration n’a pas pu être vérifiée. Le fichier est peut-être endommagé ou modifié et ne peut pas être importé.
+# review: new
+sync-wrong-passphrase = Ce n’est pas la phrase secrète de synchronisation de ce coffre. Saisissez celle que vous avez choisie en configurant la synchronisation sur votre premier ordinateur.
+# review: new
+sync-place = { $place }, sous le nom « { $name } »
+# review: new
+sync-news-removed = { $count ->
+    [one] La synchronisation a supprimé le compte { $accounts }, car il a été supprimé sur un autre ordinateur.
+   *[other] La synchronisation a supprimé les comptes { $accounts }, car ils ont été supprimés sur un autre ordinateur.
+}
+# review: new
+sync-news-lost = { $count ->
+    [one] { $count } modification faite au même moment sur un autre ordinateur a été remplacée par celle faite ici. L’historique de synchronisation la conserve.
+   *[other] { $count } modifications faites au même moment sur d’autres ordinateurs ont été remplacées par celles faites ici. L’historique de synchronisation les conserve.
+}
+# review: new
+sync-status-busy = Synchronisation…
+# review: new
+sync-status-never = Pas encore synchronisé.
+# review: new
+sync-status-last = Dernière synchronisation : { $when }.
+# review: new
+sync-status-today = Dernière synchronisation aujourd’hui à { $time }.
+# review: new
+sync-when-today = aujourd’hui à { $time }
+# review: new
+sync-status-problem = Échec de la synchronisation : { $problem }
+# review: new
+sync-removed-here = Cet ordinateur a été retiré de la synchronisation depuis un autre ordinateur. Désactivez la synchronisation, puis configurez-la à nouveau pour la rejoindre.
+# review: new
+sync-item-account = Compte { $name }
+# review: new
+sync-item-contact = Contact { $name }
+# review: new
+sync-item-group = Groupe { $name }
+# review: new
+sync-item-key = Clé { $name }
+# review: new
+sync-item-rule = Règle { $name }
+# review: new
+sync-item-trusted = Expéditeur de confiance { $name }
+# review: new
+sync-item-sign-in-app = Application de connexion { $name }
+# review: new
+sync-item-settings = Paramètres
+# review: new
+sync-another-computer = un autre ordinateur
+# review: new
+sync-no-key = Cet ordinateur ne dispose plus de la clé du coffre de synchronisation. Désactivez puis réactivez la synchronisation avec la phrase secrète de synchronisation.
 setup-error-read = Le fichier de configuration n'a pas pu être lu : { $error }
 setup-error-write = Le fichier de configuration n’a pas pu être enregistré : { $error }
 setup-error-no-parts = Choisissez au moins une catégorie de données.

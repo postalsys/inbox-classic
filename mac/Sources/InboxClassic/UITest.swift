@@ -714,6 +714,7 @@ final class UITest {
         try await bigActions()
         try await accountsAndHelp()
         try await setupFile()
+        try await settingsSync()
         try await languages()
         try await openedFromStore()
     }

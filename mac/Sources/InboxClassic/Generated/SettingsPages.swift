@@ -5,6 +5,7 @@ enum SettingsPage: String, CaseIterable {
     case general = "general"
     case reading = "reading"
     case downloading = "downloading"
+    case sync = "sync"
 
     /// Its toolbar item's label and the window's title while it is shown
     var label: Text {
@@ -12,6 +13,7 @@ enum SettingsPage: String, CaseIterable {
         case .general: return .uiSettingsGeneral
         case .reading: return .uiSettingsReading
         case .downloading: return .uiDownloadHeading
+        case .sync: return .uiSettingsSync
         }
     }
 
@@ -21,6 +23,7 @@ enum SettingsPage: String, CaseIterable {
         case .general: return "gearshape"
         case .reading: return "eyeglasses"
         case .downloading: return "arrow.down.circle"
+        case .sync: return "arrow.triangle.2.circlepath"
         }
     }
 
@@ -30,6 +33,7 @@ enum SettingsPage: String, CaseIterable {
         case .general: return [.language, .newMail, .sending, .defaultApps, .updates]
         case .reading: return [.messageList, .messages, .encryption]
         case .downloading: return [.downloading]
+        case .sync: return [.sync, .syncWhat]
         }
     }
 }
@@ -45,6 +49,8 @@ enum SettingsGroup {
     case messages
     case encryption
     case downloading
+    case sync
+    case syncWhat
 
     /// Its title, nil for none
     var label: Text? {
@@ -58,6 +64,8 @@ enum SettingsGroup {
         case .messages: return .uiSettingsMessages
         case .encryption: return .uiSettingsEncryption
         case .downloading: return nil
+        case .sync: return nil
+        case .syncWhat: return .uiSyncWhat
         }
     }
 
@@ -73,6 +81,8 @@ enum SettingsGroup {
         case .messages: return nil
         case .encryption: return nil
         case .downloading: return .uiDownloadNote
+        case .sync: return .uiSyncNote
+        case .syncWhat: return .uiSyncWhatNote
         }
     }
 
@@ -88,13 +98,15 @@ enum SettingsGroup {
         case .messages: return [.darkMessages, .showPreviews, .pdfPreviews, .picturesAlways, .trustedSenders]
         case .encryption: return [.searchEncrypted, .keyserver]
         case .downloading: return [.downloadAhead, .downloadLimit]
+        case .sync: return [.syncPlace, .syncStatus, .syncSetUp, .syncNow, .syncComputers, .syncHistory, .syncTurnOff]
+        case .syncWhat: return [.syncAccounts, .syncPasswords, .syncSignIns, .syncSignInApps, .syncAppSecrets, .syncContacts, .syncKeys, .syncPrivateKeys, .syncRules, .syncTrusted, .syncSettings, .syncPreferences]
         }
     }
 }
 
-/// What a setting is: a check box, a pop-up with its label, or a push button
+/// What a setting is: a check box, a pop-up with its label, a push button, or a line of state with its label
 enum SettingKind {
-    case toggle, choice, button
+    case toggle, choice, button, status
 }
 
 /// A setting of the settings window
@@ -120,6 +132,25 @@ enum Setting {
     case keyserver
     case downloadAhead
     case downloadLimit
+    case syncPlace
+    case syncStatus
+    case syncSetUp
+    case syncNow
+    case syncComputers
+    case syncHistory
+    case syncTurnOff
+    case syncAccounts
+    case syncPasswords
+    case syncSignIns
+    case syncSignInApps
+    case syncAppSecrets
+    case syncContacts
+    case syncKeys
+    case syncPrivateKeys
+    case syncRules
+    case syncTrusted
+    case syncSettings
+    case syncPreferences
 
     var kind: SettingKind {
         switch self {
@@ -144,6 +175,25 @@ enum Setting {
         case .keyserver: return .toggle
         case .downloadAhead: return .choice
         case .downloadLimit: return .choice
+        case .syncPlace: return .status
+        case .syncStatus: return .status
+        case .syncSetUp: return .button
+        case .syncNow: return .button
+        case .syncComputers: return .button
+        case .syncHistory: return .button
+        case .syncTurnOff: return .button
+        case .syncAccounts: return .toggle
+        case .syncPasswords: return .toggle
+        case .syncSignIns: return .toggle
+        case .syncSignInApps: return .toggle
+        case .syncAppSecrets: return .toggle
+        case .syncContacts: return .toggle
+        case .syncKeys: return .toggle
+        case .syncPrivateKeys: return .toggle
+        case .syncRules: return .toggle
+        case .syncTrusted: return .toggle
+        case .syncSettings: return .toggle
+        case .syncPreferences: return .toggle
         }
     }
 
@@ -171,6 +221,25 @@ enum Setting {
         case .keyserver: return .uiPgpKeyserver
         case .downloadAhead: return .uiDownloadAhead
         case .downloadLimit: return .uiDownloadLimit
+        case .syncPlace: return .uiSyncPlace
+        case .syncStatus: return .uiSyncStatus
+        case .syncSetUp: return .uiSyncSetUp
+        case .syncNow: return .uiSyncNow
+        case .syncComputers: return .uiSyncComputers
+        case .syncHistory: return .uiSyncHistory
+        case .syncTurnOff: return .uiSyncTurnOff
+        case .syncAccounts: return .uiSyncAccounts
+        case .syncPasswords: return .uiSyncPasswords
+        case .syncSignIns: return .uiSyncSignIns
+        case .syncSignInApps: return .uiSyncSignInApps
+        case .syncAppSecrets: return .uiSyncAppSecrets
+        case .syncContacts: return .uiSyncContacts
+        case .syncKeys: return .uiSyncKeys
+        case .syncPrivateKeys: return .uiSyncPrivateKeys
+        case .syncRules: return .uiSyncRules
+        case .syncTrusted: return .uiSyncTrusted
+        case .syncSettings: return .uiSyncSettings
+        case .syncPreferences: return .uiSyncPreferences
         }
     }
 
@@ -198,6 +267,25 @@ enum Setting {
         case .keyserver: return .uiPgpKeyserverNote
         case .downloadAhead: return nil
         case .downloadLimit: return nil
+        case .syncPlace: return nil
+        case .syncStatus: return nil
+        case .syncSetUp: return nil
+        case .syncNow: return nil
+        case .syncComputers: return nil
+        case .syncHistory: return nil
+        case .syncTurnOff: return nil
+        case .syncAccounts: return nil
+        case .syncPasswords: return nil
+        case .syncSignIns: return nil
+        case .syncSignInApps: return nil
+        case .syncAppSecrets: return nil
+        case .syncContacts: return nil
+        case .syncKeys: return nil
+        case .syncPrivateKeys: return nil
+        case .syncRules: return nil
+        case .syncTrusted: return nil
+        case .syncSettings: return nil
+        case .syncPreferences: return nil
         }
     }
 
@@ -225,6 +313,25 @@ enum Setting {
         case .keyserver: return nil
         case .downloadAhead: return nil
         case .downloadLimit: return nil
+        case .syncPlace: return nil
+        case .syncStatus: return nil
+        case .syncSetUp: return nil
+        case .syncNow: return nil
+        case .syncComputers: return nil
+        case .syncHistory: return nil
+        case .syncTurnOff: return nil
+        case .syncAccounts: return nil
+        case .syncPasswords: return .syncAccounts
+        case .syncSignIns: return .syncAccounts
+        case .syncSignInApps: return nil
+        case .syncAppSecrets: return .syncSignInApps
+        case .syncContacts: return nil
+        case .syncKeys: return nil
+        case .syncPrivateKeys: return .syncKeys
+        case .syncRules: return nil
+        case .syncTrusted: return nil
+        case .syncSettings: return nil
+        case .syncPreferences: return nil
         }
     }
 }
