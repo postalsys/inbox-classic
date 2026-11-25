@@ -36,6 +36,10 @@ const STYLE: &str = "
 .reader-header .field { opacity: 0.7; }
 .reader-header .subject { font-weight: bold; font-size: 1.1em; }
 .reader-header.with-files { border-bottom: none; padding-bottom: 4px; }
+.reaction-chips flowboxchild { padding: 0; }
+menubutton.reaction-chip > button { min-height: 0; padding: 1px 10px; border-radius: 999px; font-weight: normal; background-color: alpha(currentColor, 0.08); }
+menubutton.reaction-chip > button:hover { background-color: alpha(currentColor, 0.14); }
+menubutton.reaction-chip > button:checked { background-color: alpha(currentColor, 0.2); }
 .attachment-strip { background-color: @headerbar_bg_color; border-bottom: 1px solid alpha(@borders, 0.6); }
 .attachment-strip flowbox { padding: 0 6px 6px; }
 flowboxchild.attachment-file { padding: 4px 10px 4px 4px; border-radius: 6px; }

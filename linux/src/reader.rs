@@ -36,10 +36,16 @@ pub struct Reader {
     header: gtk::Box,
     logo: gtk::Image,
     subject: gtk::Label,
-    fields: gtk::Grid,
+    /// The fields (From, To, Date) and the Reactions row under them
+    fields: gtk::Box,
     from: gtk::Label,
     date: gtk::Label,
     to: gtk::Label,
+    /// "Reactions:" and its chips, one a person, under the fields while the message has reactions
+    reactions_row: gtk::Box,
+    reactions: gtk::FlowBox,
+    /// The chips shown, for their menus
+    chips: RefCell<Vec<pe_core::reactions::ReactionChip>>,
     /// Why the message is not shown
     note: gtk::Label,
     /// The paper clip with the files of the message
@@ -138,6 +144,106 @@ fn field_label(text: &str) -> gtk::Label {
     label
 }
 
+/// The Reactions row of the header: its label as wide as those of From and To (`labels`), and the box of its chips.
+/// A row of its own under the grid of the fields, not a row of it: a grid measures a child that wraps at its narrowest
+/// and leaves a gap under the chips
+fn reactions_row(labels: &gtk::SizeGroup) -> (gtk::Box, gtk::FlowBox) {
+    let label = field_label(&t!(UiReactionsLabel));
+    labels.add_widget(&label);
+    // its words on the line of the first chips' words, which sit a little lower in their pills
+    label.set_margin_top(2);
+    // the chips on more lines when the pane is too narrow for them, rather than widening it
+    let chips = gtk::FlowBox::new();
+    chips.set_selection_mode(gtk::SelectionMode::None);
+    chips.set_column_spacing(6);
+    chips.set_row_spacing(4);
+    chips.set_max_children_per_line(64);
+    chips.set_hexpand(true);
+    chips.set_valign(gtk::Align::Start);
+    chips.add_css_class("reaction-chips");
+    chips.set_widget_name("reader-reactions");
+    chips.update_relation(&[gtk::accessible::Relation::LabelledBy(&[label.upcast_ref()])]);
+    let row = gtk::Box::new(gtk::Orientation::Horizontal, FIELD_SPACING);
+    row.set_margin_top(2);
+    row.append(&label);
+    row.append(&chips);
+    row.set_visible(false);
+    (row, chips)
+}
+
+/// The room between a field's label and its value
+const FIELD_SPACING: i32 = 8;
+
+/// The widest a reaction chip's words are drawn, in pixels
+const CHIP_WIDTH: i32 = 240;
+
+/// A person's reactions: a chip with their emoji and name whose menu (a click, a right-click, the Menu key or
+/// Shift+F10) opens the reaction's email, shows the reactions as emails again, and says when they reacted
+fn reaction_chip(index: usize, chip: &pe_core::reactions::ReactionChip) -> gtk::MenuButton {
+    let label = gtk::Label::new(Some(&chip.text));
+    label.set_ellipsize(gtk::pango::EllipsizeMode::End);
+    // as wide as its words up to CHIP_WIDTH, a longer name cut short; its smallest and natural widths the same, so the
+    // row's chips wrap the same way whichever GTK measures (a label that could shrink leaves a gap under them)
+    label.set_max_width_chars(1);
+    let (width, _) = label.create_pango_layout(Some(&chip.text)).pixel_size();
+    label.set_size_request((width + 1).min(CHIP_WIDTH), -1);
+    let button = gtk::MenuButton::new();
+    button.set_child(Some(&label));
+    button.add_css_class("reaction-chip");
+    button.set_widget_name(&format!("reader-reaction-{index}"));
+    button.set_tooltip_text(Some(&chip.text));
+    let when = t!(UiReactionWhen, when = chip.when.as_str());
+    button.update_property(&[
+        gtk::accessible::Property::Label(&chip.text),
+        gtk::accessible::Property::Description(&when),
+    ]);
+    let index = index as u32;
+    let actions = gio::Menu::new();
+    actions.append(
+        Some(&t!(UiReactionOpenEmail)),
+        Some(&gio::Action::print_detailed_name(
+            "reader.reaction-open",
+            Some(&index.to_variant()),
+        )),
+    );
+    actions.append(
+        Some(&t!(UiReactionShowAsEmail)),
+        Some(&gio::Action::print_detailed_name(
+            "reader.reaction-show",
+            Some(&index.to_variant()),
+        )),
+    );
+    let menu = gio::Menu::new();
+    menu.append_section(None, &actions);
+    let said = gio::Menu::new();
+    said.append(Some(&when), Some("reader.reaction-when"));
+    menu.append_section(None, &said);
+    button.set_menu_model(Some(&menu));
+    // the context menu's own ways: a right-click, the Menu key and Shift+F10, as on the list's rows
+    let click = gtk::GestureClick::new();
+    click.set_button(gtk::gdk::BUTTON_SECONDARY);
+    click.connect_pressed(|gesture, _, _, _| {
+        gesture.set_state(gtk::EventSequenceState::Claimed);
+        if let Some(button) = gesture.widget().and_downcast::<gtk::MenuButton>() {
+            button.popup();
+        }
+    });
+    button.add_controller(click);
+    let keys = gtk::ShortcutController::new();
+    let popup = gtk::CallbackAction::new(|widget, _| {
+        if let Some(button) = widget.downcast_ref::<gtk::MenuButton>() {
+            button.popup();
+        }
+        glib::Propagation::Stop
+    });
+    keys.add_shortcut(gtk::Shortcut::new(
+        gtk::ShortcutTrigger::parse_string("Menu|<Shift>F10"),
+        Some(popup),
+    ));
+    button.add_controller(keys);
+    button
+}
+
 fn value_label(name: &str) -> gtk::Label {
     let label = gtk::Label::new(None);
     label.set_xalign(0.0);
@@ -155,9 +261,10 @@ impl Reader {
         let from = value_label("reader-from");
         let date = value_label("reader-date");
         let to = value_label("reader-to");
-        let fields = gtk::Grid::new();
-        fields.set_column_spacing(8);
-        fields.set_row_spacing(2);
+        let grid = gtk::Grid::new();
+        grid.set_column_spacing(FIELD_SPACING as u32);
+        grid.set_row_spacing(2);
+        let labels = gtk::SizeGroup::new(gtk::SizeGroupMode::Horizontal);
         for (row, (name, value)) in [
             (t!(UiFieldFrom), &from),
             (t!(UiFieldTo), &to),
@@ -166,9 +273,25 @@ impl Reader {
         .into_iter()
         .enumerate()
         {
-            fields.attach(&field_label(&name), 0, row as i32, 1, 1);
-            fields.attach(&PassedByTab::new(value), 1, row as i32, 1, 1);
+            let label = field_label(&name);
+            labels.add_widget(&label);
+            grid.attach(&label, 0, row as i32, 1, 1);
+            grid.attach(&PassedByTab::new(value), 1, row as i32, 1, 1);
         }
+        // the label column always as wide as "Reactions:", so From, To and Date stay where they are whether a message
+        // has reactions or not: a label nobody sees, in the cell of Date's (a hidden one would not count)
+        let room = gtk::Label::builder()
+            .label(t!(UiReactionsLabel))
+            .accessible_role(gtk::AccessibleRole::Presentation)
+            .opacity(0.0)
+            .can_target(false)
+            .build();
+        room.add_css_class("field");
+        grid.attach(&room, 0, 2, 1, 1);
+        let (reactions_row, reactions) = reactions_row(&labels);
+        let fields = gtk::Box::new(gtk::Orientation::Vertical, 2);
+        fields.append(&grid);
+        fields.append(&reactions_row);
         let note = gtk::Label::new(None);
         note.set_xalign(0.0);
         note.set_widget_name("reader-note");
@@ -270,6 +393,9 @@ impl Reader {
             from,
             date,
             to,
+            reactions_row,
+            reactions,
+            chips: RefCell::default(),
             note,
             attachments,
             attachments_label,
@@ -464,6 +590,7 @@ impl Reader {
             }
         });
         group.add_action(&import);
+        self.add_reaction_actions(&group);
         // the greyed Open of a file that can run programs
         let refused = gio::SimpleAction::new("open-refused", Some(glib::VariantTy::UINT32));
         refused.set_enabled(false);
@@ -704,6 +831,11 @@ impl Reader {
                 if *account == self.account.get() && self.uid.get() != 0 && self.shows_failure() =>
             {
                 self.retry();
+                None
+            }
+            // a reaction came for the message shown, or was shown as an email
+            Event::FolderChanged { folder, .. } if *folder == self.folder.get() && self.file.borrow().is_none() => {
+                self.show_reactions();
                 None
             }
             Event::LogoReady { request } if self.logo_request.get() != 0 && *request == self.logo_request.get() => {
@@ -1017,6 +1149,7 @@ impl Reader {
         self.set_logo_shown(false);
         self.subject.set_text("");
         self.fields.set_visible(false);
+        self.show_reactions();
         self.note.set_visible(false);
         self.header.set_visible(loading);
         self.preview.show(&no_message(!loading), false);
@@ -1057,6 +1190,7 @@ impl Reader {
         self.date
             .set_text(&message.display_date().map(crate::ui::format_date).unwrap_or_default());
         self.to.set_text(&message.recipients);
+        self.show_reactions();
         self.stop_downloading_note();
         let (preview, retry, timer) = (self.preview.clone(), self.retry.clone(), self.downloading.clone());
         let size = message.size.unwrap_or(0);
@@ -1134,6 +1268,7 @@ impl Reader {
             format!("{}    Cc:  {}", view.to, view.cc)
         };
         self.to.set_text(&to);
+        self.show_reactions();
         self.set_list_bar(view.list_bar.as_ref());
         self.show_attachments(view);
         // the same message again (Show in Message, its whole source after its text, its pictures): where it was
@@ -1156,6 +1291,87 @@ impl Reader {
             .measure_frames(view.protection.is_some() || view.conversation.is_some());
         self.security.show(view);
         self.show_pictures_bar(view);
+    }
+
+    /// The Reactions row of the message shown (of a folder, not a file): a chip a person, the row hidden when there
+    /// are none
+    fn show_reactions(&self) {
+        let chips = match (self.uid.get(), self.file.borrow().is_some()) {
+            (0, _) | (_, true) => Vec::new(),
+            (uid, false) => shell().core.reactions_of(self.folder.get(), uid).unwrap_or_default(),
+        };
+        if *self.chips.borrow() == chips {
+            return;
+        }
+        self.reactions.remove_all();
+        for (index, chip) in chips.iter().enumerate() {
+            self.reactions.append(&reaction_chip(index, chip));
+            // the chip takes the focus, not the box around it
+            if let Some(child) = self.reactions.child_at_index(index as i32) {
+                child.set_focusable(false);
+            }
+        }
+        self.reactions_row.set_visible(!chips.is_empty());
+        *self.chips.borrow_mut() = chips;
+    }
+
+    /// The actions of a reaction chip's menu, on the chip's number: Open Reaction Email, Show as Email, and the
+    /// dimmed line of when (an action that is never on)
+    fn add_reaction_actions(self: &Rc<Self>, group: &gio::SimpleActionGroup) {
+        let open = gio::SimpleAction::new("reaction-open", Some(glib::VariantTy::UINT32));
+        let this = Rc::downgrade(self);
+        open.connect_activate(move |_, index| {
+            let (Some(this), Some(index)) = (this.upgrade(), index.and_then(|i| i.get::<u32>())) else {
+                return;
+            };
+            let newest = this
+                .chips
+                .borrow()
+                .get(index as usize)
+                .and_then(|chip| chip.emails.last().copied());
+            let file = newest.and_then(|at| shell().core.reaction_email_file(at).ok().flatten());
+            if let Some(path) = file {
+                spawn(async move { crate::message_window::open_file(&path).await });
+            }
+        });
+        let show = gio::SimpleAction::new("reaction-show", Some(glib::VariantTy::UINT32));
+        let this = Rc::downgrade(self);
+        show.connect_activate(move |_, index| {
+            let (Some(this), Some(index)) = (this.upgrade(), index.and_then(|i| i.get::<u32>())) else {
+                return;
+            };
+            let emails = this
+                .chips
+                .borrow()
+                .get(index as usize)
+                .map(|chip| chip.emails.clone())
+                .unwrap_or_default();
+            if !emails.is_empty() {
+                let _ = shell().core.show_reactions_as_email(&emails);
+                this.show_reactions();
+            }
+        });
+        let when = gio::SimpleAction::new("reaction-when", None);
+        when.set_enabled(false);
+        group.add_action(&open);
+        group.add_action(&show);
+        group.add_action(&when);
+    }
+
+    /// The chips of the Reactions row, their words (the UI test)
+    #[cfg(feature = "e2e")]
+    pub fn reaction_chips(&self) -> Vec<gtk::MenuButton> {
+        let mut chips = Vec::new();
+        let mut child = self.reactions.first_child();
+        while let Some(at) = child {
+            if let Some(chip) = at.first_child().and_downcast::<gtk::MenuButton>()
+                && self.reactions_row.is_visible()
+            {
+                chips.push(chip);
+            }
+            child = at.next_sibling();
+        }
+        chips
     }
 
     /// The pictures bar, offered only for a message with pictures on the internet, until they are shown. With a

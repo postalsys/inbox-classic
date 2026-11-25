@@ -72,6 +72,8 @@ mod inline_pictures;
 mod preview_tiles;
 /// Step 8b: pictures and PDF files in the message
 mod previews;
+/// Emoji reactions, after the one-time codes
+mod reactions;
 /// Step 45a: settings and accounts to another computer
 mod setup;
 
@@ -1205,6 +1207,7 @@ async fn scenario(d: Rc<Driver>) {
             "conversations" => steps::conversations(&d).await,
             "sync" => sync::settings_sync(&d).await,
             "languages" => steps::languages(&d).await,
+            "reactions" => reactions::reactions(&d).await,
             _ => {}
         }
         steps::closing(&d).await;
@@ -1255,6 +1258,7 @@ async fn scenario(d: Rc<Driver>) {
     steps::conversations(&d).await;
     steps::bounces(&d).await;
     steps::one_time_codes(&d).await;
+    reactions::reactions(&d).await;
     hide_read::hide_read(&d).await;
     layout::folder_list(&d).await;
     layout::columns(&d).await;

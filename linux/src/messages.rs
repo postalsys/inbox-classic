@@ -1258,13 +1258,17 @@ fn subject_column() -> gtk::ColumnViewColumn {
         };
         let cell = gtk::Box::new(gtk::Orientation::Horizontal, 4);
         let expander = thread_expander(item);
+        // the subject as wide as its words, the reactions right after it taking the rest of the cell: a long subject
+        // is cut short, never the reactions
         let label = gtk::Label::new(None);
         label.set_xalign(0.0);
-        label.set_hexpand(true);
         label.set_ellipsize(gtk::pango::EllipsizeMode::End);
+        let reactions = reactions_label();
         cell.append(&expander);
         cell.append(&label);
+        cell.append(&reactions);
         add_drag_source(&label, item);
+        add_drag_source(&reactions, item);
         item.set_child(Some(&cell));
     });
     factory.connect_bind(|_, item| {
@@ -1274,23 +1278,34 @@ fn subject_column() -> gtk::ColumnViewColumn {
         let Some(cell) = item.child().and_downcast::<gtk::Box>() else {
             return;
         };
-        let (Some(expander), Some(label)) = (
-            cell.first_child().and_downcast::<gtk::Image>(),
-            cell.last_child().and_downcast::<gtk::Label>(),
-        ) else {
+        let expander = cell.first_child().and_downcast::<gtk::Image>();
+        let label = expander
+            .as_ref()
+            .and_then(|e| e.next_sibling())
+            .and_downcast::<gtk::Label>();
+        let reactions = cell.last_child().and_downcast::<gtk::Label>();
+        let (Some(expander), Some(label), Some(reactions)) = (expander, label, reactions) else {
             return;
         };
         let Some(row) = item.item().and_downcast::<MessageRow>() else {
             return;
         };
-        let Some((subject, thread, unread, ignored)) =
-            row.with(|m| (m.info.subject.clone(), m.thread, m.bold(), m.dimmed()))
-        else {
+        let Some((subject, thread, unread, ignored, badge)) = row.with(|m| {
+            (
+                m.info.subject.clone(),
+                m.thread,
+                m.bold(),
+                m.dimmed(),
+                pe_core::reactions::badge(&m.reactions),
+            )
+        }) else {
             // its page is not here yet: a blank line
             expander.set_visible(false);
             label.set_text("");
+            reactions.set_text("");
             return;
         };
+        reactions.set_text(&badge);
         set_class(&label, "unread", unread);
         set_class(&cell, "dim-label", ignored);
         // one row a message: the subject alone
@@ -1324,6 +1339,21 @@ fn subject_column() -> gtk::ColumnViewColumn {
     column.set_expand(true);
     column.set_resizable(true);
     column
+}
+
+/// The label of a row's reactions after its subject: the core's badge ("👍❤️ 3"), its count in the list's secondary
+/// colour (the emoji keep their own colours), never cut short; it takes the rest of the line, so the marks after it
+/// stay at the line's end
+pub(crate) fn reactions_label() -> gtk::Label {
+    let label = gtk::Label::new(None);
+    label.set_xalign(0.0);
+    label.set_hexpand(true);
+    label.set_single_line_mode(true);
+    let attributes = gtk::pango::AttrList::new();
+    // 55%, as libadwaita's dim-label, which on the label itself would dim the emoji too
+    attributes.insert(gtk::pango::AttrInt::new_foreground_alpha(36000));
+    label.set_attributes(Some(&attributes));
+    label
 }
 
 /// Rows dragged out of the list: a selected row brings the whole selection, another row itself alone. Onto a folder of
@@ -1434,6 +1464,7 @@ mod tests {
             logo: None,
             contact: None,
             snippet_is_state: false,
+            reactions: Vec::new(),
         }
     }
 
