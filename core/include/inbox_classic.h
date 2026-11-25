@@ -1220,6 +1220,11 @@ typedef struct PeContact {
   // A group of the address book: shown by its `name`, it puts its members (`label`) in the field, and is not
   // forgotten with `pe_contact_forget`
   bool group;
+  // What was typed begins its name, address or label: the list may have it chosen for Return or Tab to take; when
+  // the first is not, nothing is chosen and what was typed stays
+  bool completes;
+  // What was typed begins its `label`: a field that fills the rest in as the user types may do so
+  bool fills_in;
 } PeContact;
 
 // A folder as the folder tree shows it, in tree order

@@ -1445,14 +1445,23 @@ final class AddressField: NSTextField {
     /// what the list shows for a group of the address book, and what choosing it puts in the field: its members
     private var groupLabels: [String: String] = [:]
 
+    /// whether the first of the people listed last may be chosen as the user types: only one whose text begins with
+    /// what was typed (the core's `inline`), filled in after it; otherwise the list only offers, and what is typed stays
+    private(set) var firstFillsIn = false
+
     /// the people (and groups) for `typed`, as the core finds them; a group by its name, with the group symbol
     @MainActor
     func people(_ typed: String) -> [String] {
         // a whole address typed with its brackets is not looked up again
         guard let core, !typed.isEmpty, !typed.contains("<") else { return [] }
+        firstFillsIn = false
         guard let list = typed.withCString({ pe_contacts(core.handle, $0, 8) }) else { return [] }
         defer { pe_contact_list_free(list) }
         groupLabels = [:]
+        // a person whose text begins with what was typed; a group whose name does (it goes in as its members)
+        if let first = pe_contact_list_get(list, 0)?.pointee {
+            firstFillsIn = first.fills_in || (first.group && first.completes)
+        }
         return (0..<pe_contact_list_count(list)).compactMap { pe_contact_list_get(list, $0)?.pointee }.map { contact in
             guard contact.group else { return text(contact.label) }
             let shown = "\u{1F465} " + text(contact.name)
@@ -1471,9 +1480,11 @@ extension ComposeWindow {
     func control(_ control: NSControl, textView: NSTextView, completions words: [String], forPartialWordRange range: NSRange,
                  indexOfSelectedItem index: UnsafeMutablePointer<Int>) -> [String] {
         guard let field = control as? AddressField else { return [] }
-        // the best one chosen: Return or Tab takes it
-        index.pointee = 0
-        return field.people((textView.string as NSString).substring(with: range))
+        let people = field.people((textView.string as NSString).substring(with: range))
+        // the best one chosen (and filled in as the user types) only when it begins with what was typed; otherwise
+        // nothing is: what is typed stays, and Return or Tab keep it (a new address that resembles someone's)
+        index.pointee = field.firstFillsIn ? 0 : -1
+        return people
     }
 
     func control(_ control: NSControl, textView: NSTextView, doCommandBy selector: Selector) -> Bool {

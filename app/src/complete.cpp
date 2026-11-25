@@ -155,8 +155,9 @@ void Update(Completion* state) {
         std::wstring shown = contact->group ? Text(contact->name) : state->rows.back().label;
         SendMessageW(state->list, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(shown.c_str()));
     }
-    // the best one chosen: Enter or Tab takes it
-    SendMessageW(state->list, LB_SETCURSEL, 0, 0);
+    // the best one chosen for Enter or Tab to take, when it begins with what was typed; otherwise what is typed stays
+    const PeContact* first = pe_contact_list_get(found.get(), 0);
+    SendMessageW(state->list, LB_SETCURSEL, first && first->completes ? 0 : static_cast<WPARAM>(-1), 0);
     SendMessageW(state->list, WM_SETREDRAW, TRUE, 0);
     RECT field;
     GetWindowRect(state->edit, &field);
@@ -197,6 +198,11 @@ LRESULT CALLBACK FieldProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam
         }
         break;
     case WM_KEYDOWN:
+        // nothing chosen: Enter and Tab close the list and do their own work, what is typed stays
+        if (Shown(state) && (wParam == VK_RETURN || wParam == VK_TAB) && SendMessageW(state->list, LB_GETCURSEL, 0, 0) < 0) {
+            Hide(state);
+            break;
+        }
         if (Shown(state)) {
             state->swallow = wParam == VK_RETURN || wParam == VK_TAB || wParam == VK_ESCAPE;
             switch (wParam) {

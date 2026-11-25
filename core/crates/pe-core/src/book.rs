@@ -20,6 +20,22 @@ pub struct Completion {
     /// As it goes in the field: `Name <address>`, or for a group its members' so
     pub label: String,
     pub group: bool,
+    /// What was typed begins its name, its address or its label: the list may have it chosen, for Return or Tab to
+    /// take. Otherwise it is only offered, and what was typed stays (a new address that resembles someone's)
+    pub completes: bool,
+    /// What was typed begins its label: a field that fills the rest in as the user types (the Mac's) may
+    pub inline: bool,
+}
+
+impl Completion {
+    /// `completes` and `inline` for `typed`
+    fn starting(mut self, typed: &str) -> Completion {
+        let typed = typed.trim().to_lowercase();
+        let begins = |text: &str| !typed.is_empty() && text.to_lowercase().starts_with(&typed);
+        self.inline = !self.group && begins(&self.label);
+        self.completes = self.inline || begins(&self.name) || begins(&self.address);
+        self
+    }
 }
 
 /// A person of the address book as its lists show them: a card, or in a group an address typed into it
@@ -519,6 +535,8 @@ impl Core {
                 name,
                 address,
                 group: false,
+                completes: false,
+                inline: false,
             });
         }
         for group in groups {
@@ -531,6 +549,8 @@ impl Core {
                 address: String::new(),
                 label,
                 group: true,
+                completes: false,
+                inline: false,
             });
         }
         for contact in self.store().contacts_matching(typed, limit)? {
@@ -542,16 +562,41 @@ impl Core {
                 name: contact.name,
                 address: contact.address,
                 group: false,
+                completes: false,
+                inline: false,
             });
         }
         found.truncate(limit);
-        Ok(found)
+        Ok(found.into_iter().map(|c| c.starting(typed)).collect())
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_suggestion_is_chosen_only_when_it_begins_with_what_was_typed() {
+        let ann = |typed: &str| {
+            Completion {
+                name: "Ann Example".into(),
+                address: "ann@example.com".into(),
+                label: "Ann Example <ann@example.com>".into(),
+                group: false,
+                completes: false,
+                inline: false,
+            }
+            .starting(typed)
+        };
+        assert!(ann("ann").inline && ann("ANN EX").completes);
+        // by its address: chosen, but not filled in as typed (its label begins otherwise)
+        let by_address = ann("ann@ex");
+        assert!(by_address.completes && !by_address.inline);
+        // a part of the name, or a new address that resembles hers: only offered
+        for typed in ["example", "ann@other.org", "nn", ""] {
+            assert!(!ann(typed).completes && !ann(typed).inline, "{typed}");
+        }
+    }
 
     #[test]
     fn adds_to_a_field_once() {

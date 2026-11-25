@@ -2752,6 +2752,33 @@ pub async fn completing(d: &Driver) {
         &format!("a click takes the first, with a comma for the next ({})", c.to.text()),
     );
     d.check(crate::complete::shown_rows(&c.to).is_none(), "and closes the list");
+    // what does not begin anyone's entry stays as typed: the list offers Ann (her surname), nothing is chosen, and
+    // Tab keeps the text
+    c.to.set_text("");
+    type_letters(&c.to, "example");
+    let offered = wait_for(10, || crate::complete::shown_rows(&c.to).filter(|r| !r.is_empty())).await;
+    let tab = {
+        let controllers = c.to.observe_controllers();
+        (0..controllers.n_items())
+            .filter_map(|i| controllers.item(i).and_downcast::<gtk::EventControllerKey>())
+            .any(|keys| {
+                keys.emit_by_name::<bool>(
+                    "key-pressed",
+                    &[
+                        &glib::translate::IntoGlib::into_glib(gdk::Key::Tab),
+                        &0u32,
+                        &gdk::ModifierType::empty(),
+                    ],
+                )
+            })
+    };
+    d.check(
+        offered.is_some() && !tab && c.to.text() == "example" && crate::complete::shown_rows(&c.to).is_none(),
+        &format!(
+            "an address typed that only resembles someone's stays as typed ({})",
+            c.to.text()
+        ),
+    );
     close_compose(&c).await;
 }
 
