@@ -1637,9 +1637,6 @@ enum OptionsControlId : WORD {
     IDC_OPTIONS_NOTIFY,
     IDC_OPTIONS_NOTE,
     IDC_OPTIONS_THREADS,
-    IDC_OPTIONS_WHOLE_CONVERSATION,
-    IDC_OPTIONS_WHOLE_CONVERSATION_NOTE,
-    IDC_OPTIONS_CONVERSATION_ORDER,
     // under the notifications: whether they name a message's sign-in code
     IDC_OPTIONS_CODES,
     // pictures in every message, its warning, the Trusted Senders window; Open .eml Files with Inbox Classic
@@ -1676,6 +1673,11 @@ enum OptionsControlId : WORD {
     IDC_OPTIONS_PREVIEWS,
     IDC_OPTIONS_PREVIEWS_NOTE,
     IDC_OPTIONS_PDF_PREVIEWS,
+    // Reading > Message list: Show the whole conversation, its note, and the order of a conversation's messages
+    // (new ids go last: the UI test finds the others by their numbers)
+    IDC_OPTIONS_WHOLE_CONVERSATION,
+    IDC_OPTIONS_WHOLE_CONVERSATION_NOTE,
+    IDC_OPTIONS_CONVERSATION_ORDER,
 };
 
 // the controls of the Address Book's windows (addressbook.cpp), which the UI test finds by them

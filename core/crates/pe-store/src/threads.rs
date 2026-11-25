@@ -1037,6 +1037,10 @@ impl Store {
     /// conversation is.
     pub fn thread_focus(&self, search: &Search, threads: &[i64]) -> Result<HashMap<i64, Message>> {
         let search = search.ungrouped();
+        // a search's words are a full-text match each query runs again: one query for every conversation of the page
+        if !search.text.trim().is_empty() && threads.len() > 1 {
+            return self.thread_focus_at_once(&search, threads);
+        }
         let mut focus = HashMap::new();
         for &thread in threads {
             for (unread, order) in [(true, "ASC"), (false, "DESC")] {
@@ -1055,6 +1059,30 @@ impl Store {
                     focus.insert(thread, message);
                     break;
                 }
+            }
+        }
+        Ok(focus)
+    }
+
+    /// [`Store::thread_focus`] in one query for all `threads`: what `search` finds of them, each conversation's oldest
+    /// unread message, else its newest
+    fn thread_focus_at_once(&self, search: &Search, threads: &[i64]) -> Result<HashMap<i64, Message>> {
+        let (wanted, values) = of_threads(search, threads);
+        let mut statement = self.db.prepare_cached(&format!(
+            "SELECT {COLUMNS}, {ARRIVED} AS arrived FROM messages WHERE {wanted} ORDER BY arrived, uid, id"
+        ))?;
+        let found = statement
+            .query_map(params_from_iter(values), |row| {
+                Ok((from_row(row)?, row.get::<_, Option<i64>>("arrived")?))
+            })?
+            .collect::<rusqlite::Result<Vec<_>>>()?;
+        let mut focus: HashMap<i64, Message> = HashMap::new();
+        for (message, _) in found {
+            let Some(thread) = message.info.thread_id else { continue };
+            // oldest first: the first unread one stays; while none is, each newer one takes its place
+            let replace = focus.get(&thread).is_none_or(|held| held.info.seen());
+            if replace {
+                focus.insert(thread, message);
             }
         }
         Ok(focus)
@@ -1541,6 +1569,25 @@ mod tests {
             "all read: it opens its newest message"
         );
         assert_eq!(place(&read[1]).focus, None, "a message alone has no focus");
+        store.set_flag(inbox, 3, "\\Seen", false).unwrap();
+        // a search's page asks once for all its conversations, with the same answer
+        let threads = [
+            place(&rows[0]).thread,
+            store.message(inbox, 2).unwrap().unwrap().info.thread_id.unwrap(),
+        ];
+        let one_by_one = store.thread_focus(&list, &threads).unwrap();
+        let at_once = store.thread_focus_at_once(&list, &threads).unwrap();
+        let uids = |found: &HashMap<i64, Message>| {
+            let mut uids: Vec<(i64, u64)> = found.iter().map(|(t, m)| (*t, m.info.uid)).collect();
+            uids.sort();
+            uids
+        };
+        assert_eq!(uids(&at_once), uids(&one_by_one));
+        store.set_flag(inbox, 3, "\\Seen", true).unwrap();
+        assert_eq!(
+            uids(&store.thread_focus_at_once(&list, &threads).unwrap()),
+            uids(&store.thread_focus(&list, &threads).unwrap())
+        );
         store.set_flag(inbox, 3, "\\Seen", false).unwrap();
         // the reply in Sent Items is in the same conversation, not in this list
         let a = place(&rows[0]).thread;
