@@ -25,6 +25,7 @@ use crate::{Event, EventSink, FailureKind, Secrets};
 mod background;
 mod download;
 mod large;
+mod reactions;
 mod reader;
 mod senders;
 mod transfer;
@@ -1747,7 +1748,17 @@ impl Worker {
             && !report.reset
             && let Some(next) = before.state.uid_next
         {
-            // the message rules first, on the Inbox's new mail read or not; what they keep quiet is not announced
+            // reactions first: taken out of the lists, announced as reactions, never moved by a rule
+            let reacted = if matches!(
+                before.info.special_use.as_deref(),
+                Some("\\Junk" | "\\Sent" | "\\Drafts")
+            ) {
+                Vec::new()
+            } else {
+                let new: Vec<u64> = store.uids(folder)?.into_iter().filter(|&uid| uid >= next).collect();
+                Box::pin(self.take_reactions(store, folder, &new)).await?
+            };
+            // the message rules, on the Inbox's new mail read or not; what they keep quiet is not announced
             let rules = store.rules()?;
             let quiet =
                 if before.info.path.eq_ignore_ascii_case("INBOX") && rules.iter().any(|r| r.applies_to(self.account)) {
@@ -1786,6 +1797,10 @@ impl Worker {
                     title,
                     text,
                 });
+            }
+            // the newest reaction, as its own notification: a click opens the message it is for
+            if let Some(newest) = reacted.last() {
+                self.announce_reaction(store, newest, reacted.len());
             }
         }
         Ok(())
