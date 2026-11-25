@@ -450,10 +450,5 @@ async fn a_hidden_reaction_email_is_not_fetched_again_and_goes_with_the_server()
     s.server.expunge("INBOX", &[reaction]);
     s.sync(inbox).await;
     assert!(s.store.hidden_uids(inbox).unwrap().is_empty());
-    assert!(
-        s.store
-            .reactions_to(s.account, "<1@example.com>")
-            .unwrap()
-            .is_empty()
-    );
+    assert!(s.store.reactions_to(s.account, "<1@example.com>").unwrap().is_empty());
 }

@@ -1111,6 +1111,8 @@ impl Worker {
             Command::FetchUids { folder, uids } => {
                 let client = self.client(store).await?;
                 pe_sync::fetch_uids(client, store, folder, &uids).await?;
+                // their first words and search text, as for new mail
+                self.more_background_work();
                 self.emit(Event::FolderChanged {
                     account: self.account,
                     folder,

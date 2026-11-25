@@ -7691,7 +7691,8 @@ public static class Dragger {
     [void][Native.Win]::SendMessage($tree, $WM_KEYUP, [IntPtr]$VK_LEFT, [IntPtr]::Zero)
     $collapsed = WaitFor { $t = [Native.Win]::RemoteTreeText($tree, $alex); if ($t -match '\((\d+)\)$' -and [int]$Matches[1] -ge $hiddenUnread -and $hiddenUnread -gt 0) { $t } } 5
     Check ([bool]$collapsed -and (& $bold $alex)) "collapsed, the account shows the unread messages of the folders it hides, in bold ($([Native.Win]::RemoteTreeText($tree, $alex)))"
-    Check ((& $folderBar) -eq ' inboxclassic.test' -and (Rows) -eq 0) "the account's row is selected and lists nothing ($(& $folderBar), $(Rows) rows)"
+    # the list empties as the selection's change is handled, a moment after the key
+    Check ([bool](WaitFor { (& $folderBar) -eq ' inboxclassic.test' -and (Rows) -eq 0 } 5)) "the account's row is selected and lists nothing ($(& $folderBar), $(Rows) rows)"
     Shot $main 'folders-5-collapsed'
     [void][Native.Win]::SendMessage($tree, $WM_KEYDOWN, [IntPtr]$VK_RIGHT, [IntPtr]::Zero)
     [void][Native.Win]::SendMessage($tree, $WM_KEYUP, [IntPtr]$VK_RIGHT, [IntPtr]::Zero)

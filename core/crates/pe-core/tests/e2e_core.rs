@@ -4083,8 +4083,9 @@ fn rows_get_their_senders_pictures() {
             .unwrap()
     };
     // the background worker reads the verdicts after the sync, and tells the list of the folder, which loaded its rows
-    // before (they show the logo once it loads them again)
-    s.wait(|e| *e == Event::FolderChanged { account, folder: inbox } && row("With a logo").logo.is_some());
+    // before (they show the logo once it loads them again); it may do so before the sync's end is told, so the rows
+    // are waited on rather than its event
+    s.wait_until(|| row("With a logo").logo.is_some(), "the logo of the brand's row");
     let (kind, key) = pe_core::senders::picture(&row("With a logo"));
     assert_eq!(kind, pe_core::senders::PictureKind::Logo);
     assert_ne!(key, 0);

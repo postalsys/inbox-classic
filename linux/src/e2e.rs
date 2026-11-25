@@ -2762,11 +2762,18 @@ async fn wrong_password(d: &Driver) {
     let logon = wait_dialog(30, "logon").await;
     d.check(logon.is_some(), "a refused password is asked for again");
     if let Some(logon) = logon {
+        // the sync's end, which the status bar tells, may come a moment after the logon dialog
+        let said = wait_until(10, || {
+            shell()
+                .main()
+                .status_texts()
+                .0
+                .to_lowercase()
+                .contains("authentication")
+        })
+        .await;
         let status = shell().main().status_texts().0;
-        d.check(
-            status.to_lowercase().contains("authentication"),
-            &format!("the status bar says why ({status})"),
-        );
+        d.check(said, &format!("the status bar says why ({status})"));
         d.shot(&logon, "trouble-1-password").await;
         // the right password, and the account syncs
         set_text(logon.upcast_ref(), "form-0", "testpass2");
