@@ -1293,6 +1293,11 @@ fn read_fields(
     if !message.reply_to.is_empty() && message.reply_to != message.from {
         fields.insert("reply_to".into(), fence.wrap(&message.reply_to));
     }
+    // who reacted with what, in their own words: fenced as everything a sender wrote
+    if !message.reactions.is_empty() {
+        let reactions: Vec<Value> = message.reactions.iter().map(|r| fence.wrap(r)).collect();
+        fields.insert("reactions".into(), json!(reactions));
+    }
     fields.extend(mail::facts(&message.facts, fence));
     fields
 }

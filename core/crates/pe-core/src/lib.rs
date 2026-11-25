@@ -1912,7 +1912,9 @@ impl Core {
                 if conversation::alone(&message) {
                     return None;
                 }
-                let messages = store.conversation_messages(thread, folder).ok()?;
+                let mut messages = store.conversation_messages(thread, folder).ok()?;
+                // each line's reactions
+                let _ = store.add_reactions(&mut messages);
                 let account = store.folder_info(folder).map(|(account, _)| account).ok()?;
                 let folders: HashMap<FolderId, pe_store::FolderInfo> = store
                     .folders(account)

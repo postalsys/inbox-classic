@@ -777,7 +777,7 @@ fn the_migration_counts_what_was_stored_before() {
          DROP TABLE invitation_replies; DROP TABLE flags_owed; DROP TABLE unsubscribed; \
          ALTER TABLE accounts DROP COLUMN verifiers; DROP INDEX messages_thread_focus; DROP TABLE sync_ids; \
          DROP TABLE sync_fields; DROP TABLE sync_devices; DROP TABLE sync_lost; DROP TABLE reactions; \
-         DROP TABLE hidden_messages;",
+         DROP TABLE hidden_messages; DROP TABLE reaction_looked;",
     )
     .unwrap();
     // from the migration that counts, and those after it

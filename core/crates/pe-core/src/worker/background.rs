@@ -135,6 +135,9 @@ impl Worker {
         if self.index_texts(store, &Store::messages_without_snippet).await? > 0 {
             return Ok(true);
         }
+        if self.reactions_stored(store).await? > 0 {
+            return Ok(true);
+        }
         Ok(self.fetch_sender_verdicts(store).await? > 0)
     }
 }

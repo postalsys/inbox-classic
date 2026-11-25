@@ -903,6 +903,8 @@ CREATE TABLE reactions (
     PRIMARY KEY (folder_id, uid)
 ) WITHOUT ROWID;
 CREATE INDEX reactions_by_target ON reactions (account_id, target);
+-- mail stored before reactions were recognised, looked at once each (a message's row going takes its mark)
+CREATE TABLE reaction_looked (message INTEGER PRIMARY KEY REFERENCES messages(id) ON DELETE CASCADE);
 "#,
 ];
 

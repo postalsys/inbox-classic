@@ -43,6 +43,8 @@ pub struct ConversationLine<'a> {
     pub open: bool,
     /// Reply, Forward and Print act on it: its frame has an edge
     pub focus: bool,
+    /// Its emoji reactions' badge ("👍❤️ 3"), at the end of its line; empty for none
+    pub reactions: &'a str,
 }
 
 /// The page of `lines`, in their order, the place of each its N. `earlier`: the words of the link that shows the
@@ -81,6 +83,9 @@ pub fn conversation_page(
             }
         }
         head.push_str(&format!("<span class=\"pe-w\">{}</span>", editor::text(line.words)));
+        if !line.reactions.is_empty() {
+            head.push_str(&format!("<span class=\"pe-r\">{}</span>", editor::text(line.reactions)));
+        }
         body.push_str(&format!(
             "<section class=\"{classes}\"><a class=\"pe-h\" href=\"{CONVERSATION_LINK}{index}\">{head}</a>"
         ));
@@ -104,6 +109,7 @@ pub fn conversation_page(
          .pe-t{{color:GrayText;font-size:9pt}}\
          .pe-g{{font-size:8pt;border:1px solid var(--l);border-radius:3px;padding:0 5px;color:GrayText}}\
          .pe-w{{flex:1 1 12em;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:GrayText}}\
+         .pe-r{{border:1px solid var(--l);border-radius:9px;padding:0 7px;font-size:9pt;white-space:nowrap}}\
          .pe-e{{display:block;margin:0 0 6px;padding:4px 10px;color:var(--a)}}\
          .pe-d{{display:block;width:100%;border:0;height:120px}}\
          @media (prefers-color-scheme:dark){{body{{--l:#4a4f57;--a:#7fb0f0;--h:#262a30}}}}\
@@ -125,7 +131,20 @@ mod tests {
             unread: false,
             open,
             focus,
+            reactions: "",
         }
+    }
+
+    #[test]
+    fn a_line_shows_its_reactions_as_text() {
+        let mut liked = line("Ann", false, false);
+        liked.reactions = "<b>👍</b> 2";
+        let page = conversation_page(&[liked], 0, None, false);
+        assert!(
+            page.contains("<span class=\"pe-r\">&lt;b&gt;👍&lt;/b&gt; 2</span>"),
+            "{page}"
+        );
+        assert!(!conversation_page(&[line("Bo", false, false)], 0, None, false).contains("pe-r\">"));
     }
 
     #[test]

@@ -159,6 +159,36 @@ impl Store {
         Ok(())
     }
 
+    /// Mail stored before reactions were recognised that may be reactions, a batch at a time, newest first: small
+    /// replies to a message of the account, whose first words start with an emoji or with Outlook's `[like]`-style
+    /// marker, not looked at yet. Each is looked at once ([`Store::looked_at_for_reaction`]).
+    pub fn reaction_candidates(&self, account: AccountId, limit: usize) -> Result<Vec<(FolderId, u64)>> {
+        self.db
+            .prepare_cached(
+                "SELECT m.folder_id, m.uid FROM messages m JOIN folders f ON f.id = m.folder_id \
+                 WHERE f.account_id = ?1 AND m.in_reply_to IS NOT NULL AND COALESCE(m.size, 0) < 262144 \
+                 AND m.snippet IS NOT NULL AND m.snippet != '' \
+                 AND (unicode(m.snippet) >= 8592 OR m.snippet LIKE '[like]%' OR m.snippet LIKE '[heart]%' \
+                  OR m.snippet LIKE '[celebrate]%' OR m.snippet LIKE '[laugh]%' OR m.snippet LIKE '[surprised]%' \
+                  OR m.snippet LIKE '[sad]%') \
+                 AND COALESCE(f.special_use, '') NOT IN ('\\Junk', '\\Sent', '\\Drafts') \
+                 AND NOT EXISTS (SELECT 1 FROM reaction_looked l WHERE l.message = m.id) \
+                 ORDER BY m.id DESC LIMIT ?2",
+            )?
+            .query_map(params![account, limit as i64], |row| Ok((row.get(0)?, row.get(1)?)))?
+            .collect()
+    }
+
+    /// A message looked at for being a reaction, whatever it was: not looked at again
+    pub fn looked_at_for_reaction(&self, folder: FolderId, uid: u64) -> Result<()> {
+        self.db.execute(
+            "INSERT OR IGNORE INTO reaction_looked (message) \
+             SELECT id FROM messages WHERE folder_id = ?1 AND uid = ?2",
+            params![folder, uid],
+        )?;
+        Ok(())
+    }
+
     /// The reactions to the messages `targets` (Message-IDs with their brackets) of `account`, oldest first
     pub fn reactions_to(&self, account: AccountId, targets: &[String]) -> Result<Vec<ReactionRow>> {
         let mut found = Vec::new();
@@ -270,6 +300,32 @@ mod tests {
         store.add_reactions(&mut rows).unwrap();
         assert_eq!(rows.len(), 1);
         assert_eq!(rows[0].reactions, [("👍".to_string(), 2), ("❤️".to_string(), 1)]);
+    }
+
+    #[test]
+    fn stored_replies_that_start_with_an_emoji_are_looked_at_once() {
+        let (store, account, inbox) = with_inbox();
+        let reply = |uid: u64, words: &str| {
+            let mut message = message_to(uid, "Re: Hi", ("Kate", "kate@studio.example"), "ann@example.org");
+            message.in_reply_to = Some("<original@example.org>".into());
+            store.add_messages(inbox, &[message]).unwrap();
+            let id = id_of(&store, inbox, uid);
+            let text = crate::IndexText {
+                snippet: words.into(),
+                ..Default::default()
+            };
+            store.set_indexed(id, &text).unwrap();
+        };
+        reply(1, "👍 Kate reacted via Gmail");
+        reply(2, "[like]  Kate reacted to your message:");
+        reply(3, "Thanks, see you then");
+        add(&store, inbox, &[4]);
+        assert_eq!(
+            store.reaction_candidates(account, 10).unwrap(),
+            [(inbox, 2), (inbox, 1)]
+        );
+        store.looked_at_for_reaction(inbox, 2).unwrap();
+        assert_eq!(store.reaction_candidates(account, 10).unwrap(), [(inbox, 1)]);
     }
 
     #[test]
