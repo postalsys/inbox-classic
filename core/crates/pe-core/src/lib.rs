@@ -1058,7 +1058,10 @@ impl Core {
     /// A page of what `search` finds (Gmail's syntax, see [`pe_store::Query`]), in the order of `sort`
     pub fn search(&self, search: &Search, sort: Sort, offset: u64, limit: u64) -> Result<Vec<Message>> {
         let sort = self.list_sort(search, sort)?;
-        Ok(encrypted_lines(self.store().search(search, sort, offset, limit)?))
+        let store = self.store();
+        let mut rows = encrypted_lines(store.search(search, sort, offset, limit)?);
+        store.add_reactions(&mut rows)?;
+        Ok(rows)
     }
 
     /// [`Core::search`] read from a row next to the page or from the end of the list (`anchor`, see
@@ -1072,9 +1075,10 @@ impl Core {
         anchor: pe_store::Anchor,
     ) -> Result<Vec<Message>> {
         let sort = self.list_sort(search, sort)?;
-        Ok(encrypted_lines(
-            self.store().search_from(search, sort, offset, limit, anchor)?,
-        ))
+        let store = self.store();
+        let mut rows = encrypted_lines(store.search_from(search, sort, offset, limit, anchor)?);
+        store.add_reactions(&mut rows)?;
+        Ok(rows)
     }
 
     /// What the store holds now: equal values mean nothing was written in between, so what was read then is still so

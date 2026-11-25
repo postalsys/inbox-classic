@@ -41,6 +41,11 @@ pub(crate) use reader::{Synced, tell_woke, watch_sleep};
 #[derive(Debug)]
 pub(crate) enum Command {
     Sync,
+    /// Messages of a folder fetched into the list again (reaction emails shown as emails)
+    FetchUids {
+        folder: FolderId,
+        uids: Vec<u64>,
+    },
     FetchSource {
         folder: FolderId,
         uid: u64,
@@ -1098,6 +1103,15 @@ impl Worker {
             }
             Command::SetFlag { folder, uids, flag, on } => {
                 self.set_flag_or_take_back(store, folder, &uids, flag, on).await
+            }
+            Command::FetchUids { folder, uids } => {
+                let client = self.client(store).await?;
+                pe_sync::fetch_uids(client, store, folder, &uids).await?;
+                self.emit(Event::FolderChanged {
+                    account: self.account,
+                    folder,
+                });
+                Ok(())
             }
             Command::SetFlags {
                 folder,

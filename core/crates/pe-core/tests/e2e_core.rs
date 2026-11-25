@@ -5254,4 +5254,30 @@ fn a_reaction_leaves_the_inbox_and_comes_as_a_reaction() {
         .map(|m| m.info.subject)
         .collect();
     assert_eq!(subjects, ["Furniture"]);
+    // the message carries it: its row's badge, the reading pane's chip
+    let furniture = s.core.messages(inbox.id, Sort::default(), 0, 10).unwrap()[0].info.uid;
+    let rows = s
+        .core
+        .search(&pe_store::Search::folder(inbox.id), Sort::default(), 0, 10)
+        .unwrap();
+    assert_eq!(pe_core::reactions::badge(&rows[0].reactions), "\u{1F44D}");
+    let chips = s.core.reactions_of(inbox.id, furniture).unwrap();
+    assert_eq!(chips.len(), 1);
+    assert_eq!(chips[0].text, "\u{1F44D} Kate Kalda");
+    // Open Reaction Email: the email as a file
+    let file = s.core.reaction_email_file(chips[0].emails[0]).unwrap().unwrap();
+    assert!(std::fs::read_to_string(&file).unwrap().contains("Re: Furniture"));
+    // Show as Email: listed again, the reaction gone from the message
+    s.core.show_reactions_as_email(&chips[0].emails).unwrap();
+    eventually(
+        || {
+            s.core
+                .messages(inbox.id, Sort::default(), 0, 10)
+                .unwrap()
+                .iter()
+                .any(|m| m.info.subject == "Re: Furniture")
+        },
+        "the reaction email listed again",
+    );
+    assert!(s.core.reactions_of(inbox.id, furniture).unwrap().is_empty());
 }

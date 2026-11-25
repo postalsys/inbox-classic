@@ -262,6 +262,9 @@ pub struct Message {
     /// [`Message::snippet`] says the message's state ("Encrypted message"), not words its sender wrote: the apps style
     /// it as such (the core sets it)
     pub snippet_is_state: bool,
+    /// The emoji reactions to it (to its conversation's messages, for a collapsed conversation's row), each emoji with
+    /// how many sent it, most first ([`Store::add_reactions`])
+    pub reactions: Vec<(String, u32)>,
 }
 
 impl Message {
@@ -404,6 +407,7 @@ pub(crate) fn from_row(row: &Row) -> rusqlite::Result<Message> {
             _ => None,
         },
         snippet_is_state: false,
+        reactions: Vec::new(),
         info: MessageInfo {
             uid: row.get(2)?,
             modseq: row.get(3)?,

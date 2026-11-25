@@ -7,7 +7,7 @@
 
 use rusqlite::{OptionalExtension, params};
 
-use crate::{AccountId, FolderId, Result, Store};
+use crate::{AccountId, FolderId, Message, Result, Store};
 
 /// A reaction someone sent to a message, as kept
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -122,6 +122,43 @@ impl Store {
         Ok(())
     }
 
+    /// Each row's reactions ([`Message::reactions`]): to its message, or for a collapsed conversation's row to every
+    /// message of its conversation. Nothing to read while no reaction is kept.
+    pub fn add_reactions(&self, rows: &mut [Message]) -> Result<()> {
+        let any: bool = self
+            .db
+            .prepare_cached("SELECT EXISTS (SELECT 1 FROM reactions)")?
+            .query_row([], |row| row.get(0))?;
+        if !any {
+            return Ok(());
+        }
+        let mut of_message = self.db.prepare_cached(
+            "SELECT r.emoji, COUNT(*) FROM reactions r JOIN folders f ON f.id = ?1 \
+             WHERE r.account_id = f.account_id AND r.target = lower(?2) GROUP BY r.emoji ORDER BY COUNT(*) DESC, MIN(r.at)",
+        )?;
+        let mut of_thread = self.db.prepare_cached(
+            "SELECT r.emoji, COUNT(*) FROM reactions r JOIN folders f ON f.id = ?1 \
+             WHERE r.account_id = f.account_id \
+             AND r.target IN (SELECT lower(message_id) FROM messages WHERE thread_id = ?2 AND message_id IS NOT NULL) \
+             GROUP BY r.emoji ORDER BY COUNT(*) DESC, MIN(r.at)",
+        )?;
+        let counted = |row: &rusqlite::Row| Ok((row.get::<_, String>(0)?, row.get::<_, u32>(1)?));
+        for message in rows {
+            message.reactions = match message.thread.filter(crate::ThreadPlace::collapsed) {
+                Some(place) => of_thread
+                    .query_map(params![message.folder_id, place.thread], counted)?
+                    .collect::<rusqlite::Result<_>>()?,
+                None => match &message.info.message_id {
+                    Some(id) => of_message
+                        .query_map(params![message.folder_id, id], counted)?
+                        .collect::<rusqlite::Result<_>>()?,
+                    None => Vec::new(),
+                },
+            };
+        }
+        Ok(())
+    }
+
     /// The reactions to the messages `targets` (Message-IDs with their brackets) of `account`, oldest first
     pub fn reactions_to(&self, account: AccountId, targets: &[String]) -> Result<Vec<ReactionRow>> {
         let mut found = Vec::new();
@@ -215,6 +252,24 @@ mod tests {
         );
         assert!(store.unhide(inbox, 2).unwrap());
         assert!(store.hidden_uids(inbox).unwrap().is_empty());
+    }
+
+    #[test]
+    fn a_row_carries_its_reactions_most_first() {
+        let (store, account, inbox) = with_inbox();
+        let mut original = message_to(1, "Furniture", ("Ann", "ann@example.org"), "kate@studio.example");
+        original.message_id = Some("<Original@Example.org>".into());
+        store.add_messages(inbox, &[original]).unwrap();
+        add(&store, inbox, &[2, 3, 4]);
+        for (uid, emoji) in [(2, "❤️"), (3, "👍"), (4, "👍")] {
+            store
+                .hide_as_reaction(&reaction(inbox, uid, account, emoji), b"s")
+                .unwrap();
+        }
+        let mut rows = store.messages(inbox, crate::Sort::default(), 0, 10).unwrap();
+        store.add_reactions(&mut rows).unwrap();
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows[0].reactions, [("👍".to_string(), 2), ("❤️".to_string(), 1)]);
     }
 
     #[test]

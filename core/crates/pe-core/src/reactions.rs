@@ -6,7 +6,10 @@
 //! is here and that the sender is in it (`Core::reaction_target`). Anything short of that stays an ordinary email.
 
 use pe_mime::parser::Message;
+use pe_store::{FolderId, MessageRef};
 use serde::Deserialize;
+
+use crate::{Core, Event, Result};
 
 /// A reaction a message carries: the emoji and the Message-ID of the message it is for
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -136,6 +139,109 @@ pub(crate) fn of(raw: &[u8], message: &Message, trusted: &crate::authres::Verifi
         .then_some(reaction)
 }
 
+/// One person's reactions to a message, as the reading pane's Reactions line shows them: "👍❤️ Kate Kalda"
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ReactionChip {
+    /// Their emoji, then their name (their address when they gave none)
+    pub text: String,
+    /// When their last reaction came, in words, for the chip's menu
+    pub when: String,
+    /// The emails their reactions came in, newest last: Open Reaction Email opens the newest, Show as Email lists
+    /// them all again
+    pub emails: Vec<MessageRef>,
+}
+
+/// A row's reactions as its badge shows them: up to three emoji, most used first, then how many reactions there are
+/// when more than one ("👍❤️ 3"); empty for none
+pub fn badge(reactions: &[(String, u32)]) -> String {
+    let shown: String = reactions.iter().take(3).map(|(emoji, _)| emoji.as_str()).collect();
+    let total: u32 = reactions.iter().map(|(_, count)| count).sum();
+    match total {
+        0 => String::new(),
+        1 => shown,
+        _ => format!("{shown} {total}"),
+    }
+}
+
+impl Core {
+    /// The reactions to the message `folder`/`uid`, one chip a person, in the order they first reacted
+    pub fn reactions_of(&self, folder: FolderId, uid: u64) -> Result<Vec<ReactionChip>> {
+        let store = self.store();
+        let Some(message) = store.message(folder, uid)? else {
+            return Ok(Vec::new());
+        };
+        let Some(id) = message.info.message_id else {
+            return Ok(Vec::new());
+        };
+        let account = store.folder(folder)?.account_id;
+        let found = store.reactions_to(account, &[id])?;
+        let mut chips: Vec<(String, String, Vec<String>, i64, Vec<MessageRef>)> = Vec::new();
+        for row in found {
+            let at = MessageRef {
+                folder: row.folder,
+                uid: row.uid,
+            };
+            match chips.iter_mut().find(|c| c.0 == row.address) {
+                Some(chip) => {
+                    if !chip.2.contains(&row.emoji) {
+                        chip.2.push(row.emoji);
+                    }
+                    chip.3 = row.at;
+                    chip.4.push(at);
+                }
+                None => {
+                    let who = if row.name.is_empty() {
+                        row.address.clone()
+                    } else {
+                        row.name.clone()
+                    };
+                    chips.push((row.address, who, vec![row.emoji], row.at, vec![at]));
+                }
+            }
+        }
+        Ok(chips
+            .into_iter()
+            .map(|(_, who, emoji, at, emails)| ReactionChip {
+                text: format!("{} {who}", emoji.concat()),
+                when: crate::calendar::local_date_time(at),
+                emails,
+            })
+            .collect())
+    }
+
+    /// Open Reaction Email: the hidden email `at` written to a private file, for the message window that opens files;
+    /// None when it is not kept (any longer)
+    pub fn reaction_email_file(&self, at: MessageRef) -> Result<Option<std::path::PathBuf>> {
+        let Some(source) = self.store().hidden_source(at.folder, at.uid)? else {
+            return Ok(None);
+        };
+        let dir = crate::private_dir("reactions").map_err(|e| crate::Error::Invalid(e.to_string()))?;
+        let path = dir.join(format!("reaction-{}-{}.eml", at.folder, at.uid));
+        std::fs::write(&path, source).map_err(|e| crate::Error::Invalid(e.to_string()))?;
+        Ok(Some(path))
+    }
+
+    /// Show as Email: the reaction emails `emails` listed again for good, their reactions taken off the message
+    pub fn show_reactions_as_email(&self, emails: &[MessageRef]) -> Result<()> {
+        let mut by_folder: std::collections::BTreeMap<FolderId, Vec<u64>> = std::collections::BTreeMap::new();
+        {
+            let store = self.store();
+            for at in emails {
+                if store.unhide(at.folder, at.uid)? {
+                    by_folder.entry(at.folder).or_default().push(at.uid);
+                }
+            }
+        }
+        for (folder, uids) in by_folder {
+            let account = self.store().folder(folder)?.account_id;
+            self.send_command(account, crate::worker::Command::FetchUids { folder, uids })?;
+            self.post(Event::FolderChanged { account, folder })?;
+        }
+        self.post(Event::ListsChanged)?;
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -230,6 +336,15 @@ mod tests {
         // an ordinary reply
         let plain = "From: a@x.example\r\nIn-Reply-To: <o@x>\r\nSubject: Re: x\r\n\r\nThanks!\r\n";
         assert!(read(plain).is_none());
+    }
+
+    #[test]
+    fn the_badge_shows_three_emoji_and_the_count() {
+        let r = |list: &[(&str, u32)]| badge(&list.iter().map(|(e, n)| (e.to_string(), *n)).collect::<Vec<_>>());
+        assert_eq!(r(&[]), "");
+        assert_eq!(r(&[("👍", 1)]), "👍");
+        assert_eq!(r(&[("👍", 2), ("❤️", 1)]), "👍❤️ 3");
+        assert_eq!(r(&[("🎉", 3), ("👍", 2), ("❤️", 1), ("😮", 1)]), "🎉👍❤️ 7");
     }
 
     #[test]
