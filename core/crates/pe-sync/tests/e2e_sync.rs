@@ -413,3 +413,47 @@ async fn creates_renames_and_deletes_folders() {
     sync_folders(&mut s.client, &mut s.store, s.account).await.unwrap();
     assert!(!paths(&s).iter().any(|p| p.starts_with("Plans")), "{:?}", paths(&s));
 }
+
+#[tokio::test]
+async fn a_hidden_reaction_email_is_not_fetched_again_and_goes_with_the_server() {
+    let mut s = setup!(json!({}));
+    s.server.add_message("INBOX", &rfc822("One", "1"), &[]);
+    let reaction = s.server.add_message("INBOX", &rfc822("Re: One", "2"), &[]);
+    sync_folders(&mut s.client, &mut s.store, s.account).await.unwrap();
+    let inbox = s.folder("INBOX").await;
+    s.sync(inbox).await;
+    // the newest message taken out as a reaction: the next sync neither fetches it again nor counts it gone
+    let row = pe_store::reactions::ReactionRow {
+        folder: inbox,
+        uid: reaction,
+        account: s.account,
+        target: "<1@example.com>".into(),
+        address: "kate@example.com".into(),
+        name: "Kate".into(),
+        emoji: "👍".into(),
+        at: 1,
+    };
+    assert!(s.store.hide_as_reaction(&row, b"source").unwrap());
+    assert_eq!(s.sync(inbox).await, Report::default());
+    assert_eq!(s.subjects(inbox), ["One"]);
+    // Show as Email: let go and fetched back into the list
+    s.store.unhide(inbox, reaction).unwrap();
+    assert_eq!(
+        pe_sync::fetch_uids(&mut s.client, &mut s.store, inbox, &[reaction])
+            .await
+            .unwrap(),
+        1
+    );
+    assert_eq!(s.subjects(inbox), ["One", "Re: One"]);
+    // hidden again, then deleted on the server: let go with its reaction
+    assert!(s.store.hide_as_reaction(&row, b"source").unwrap());
+    s.server.expunge("INBOX", &[reaction]);
+    s.sync(inbox).await;
+    assert!(s.store.hidden_uids(inbox).unwrap().is_empty());
+    assert!(
+        s.store
+            .reactions_to(s.account, &["<1@example.com>".into()])
+            .unwrap()
+            .is_empty()
+    );
+}

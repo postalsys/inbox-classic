@@ -882,6 +882,28 @@ CREATE TABLE sync_lost (
     source TEXT NOT NULL
 );
 "#,
+    // emoji reactions (reactions.rs): the reaction emails taken out of the lists, with their source, and the
+    // reactions they carried, by the Message-ID of the message each is for
+    r#"
+CREATE TABLE hidden_messages (
+    folder_id INTEGER NOT NULL REFERENCES folders(id) ON DELETE CASCADE,
+    uid INTEGER NOT NULL,
+    source BLOB NOT NULL,
+    PRIMARY KEY (folder_id, uid)
+) WITHOUT ROWID;
+CREATE TABLE reactions (
+    folder_id INTEGER NOT NULL REFERENCES folders(id) ON DELETE CASCADE,
+    uid INTEGER NOT NULL,
+    account_id INTEGER NOT NULL,
+    target TEXT NOT NULL,
+    address TEXT NOT NULL,
+    name TEXT NOT NULL,
+    emoji TEXT NOT NULL,
+    at INTEGER NOT NULL,
+    PRIMARY KEY (folder_id, uid)
+) WITHOUT ROWID;
+CREATE INDEX reactions_by_target ON reactions (account_id, target);
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

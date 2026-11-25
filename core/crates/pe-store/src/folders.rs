@@ -197,6 +197,11 @@ impl Store {
             // its conversations first: then each message deleted finds none of them to count again
             self.db
                 .execute("DELETE FROM conversations WHERE folder_id = ?1", [folder])?;
+            // its hidden reaction emails (their reactions with them): their UIDs mean nothing now
+            self.db
+                .execute("DELETE FROM reactions WHERE folder_id = ?1", [folder])?;
+            self.db
+                .execute("DELETE FROM hidden_messages WHERE folder_id = ?1", [folder])?;
             self.db.execute("DELETE FROM messages WHERE folder_id = ?1", [folder])
         })?;
         self.set_sync_state(

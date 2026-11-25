@@ -29,6 +29,7 @@ mod outbox;
 mod owed;
 mod pgp;
 mod query;
+pub mod reactions;
 mod recovery;
 mod rules;
 mod schema;

@@ -662,6 +662,8 @@ impl Store {
 
     /// Removes messages by UID, with their cached sources; returns how many there were
     pub fn remove_messages(&self, folder: FolderId, uids: &[u64]) -> Result<usize> {
+        // a hidden reaction email gone from the server goes with its reaction
+        self.remove_hidden(folder, uids)?;
         let mut statement = self
             .db
             .prepare_cached("DELETE FROM messages WHERE folder_id = ?1 AND uid = ?2")?;
