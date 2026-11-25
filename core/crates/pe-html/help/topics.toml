@@ -31,7 +31,7 @@ topics = ["all-inboxes", "manage-accounts", "sync", "move-computer"]
 
 [[section]]
 id = "message-features"
-topics = ["sign-in-codes", "delivery-problems", "invitations", "unsubscribe", "brand-logos"]
+topics = ["sign-in-codes", "reactions", "delivery-problems", "invitations", "unsubscribe", "brand-logos"]
 
 [[section]]
 id = "encrypted-mail"

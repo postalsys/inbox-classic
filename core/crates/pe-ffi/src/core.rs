@@ -1865,6 +1865,9 @@ pub struct PeMessage {
     /// `snippet` says the message's state ("Encrypted message"), not words its sender wrote: shown in the list's
     /// secondary style for a state (italic)
     pub snippet_is_state: bool,
+    /// Its emoji reactions' badge, after the subject ("👍❤️ 3"; a collapsed conversation's are its messages'); empty
+    /// for none
+    pub reactions: *const c_char,
 }
 
 /// Whether a message is signed or encrypted as a whole (a list row), or how the part an attachment came from was
@@ -1975,6 +1978,7 @@ pub(crate) fn message_list(messages: &[pe_store::Message]) -> *mut PeMessageList
             protection: info.protection.into(),
             protection_words: strings.add(&pe_core::protection_words(info.protection).unwrap_or_default()),
             snippet_is_state: m.snippet_is_state,
+            reactions: strings.add(&pe_core::reactions::badge(&m.reactions)),
         }
     })))
 }
