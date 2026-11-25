@@ -994,6 +994,9 @@ public:
     // the UI test's look at the row of the message `subject`: 12 its picture drawn, 11 its initials, 10 neither, 0 no
     // such row shown
     int TestRowPicture(const std::wstring& subject);
+    // the UI test's look at the count beside a conversation's row ("subject\nlabel"): 1 the row of that subject says
+    // that label, 2 it says another, 0 no such row shown
+    int TestThreadLabel(const std::wstring& text);
     // the UI test's look at where the list's top row starts: 1000 plus its top in the list's client area (the header's
     // room above it, if any); 0 for an empty list
     int TestListTop() const;

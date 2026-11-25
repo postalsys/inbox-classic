@@ -1659,6 +1659,8 @@ constexpr ULONG_PTR kTestBadge = 0x42414447;
 constexpr ULONG_PTR kTestFromStore = 0x53544F52;
 // with --test-hooks only: the picture of the list's row of the message whose subject is the text (TestRowPicture)
 constexpr ULONG_PTR kTestRowPicture = 0x50494354;
+// with --test-hooks only: the count drawn beside a conversation's row (TestThreadLabel)
+constexpr ULONG_PTR kTestThreadLabel = 0x544C424C;
 // with --test-hooks only: where the list's top row starts, and whether its header is shown (TestListTop)
 constexpr ULONG_PTR kTestListTop = 0x4C544F50;
 // with --test-hooks only: the compose windows gone as a crash takes them, and opened again (TestAbandonCompose); how
@@ -2212,6 +2214,10 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         if (g_arguments.testHooks && data->dwData == kTestCrashCompose) {
             return static_cast<LRESULT>(TestAbandonCompose(hwnd, g_core.get()) + 10);
+        }
+        if (g_arguments.testHooks && data->dwData == kTestThreadLabel && data->cbData % sizeof(wchar_t) == 0) {
+            std::wstring text(static_cast<const wchar_t*>(data->lpData), data->cbData / sizeof(wchar_t));
+            return g_mailbox.TestThreadLabel(text);
         }
         if (g_arguments.testHooks && data->dwData == kTestRowPicture && data->cbData % sizeof(wchar_t) == 0) {
             std::wstring subject(static_cast<const wchar_t*>(data->lpData), data->cbData / sizeof(wchar_t));

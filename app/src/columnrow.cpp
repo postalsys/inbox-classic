@@ -497,6 +497,22 @@ int Mailbox::TestListTop() const {
     return 1000 + row.top;
 }
 
+int Mailbox::TestThreadLabel(const std::wstring& text) {
+    size_t newline = text.find(L'\n');
+    if (newline == std::wstring::npos) {
+        return 0;
+    }
+    std::wstring subject = text.substr(0, newline), label = text.substr(newline + 1);
+    int count = ListView_GetItemCount(list_);
+    for (int index = 0; index < count; index++) {
+        const PeMessage* row = RowNow(index);
+        if (row && row->thread_opens && Text(row->subject) == subject) {
+            return Text(row->thread_label) == label ? 1 : 2;
+        }
+    }
+    return 0;
+}
+
 int Mailbox::TestRowPicture(const std::wstring& subject) {
     int count = ListView_GetItemCount(list_);
     for (int index = 0; index < count; index++) {

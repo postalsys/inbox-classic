@@ -5996,10 +5996,11 @@ public static class Dragger {
         [void](Invoke-RestMethod -Method Post -ContentType 'application/json' "$rest/INBOX/messages/flags" -Body (@{
             uids = $coastUids; flags = @('\Seen'); mode = 'remove' } | ConvertTo-Json))
         Command $main $IDM_SYNC
-        [void](WaitFor { (& $coastSeen) -eq 0 -and ([Native.Win]::RemoteListText($list, $at, $COL_SUBJECT)) -match '3\D+3' } 20)
-        $counted = Pattern $en['ui-thread-count[other]'] @{ count = '3'; new = '3' }
-        $headText = [Native.Win]::RemoteListText($list, $at, $COL_SUBJECT)
-        Check ($headText -match ($counted -replace '^\^', '')) "with the count of its messages and of the new ones ($headText)"
+        # the count drawn beside the subject (not the row's text): what the core says for three, three of them new
+        $kTestThreadLabel = 0x544C424C
+        $label = '(3, 3 new)'
+        $labelled = WaitFor { if ((& $coastSeen) -eq 0 -and [Native.Win]::SendText($main, $kTestThreadLabel, "$topic`n$label") -eq 1) { 1 } } 20
+        Check ($null -ne $labelled) "with the count of its messages and of the new ones ($($label): $([Native.Win]::SendText($main, $kTestThreadLabel, "$topic`n$label")))"
         SelectRow $at
         Check ((SelectedRow) -eq $at) "its row can be selected ($(SelectedRow))"
         # the whole conversation in the reading pane: all three unread, so all three open, each a frame sized to it
@@ -6038,8 +6039,11 @@ public static class Dragger {
         Check ([bool](WaitFor { (Rows) -eq $flat } 10)) "Expand All Conversations shows every message ($(Rows) of $flat)"
         Command $main $IDM_COLLAPSE_ALL_THREADS
         Check ([bool](WaitFor { (Rows) -eq $grouped } 10)) "Collapse All Conversations hides the replies again ($(Rows))"
-        # the replies are still unread; the first message is read once it was shown
-        Check ((& $coastSeen) -lt 3) "not all of the conversation is read yet ($(& $coastSeen))"
+        # shown whole, its open messages were read; one unread again on the server for Mark Read to read
+        [void](Invoke-RestMethod -Method Post -ContentType 'application/json' "$rest/INBOX/messages/flags" -Body (@{
+            uids = @($coastUids | Select-Object -Last 1); flags = @('\Seen'); mode = 'remove' } | ConvertTo-Json))
+        Command $main $IDM_SYNC
+        Check ([bool](WaitFor { (& $coastSeen) -eq 2 } 20)) "one of the conversation unread again ($(& $coastSeen) of 3 read)"
         $at = [int](@(SubjectRows $topic)[0])
         SelectRow $at
         Command $main $IDM_MARK_READ
