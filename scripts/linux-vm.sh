@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 # An Ubuntu Desktop 26.04 (arm64) virtual machine in QEMU on this Mac, for what only a real desktop shows: GNOME on
 # Wayland, the tray icon, notifications, the dock's count, the portal file dialogs, installing the .deb and the
-# mailto: registration. The disk and the sockets live in build/vm/.
+# mailto: registration. The disk and the sockets live in build/vm/. DISTRO=fedora makes and runs a Fedora Workstation
+# 45 (aarch64) one instead, in build/vm-fedora/ with ssh on port 2223, and `run` installs the .rpm of dist/
+# (scripts/fedora-package.sh aarch64): its GNOME has no tray host, which is what it is for.
 #
 #   scripts/linux-vm.sh create       downloads the installer image, makes the disk and boots the installer in a window.
 #                                    Install once by hand (about 15 minutes): user "inbox" (uid 1000), automatic login,
-#                                    then in the VM `sudo apt install openssh-server` and add ~/.ssh/id_*.pub of this
+#                                    then in the VM `sudo apt install openssh-server` (Fedora: `sudo systemctl enable
+#                                    --now sshd`) and add ~/.ssh/id_*.pub of this
 #                                    Mac to ~/.ssh/authorized_keys. When it is done, stop the VM: `create` then makes a
 #                                    snapshot "installed" of the disk to return to (qemu-img snapshot -a installed)
 #   scripts/linux-vm.sh start        boots the installed VM in a window (hvf, virtio GPU with GL, ssh on port 2222)
@@ -19,13 +22,35 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-VM=build/vm
-DISK=$VM/ubuntu-26.04.qcow2
-ISO=$VM/ubuntu-26.04-desktop-arm64.iso
-ISO_URL=${ISO_URL:-https://cdimage.ubuntu.com/releases/26.04/release/ubuntu-26.04-desktop-arm64.iso}
+DISTRO=${DISTRO:-ubuntu}
+case "$DISTRO" in
+ubuntu)
+    VM=build/vm
+    DISK=$VM/ubuntu-26.04.qcow2
+    ISO=$VM/ubuntu-26.04-desktop-arm64.iso
+    ISO_URL=${ISO_URL:-https://cdimage.ubuntu.com/releases/26.04/release/ubuntu-26.04-desktop-arm64.iso}
+    SSH_PORT=${SSH_PORT:-2222}
+    PACKAGE=dist/InboxClassic-arm64.deb
+    BUILD="scripts/linux-package.sh arm64"
+    INSTALL="sudo apt-get install -y"
+    ;;
+fedora)
+    VM=build/vm-fedora
+    DISK=$VM/fedora-45.qcow2
+    ISO=$VM/Fedora-Workstation-Live-45-1.4.aarch64.iso
+    ISO_URL=${ISO_URL:-https://dl.fedoraproject.org/pub/fedora/linux/releases/45/Workstation/aarch64/iso/Fedora-Workstation-Live-45-1.4.aarch64.iso}
+    SSH_PORT=${SSH_PORT:-2223}
+    PACKAGE=dist/InboxClassic-aarch64.rpm
+    BUILD="scripts/fedora-package.sh aarch64"
+    INSTALL="sudo dnf install -y"
+    ;;
+*)
+    echo "DISTRO is ubuntu or fedora, not $DISTRO" >&2
+    exit 2
+    ;;
+esac
 VARS=$VM/efi-vars.fd
 QMP=$VM/qmp.sock
-SSH_PORT=${SSH_PORT:-2222}
 VM_USER=${VM_USER:-inbox}
 PREFIX=$(brew --prefix 2>/dev/null || echo /opt/homebrew)
 FIRMWARE=$PREFIX/share/qemu/edk2-aarch64-code.fd
@@ -78,10 +103,9 @@ ssh)
     vm_ssh "$@"
     ;;
 run)
-    deb=dist/InboxClassic-arm64.deb
-    [ -f "$deb" ] || { echo "no $deb: scripts/linux-package.sh arm64" >&2; exit 1; }
-    scp -P "$SSH_PORT" -o UserKnownHostsFile="$VM/known_hosts" "$deb" "$VM_USER@127.0.0.1:/tmp/"
-    vm_ssh "sudo apt-get install -y /tmp/$(basename "$deb") && pkill -x inbox-classic || true"
+    [ -f "$PACKAGE" ] || { echo "no $PACKAGE: $BUILD" >&2; exit 1; }
+    scp -P "$SSH_PORT" -o UserKnownHostsFile="$VM/known_hosts" "$PACKAGE" "$VM_USER@127.0.0.1:/tmp/"
+    vm_ssh "$INSTALL /tmp/$(basename "$PACKAGE") && pkill -x inbox-classic || true"
     # on the user's desktop session (SSH has none of its own)
     vm_ssh 'WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/$(id -u) DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u)/bus systemd-run --user --scope inbox-classic >/dev/null 2>&1 &'
     ;;
@@ -95,7 +119,7 @@ screenshot)
     echo "$out"
     ;;
 *)
-    sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n '2,24p' "$0" | sed 's/^# \{0,1\}//'
     exit 2
     ;;
 esac
