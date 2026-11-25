@@ -1204,6 +1204,7 @@ async fn scenario(d: Rc<Driver>) {
         match only.as_str() {
             "conversations" => steps::conversations(&d).await,
             "sync" => sync::settings_sync(&d).await,
+            "languages" => steps::languages(&d).await,
             _ => {}
         }
         steps::closing(&d).await;

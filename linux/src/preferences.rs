@@ -32,7 +32,7 @@ pub async fn open(parent: &impl IsA<gtk::Widget>) {
     let dialog = adw::PreferencesDialog::builder()
         .title(t!(GtkPreferences))
         // four pages in the view switcher, each label whole in every language
-        .content_width(720)
+        .content_width(900)
         .build();
     dialog.set_widget_name("preferences-dialog");
     for page in SettingsPage::ALL {

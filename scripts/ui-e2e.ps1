@@ -8153,7 +8153,9 @@ public static class Dragger {
         [void](WaitFor { Visible $setUp $IDC_SYNC_FOLDER } 5)
         Click $setUp $IDC_SYNC_CHOOSE
         Check (AnswerFolderDialog 'Choose the Folder to Sync Through' $vault) 'Choose asks for the folder'
-        Check ([bool](WaitFor { (GetText $setUp $IDC_SYNC_FOLDER) -eq $vault -and (Enabled $setUp 1) } 10)) "the folder chosen is in its field, Next on ($(GetText $setUp $IDC_SYNC_FOLDER))"
+        # by its name: the runner's TEMP may be written short (RUNNER~1) where the chooser gives the long path
+        $vaultName = Split-Path $vault -Leaf
+        Check ([bool](WaitFor { (GetText $setUp $IDC_SYNC_FOLDER) -like "*\$vaultName" -and (Enabled $setUp 1) } 10)) "the folder chosen is in its field, Next on ($(GetText $setUp $IDC_SYNC_FOLDER), Next $(Enabled $setUp 1))"
         Click $setUp 1
         Check ([bool](WaitFor { (Visible $setUp $IDC_SYNC_PASSPHRASE_AGAIN) } 20)) 'the folder is empty: it asks for a new sync passphrase, twice'
         Check ((GetText $setUp $IDC_SYNC_NAME) -ne '' -and (Visible $setUp $IDC_SYNC_BACK) -and -not (Enabled $setUp 1)) "with the name of this computer filled in ($(GetText $setUp $IDC_SYNC_NAME)), Back, and Turn On Sync off until the passphrase is typed"
