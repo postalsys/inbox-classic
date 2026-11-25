@@ -4,7 +4,7 @@
 //! (pe-store reactions.rs), and announced as a reaction rather than as new mail.
 
 use pe_store::reactions::ReactionRow;
-use pe_store::{FolderId, Store};
+use pe_store::{AccountId, FolderId, MessageRef, Store};
 
 use super::{ANSWER_LIMIT, Failure, Worker, unix_now};
 use crate::Event;
@@ -12,42 +12,50 @@ use crate::Event;
 /// The largest reaction email looked at: the samples are 11 and 19 KB, with the whole message they answer quoted
 const REACTION_SIZE_LIMIT: u64 = 256 * 1024;
 
-/// A reaction taken out of new mail, and the subject of the message it is for (for its notification)
+/// A reaction taken out of new mail, the message it is for and that message's subject (for its notification)
 pub(super) struct Reacted {
     pub row: ReactionRow,
+    pub target: MessageRef,
     pub subject: String,
 }
 
+/// A new email that may be a reaction, by what the store knows of it: its UID, the message it answers and that
+/// message's subject
+struct Candidate {
+    uid: u64,
+    target: MessageRef,
+    subject: String,
+}
+
 impl Worker {
-    /// The messages `uids` of `folder` that are reactions, taken out of the lists; the others are left as they are
+    /// The messages `uids` of `folder` that are reactions, taken out of the lists; the others are left as they are.
+    /// Each is looked at once: first by what the store knows (a small reply to a message here, from someone in its
+    /// conversation), then those left by their sources, fetched in one command, and marked read in one more.
     pub(super) async fn take_reactions(
         &mut self,
         store: &mut Store,
         folder: FolderId,
         uids: &[u64],
     ) -> Result<Vec<Reacted>, Failure> {
-        let trusted = crate::authres::verifiers(store, self.account)?;
-        let mut taken = Vec::new();
+        let mut candidates = Vec::new();
         for &uid in uids {
-            let Some(message) = store.message(folder, uid)? else {
-                continue;
-            };
-            let Some(reply_to) = message.info.in_reply_to.clone() else {
-                continue;
-            };
-            if message.info.size.is_some_and(|size| size > REACTION_SIZE_LIMIT) {
-                continue;
+            if let Some(candidate) = candidate(store, self.account, folder, uid)? {
+                candidates.push(candidate);
             }
-            // a reaction without its message here stays an ordinary email
-            let Some(at) = store.find_message_id(self.account, &reply_to)? else {
-                continue;
-            };
-            let Some(original) = store.message(at.folder, at.uid)? else {
-                continue;
-            };
-            let client = self.client(store).await?;
-            client.limit_next_answer(ANSWER_LIMIT);
-            let Ok(source) = pe_sync::fetch_source(client, store, folder, uid).await else {
+        }
+        if candidates.is_empty() {
+            return Ok(Vec::new());
+        }
+        let wanted: Vec<u64> = candidates.iter().map(|c| c.uid).collect();
+        let client = self.client(store).await?;
+        client.limit_next_answer(ANSWER_LIMIT);
+        let Ok(sources) = pe_sync::fetch_sources(client, store, folder, &wanted).await else {
+            return Ok(Vec::new());
+        };
+        let trusted = crate::authres::verifiers(store, self.account)?;
+        let mut found = Vec::new();
+        for (uid, source) in sources {
+            let Some(candidate) = candidates.iter().find(|c| c.uid == uid) else {
                 continue;
             };
             let Ok(parsed) = pe_mime::parser::parse(&source) else {
@@ -56,14 +64,13 @@ impl Worker {
             let Some(reaction) = crate::reactions::of(&source, &parsed, &trusted) else {
                 continue;
             };
-            if !in_conversation(&original.info, &reaction.from) {
+            let Some(message) = store.message(folder, uid)? else {
                 continue;
-            }
-            let client = self.client(store).await?;
-            if pe_sync::set_flag(client, store, folder, &[uid], "\\Seen", true)
-                .await
-                .is_err()
-            {
+            };
+            let Some(original) = store.message(candidate.target.folder, candidate.target.uid)? else {
+                continue;
+            };
+            if !in_conversation(&original.info, &reaction.from) {
                 continue;
             }
             let row = ReactionRow {
@@ -80,15 +87,31 @@ impl Worker {
                     .or(message.info.date)
                     .unwrap_or_else(unix_now),
             };
+            found.push((row, source, candidate));
+        }
+        if found.is_empty() {
+            return Ok(Vec::new());
+        }
+        let seen: Vec<u64> = found.iter().map(|(row, ..)| row.uid).collect();
+        let client = self.client(store).await?;
+        if pe_sync::set_flag(client, store, folder, &seen, "\\Seen", true)
+            .await
+            .is_err()
+        {
+            return Ok(Vec::new());
+        }
+        let mut taken = Vec::new();
+        for (row, source, candidate) in found {
             if store.hide_as_reaction(&row, &source)? {
                 // the reacted message's list shows its new reaction
                 self.emit(Event::FolderChanged {
                     account: self.account,
-                    folder: at.folder,
+                    folder: candidate.target.folder,
                 });
                 taken.push(Reacted {
                     row,
-                    subject: original.info.subject.clone(),
+                    target: candidate.target,
+                    subject: candidate.subject.clone(),
                 });
             }
         }
@@ -102,42 +125,80 @@ impl Worker {
     }
 }
 
+/// The new email `folder`/`uid` as a reaction may be, by what the store knows: a reply up to the size a reaction is,
+/// to a message here, from that message's sender or one of its recipients, not looked at before. A reply is looked at
+/// once, whatever comes of it (a reaction whose message is not here stays an ordinary email).
+fn candidate(store: &Store, account: AccountId, folder: FolderId, uid: u64) -> Result<Option<Candidate>, Failure> {
+    if store.looked_at(folder, uid)? {
+        return Ok(None);
+    }
+    let Some(message) = store.message(folder, uid)? else {
+        return Ok(None);
+    };
+    let Some(reply_to) = message.info.in_reply_to.as_deref() else {
+        return Ok(None);
+    };
+    store.looked_at_for_reaction(folder, uid)?;
+    if message.info.size.is_some_and(|size| size > REACTION_SIZE_LIMIT) {
+        return Ok(None);
+    }
+    let Some(target) = store.find_message_id(account, reply_to)? else {
+        return Ok(None);
+    };
+    let Some(original) = store.message(target.folder, target.uid)? else {
+        return Ok(None);
+    };
+    if !in_conversation(&original.info, &message.info.from_address) {
+        return Ok(None);
+    }
+    Ok(Some(Candidate {
+        uid,
+        target,
+        subject: original.info.subject,
+    }))
+}
+
 /// How many stored messages one background batch looks at for being reactions
 const REACTIONS_BATCH: usize = 20;
 
 impl Worker {
-    /// Mail stored before reactions were recognised: a batch of the replies that may be reactions looked at, those
-    /// that are taken out as new ones are (not announced). How many were looked at.
+    /// Mail stored before reactions were recognised: the next batch of the walk through the account's stored replies
+    /// (once through, from the newest), those that are reactions taken out as new ones are (not announced). How many
+    /// were looked at.
     pub(super) async fn reactions_stored(&mut self, store: &mut Store) -> Result<usize, Failure> {
-        let candidates = store.reaction_candidates(self.account, REACTIONS_BATCH)?;
+        if self.reactions_walk == 0 {
+            return Ok(0);
+        }
+        let batch =
+            store.reaction_candidates(self.account, REACTION_SIZE_LIMIT, self.reactions_walk, REACTIONS_BATCH)?;
+        self.reactions_walk = match batch.last() {
+            Some(&(id, ..)) if batch.len() == REACTIONS_BATCH => id,
+            _ => 0,
+        };
         let mut by_folder: std::collections::BTreeMap<FolderId, Vec<u64>> = std::collections::BTreeMap::new();
-        for (folder, uid) in &candidates {
-            by_folder.entry(*folder).or_default().push(*uid);
+        for &(_, folder, uid) in &batch {
+            by_folder.entry(folder).or_default().push(uid);
         }
         for (folder, uids) in by_folder {
-            for uid in &uids {
-                store.looked_at_for_reaction(folder, *uid)?;
+            if crate::sender_cards_shown(&store.folder(folder)?.info) {
+                Box::pin(self.take_reactions(store, folder, &uids)).await?;
+            } else {
+                for uid in uids {
+                    store.looked_at_for_reaction(folder, uid)?;
+                }
             }
-            Box::pin(self.take_reactions(store, folder, &uids)).await?;
         }
-        Ok(candidates.len())
+        Ok(batch.len())
     }
 
     /// A reaction announced as new mail is: "Kate Kalda reacted 👍" over "to “Furniture”" (or how many came)
-    pub(super) fn announce_reaction(&self, store: &Store, newest: &Reacted, count: usize) {
-        let Ok(Some(at)) = store.find_message_id(self.account, &newest.row.target) else {
-            return;
-        };
-        let who = if newest.row.name.is_empty() {
-            newest.row.address.clone()
-        } else {
-            newest.row.name.clone()
-        };
+    pub(super) fn announce_reaction(&self, newest: &Reacted, count: usize) {
+        let who = crate::book::shown_name(&newest.row.name, &newest.row.address).to_string();
         let (title, text) = crate::text::reaction_words(&who, &newest.row.emoji, &newest.subject, count);
         self.emit(Event::NewMail {
             account: self.account,
-            folder: at.folder,
-            uid: at.uid,
+            folder: newest.target.folder,
+            uid: newest.target.uid,
             count,
             from: who,
             subject: newest.subject.clone(),

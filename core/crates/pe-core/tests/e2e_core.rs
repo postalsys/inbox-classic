@@ -5280,4 +5280,21 @@ fn a_reaction_leaves_the_inbox_and_comes_as_a_reaction() {
         "the reaction email listed again",
     );
     assert!(s.core.reactions_of(inbox.id, furniture).unwrap().is_empty());
+    // for good: the background pass reads its first words (which start with the emoji) and leaves it listed
+    let listed = || {
+        s.core
+            .messages(inbox.id, Sort::default(), 0, 10)
+            .unwrap()
+            .into_iter()
+            .find(|m| m.info.subject == "Re: Furniture")
+    };
+    eventually(
+        || listed().is_some_and(|m| m.snippet.is_some_and(|words| !words.is_empty())),
+        "the background pass reading the email's first words",
+    );
+    let until = std::time::Instant::now() + std::time::Duration::from_secs(3);
+    while std::time::Instant::now() < until {
+        assert!(listed().is_some(), "the email shown as email stays listed");
+        std::thread::sleep(std::time::Duration::from_millis(200));
+    }
 }

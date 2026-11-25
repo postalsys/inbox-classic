@@ -686,6 +686,14 @@ impl Store {
         statement.query_map([folder], |row| row.get(0))?.collect()
     }
 
+    /// The UIDs of the cached messages of a folder from `first` on, ascending (the new ones of a sync)
+    pub fn uids_from(&self, folder: FolderId, first: u64) -> Result<Vec<u64>> {
+        self.db
+            .prepare_cached("SELECT uid FROM messages WHERE folder_id = ?1 AND uid >= ?2 ORDER BY uid")?
+            .query_map(params![folder, first], |row| row.get(0))?
+            .collect()
+    }
+
     /// The highest cached UID of a folder
     pub fn max_uid(&self, folder: FolderId) -> Result<Option<u64>> {
         self.db

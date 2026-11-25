@@ -500,6 +500,9 @@ pub(crate) struct Worker {
     /// The messages opened whose search text is being read on the blocking pool, oldest first: their index rows are
     /// written when it is read ([`Worker::index_parsed`]), not before the next open (reader.rs)
     parsing: std::collections::VecDeque<Parsing>,
+    /// How far the background walk through stored mail for reactions went: the row id it goes on below, 0 once
+    /// through (worker/reactions.rs)
+    reactions_walk: i64,
 }
 
 /// A message opened (its id in the store) and its search text being read off the async threads
@@ -543,6 +546,7 @@ impl Worker {
             last_used: Instant::now(),
             wake_seen: 0,
             connections_made: 0,
+            reactions_walk: i64::MAX,
             host: String::new(),
             parsing: std::collections::VecDeque::new(),
         }
@@ -1763,20 +1767,17 @@ impl Worker {
             && let Some(next) = before.state.uid_next
         {
             // reactions first: taken out of the lists, announced as reactions, never moved by a rule
-            let reacted = if matches!(
-                before.info.special_use.as_deref(),
-                Some("\\Junk" | "\\Sent" | "\\Drafts")
-            ) {
-                Vec::new()
-            } else {
-                let new: Vec<u64> = store.uids(folder)?.into_iter().filter(|&uid| uid >= next).collect();
+            let reacted = if crate::sender_cards_shown(&before.info) {
+                let new = store.uids_from(folder, next)?;
                 Box::pin(self.take_reactions(store, folder, &new)).await?
+            } else {
+                Vec::new()
             };
             // the message rules, on the Inbox's new mail read or not; what they keep quiet is not announced
             let rules = store.rules()?;
             let quiet =
                 if before.info.path.eq_ignore_ascii_case("INBOX") && rules.iter().any(|r| r.applies_to(self.account)) {
-                    let new: Vec<u64> = store.uids(folder)?.into_iter().filter(|&uid| uid >= next).collect();
+                    let new = store.uids_from(folder, next)?;
                     Box::pin(self.apply_rules(store, folder, &new, &rules)).await?
                 } else {
                     Vec::new()
@@ -1814,7 +1815,7 @@ impl Worker {
             }
             // the newest reaction, as its own notification: a click opens the message it is for
             if let Some(newest) = reacted.last() {
-                self.announce_reaction(store, newest, reacted.len());
+                self.announce_reaction(newest, reacted.len());
             }
         }
         Ok(())
@@ -1932,10 +1933,7 @@ impl Worker {
             return None;
         }
         let place = store.folder(folder).ok()?;
-        if matches!(
-            place.info.special_use.as_deref(),
-            Some("\\Junk" | "\\Sent" | "\\Drafts")
-        ) {
+        if !crate::sender_cards_shown(&place.info) {
             return None;
         }
         let at = newest.info.internal_date.or(newest.info.date)?;

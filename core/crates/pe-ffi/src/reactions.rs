@@ -80,7 +80,7 @@ pub unsafe extern "C" fn pe_reactions_email_file(
     // SAFETY: as the caller guarantees
     let Some(at) = (unsafe { list.as_ref() })
         .and_then(|l| l.chips.get(index))
-        .and_then(|c| c.emails.last().copied())
+        .and_then(ReactionChip::newest)
     else {
         return null_mut();
     };

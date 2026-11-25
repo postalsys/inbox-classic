@@ -151,6 +151,13 @@ pub struct ReactionChip {
     pub emails: Vec<MessageRef>,
 }
 
+impl ReactionChip {
+    /// The email of their newest reaction, the one Open Reaction Email opens
+    pub fn newest(&self) -> Option<MessageRef> {
+        self.emails.last().copied()
+    }
+}
+
 /// A row's reactions as its badge shows them: up to three emoji, most used first, then how many reactions there are
 /// when more than one ("👍❤️ 3"); empty for none
 pub fn badge(reactions: &[(String, u32)]) -> String {
@@ -167,46 +174,52 @@ impl Core {
     /// The reactions to the message `folder`/`uid`, one chip a person, in the order they first reacted
     pub fn reactions_of(&self, folder: FolderId, uid: u64) -> Result<Vec<ReactionChip>> {
         let store = self.store();
-        let Some(message) = store.message(folder, uid)? else {
+        if !store.any_reactions()? {
             return Ok(Vec::new());
-        };
-        let Some(id) = message.info.message_id else {
+        }
+        let Some(id) = store.message(folder, uid)?.and_then(|m| m.info.message_id) else {
             return Ok(Vec::new());
         };
         let account = store.folder(folder)?.account_id;
-        let found = store.reactions_to(account, &[id])?;
-        // (address, who, their emoji, when the last came, their emails)
-        type Gathered = (String, String, Vec<String>, i64, Vec<MessageRef>);
-        let mut chips: Vec<Gathered> = Vec::new();
-        for row in found {
+        /// One person's reactions as they are gathered
+        struct Person {
+            address: String,
+            who: String,
+            emoji: Vec<String>,
+            last: i64,
+            emails: Vec<MessageRef>,
+        }
+        let mut people: Vec<Person> = Vec::new();
+        for row in store.reactions_to(account, &id)? {
             let at = MessageRef {
                 folder: row.folder,
                 uid: row.uid,
             };
-            match chips.iter_mut().find(|c| c.0 == row.address) {
-                Some(chip) => {
-                    if !chip.2.contains(&row.emoji) {
-                        chip.2.push(row.emoji);
-                    }
-                    chip.3 = row.at;
-                    chip.4.push(at);
-                }
+            let person = match people.iter().position(|p| p.address == row.address) {
+                Some(index) => &mut people[index],
                 None => {
-                    let who = if row.name.is_empty() {
-                        row.address.clone()
-                    } else {
-                        row.name.clone()
-                    };
-                    chips.push((row.address, who, vec![row.emoji], row.at, vec![at]));
+                    people.push(Person {
+                        who: crate::book::shown_name(&row.name, &row.address).to_string(),
+                        address: row.address.clone(),
+                        emoji: Vec::new(),
+                        last: row.at,
+                        emails: Vec::new(),
+                    });
+                    people.last_mut().expect("just pushed")
                 }
+            };
+            if !person.emoji.contains(&row.emoji) {
+                person.emoji.push(row.emoji);
             }
+            person.last = row.at;
+            person.emails.push(at);
         }
-        Ok(chips
+        Ok(people
             .into_iter()
-            .map(|(_, who, emoji, at, emails)| ReactionChip {
-                text: format!("{} {who}", emoji.concat()),
-                when: crate::calendar::local_date_time(at),
-                emails,
+            .map(|p| ReactionChip {
+                text: format!("{} {}", p.emoji.concat(), p.who),
+                when: crate::calendar::local_date_time(p.last),
+                emails: p.emails,
             })
             .collect())
     }

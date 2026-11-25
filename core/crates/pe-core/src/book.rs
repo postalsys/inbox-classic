@@ -116,7 +116,7 @@ impl BookRow {
 }
 
 /// The name a contact is shown by: its name, or its address when it has none
-fn shown_name<'a>(name: &'a str, address: &'a str) -> &'a str {
+pub(crate) fn shown_name<'a>(name: &'a str, address: &'a str) -> &'a str {
     if name.trim().is_empty() { address } else { name }
 }
 

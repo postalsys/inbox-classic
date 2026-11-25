@@ -39,6 +39,9 @@ fn reaction_row(row: &rusqlite::Row) -> rusqlite::Result<ReactionRow> {
     })
 }
 
+/// One emoji given to a message: (emoji, how many times, when first)
+type Given = (String, u32, i64);
+
 const REACTION_COLUMNS: &str = "folder_id, uid, account_id, target, address, name, emoji, at";
 
 impl Store {
@@ -92,14 +95,11 @@ impl Store {
             .optional()
     }
 
-    /// A hidden reaction email let go, with its reaction (Show as Email: the worker fetches it into the list again);
-    /// whether it was hidden
+    /// A hidden reaction email let go with its reaction, for good (Show as Email: the worker fetches it into the list
+    /// again, and it is never taken for a reaction again); whether it was hidden
     pub fn unhide(&self, folder: FolderId, uid: u64) -> Result<bool> {
         self.atomic(|| {
-            self.db.execute(
-                "DELETE FROM reactions WHERE folder_id = ?1 AND uid = ?2",
-                params![folder, uid],
-            )?;
+            self.looked_at_for_reaction(folder, uid)?;
             Ok(self.db.execute(
                 "DELETE FROM hidden_messages WHERE folder_id = ?1 AND uid = ?2",
                 params![folder, uid],
@@ -107,102 +107,160 @@ impl Store {
         })
     }
 
-    /// Hidden reaction emails gone from the server: let go with their reactions
+    /// Emails gone from the server: hidden ones let go with their reactions, and their marks (nothing to do in a
+    /// folder without either)
     pub(crate) fn remove_hidden(&self, folder: FolderId, uids: &[u64]) -> Result<()> {
-        let mut reactions = self
+        let any: bool = self
             .db
-            .prepare_cached("DELETE FROM reactions WHERE folder_id = ?1 AND uid = ?2")?;
+            .prepare_cached(
+                "SELECT EXISTS (SELECT 1 FROM hidden_messages WHERE folder_id = ?1) \
+                 OR EXISTS (SELECT 1 FROM reaction_looked WHERE folder_id = ?1)",
+            )?
+            .query_row([folder], |row| row.get(0))?;
+        if !any {
+            return Ok(());
+        }
         let mut hidden = self
             .db
             .prepare_cached("DELETE FROM hidden_messages WHERE folder_id = ?1 AND uid = ?2")?;
+        let mut looked = self
+            .db
+            .prepare_cached("DELETE FROM reaction_looked WHERE folder_id = ?1 AND uid = ?2")?;
         for uid in uids {
-            reactions.execute(params![folder, uid])?;
             hidden.execute(params![folder, uid])?;
+            looked.execute(params![folder, uid])?;
         }
         Ok(())
     }
 
     /// Each row's reactions ([`Message::reactions`]): to its message, or for a collapsed conversation's row to every
-    /// message of its conversation. Nothing to read while no reaction is kept.
+    /// message of its conversation, most given first. A page's reactions are read at once (they are few: one row a
+    /// reaction ever received), and its collapsed conversations' Message-IDs in one query; nothing is read while no
+    /// reaction is kept.
     pub fn add_reactions(&self, rows: &mut [Message]) -> Result<()> {
-        let any: bool = self
-            .db
-            .prepare_cached("SELECT EXISTS (SELECT 1 FROM reactions)")?
-            .query_row([], |row| row.get(0))?;
-        if !any {
+        use std::collections::HashMap;
+        let mut given: HashMap<(AccountId, String), Vec<Given>> = HashMap::new();
+        let mut statement = self.db.prepare_cached(
+            "SELECT account_id, target, emoji, COUNT(*), MIN(at) FROM reactions GROUP BY account_id, target, emoji",
+        )?;
+        let mut found = statement.query([])?;
+        while let Some(row) = found.next()? {
+            given
+                .entry((row.get(0)?, row.get(1)?))
+                .or_default()
+                .push((row.get(2)?, row.get(3)?, row.get(4)?));
+        }
+        if given.is_empty() {
             return Ok(());
         }
-        let mut of_message = self.db.prepare_cached(
-            "SELECT r.emoji, COUNT(*) FROM reactions r JOIN folders f ON f.id = ?1 \
-             WHERE r.account_id = f.account_id AND r.target = lower(?2) GROUP BY r.emoji ORDER BY COUNT(*) DESC, MIN(r.at)",
-        )?;
-        let mut of_thread = self.db.prepare_cached(
-            "SELECT r.emoji, COUNT(*) FROM reactions r JOIN folders f ON f.id = ?1 \
-             WHERE r.account_id = f.account_id \
-             AND r.target IN (SELECT lower(message_id) FROM messages WHERE thread_id = ?2 AND message_id IS NOT NULL) \
-             GROUP BY r.emoji ORDER BY COUNT(*) DESC, MIN(r.at)",
-        )?;
-        let counted = |row: &rusqlite::Row| Ok((row.get::<_, String>(0)?, row.get::<_, u32>(1)?));
+        let accounts: HashMap<FolderId, AccountId> = self
+            .db
+            .prepare_cached("SELECT id, account_id FROM folders")?
+            .query_map([], |row| Ok((row.get(0)?, row.get(1)?)))?
+            .collect::<rusqlite::Result<_>>()?;
+        let threads: Vec<i64> = rows
+            .iter()
+            .filter_map(|m| m.thread.filter(crate::ThreadPlace::collapsed).map(|place| place.thread))
+            .collect();
+        let mut of_thread: HashMap<i64, Vec<String>> = HashMap::new();
+        if !threads.is_empty() {
+            let marks = vec!["?"; threads.len()].join(",");
+            let mut statement = self.db.prepare(&format!(
+                "SELECT thread_id, lower(message_id) FROM messages \
+                 WHERE thread_id IN ({marks}) AND message_id IS NOT NULL"
+            ))?;
+            let mut found = statement.query(rusqlite::params_from_iter(&threads))?;
+            while let Some(row) = found.next()? {
+                of_thread.entry(row.get(0)?).or_default().push(row.get(1)?);
+            }
+        }
         for message in rows {
-            message.reactions = match message.thread.filter(crate::ThreadPlace::collapsed) {
-                Some(place) => of_thread
-                    .query_map(params![message.folder_id, place.thread], counted)?
-                    .collect::<rusqlite::Result<_>>()?,
-                None => match &message.info.message_id {
-                    Some(id) => of_message
-                        .query_map(params![message.folder_id, id], counted)?
-                        .collect::<rusqlite::Result<_>>()?,
-                    None => Vec::new(),
-                },
+            let Some(&account) = accounts.get(&message.folder_id) else {
+                continue;
             };
+            let targets: Vec<String> = match message.thread.filter(crate::ThreadPlace::collapsed) {
+                Some(place) => {
+                    let mut ids = of_thread.remove(&place.thread).unwrap_or_default();
+                    ids.sort_unstable();
+                    ids.dedup();
+                    ids
+                }
+                None => message.info.message_id.iter().map(|id| id.to_lowercase()).collect(),
+            };
+            let mut counts: Vec<(String, u32, i64)> = Vec::new();
+            for target in targets {
+                for (emoji, count, at) in given.get(&(account, target)).into_iter().flatten() {
+                    match counts.iter_mut().find(|c| &c.0 == emoji) {
+                        Some(c) => {
+                            c.1 += count;
+                            c.2 = c.2.min(*at);
+                        }
+                        None => counts.push((emoji.clone(), *count, *at)),
+                    }
+                }
+            }
+            counts.sort_by_key(|c| (std::cmp::Reverse(c.1), c.2));
+            message.reactions = counts.into_iter().map(|(emoji, count, _)| (emoji, count)).collect();
         }
         Ok(())
     }
 
-    /// Mail stored before reactions were recognised that may be reactions, a batch at a time, newest first: small
-    /// replies to a message of the account, whose first words start with an emoji or with Outlook's `[like]`-style
-    /// marker, not looked at yet. Each is looked at once ([`Store::looked_at_for_reaction`]).
-    pub fn reaction_candidates(&self, account: AccountId, limit: usize) -> Result<Vec<(FolderId, u64)>> {
+    /// Whether any reaction is kept: nothing to read for one while none is
+    pub fn any_reactions(&self) -> Result<bool> {
+        self.db
+            .prepare_cached("SELECT EXISTS (SELECT 1 FROM reactions)")?
+            .query_row([], |row| row.get(0))
+    }
+
+    /// Mail stored before reactions were recognised that may be reactions, a batch at a time, newest first from below
+    /// `before` (a row id; the walk goes on from the last one given, once through the store): replies of the account
+    /// up to `largest` bytes with first words (the core decides what a reaction is), not looked at yet. (row id,
+    /// folder, UID); each is looked at once ([`Store::looked_at_for_reaction`]).
+    pub fn reaction_candidates(
+        &self,
+        account: AccountId,
+        largest: u64,
+        before: i64,
+        limit: usize,
+    ) -> Result<Vec<(i64, FolderId, u64)>> {
         self.db
             .prepare_cached(
-                "SELECT m.folder_id, m.uid FROM messages m JOIN folders f ON f.id = m.folder_id \
-                 WHERE f.account_id = ?1 AND m.in_reply_to IS NOT NULL AND COALESCE(m.size, 0) < 262144 \
+                "SELECT m.id, m.folder_id, m.uid FROM messages m JOIN folders f ON f.id = m.folder_id \
+                 WHERE m.id < ?4 AND f.account_id = ?1 AND m.in_reply_to IS NOT NULL AND COALESCE(m.size, 0) <= ?2 \
                  AND m.snippet IS NOT NULL AND m.snippet != '' \
-                 AND (unicode(m.snippet) >= 8592 OR m.snippet LIKE '[like]%' OR m.snippet LIKE '[heart]%' \
-                  OR m.snippet LIKE '[celebrate]%' OR m.snippet LIKE '[laugh]%' OR m.snippet LIKE '[surprised]%' \
-                  OR m.snippet LIKE '[sad]%') \
-                 AND COALESCE(f.special_use, '') NOT IN ('\\Junk', '\\Sent', '\\Drafts') \
-                 AND NOT EXISTS (SELECT 1 FROM reaction_looked l WHERE l.message = m.id) \
-                 ORDER BY m.id DESC LIMIT ?2",
+                 AND NOT EXISTS (SELECT 1 FROM reaction_looked l WHERE l.folder_id = m.folder_id AND l.uid = m.uid) \
+                 ORDER BY m.id DESC LIMIT ?3",
             )?
-            .query_map(params![account, limit as i64], |row| Ok((row.get(0)?, row.get(1)?)))?
+            .query_map(params![account, largest as i64, limit as i64, before], |row| {
+                Ok((row.get(0)?, row.get(1)?, row.get(2)?))
+            })?
             .collect()
     }
 
-    /// A message looked at for being a reaction, whatever it was: not looked at again
+    /// An email looked at for being a reaction, whatever it was: not looked at again
     pub fn looked_at_for_reaction(&self, folder: FolderId, uid: u64) -> Result<()> {
         self.db.execute(
-            "INSERT OR IGNORE INTO reaction_looked (message) \
-             SELECT id FROM messages WHERE folder_id = ?1 AND uid = ?2",
+            "INSERT OR IGNORE INTO reaction_looked (folder_id, uid) VALUES (?1, ?2)",
             params![folder, uid],
         )?;
         Ok(())
     }
 
-    /// The reactions to the messages `targets` (Message-IDs with their brackets) of `account`, oldest first
-    pub fn reactions_to(&self, account: AccountId, targets: &[String]) -> Result<Vec<ReactionRow>> {
-        let mut found = Vec::new();
-        let mut statement = self.db.prepare_cached(&format!(
-            "SELECT {REACTION_COLUMNS} FROM reactions WHERE account_id = ?1 AND target = ?2 ORDER BY at, uid"
-        ))?;
-        for target in targets {
-            let rows = statement.query_map(params![account, target.to_lowercase()], reaction_row)?;
-            for row in rows {
-                found.push(row?);
-            }
-        }
-        found.sort_by_key(|r| (r.at, r.uid));
-        Ok(found)
+    /// Whether an email was looked at for being a reaction (or listed again with Show as Email)
+    pub fn looked_at(&self, folder: FolderId, uid: u64) -> Result<bool> {
+        self.db
+            .prepare_cached("SELECT EXISTS (SELECT 1 FROM reaction_looked WHERE folder_id = ?1 AND uid = ?2)")?
+            .query_row(params![folder, uid], |row| row.get(0))
+    }
+
+    /// The reactions to the message `target` (its Message-ID with its brackets) of `account`, oldest first
+    pub fn reactions_to(&self, account: AccountId, target: &str) -> Result<Vec<ReactionRow>> {
+        self.db
+            .prepare_cached(&format!(
+                "SELECT {REACTION_COLUMNS} FROM reactions WHERE account_id = ?1 AND target = ?2 ORDER BY at, uid"
+            ))?
+            .query_map(params![account, target.to_lowercase()], reaction_row)?
+            .collect()
     }
 }
 
@@ -254,7 +312,7 @@ mod tests {
         assert_eq!(store.folder(inbox).unwrap().total, before.total - 1);
         assert_eq!(store.hidden_uids(inbox).unwrap(), [3]);
         assert_eq!(store.hidden_source(inbox, 3).unwrap().as_deref(), Some(&b"source"[..]));
-        let found = store.reactions_to(account, &["<original@example.org>".into()]).unwrap();
+        let found = store.reactions_to(account, "<original@example.org>").unwrap();
         assert_eq!(
             (found.len(), found[0].emoji.as_str(), found[0].address.as_str()),
             (1, "👍", "kate@studio.example")
@@ -270,7 +328,7 @@ mod tests {
         assert!(store.hidden_uids(inbox).unwrap().is_empty());
         assert!(
             store
-                .reactions_to(account, &["<original@example.org>".into()])
+                .reactions_to(account, "<original@example.org>")
                 .unwrap()
                 .is_empty()
         );
@@ -282,6 +340,8 @@ mod tests {
         );
         assert!(store.unhide(inbox, 2).unwrap());
         assert!(store.hidden_uids(inbox).unwrap().is_empty());
+        // and never taken for a reaction again, though it comes back as a new row
+        assert!(store.looked_at(inbox, 2).unwrap());
     }
 
     #[test]
@@ -303,7 +363,7 @@ mod tests {
     }
 
     #[test]
-    fn stored_replies_that_start_with_an_emoji_are_looked_at_once() {
+    fn stored_replies_are_looked_at_once() {
         let (store, account, inbox) = with_inbox();
         let reply = |uid: u64, words: &str| {
             let mut message = message_to(uid, "Re: Hi", ("Kate", "kate@studio.example"), "ann@example.org");
@@ -318,14 +378,21 @@ mod tests {
         };
         reply(1, "👍 Kate reacted via Gmail");
         reply(2, "[like]  Kate reacted to your message:");
-        reply(3, "Thanks, see you then");
+        // not a reply
         add(&store, inbox, &[4]);
-        assert_eq!(
-            store.reaction_candidates(account, 10).unwrap(),
-            [(inbox, 2), (inbox, 1)]
-        );
+        let found = |before| -> Vec<(FolderId, u64)> {
+            store
+                .reaction_candidates(account, 1 << 18, before, 10)
+                .unwrap()
+                .into_iter()
+                .map(|(_, folder, uid)| (folder, uid))
+                .collect()
+        };
+        assert_eq!(found(i64::MAX), [(inbox, 2), (inbox, 1)]);
+        // the walk goes on below the last row given
+        assert_eq!(found(id_of(&store, inbox, 2)), [(inbox, 1)]);
         store.looked_at_for_reaction(inbox, 2).unwrap();
-        assert_eq!(store.reaction_candidates(account, 10).unwrap(), [(inbox, 1)]);
+        assert_eq!(found(i64::MAX), [(inbox, 1)]);
     }
 
     #[test]
@@ -339,7 +406,7 @@ mod tests {
         assert!(store.hidden_uids(inbox).unwrap().is_empty());
         assert!(
             store
-                .reactions_to(account, &["<original@example.org>".into()])
+                .reactions_to(account, "<original@example.org>")
                 .unwrap()
                 .is_empty()
         );

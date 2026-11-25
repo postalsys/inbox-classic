@@ -199,7 +199,7 @@ impl Store {
                 .execute("DELETE FROM conversations WHERE folder_id = ?1", [folder])?;
             // its hidden reaction emails (their reactions with them): their UIDs mean nothing now
             self.db
-                .execute("DELETE FROM reactions WHERE folder_id = ?1", [folder])?;
+                .execute("DELETE FROM reaction_looked WHERE folder_id = ?1", [folder])?;
             self.db
                 .execute("DELETE FROM hidden_messages WHERE folder_id = ?1", [folder])?;
             self.db.execute("DELETE FROM messages WHERE folder_id = ?1", [folder])

@@ -900,11 +900,17 @@ CREATE TABLE reactions (
     name TEXT NOT NULL,
     emoji TEXT NOT NULL,
     at INTEGER NOT NULL,
-    PRIMARY KEY (folder_id, uid)
+    PRIMARY KEY (folder_id, uid),
+    FOREIGN KEY (folder_id, uid) REFERENCES hidden_messages (folder_id, uid) ON DELETE CASCADE
 ) WITHOUT ROWID;
 CREATE INDEX reactions_by_target ON reactions (account_id, target);
--- mail stored before reactions were recognised, looked at once each (a message's row going takes its mark)
-CREATE TABLE reaction_looked (message INTEGER PRIMARY KEY REFERENCES messages(id) ON DELETE CASCADE);
+-- emails looked at for being reactions, whatever they were, by folder and UID so that one listed again with Show as
+-- Email (a new row of messages) stays an email
+CREATE TABLE reaction_looked (
+    folder_id INTEGER NOT NULL REFERENCES folders(id) ON DELETE CASCADE,
+    uid INTEGER NOT NULL,
+    PRIMARY KEY (folder_id, uid)
+) WITHOUT ROWID;
 "#,
 ];
 

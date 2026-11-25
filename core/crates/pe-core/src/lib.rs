@@ -3514,7 +3514,7 @@ fn encrypted_lines(mut found: Vec<Message>) -> Vec<Message> {
 /// Whether a folder shows the cards and bars about a message's sender (a one-time code, the mailing-list bar): not Junk
 /// E-mail (a code may be bait, leaving a list confirms the address to a spammer), Sent Items or Drafts (the user's own
 /// mail)
-fn sender_cards_shown(folder: &pe_store::FolderInfo) -> bool {
+pub(crate) fn sender_cards_shown(folder: &pe_store::FolderInfo) -> bool {
     !matches!(folder.special_use.as_deref(), Some("\\Junk" | "\\Sent" | "\\Drafts"))
 }
 
