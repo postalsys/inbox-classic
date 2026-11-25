@@ -906,6 +906,19 @@ function Pressed([IntPtr]$compose, [int]$id) {
     $bar = [Native.Win]::GetDlgItem($compose, 322)
     [int][Native.Win]::SendMessage($bar, 0x040A, [IntPtr]$id, [IntPtr]::Zero) -ne 0
 }
+# a right-click on a row of the folder tree, as the user gives it: its menu's window (null when none opened) and its
+# labels. The window topmost for the click, as SetForegroundWindow alone is refused to a background process.
+function TreeRowMenu([IntPtr]$window, [IntPtr]$tree, [IntPtr]$row) {
+    [void][Native.Win]::SetWindowPos($window, [IntPtr](-1), 0, 0, 0, 0, 0x13)
+    [void][Native.Win]::SetForegroundWindow($window)
+    Start-Sleep -Milliseconds 300
+    $box = [Native.Win]::RemoteRect($tree, 0x1104, [IntPtr]1, $row.ToInt64())
+    [Native.Win]::MouseRightClick([int](($box.Left + $box.Right) / 2), [int](($box.Top + $box.Bottom) / 2))
+    $menu = WaitWindow '#32768' $null 10
+    [void][Native.Win]::SetWindowPos($window, [IntPtr](-2), 0, 0, 0, 0, 0x13)
+    $labels = if ($menu) { @([Native.Win]::MenuLabels([Native.Win]::SendMessage($menu, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero))) } else { @() }
+    @{ menu = $menu; labels = $labels }
+}
 # the language of a catalog, as the app shows it: id to words (core/locales/<language>/*.ftl), the access keys' & left
 # out; a message of one line by its id, each variant of a select by "id[key]" (the default also as "id[*]")
 function Catalog([string]$language) {
@@ -4791,7 +4804,7 @@ public static class Dragger {
     if (-not $menu) { Shot ([Native.Win]::GetDesktopWindow()) 'debug-inbox-menu-missing'; Write-Host "   (the Inbox row at $($at -join "," ))" }
     [void][Native.Win]::SetWindowPos($main, [IntPtr](-2), 0, 0, 0, 0, 0x13)
     $labels = if ($menu) { @([Native.Win]::MenuLabels([Native.Win]::SendMessage($menu, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero))) } else { @() }
-    Check (($labels -contains 'New Folder...') -and -not ($labels -contains 'Properties...') -and -not ($labels -contains 'Send and Receive')) "right-clicking the Inbox gives the folder's menu, no account commands ($($labels -join ', '))"
+    Check (($labels -contains 'New Folder...') -and $labels[-1] -eq $en['ui-account-properties-of'] -and -not ($labels -contains 'Send and Receive')) "right-clicking the Inbox gives the folder's menu, ending with Account Properties, no other account commands ($($labels -join ', '))"
     if ($menu) {
         Key $menu $VK_ESCAPE
         [void](WaitFor { [Native.Win]::FindWindow('#32768', [NullString]::Value) -eq [IntPtr]::Zero } 5)
@@ -7508,8 +7521,16 @@ public static class Dragger {
     [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $top)
     $both = (Messages 'INBOX').Count + (Messages 'INBOX' $rest2).Count
     Check ([bool](WaitFor { (StatusPart $mainStatus 2) -match "^$both message" } 20)) "All Inboxes again lists both accounts' Inboxes ($(StatusPart $mainStatus 2) of $both)"
-    # the second account's Properties, from its row: the Account name first, filled with its name
-    [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, (AccountRow 'Work'))
+    # the second account's Properties, from its row under All Inboxes: the last item of its right-click menu
+    $opened = TreeRowMenu $main $tree @(AllInboxesRows)[1]
+    $menu = $opened.menu; $labels = $opened.labels
+    Check ($labels.Count -gt 0 -and $labels[-1] -eq $en['ui-account-properties-of']) "the account's row under All Inboxes ends its menu with Account Properties ($($labels -join ', '))"
+    if ($menu) {
+        Shot $main 'all-inboxes-3b-inbox-menu' $menu
+        Key $menu $VK_ESCAPE
+        [void](WaitFor { [Native.Win]::FindWindow('#32768', [NullString]::Value) -eq [IntPtr]::Zero } 5)
+    }
+    # the right-click selected the row; its menu's command opens that account's Properties
     Command $main $IDM_ACCOUNT_PROPERTIES
     $properties = WaitFor {
         $f = PropertiesForm
@@ -7523,6 +7544,7 @@ public static class Dragger {
     }
     $renamed = [bool](WaitFor { (AccountRow 'Second') -ne [IntPtr]::Zero -and @(& $rowTexts)[-1] -match '^Second( \(\d+\))?$' } 20)
     Check $renamed "set to Second, the account's heading and its row under All Inboxes say Second ($((& $rowTexts) -join ', '))"
+    Check ([bool](WaitFor { (& $folderBar) -eq ' Inbox - Second' } 10)) "the folder bar names the account by its new name ($(& $folderBar))"
     # the first account collapsed with the keyboard, as a user would, so the tree tells the window (TVM_EXPAND would
     # not): it counts the unread mail of the folders it hides (Kept for later in Archive)
     $alex = AccountRow 'inboxclassic.test'

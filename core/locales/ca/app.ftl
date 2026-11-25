@@ -417,6 +417,8 @@ ui-delete-folder-question = Voleu suprimir la carpeta «{ $folder }» amb tots e
 ui-properties = &Propietats
 ui-account-sync = Envia i re&p
 ui-account-properties = P&ropietats...
+# review: new
+ui-account-properties-of = Propietats &del compte...
 ui-account-move-up = Mou am&unt
 ui-account-move-down = Mou a&vall
 ui-menu-open = &Obre

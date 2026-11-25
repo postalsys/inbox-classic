@@ -421,6 +421,8 @@ ui-delete-folder-question = Da li želite da izbrišete fasciklu „{ $folder }�
 ui-properties = Svo&jstva
 ui-account-sync = Pošalji i pri&mi
 ui-account-properties = Svo&jstva...
+# review: new
+ui-account-properties-of = Svojstva n&aloga...
 ui-account-move-up = Premesti &gore
 ui-account-move-down = Premesti d&ole
 ui-menu-open = &Otvori

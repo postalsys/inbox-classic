@@ -418,6 +418,8 @@ ui-delete-folder-question = Vil du slette mappen «{ $folder }» med meldingene 
 ui-properties = Ege&nskaper
 ui-account-sync = Send og &motta
 ui-account-properties = &Egenskaper...
+# review: new
+ui-account-properties-of = Konto&egenskaper...
 ui-account-move-up = Flytt &opp
 ui-account-move-down = Flytt &ned
 ui-menu-open = &Åpne

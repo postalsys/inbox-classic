@@ -418,6 +418,8 @@ ui-delete-folder-question = Usunąć folder „{ $folder }” wraz ze wszystkimi
 ui-properties = Właś&ciwości
 ui-account-sync = Wyśl&ij i odbierz
 ui-account-properties = &Właściwości...
+# review: new
+ui-account-properties-of = Właściwości &konta...
 ui-account-move-up = Przenieś w &górę
 ui-account-move-down = Przenieś w &dół
 ui-menu-open = &Otwórz

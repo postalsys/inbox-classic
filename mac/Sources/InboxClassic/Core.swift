@@ -945,6 +945,8 @@ struct TreeRow {
     let selectable: Bool
     let dropTarget: Bool
     let reordersAccounts: Bool
+    /// Its menu ends with Account Properties
+    let accountProperties: Bool
     let menu: PeTreeMenu
     /// what it lists when chosen (`ListView.setList` with it and `folder`)
     let list: PeTreeList
@@ -975,6 +977,7 @@ struct TreeRow {
         selectable = row.selectable
         dropTarget = row.drop_target
         reordersAccounts = row.reorders_accounts
+        accountProperties = row.account_properties
         menu = row.menu
         list = row.list
         startsOpen = row.starts_open

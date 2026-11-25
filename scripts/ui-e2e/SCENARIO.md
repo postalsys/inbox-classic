@@ -562,7 +562,7 @@ Screenshot: `folders-6-one-account`
 - the Inbox is the first row of the tree, Flagged the second, then the account's other folders (Sent Items, Drafts, Archive and the rest)
 - there is no row for the account: no heading, nothing to collapse at the top
 - the Inbox holds no folders of its own: a folder the server keeps in the Inbox is listed a level up, after Flagged
-- right-clicking the Inbox gives the folder's menu (no account commands); File > Accounts and the Tools menu have the account's
+- right-clicking the Inbox gives the folder's menu, ending with Account Properties (there is no heading to offer them); no other account commands; File > Accounts and the Tools menu have the account's
 - New Folder with Flagged selected makes the folder at the top of the list
 - Flagged has no right-click menu: its messages are of every folder
 
@@ -1025,7 +1025,7 @@ Screenshots: `all-inboxes-3-accounts`, `account-menu`, `folders-5-collapsed`
 - the second account's row lists that account's Inbox alone (the first account's message is not in it)
 - the folder bar names the Inbox and the account ("Inbox - " and the account's name)
 - All Inboxes again lists both accounts' Inboxes
-- the second account's Properties has the Account name field, filled with its name; set to "Second", the account's heading and its row under All Inboxes say "Second"
+- the second account's row under All Inboxes has Account Properties at the end of its right-click menu; it opens that account's Properties, whose Account name field is filled with its name; set to "Second", the account's heading, its row under All Inboxes and the folder bar ("Inbox - Second") say "Second"
 - the first account's right-click menu has Send and Receive, Mark All Read, New Folder and Properties
 - its Mark All Read marks every folder of the first account read on the server, the second account's mail stays unread
 - its Properties opens that account's Properties

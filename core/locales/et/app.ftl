@@ -412,6 +412,8 @@ ui-delete-folder-question = Kas kustutada kaust „{ $folder }“ koos selle kir
 ui-properties = Atri&buudid
 ui-account-sync = Saada ja võta &vastu
 ui-account-properties = Atri&buudid...
+# review: new
+ui-account-properties-of = K&onto atribuudid...
 ui-account-move-up = Liiguta ü&les
 ui-account-move-down = Liiguta &alla
 ui-menu-open = &Ava

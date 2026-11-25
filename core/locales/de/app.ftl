@@ -412,6 +412,8 @@ ui-delete-folder-question = Den Ordner „{ $folder }“ mit allen Nachrichten u
 ui-properties = Eigens&chaften
 ui-account-sync = Sen&den und empfangen
 ui-account-properties = &Eigenschaften...
+# review: new
+ui-account-properties-of = Konto&eigenschaften...
 ui-account-move-up = Nach &oben
 ui-account-move-down = N&ach unten
 ui-menu-open = Ö&ffnen

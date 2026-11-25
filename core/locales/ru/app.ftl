@@ -416,6 +416,8 @@ ui-delete-folder-question = Удалить папку «{ $folder }» вмест
 ui-properties = Сво&йства
 ui-account-sync = Отправить и &получить
 ui-account-properties = &Свойства...
+# review: new
+ui-account-properties-of = &Свойства учетной записи...
 ui-account-move-up = &Вверх
 ui-account-move-down = В&низ
 ui-menu-open = &Открыть

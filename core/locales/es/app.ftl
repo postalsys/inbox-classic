@@ -412,6 +412,8 @@ ui-delete-folder-question = ¿Eliminar la carpeta «{ $folder }», todos sus men
 ui-properties = Pr&opiedades
 ui-account-sync = &Enviar y recibir
 ui-account-properties = P&ropiedades...
+# review: new
+ui-account-properties-of = Propiedades de la c&uenta...
 ui-account-move-up = Mover &arriba
 ui-account-move-down = Mover a&bajo
 ui-menu-open = A&brir

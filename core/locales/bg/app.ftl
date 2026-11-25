@@ -418,6 +418,8 @@ ui-delete-folder-question = Да се изтрие ли папката „{ $fol
 ui-properties = Сво&йства
 ui-account-sync = Изпращане и полу&чаване
 ui-account-properties = &Свойства...
+# review: new
+ui-account-properties-of = Свойства на а&каунта...
 ui-account-move-up = Преместване на&горе
 ui-account-move-down = Преместване на&долу
 ui-menu-open = Отвар&яне

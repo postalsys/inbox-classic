@@ -1276,6 +1276,9 @@ typedef struct PeTreeRow {
   bool drop_target;
   // It can be dragged among its own kind to order the accounts, and its menu has Move Up and Move Down
   bool reorders_accounts;
+  // Its menu opens the Properties of `account`: a heading's, and a folder's ending with Account Properties
+  // (`ui-account-properties-of`) on a row named after its account or on the only account's Inbox
+  bool account_properties;
   enum PeTreeMenu menu;
   // What it lists when chosen: `pe_list_view_set_list` with it and `folder`
   enum PeTreeList list;

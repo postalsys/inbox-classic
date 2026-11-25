@@ -417,6 +417,8 @@ ui-delete-folder-question = Vill du ta bort mappen ”{ $folder }” med dess me
 ui-properties = &Egenskaper
 ui-account-sync = Skicka och &ta emot
 ui-account-properties = Egen&skaper...
+# review: new
+ui-account-properties-of = &Kontoegenskaper...
 ui-account-move-up = Flytta &upp
 ui-account-move-down = Flytta ne&d
 ui-menu-open = &Öppna

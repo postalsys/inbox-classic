@@ -1385,6 +1385,9 @@ pub struct PeTreeRow {
     pub drop_target: bool,
     /// It can be dragged among its own kind to order the accounts, and its menu has Move Up and Move Down
     pub reorders_accounts: bool,
+    /// Its menu opens the Properties of `account`: a heading's, and a folder's ending with Account Properties
+    /// (`ui-account-properties-of`) on a row named after its account or on the only account's Inbox
+    pub account_properties: bool,
     pub menu: PeTreeMenu,
     /// What it lists when chosen: `pe_list_view_set_list` with it and `folder`
     pub list: PeTreeList,
@@ -1445,6 +1448,7 @@ pub unsafe extern "C" fn pe_folder_tree(core: *const PeCore) -> *mut PeTree {
                     selectable: row.selectable,
                     drop_target: row.drop_target,
                     reorders_accounts: row.reorders_accounts,
+                    account_properties: row.account_properties,
                     menu: match row.menu {
                         pe_core::tree::TreeMenu::None => PeTreeMenu::None,
                         pe_core::tree::TreeMenu::MarkRead => PeTreeMenu::MarkRead,

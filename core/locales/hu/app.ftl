@@ -416,6 +416,8 @@ ui-delete-folder-question = Törli ezt a mappát az üzeneteivel és a benne lé
 ui-properties = T&ulajdonságok
 ui-account-sync = Küldés és fo&gadás
 ui-account-properties = &Tulajdonságok...
+# review: new
+ui-account-properties-of = F&ióktulajdonságok...
 ui-account-move-up = &Feljebb
 ui-account-move-down = &Lejjebb
 ui-menu-open = M&egnyitás

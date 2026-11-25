@@ -419,6 +419,8 @@ ui-delete-folder-question = Ștergeți folderul „{ $folder }”, inclusiv mesa
 ui-properties = P&roprietăți
 ui-account-sync = Trimitere și pri&mire
 ui-account-properties = P&roprietăți...
+# review: new
+ui-account-properties-of = &Proprietățile contului...
 ui-account-move-up = Mutare în &sus
 ui-account-move-down = Mutare în &jos
 ui-menu-open = Desc&hidere

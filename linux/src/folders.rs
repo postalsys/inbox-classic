@@ -920,6 +920,7 @@ mod tests {
             selectable: kind != TreeRowKind::Account,
             drop_target: false,
             reorders_accounts: matches!(kind, TreeRowKind::Account | TreeRowKind::AccountInbox),
+            account_properties: kind == TreeRowKind::AccountInbox,
             menu: pe_core::tree::TreeMenu::Folder,
             list: match kind {
                 TreeRowKind::AllInboxes => TreeList::AllInboxes,

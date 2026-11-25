@@ -1992,7 +1992,7 @@ void OnCommand(WORD id, WORD code) {
         }
         return;
     case IDM_ACCOUNT_PROPERTIES:
-        if (int64_t account = g_mailbox.SelectedAccount(); account && AccountPropertiesDialog(g_main, g_core.get(), account)) {
+        if (int64_t account = g_mailbox.PropertiesAccount(); account && AccountPropertiesDialog(g_main, g_core.get(), account)) {
             // its new name in the tree, and in the folder bar while its row is selected
             g_mailbox.Reload();
             ShowFolderName();

@@ -2656,17 +2656,7 @@ impl Mailbox {
             new_in != 0,
             Box::new(move |this| spawn(async move { this.new_folder_in(new_in, new_under).await })),
         );
-        add(
-            "properties",
-            true,
-            Box::new(move |this| {
-                spawn(async move {
-                    if crate::accounts::account_properties(&this.window, account).await {
-                        this.reload();
-                    }
-                })
-            }),
-        );
+        group.add_action(&self.properties_action(account));
         let menu = gio::Menu::new();
         let first = gio::Menu::new();
         first.append(Some(&plain(Text::UiAccountSync)), Some("account.sync"));
@@ -2681,6 +2671,21 @@ impl Mailbox {
         menu.append_section(None, &third);
         widget.insert_action_group("account", Some(&group));
         *self.folder_popover.borrow_mut() = Some(popup_menu(widget, &menu, x, y));
+    }
+
+    /// The action `properties`: the account's Properties, its new name in the tree after them
+    fn properties_action(self: &Rc<Self>, account: i64) -> gio::SimpleAction {
+        let action = gio::SimpleAction::new("properties", None);
+        let this = Rc::downgrade(self);
+        action.connect_activate(move |_, _| {
+            let Some(this) = this.upgrade() else { return };
+            spawn(async move {
+                if crate::accounts::account_properties(&this.window, account).await {
+                    this.reload();
+                }
+            })
+        });
+        action
     }
 
     /// Move Up and Move Down of `account` in the accounts' order, each off at its end: actions of `group`, and the
@@ -2710,7 +2715,8 @@ impl Mailbox {
 
     /// The right-click menu of `row`, selected: Mark All Read first, as Outlook Express has it; a folder's menu
     /// (`TreeMenu::Folder`) also New Folder, Rename and Delete, and Empty Folder on Deleted Items and Junk E-mail; Move
-    /// Up and Move Down on an account's Inbox under All Inboxes, which orders the accounts as their headings do
+    /// Up and Move Down on an account's Inbox under All Inboxes, which orders the accounts as their headings do; Account
+    /// Properties on a row named after its account, or the only account's Inbox
     fn folder_menu(self: &Rc<Self>, widget: &gtk::Widget, x: f64, y: f64, row: &TreeRow) {
         let folder = row.folder;
         let some_unread = row.unread > 0;
@@ -2757,6 +2763,16 @@ impl Mailbox {
         }
         if row.reorders_accounts {
             menu.append_section(None, &self.account_order(&group, "folder", row.account));
+        }
+        // a row named after its account (or the only account's Inbox) opens the account's properties, to rename it there
+        if row.account_properties {
+            group.add_action(&self.properties_action(row.account));
+            let properties = gio::Menu::new();
+            properties.append(
+                Some(&crate::words::plain(crate::words::Text::UiAccountPropertiesOf)),
+                Some("folder.properties"),
+            );
+            menu.append_section(None, &properties);
         }
         widget.insert_action_group("folder", Some(&group));
         *self.folder_popover.borrow_mut() = Some(popup_menu(widget, &menu, x, y));

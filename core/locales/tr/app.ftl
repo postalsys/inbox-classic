@@ -417,6 +417,8 @@ ui-delete-folder-question = “{ $folder }” klasörü, iletileri ve içindeki 
 ui-properties = &Özellikler
 ui-account-sync = Gön&der ve Al
 ui-account-properties = Öze&llikler...
+# review: new
+ui-account-properties-of = Hesap ö&zellikleri...
 ui-account-move-up = Yukarı &Taşı
 ui-account-move-down = Aşa&ğı Taşı
 ui-menu-open = A&ç

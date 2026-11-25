@@ -418,6 +418,8 @@ ui-delete-folder-question = Poistetaanko kansio ”{ $folder }” viesteineen ja
 ui-properties = Ominaisuu&det
 ui-account-sync = Lähetä ja &vastaanota
 ui-account-properties = &Ominaisuudet...
+# review: new
+ui-account-properties-of = Tilin &ominaisuudet...
 ui-account-move-up = Siirrä &ylös
 ui-account-move-down = Siirrä a&las
 ui-menu-open = &Avaa

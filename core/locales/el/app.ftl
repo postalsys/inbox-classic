@@ -417,6 +417,8 @@ ui-delete-folder-question = Να διαγραφεί ο φάκελος «{ $folde
 ui-properties = Ιδιό&τητες
 ui-account-sync = Αποστολή και λή&ψη
 ui-account-properties = Ιδιό&τητες...
+# review: new
+ui-account-properties-of = Ιδιότητες &λογαριασμού...
 ui-account-move-up = Μετακίνηση &πάνω
 ui-account-move-down = Μετακίνηση &κάτω
 ui-menu-open = Ά&νοιγμα

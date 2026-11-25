@@ -418,6 +418,8 @@ ui-delete-folder-question = 要刪除資料夾「{ $folder }」及其中的郵�
 ui-properties = 內容(&S)
 ui-account-sync = 傳送及接收(&V)
 ui-account-properties = 內容(&R)...
+# review: new
+ui-account-properties-of = 帳戶內容(&C)...
 ui-account-move-up = 上移(&U)
 ui-account-move-down = 下移(&W)
 ui-menu-open = 開啟(&O)

@@ -411,6 +411,8 @@ ui-delete-folder-question = Supprimer le dossier « { $folder } », tous ses mes
 ui-properties = Propri&étés
 ui-account-sync = &Envoyer et recevoir
 ui-account-properties = &Propriétés...
+# review: new
+ui-account-properties-of = &Propriétés du compte...
 ui-account-move-up = &Monter
 ui-account-move-down = &Descendre
 ui-menu-open = &Ouvrir

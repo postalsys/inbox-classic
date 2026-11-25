@@ -417,6 +417,8 @@ ui-delete-folder-question = Odstrániť priečinok „{ $folder }“ so všetký
 ui-properties = V&lastnosti
 ui-account-sync = Odoslať a &prijať
 ui-account-properties = &Vlastnosti...
+# review: new
+ui-account-properties-of = Vlastnosti ú&čtu...
 ui-account-move-up = Posunúť na&hor
 ui-account-move-down = Posunúť nado&l
 ui-menu-open = Ot&voriť
