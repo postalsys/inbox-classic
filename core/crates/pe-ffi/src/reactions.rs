@@ -30,7 +30,11 @@ pub struct PeReactions {
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_reactions(core: *const PeCore, folder: i64, uid: u64) -> *mut PeReactions {
     // SAFETY: as the caller guarantees
-    let chips = unsafe { with(core, Vec::new(), |core| core.reactions_of(folder, uid).unwrap_or_default()) };
+    let chips = unsafe {
+        with(core, Vec::new(), |core| {
+            core.reactions_of(folder, uid).unwrap_or_default()
+        })
+    };
     let rows = Rows::new(&chips, |chip, strings| PeReaction {
         text: strings.add(&chip.text),
         when: strings.add(&chip.when),
@@ -74,13 +78,17 @@ pub unsafe extern "C" fn pe_reactions_email_file(
     index: usize,
 ) -> *mut c_char {
     // SAFETY: as the caller guarantees
-    let Some(at) = (unsafe { list.as_ref() }).and_then(|l| l.chips.get(index)).and_then(|c| c.emails.last().copied())
+    let Some(at) = (unsafe { list.as_ref() })
+        .and_then(|l| l.chips.get(index))
+        .and_then(|c| c.emails.last().copied())
     else {
         return null_mut();
     };
     // SAFETY: as the caller guarantees
     let path = unsafe { with(core, None, |core| core.reaction_email_file(at).ok().flatten()) };
-    path.map_or(null_mut(), |path| crate::into_c_string(path.to_string_lossy().into_owned()))
+    path.map_or(null_mut(), |path| {
+        crate::into_c_string(path.to_string_lossy().into_owned())
+    })
 }
 
 /// Show as Email: the emails of the chip `index` listed again for good, their reactions taken off the message
