@@ -1,0 +1,11 @@
+# Updates of Inbox Classic (https://inboxclassic.com), added by the package when it is installed. The packages and the
+# repository's metadata are signed with the Postal Systems release key, B6F07B59064F9CCA, the one each release's
+# hashes.txt is signed with; the package brings the key, so it is never fetched from the repository's own host.
+[inboxclassic]
+name=Inbox Classic
+baseurl=https://rpm.inboxclassic.com/
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=file:///usr/share/inbox-classic/RPM-GPG-KEY-inboxclassic
+metadata_expire=1d

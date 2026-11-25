@@ -1,0 +1,10 @@
+# What rpmlint says of the package that is meant so (scripts/fedora-rpmbuild.sh)
+Filters = [
+    # the changelog names the first package; each release's notes are on GitHub
+    'incoherent-version-in-changelog',
+    # the help is Yelp's, opened from the app's Help menu
+    'no-manual-page-for-binary',
+    # %post adds the package repository and %preun takes it away again, as the .deb's scripts do
+    'dangerous-command-in-%post',
+    'dangerous-command-in-%preun',
+]

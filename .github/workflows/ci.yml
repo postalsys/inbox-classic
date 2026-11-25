@@ -387,6 +387,71 @@ jobs:
                   git archive --prefix "inbox-classic-$version/" -o "/tmp/pkg/inbox-classic-$version.tar.gz" HEAD
                   CARGO_HOME="${CARGO_HOME:-$HOME/.cargo}" scripts/arch-makepkg.sh /tmp/pkg --install
 
+    # the Linux app on Fedora 44, the oldest Fedora the package is for: the UI end-to-end test, and the package of
+    # linux/fedora/inbox-classic.spec, built and installed as scripts/fedora-package.sh does it
+    fedora:
+        name: Build and test on Fedora
+        runs-on: ubuntu-latest
+        container: fedora:44
+        timeout-minutes: 60
+        # not required until it has proven steady, as Arch's
+        continue-on-error: true
+        defaults:
+            run:
+                working-directory: linux
+        steps:
+            - name: Packages
+              working-directory: /
+              run: |
+                  dnf -y -q install \
+                      git gcc rust cargo nodejs npm pkgconf-pkg-config tar gzip which procps-ng \
+                      gtk4-devel libadwaita-devel webkitgtk6.0-devel \
+                      xorg-x11-server-Xvfb xorg-x11-xauth dbus-daemon dbus-tools at-spi2-core gnome-keyring libsecret \
+                      dejavu-sans-fonts abattis-cantarell-fonts google-noto-sans-cjk-fonts adwaita-icon-theme gdb \
+                      glibc-langpack-en rpm-build rpmlint desktop-file-utils libappstream-glib
+            - uses: actions/checkout@v6
+            - uses: Swatinem/rust-cache@v2
+              with:
+                  workspaces: linux
+                  key: fedora
+            - name: ImapKit for the UI test
+              run: npm ci --no-audit --no-fund
+              working-directory: core/e2e
+            - name: UI end-to-end test
+              run: |
+                  cargo build --locked --features e2e
+                  ../scripts/linux-ui-e2e-run.sh target/debug/inbox-classic ../build/ui-e2e-fedora
+            - name: Every feature shown
+              working-directory: .
+              run: node scripts/feature-map.mjs build/ui-e2e-fedora --check linux
+            # what to look at, not what is tested: an outage of the artifact storage does not fail the run
+            - uses: actions/upload-artifact@v7
+              if: always()
+              continue-on-error: true
+              with:
+                  name: ui-e2e-fedora
+                  path: |
+                      build/ui-e2e-fedora/*.png
+                      build/ui-e2e-fedora/log.txt
+                  if-no-files-found: ignore
+            # rpmbuild from a tarball of the checkout under the release tarball's name (scripts/fedora-rpmbuild.sh,
+            # which scripts/fedora-package.sh runs too), installed here and started
+            - name: The package
+              working-directory: .
+              run: |
+                  git config --global --add safe.directory "$PWD"
+                  version=$(sed -n 's/^Version: *\([0-9.]*\).*/\1/p' linux/fedora/inbox-classic.spec)
+                  mkdir /tmp/pkg
+                  cp linux/fedora/* /tmp/pkg/
+                  git archive --prefix "inbox-classic-$version/" -o "/tmp/pkg/inbox-classic-$version.tar.gz" HEAD
+                  CARGO_HOME="${CARGO_HOME:-$HOME/.cargo}" scripts/fedora-rpmbuild.sh /tmp/pkg --install
+            - uses: actions/upload-artifact@v7
+              continue-on-error: true
+              with:
+                  name: InboxClassic-fedora-x86_64
+                  path: /tmp/pkg/RPMS/x86_64/*.rpm
+                  if-no-files-found: ignore
+
     fuzz:
         name: Fuzz the parsers
         runs-on: ubuntu-24.04

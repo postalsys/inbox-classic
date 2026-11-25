@@ -20,12 +20,16 @@
 #            published to the apt repository https://apt.inboxclassic.com (scripts/apt-repo.sh), and
 #            dist/InboxClassic-x86_64.pkg.tar.zst and -aarch64 for Arch Linux and Omarchy (scripts/arch-package.sh),
 #            each installed into a clean Arch container and started; Omarchy's package repository also builds
-#            linux/arch/PKGBUILD from the tag by itself
+#            linux/arch/PKGBUILD from the tag by itself, and dist/InboxClassic-x86_64.rpm and -aarch64.rpm for
+#            Fedora 44 and newer (scripts/fedora-package.sh, signed by scripts/rpm-sign.sh), each installed into
+#            clean Fedora 44 and 45 containers and started, and after the release published to the dnf repository
+#            https://rpm.inboxclassic.com (scripts/dnf-repo.sh)
 # then writes hashes.txt signed with the release GPG key, uploads all of it to the draft release and publishes it,
 # and puts the Mac update (Sparkle's appcast.xml, signed with the update key in this Mac's keychain) on the homepage.
 #
 # Needs: SIGN_WIN_ACCOUNT and SIGN_WIN_PROFILE (and the keychain item of scripts/sign-win.sh), the Developer ID
-# certificate and the notarytool profile (scripts/mac-package.sh), Docker, gpg with the release key, gh, makensis,
+# certificate and the notarytool profile (scripts/mac-package.sh), Docker, gpg with the release key, rpmsign
+# (brew install rpm), gh, makensis,
 # jsign, the Windows build machine of scripts/win-env.sh, and the homepage checkout ../inboxclassic.com
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -42,7 +46,7 @@ SPARKLE_VERSION="2.10.0"
 # no version in the names, so https://github.com/<repo>/releases/latest/download/<name> always gets the latest
 # release (the download links of inboxclassic.com)
 FILES=(InboxClassic-Setup.exe InboxClassic.dmg InboxClassic-amd64.deb InboxClassic-arm64.deb
-    InboxClassic-x86_64.pkg.tar.zst InboxClassic-aarch64.pkg.tar.zst)
+    InboxClassic-x86_64.pkg.tar.zst InboxClassic-aarch64.pkg.tar.zst InboxClassic-x86_64.rpm InboxClassic-aarch64.rpm)
 
 fail() {
     echo "$*" >&2
@@ -122,7 +126,8 @@ if building mac; then
 fi
 if building linux; then
     docker info >/dev/null 2>&1 || fail "Docker is not running"
-    [ "$BUILD_ONLY" = "yes" ] || ssh -o ConnectTimeout=10 andris@srv-04.emailengine.dev true || fail "srv-04, the apt repository's server, does not answer"
+    command -v rpmsign >/dev/null || fail "rpmsign is missing, for the Fedora packages: brew install rpm"
+    [ "$BUILD_ONLY" = "yes" ] || ssh -o ConnectTimeout=10 andris@srv-04.emailengine.dev true || fail "srv-04, the apt and dnf repositories' server, does not answer"
 fi
 if [ "$BUILD_ONLY" != "yes" ]; then
     gh release view "$TAG" --repo "$REPO" --json isDraft >/dev/null 2>&1 || fail "No release ${TAG}, merge the release PR of release-please first"
@@ -159,6 +164,10 @@ if building linux; then
     ./scripts/linux-package.sh
     # the Arch packages, from the release's tarball as Omarchy builds it; `curl -LO` then `sudo pacman -U` installs them
     ./scripts/arch-package.sh --release
+    # the Fedora packages, from the release's tarball, signed before hashes.txt so GitHub and the repository have the
+    # same files; `sudo dnf install ./<file>` installs one and adds the repository
+    ./scripts/fedora-package.sh --release
+    ./scripts/rpm-sign.sh
 fi
 
 cd dist
@@ -195,6 +204,7 @@ echo "Published ${TAG}: https://github.com/${REPO}/releases/tag/${TAG}"
 # the Linux packages to the apt repository, where Linux users get their updates
 if building linux; then
     ./scripts/apt-repo.sh
+    ./scripts/dnf-repo.sh
     # Omarchy's package repository builds the release from its source on its own (an upstream watch on our GitHub
     # Releases, omacom-io/omarchy-pkgs pkgbuilds/inbox-classic); its bot's pull request is where to follow it
     echo "Omarchy picks up ${TAG} at https://github.com/omacom-io/omarchy-pkgs/pulls?q=inbox-classic"
