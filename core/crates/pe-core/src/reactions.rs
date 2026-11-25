@@ -175,7 +175,9 @@ impl Core {
         };
         let account = store.folder(folder)?.account_id;
         let found = store.reactions_to(account, &[id])?;
-        let mut chips: Vec<(String, String, Vec<String>, i64, Vec<MessageRef>)> = Vec::new();
+        // (address, who, their emoji, when the last came, their emails)
+        type Gathered = (String, String, Vec<String>, i64, Vec<MessageRef>);
+        let mut chips: Vec<Gathered> = Vec::new();
         for row in found {
             let at = MessageRef {
                 folder: row.folder,

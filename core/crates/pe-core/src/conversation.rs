@@ -447,6 +447,7 @@ mod tests {
             logo: None,
             contact: None,
             snippet_is_state: false,
+            reactions: Vec::new(),
         }
     }
 

@@ -216,6 +216,7 @@ mod tests {
             logo,
             contact,
             snippet_is_state: false,
+            reactions: Vec::new(),
         }
     }
 
