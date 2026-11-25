@@ -43,6 +43,8 @@ cmd-accounts = &Tài khoản...
 cmd-find = Tì&m thư
 cmd-save-as = &Lưu dưới dạng...
 cmd-print = &In...
+# review: new
+cmd-print-conversation = In &cuộc hội thoại...
 cmd-import = &Nhập thư...
 cmd-outbox = &Hộp thư đi...
 cmd-properties = T&huộc tính
@@ -63,6 +65,43 @@ ui-find-not-found = Không có “{ $words }” trong thư này
 cmd-expand-all-threads = Mở rộn&g tất cả cuộc hội thoại
 cmd-collapse-all-threads = T&hu gọn tất cả cuộc hội thoại
 ui-group-by-conversation = &Nhóm thư theo cuộc hội thoại
+# review: new
+ui-show-whole-conversation = Hiện toàn bộ &cuộc hội thoại trong ngăn đọc
+# review: new
+ui-show-whole-conversation-note = Hàng của một cuộc hội thoại mở tất cả các thư của nó, kèm các thư trả lời và thư nháp của bạn cùng các thư đã lưu vào thư mục khác. Thư đã đọc được thu gọn thành một dòng: bấm vào dòng để mở hoặc thu gọn thư.
+# review: new
+ui-conversation-order = Thứ tự &sắp xếp cuộc hội thoại:
+# review: new
+ui-conversation-oldest-first = Cũ nhất trước
+# review: new
+ui-conversation-newest-first = Mới nhất trước
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+   *[other] ({ $count }, { $new } mới)
+}
+# review: new
+ui-conversation-to = đến { $people }
+# review: new
+ui-conversation-draft = Thư nháp
+# review: new
+ui-conversation-alone = Đã ký hoặc mã hóa: mở riêng
+# review: new
+ui-conversation-downloading = Đang tải xuống…
+# review: new
+ui-conversation-earlier = { $count ->
+    [1] Hiện 1 thư trước đó
+   *[other] Hiện { $count } thư trước đó
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [1] Cuộc hội thoại này còn có 1 thư trong thư mục khác.
+   *[other] Cuộc hội thoại này còn có { $count } thư trong các thư mục khác.
+}
+# review: new
+ui-conversation-this-folder = Chỉ thư mục &này
+# review: new
+ui-conversation-whole = Toàn bộ &cuộc hội thoại
 cmd-folder-list = &Danh sách thư mục
 cmd-layout-automatic = &Tự động
 cmd-layout-classic = &Cổ điển

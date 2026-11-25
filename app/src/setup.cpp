@@ -44,6 +44,8 @@ const Pref kPrefs[] = {
     {"notify_new_mail", L"NewMailNotifications", 1},
     {"codes_in_notifications", L"CodesInNotifications", 0},
     {"group_by_conversation", L"GroupByConversation", 1},
+    {"show_whole_conversation", L"ShowWholeConversation", 1},
+    {"conversation_order", L"ConversationNewestFirst", 0},
     {"hide_ignored", L"HideIgnoredConversations", 0},
     {"hide_read", L"HideReadMessages", 0},
     {"folder_list", L"FolderList", 1},

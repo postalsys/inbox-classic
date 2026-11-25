@@ -42,6 +42,8 @@ cmd-accounts = &Conturi...
 cmd-find = Căutare me&saj
 cmd-save-as = &Salvare ca...
 cmd-print = Im&primare...
+# review: new
+cmd-print-conversation = Imprimare con&versație...
 cmd-import = Import &mesaje...
 cmd-outbox = Mesaje de t&rimis...
 cmd-properties = Propri&etăți
@@ -62,6 +64,46 @@ ui-find-not-found = „{ $words }” nu apare în acest mesaj
 cmd-expand-all-threads = &Extindere toate conversațiile
 cmd-collapse-all-threads = &Restrângere toate conversațiile
 ui-group-by-conversation = Grupare mesa&je după conversație
+# review: new
+ui-show-whole-conversation = Afișare conversație întrea&gă în panoul de citire
+# review: new
+ui-show-whole-conversation-note = Rândul unei conversații deschide toate mesajele ei, inclusiv răspunsurile, schițele și mesajele mutate în alte foldere. Mesajele citite sunt restrânse la un rând: faceți clic pe un rând pentru a-l deschide sau a-l restrânge.
+# review: new
+ui-conversation-order = &Ordine în conversație:
+# review: new
+ui-conversation-oldest-first = Cele mai vechi primele
+# review: new
+ui-conversation-newest-first = Cele mai noi primele
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+    [one] ({ $count }, { $new } nou)
+   *[other] ({ $count }, { $new } noi)
+}
+# review: new
+ui-conversation-to = către { $people }
+# review: new
+ui-conversation-draft = Schiță
+# review: new
+ui-conversation-alone = Semnat sau criptat: se deschide separat
+# review: new
+ui-conversation-downloading = Se descarcă…
+# review: new
+ui-conversation-earlier = { $count ->
+    [one] Afișați 1 mesaj anterior
+    [few] Afișați { $count } mesaje anterioare
+   *[other] Afișați { $count } de mesaje anterioare
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [one] Această conversație are și un mesaj în alt folder.
+    [few] Această conversație are și { $count } mesaje în alte foldere.
+   *[other] Această conversație are și { $count } de mesaje în alte foldere.
+}
+# review: new
+ui-conversation-this-folder = &Doar acest folder
+# review: new
+ui-conversation-whole = &Toată conversația
 cmd-folder-list = Listă de &foldere
 cmd-layout-automatic = &Automat
 cmd-layout-classic = &Clasic

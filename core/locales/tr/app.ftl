@@ -42,6 +42,8 @@ cmd-accounts = H&esaplar...
 cmd-find = İ&leti Bul
 cmd-save-as = &Farklı Kaydet...
 cmd-print = &Yazdır...
+# review: new
+cmd-print-conversation = K&onuşmayı Yazdır...
 cmd-import = İletileri İçe Ak&tar...
 cmd-outbox = &Giden Kutusu...
 cmd-properties = Ö&zellikler
@@ -62,6 +64,43 @@ ui-find-not-found = “{ $words }” bu iletide yok
 cmd-expand-all-threads = Tüm Konuşmaları Genişl&et
 cmd-collapse-all-threads = Tüm Konuşmaları &Daralt
 ui-group-by-conversation = İletileri konuşmaya göre &grupla
+# review: new
+ui-show-whole-conversation = &Konuşmanın tamamını okuma bölmesinde göster
+# review: new
+ui-show-whole-conversation-note = Bir konuşmanın satırı, yanıtlarınız, taslaklarınız ve başka klasörlere taşınmış iletiler dahil tüm iletilerini açar. Okunmuş iletiler tek satıra daraltılır: açmak veya daraltmak için bir satıra tıklayın.
+# review: new
+ui-conversation-order = Konuşma &sırası:
+# review: new
+ui-conversation-oldest-first = Önce en eski
+# review: new
+ui-conversation-newest-first = Önce en yeni
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+   *[other] ({ $count }, { $new } yeni)
+}
+# review: new
+ui-conversation-to = alıcı: { $people }
+# review: new
+ui-conversation-draft = Taslak
+# review: new
+ui-conversation-alone = İmzalı veya şifreli: ayrı açılır
+# review: new
+ui-conversation-downloading = İndiriliyor…
+# review: new
+ui-conversation-earlier = { $count ->
+    [one] 1 eski iletiyi göster
+   *[other] { $count } eski iletiyi göster
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [one] Bu konuşmanın başka bir klasörde de bir iletisi var.
+   *[other] Bu konuşmanın başka klasörlerde de { $count } iletisi var.
+}
+# review: new
+ui-conversation-this-folder = Yalnızca &Bu Klasör
+# review: new
+ui-conversation-whole = &Tüm Konuşma
 cmd-folder-list = Klasör &Listesi
 cmd-layout-automatic = &Otomatik
 cmd-layout-classic = &Klasik

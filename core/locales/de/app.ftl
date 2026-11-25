@@ -40,6 +40,8 @@ cmd-accounts = &Konten...
 cmd-find = Nachricht &suchen
 cmd-save-as = Speichern &unter...
 cmd-print = &Drucken...
+# review: new
+cmd-print-conversation = Unterhaltung d&rucken...
 cmd-import = Nachrichten &importieren...
 cmd-outbox = &Postausgang...
 cmd-properties = &Eigenschaften
@@ -60,6 +62,43 @@ ui-find-not-found = „{ $words }“ kommt in dieser Nachricht nicht vor
 cmd-expand-all-threads = Alle Unterhaltungen &erweitern
 cmd-collapse-all-threads = Alle Unterhaltungen &reduzieren
 ui-group-by-conversation = Nachrichten nach &Unterhaltung gruppieren
+# review: new
+ui-show-whole-conversation = Die &ganze Unterhaltung im Lesebereich anzeigen
+# review: new
+ui-show-whole-conversation-note = Die Zeile einer Unterhaltung öffnet alle ihre Nachrichten, mit Ihren Antworten, Entwürfen und den in anderen Ordnern abgelegten Nachrichten. Gelesene Nachrichten sind zu einer Zeile eingeklappt: Klicken Sie auf eine Zeile, um sie zu öffnen oder einzuklappen.
+# review: new
+ui-conversation-order = &Reihenfolge in Unterhaltungen:
+# review: new
+ui-conversation-oldest-first = Älteste zuerst
+# review: new
+ui-conversation-newest-first = Neueste zuerst
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+   *[other] ({ $count }, { $new } neu)
+}
+# review: new
+ui-conversation-to = an { $people }
+# review: new
+ui-conversation-draft = Entwurf
+# review: new
+ui-conversation-alone = Signiert oder verschlüsselt: wird einzeln geöffnet
+# review: new
+ui-conversation-downloading = Wird heruntergeladen…
+# review: new
+ui-conversation-earlier = { $count ->
+    [one] 1 frühere Nachricht anzeigen
+   *[other] { $count } frühere Nachrichten anzeigen
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [one] Diese Unterhaltung hat auch eine Nachricht in einem anderen Ordner.
+   *[other] Diese Unterhaltung hat auch { $count } Nachrichten in anderen Ordnern.
+}
+# review: new
+ui-conversation-this-folder = Nur &dieser Ordner
+# review: new
+ui-conversation-whole = &Ganze Unterhaltung
 cmd-folder-list = &Ordnerliste
 cmd-layout-automatic = &Automatisch
 cmd-layout-classic = &Klassisch

@@ -197,6 +197,8 @@ final class SettingsWindow: NSObject, NSWindowDelegate, NSToolbarDelegate {
     /// Automatic, Classic, Columns: View > Layout's choice
     var layout: NSPopUpButton { popup(.layout) }
     var grouping: NSButton { box(.groupByConversation) }
+    var wholeConversation: NSButton { box(.showWholeConversation) }
+    var conversationOrder: NSPopUpButton { popup(.conversationOrder) }
     var listPictures: NSButton { box(.listPictures) }
     /// Show messages on a dark background when the system is dark
     var darkMessages: NSButton { box(.darkMessages) }
@@ -324,6 +326,12 @@ final class SettingsWindow: NSObject, NSWindowDelegate, NSToolbarDelegate {
             return fillLayouts(choice(setting, #selector(layoutChosen)))
         case .groupByConversation:
             return toggle(setting, app?.groupByConversation ?? true, #selector(groupingChanged))
+        case .showWholeConversation:
+            return toggle(setting, app?.wholeConversation ?? true, #selector(wholeConversationChanged))
+        case .conversationOrder:
+            return filled(choice(setting, #selector(conversationOrderChosen)),
+                          [Text.uiConversationOldestFirst.text, Text.uiConversationNewestFirst.text],
+                          app?.conversationNewestFirst == true ? 1 : 0)
         case .listPictures:
             return toggle(setting, app?.listPictures ?? true, #selector(listPicturesChanged))
         case .darkMessages:
@@ -507,6 +515,14 @@ final class SettingsWindow: NSObject, NSWindowDelegate, NSToolbarDelegate {
 
     @objc func groupingChanged() {
         AppDelegate.shared?.groupByConversation = grouping.state == .on
+    }
+
+    @objc func wholeConversationChanged() {
+        AppDelegate.shared?.wholeConversation = wholeConversation.state == .on
+    }
+
+    @objc func conversationOrderChosen() {
+        AppDelegate.shared?.conversationNewestFirst = conversationOrder.indexOfSelectedItem == 1
     }
 
     @objc func listPicturesChanged() {

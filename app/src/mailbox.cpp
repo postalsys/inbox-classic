@@ -34,6 +34,10 @@ void ShowRefusal(HWND owner, char* reason, PeText fallback) {
 
 // Tools > Options: a row a conversation (on unless turned off)
 const wchar_t* kThreadsPreference = L"GroupByConversation";
+// Tools > Options: a collapsed conversation's row (or a message's own) shows the conversation in the reading pane
+const wchar_t* kWholeConversationPreference = L"ShowWholeConversation";
+// Tools > Options: Conversation order newest first
+const wchar_t* kNewestFirstPreference = L"ConversationNewestFirst";
 // View > Hide Ignored Conversations (off unless turned on)
 const wchar_t* kHideIgnoredPreference = L"HideIgnoredConversations";
 const wchar_t* kUnreadOnlyPreference = L"HideReadMessages";
@@ -214,6 +218,7 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     ListView_SetExtendedListViewStyle(list_, LVS_EX_FULLROWSELECT);
     SetWindowSubclass(list_, ListProc, 0, reinterpret_cast<DWORD_PTR>(this));
     pe_list_view_set_grouped(view_.get(), GetPreference(kThreadsPreference, 1) != 0);
+    pe_list_view_set_newest_first(view_.get(), ConversationNewestFirst());
     hideIgnored_ = GetPreference(kHideIgnoredPreference, 0) != 0;
     pe_list_view_set_hide_ignored(view_.get(), hideIgnored_);
     unreadOnly_ = GetPreference(kUnreadOnlyPreference, 0) != 0;
@@ -925,7 +930,10 @@ void Mailbox::OpenSelected() {
         return;
     }
     if (!draftFolders_.contains(folder)) {
-        OpenMessageWindow(parent_, core_, this, ListOrder(), folder, uid, SelectedRow());
+        // the row's header only for its own message, not a conversation's focus elsewhere
+        const PeMessage* row = SelectedRow();
+        bool own = row && row->folder == folder && row->uid == uid;
+        OpenMessageWindow(parent_, core_, this, ListOrder(), folder, uid, own ? row : nullptr, reader_.ShowsConversation());
         return;
     }
     // read off the window thread, the compose window opened once it is (ReadDone)
@@ -1581,7 +1589,7 @@ void Mailbox::DrawSubject(HDC dc, int index, const PeMessage& row) {
     text.right -= Scale(4);
     std::wstring words = Text(row.subject);
     if (row.thread_opens) {
-        words += L" (" + std::to_wstring(row.thread_count) + L")";
+        words += L" " + Text(row.thread_label);
     }
     HGDIOBJ old = SelectObject(dc, RowFont(row));
     SetBkMode(dc, TRANSPARENT);
@@ -1683,7 +1691,11 @@ int Mailbox::TestShown(const std::wstring& subject) {
     }
     if (subject.empty()) {
         const PeMessage* row = SelectedCount() == 1 ? SelectedRow() : nullptr;
-        if (!row || row->uid != reader_.Uid() || row->folder != reader_.Folder()) {
+        // the message the row opens (a collapsed conversation's focus), or the one a click in its conversation gave
+        // the focus
+        bool opened = row && row->open_uid == reader_.Uid() && row->open_folder == reader_.Folder();
+        bool focused = row && reader_.ShowsConversation() && readerRow_ == std::make_pair(row->folder, row->uid);
+        if (!opened && !focused) {
             return 0;
         }
     }
@@ -1703,10 +1715,17 @@ void Mailbox::OnSelectionChanged(bool rebuild) {
         return;
     }
     const PeMessage* row = SelectedRow();
-    uint64_t uid = row ? row->uid : 0;
-    int64_t folder = row ? row->folder : 0;
-    // the same message, or still none; the page that counted several selected goes once they are not
-    if (uid == reader_.Uid() && folder == reader_.Folder() && (uid || summaryPage_.empty())) {
+    // what the row opens: a collapsed conversation's focus (its oldest unread message, else its newest), else its own
+    // message; with Show the whole conversation, in its conversation unless it is a row of an expanded one
+    uint64_t uid = row ? row->open_uid : 0;
+    int64_t folder = row ? row->open_folder : 0;
+    bool inConversation = row && row->shows_conversation && WholeConversation();
+    std::pair<int64_t, uint64_t> rowKey = row ? std::make_pair(row->folder, row->uid) : std::make_pair(int64_t{0}, uint64_t{0});
+    // the same message, or still none; the page that counted several selected goes once they are not; a conversation
+    // shown keeps the message a click in it gave the focus
+    bool shownHere = (uid == reader_.Uid() && folder == reader_.Folder()) ||
+                     (inConversation && reader_.ShowsConversation() && readerRow_ == rowKey);
+    if (shownHere && (uid || summaryPage_.empty())) {
         return;
     }
     ClearReader(uid != 0);
@@ -1714,8 +1733,18 @@ void Mailbox::OnSelectionChanged(bool rebuild) {
         return;
     }
     // for the list to open with it when it is come back to
-    pe_list_view_shown(core_, view_.get(), folder, uid);
-    reader_.Open(folder, uid, AccountOf(folder), row);
+    pe_list_view_shown(core_, view_.get(), row->folder, row->uid);
+    readerRow_ = rowKey;
+    reader_.SetConversation(inConversation);
+    // the header from the list at once for the row's own message; a focus elsewhere has its own
+    bool own = folder == row->folder && uid == row->uid;
+    reader_.Open(folder, uid, AccountOf(folder), own ? row : nullptr);
+}
+
+void Mailbox::ReopenShown() {
+    readerRow_ = {};
+    ClearReader(false);
+    OnSelectionChanged(false);
 }
 
 void Mailbox::ScheduleSelection() {
@@ -2073,7 +2102,29 @@ void Mailbox::ArchiveSelected() {
         return;
     }
     if (CanArchive()) {
-        Act(PE_ACTION_ARCHIVE);
+        ActOnConversations(PE_ACTION_ARCHIVE);
+    }
+}
+
+void Mailbox::ActOnConversations(PeAction action, int64_t to) {
+    FlushSelection();
+    size_t count = pe_selection_conversation_elsewhere(core_, selection_.get(), action, to);
+    if (count == 0) {
+        Act(action, to);
+        return;
+    }
+    core::String question(pe_conversation_elsewhere_question(count));
+    enum { kThisFolder = 1, kWhole = 2 };
+    int answer = AskAnswers(parent_, Text(question.get()),
+                            {{core::T(PE_TEXT_UI_CONVERSATION_THIS_FOLDER), kThisFolder},
+                             {core::T(PE_TEXT_UI_CONVERSATION_WHOLE), kWhole},
+                             {core::T(PE_TEXT_UI_CANCEL), IDCANCEL}},
+                            IDCANCEL);
+    if (answer == kWhole && !pe_selection_add_conversation(core_, selection_.get(), action, to)) {
+        return;
+    }
+    if (answer == kThisFolder || answer == kWhole) {
+        Act(action, to);
     }
 }
 
@@ -2260,7 +2311,7 @@ void Mailbox::DeleteSelected() {
     if (question && MessageBoxApp(parent_, Text(question.get()).c_str(), L"Inbox Classic", MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) != IDYES) {
         return;
     }
-    Act(PE_ACTION_DELETE);
+    ActOnConversations(PE_ACTION_DELETE);
 }
 
 void Mailbox::MoveSelected(HWND owner, bool copy) {
@@ -2299,8 +2350,10 @@ void Mailbox::MoveSelected(HWND owner, bool copy) {
     newInPick_ = false;
     int64_t to = PickFolder(owner, pick);
     newInPick_ = false;
-    if (to) {
-        Act(copy ? PE_ACTION_COPY : PE_ACTION_MOVE, to);
+    if (to && copy) {
+        Act(PE_ACTION_COPY, to);
+    } else if (to) {
+        ActOnConversations(PE_ACTION_MOVE, to);
     }
 }
 
@@ -2913,6 +2966,32 @@ void Mailbox::SetListPictures(bool on) {
     InvalidateRect(list_, nullptr, TRUE);
 }
 
+bool WholeConversation() {
+    return GetPreference(kWholeConversationPreference, 1) != 0;
+}
+
+bool ConversationNewestFirst() {
+    return GetPreference(kNewestFirstPreference, 0) != 0;
+}
+
+void Mailbox::SetWholeConversation(bool on) {
+    if (on == WholeConversation()) {
+        return;
+    }
+    SetPreference(kWholeConversationPreference, on ? 1 : 0);
+    ReopenShown();
+}
+
+void Mailbox::SetNewestFirst(bool on) {
+    if (on == ConversationNewestFirst()) {
+        return;
+    }
+    SetPreference(kNewestFirstPreference, on ? 1 : 0);
+    pe_list_view_set_newest_first(view_.get(), on);
+    ReloadList(true);
+    ReopenShown();
+}
+
 void Mailbox::SetGrouped(bool on) {
     if (on == Grouped()) {
         return;
@@ -3393,6 +3472,10 @@ void Mailbox::PrintShown() {
     reader_.Print(parent_);
 }
 
+void Mailbox::PrintConversation() {
+    reader_.PrintConversation(parent_);
+}
+
 void Mailbox::Import(HWND owner) {
     int64_t folder = pe_list_view_own_folder(view_.get());
     if (!folder) {
@@ -3556,6 +3639,11 @@ bool Mailbox::OnCommand(WORD id, WORD code) {
         return true;
     }
     if (id == IDOK && GetFocus() == list_) {
+        // Enter on a collapsed conversation's row opens it in the list; on any other row it opens the message
+        if (const PeMessage* row = SelectedRow(); SelectedCount() == 1 && row && row->thread_collapsed) {
+            SetThreadExpanded(row->thread, true);
+            return true;
+        }
         OpenSelected();
         return true;
     }
@@ -3831,9 +3919,16 @@ void Mailbox::OnTimer(UINT_PTR id) {
     }
     KillTimer(parent_, TIMER_MARK_READ);
     const PeMessage* row = SelectedRow();
-    if (row && row->uid == reader_.Uid() && row->folder == reader_.Folder() && !row->seen) {
-        // read after a moment on screen: no word of it in the status bar
-        pe_message_set_seen(core_, row->folder, row->uid, true);
+    if (!row || readerRow_ != std::make_pair(row->folder, row->uid) || !reader_.Uid()) {
+        return;
+    }
+    // read after a moment on screen: no word of it in the status bar. A conversation: the unread messages it showed
+    // open; a message alone: it (a collapsed conversation's row opens its oldest unread while it is bold)
+    if (reader_.ShowsConversation()) {
+        pe_conversation_shown(core_, reader_.Folder(), reader_.Uid());
+        ReloadList();
+    } else if (row->bold) {
+        pe_message_set_seen(core_, reader_.Folder(), reader_.Uid(), true);
         ReloadList();
     }
 }

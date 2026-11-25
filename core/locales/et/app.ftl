@@ -40,6 +40,8 @@ cmd-accounts = &Kontod...
 cmd-find = &Otsi kirja
 cmd-save-as = &Salvesta nimega...
 cmd-print = &Prindi...
+# review: new
+cmd-print-conversation = Prindi vest&lus...
 cmd-import = &Impordi kirjad...
 cmd-outbox = Väl&jundkaust...
 cmd-properties = Atri&buudid
@@ -60,6 +62,44 @@ ui-find-not-found = „{ $words }“ ei ole selles kirjas
 cmd-expand-all-threads = &Laienda kõik vestlused
 cmd-collapse-all-threads = &Ahenda kõik vestlused
 ui-group-by-conversation = &Rühmita kirjad vestluste kaupa
+# review: new
+ui-show-whole-conversation = Näita lugemispaanil kogu &vestlust
+# review: new
+ui-show-whole-conversation-note = Vestluse rida avab kõik selle kirjad koos teie vastuste, mustandite ja teistesse kaustadesse paigutatud kirjadega. Loetud kirjad on ahendatud üheks reaks: klõpsake rida, et see avada või ahendada.
+# review: new
+ui-conversation-order = Vestluse &järjestus:
+# review: new
+ui-conversation-oldest-first = Vanimad eespool
+# review: new
+ui-conversation-newest-first = Uusimad eespool
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+    [one] ({ $count }, { $new } uus)
+   *[other] ({ $count }, { $new } uut)
+}
+# review: new
+ui-conversation-to = kellele: { $people }
+# review: new
+ui-conversation-draft = Mustand
+# review: new
+ui-conversation-alone = Allkirjastatud või krüptitud: avaneb eraldi
+# review: new
+ui-conversation-downloading = Allalaadimine…
+# review: new
+ui-conversation-earlier = { $count ->
+    [one] Näita { $count } varasemat kirja
+   *[other] Näita { $count } varasemat kirja
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [one] Sellel vestlusel on ka üks kiri teises kaustas.
+   *[other] Sellel vestlusel on ka { $count } kirja teistes kaustades.
+}
+# review: new
+ui-conversation-this-folder = &Ainult see kaust
+# review: new
+ui-conversation-whole = &Kogu vestlus
 cmd-folder-list = &Kaustade loend
 cmd-layout-automatic = &Automaatne
 cmd-layout-classic = &Klassikaline

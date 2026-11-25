@@ -40,6 +40,8 @@ cmd-accounts = K&ontá...
 cmd-find = Ná&jsť správu
 cmd-save-as = Uložiť &ako...
 cmd-print = &Tlačiť...
+# review: new
+cmd-print-conversation = Tlačiť konver&záciu...
 cmd-import = &Importovať správy...
 cmd-outbox = Pošta na &odoslanie...
 cmd-properties = V&lastnosti
@@ -60,6 +62,47 @@ ui-find-not-found = „{ $words }“ sa v tejto správe nenachádza
 cmd-expand-all-threads = R&ozbaliť všetky konverzácie
 cmd-collapse-all-threads = Z&baliť všetky konverzácie
 ui-group-by-conversation = Zoskupovať správy podľa &konverzácií
+# review: new
+ui-show-whole-conversation = Zobraziť &celú konverzáciu na table na čítanie
+# review: new
+ui-show-whole-conversation-note = Riadok konverzácie otvorí všetky jej správy aj s vašimi odpoveďami, konceptmi a správami založenými v iných priečinkoch. Prečítané správy sú zbalené do jedného riadka: kliknutím na riadok ho otvoríte alebo znova zbalíte.
+# review: new
+ui-conversation-order = P&oradie správ v konverzácii:
+# review: new
+ui-conversation-oldest-first = Najstaršie prvé
+# review: new
+ui-conversation-newest-first = Najnovšie prvé
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+    [one] ({ $count }, { $new } nová)
+    [few] ({ $count }, { $new } nové)
+   *[other] ({ $count }, { $new } nových)
+}
+# review: new
+ui-conversation-to = komu: { $people }
+# review: new
+ui-conversation-draft = Koncept
+# review: new
+ui-conversation-alone = Podpísaná alebo šifrovaná: otvorí sa samostatne
+# review: new
+ui-conversation-downloading = Sťahovanie…
+# review: new
+ui-conversation-earlier = { $count ->
+    [one] Zobraziť { $count } staršiu správu
+    [few] Zobraziť { $count } staršie správy
+   *[other] Zobraziť { $count } starších správ
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [one] Táto konverzácia má aj { $count } správu v inom priečinku.
+    [few] Táto konverzácia má aj { $count } správy v iných priečinkoch.
+   *[other] Táto konverzácia má aj { $count } správ v iných priečinkoch.
+}
+# review: new
+ui-conversation-this-folder = &Len tento priečinok
+# review: new
+ui-conversation-whole = &Celá konverzácia
 cmd-folder-list = &Zoznam priečinkov
 cmd-layout-automatic = &Automatické
 cmd-layout-classic = &Klasické

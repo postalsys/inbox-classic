@@ -1311,7 +1311,10 @@ fn subject_column() -> gtk::ColumnViewColumn {
             },
         );
         if place.opens() {
-            label.set_text(&format!("{subject} ({})", place.count));
+            label.set_text(&format!(
+                "{subject} {}",
+                pe_core::thread_count(place.count, place.unread)
+            ));
         } else {
             label.set_text(&subject);
         }

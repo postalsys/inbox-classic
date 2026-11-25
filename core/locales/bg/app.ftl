@@ -43,6 +43,8 @@ cmd-accounts = &Акаунти...
 cmd-find = &Търсене на съобщение
 cmd-save-as = &Запазване като...
 cmd-print = Пе&чат...
+# review: new
+cmd-print-conversation = Печат на &разговора...
 cmd-import = Импортиране на &съобщения...
 cmd-outbox = &Изходящи...
 cmd-properties = Сво&йства
@@ -63,6 +65,44 @@ ui-find-not-found = В съобщението не е намерен текст�
 cmd-expand-all-threads = Раз&гъване на всички разговори
 cmd-collapse-all-threads = Сви&ване на всички разговори
 ui-group-by-conversation = &Групиране на съобщенията по разговори
+# review: new
+ui-show-whole-conversation = Показване на &целия разговор в екрана за четене
+# review: new
+ui-show-whole-conversation-note = Редът на разговора отваря всичките му съобщения, заедно с вашите отговори, черновите и съобщенията, преместени в други папки. Прочетените съобщения са свити до един ред: щракнете върху ред, за да го отворите или свиете.
+# review: new
+ui-conversation-order = &Ред в разговора:
+# review: new
+ui-conversation-oldest-first = Първо най-старите
+# review: new
+ui-conversation-newest-first = Първо най-новите
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+    [one] ({ $count }, { $new } ново)
+   *[other] ({ $count }, { $new } нови)
+}
+# review: new
+ui-conversation-to = до { $people }
+# review: new
+ui-conversation-draft = Чернова
+# review: new
+ui-conversation-alone = Подписано или шифровано: отваря се отделно
+# review: new
+ui-conversation-downloading = Изтегля се…
+# review: new
+ui-conversation-earlier = { $count ->
+    [one] Показване на { $count } по-ранно съобщение
+   *[other] Показване на { $count } по-ранни съобщения
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [one] Този разговор има и { $count } съобщение в друга папка.
+   *[other] Този разговор има и { $count } съобщения в други папки.
+}
+# review: new
+ui-conversation-this-folder = Само &тази папка
+# review: new
+ui-conversation-whole = &Целият разговор
 cmd-folder-list = Списък с &папки
 cmd-layout-automatic = &Автоматично
 cmd-layout-classic = &Класическо

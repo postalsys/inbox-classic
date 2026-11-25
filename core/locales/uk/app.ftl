@@ -41,6 +41,8 @@ cmd-accounts = Облікові &записи...
 cmd-find = &Знайти повідомлення
 cmd-save-as = З&берегти як...
 cmd-print = &Друк...
+# review: new
+cmd-print-conversation = Друкувати &розмову...
 cmd-import = &Імпортувати повідомлення...
 cmd-outbox = &Вихідні...
 cmd-properties = &Властивості
@@ -61,6 +63,51 @@ ui-find-not-found = «{ $words }» немає в цьому повідомлен
 cmd-expand-all-threads = Розгорнути &всі розмови
 cmd-collapse-all-threads = З&горнути всі розмови
 ui-group-by-conversation = Гр&упувати повідомлення за розмовами
+# review: new
+ui-show-whole-conversation = Показувати &цілу розмову в області читання
+# review: new
+ui-show-whole-conversation-note = Рядок розмови відкриває всі її повідомлення разом із вашими відповідями, чернетками та повідомленнями, розкладеними в інші папки. Прочитані повідомлення згорнуто в рядок: клацніть рядок, щоб розгорнути або згорнути його.
+# review: new
+ui-conversation-order = П&орядок повідомлень у розмові:
+# review: new
+ui-conversation-oldest-first = Спочатку старіші
+# review: new
+ui-conversation-newest-first = Спочатку новіші
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+    [one] ({ $count }, { $new } нове)
+    [few] ({ $count }, { $new } нові)
+    [many] ({ $count }, { $new } нових)
+   *[other] ({ $count }, { $new } нового)
+}
+# review: new
+ui-conversation-to = кому: { $people }
+# review: new
+ui-conversation-draft = Чернетка
+# review: new
+ui-conversation-alone = Підписане або зашифроване: відкривається окремо
+# review: new
+ui-conversation-downloading = Завантаження…
+# review: new
+ui-conversation-earlier = { $count ->
+    [one] Показати { $count } попереднє повідомлення
+    [few] Показати { $count } попередні повідомлення
+    [many] Показати { $count } попередніх повідомлень
+   *[other] Показати { $count } попереднього повідомлення
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [1] Ця розмова має ще одне повідомлення в іншій папці.
+    [one] Ця розмова має ще { $count } повідомлення в інших папках.
+    [few] Ця розмова має ще { $count } повідомлення в інших папках.
+    [many] Ця розмова має ще { $count } повідомлень в інших папках.
+   *[other] Ця розмова має ще { $count } повідомлення в інших папках.
+}
+# review: new
+ui-conversation-this-folder = Лише &ця папка
+# review: new
+ui-conversation-whole = &Уся розмова
 cmd-folder-list = Список &папок
 cmd-layout-automatic = &Автоматично
 cmd-layout-classic = &Класичний

@@ -125,10 +125,13 @@ pub enum PrefKind {
 /// file gives back are checked, ready to apply, in this order, the language last. Left out:
 /// the widths and heights of the panes and the window (each screen differs), the rows of the folder list turned open
 /// or closed (they name this store's accounts), and the notes shown once (the tray, the dock, the column layout).
-pub const PREFERENCES: [(&str, PrefKind); 9] = [
+pub const PREFERENCES: [(&str, PrefKind); 11] = [
     ("notify_new_mail", PrefKind::Bool),
     ("codes_in_notifications", PrefKind::Bool),
     ("group_by_conversation", PrefKind::Bool),
+    ("show_whole_conversation", PrefKind::Bool),
+    // 0 oldest first, 1 newest first
+    ("conversation_order", PrefKind::Number(1)),
     ("hide_ignored", PrefKind::Bool),
     ("hide_read", PrefKind::Bool),
     ("folder_list", PrefKind::Bool),

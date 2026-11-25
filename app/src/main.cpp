@@ -702,6 +702,7 @@ HMENU BuildMenu() {
     AppendMenuW(file, MF_STRING, IDM_IMPORT_SETUP, MenuItem(PE_TEXT_CMD_IMPORT_SETUP).c_str());
     AppendMenuW(file, MF_STRING, IDM_EXPORT_SETUP, MenuItem(PE_TEXT_CMD_EXPORT_SETUP).c_str());
     AppendMenuW(file, MF_STRING, IDM_PRINT, MenuItem(PE_TEXT_CMD_PRINT, L"Ctrl+P").c_str());
+    AppendMenuW(file, MF_STRING, IDM_PRINT_CONVERSATION, MenuItem(PE_TEXT_CMD_PRINT_CONVERSATION).c_str());
     AppendMenuW(file, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(file, MF_STRING, IDM_PROPERTIES, DialogMenuItem(PE_TEXT_CMD_PROPERTIES, L"Alt+Enter").c_str());
     AppendMenuW(file, MF_SEPARATOR, 0, nullptr);
@@ -1585,6 +1586,10 @@ void ApplySetupPrefs(HWND owner, const std::vector<SetupPref>& prefs) {
             pe_set_codes_in_notifications(on);
         } else if (name == "group_by_conversation") {
             g_mailbox.SetGrouped(on);
+        } else if (name == "show_whole_conversation") {
+            g_mailbox.SetWholeConversation(on);
+        } else if (name == "conversation_order") {
+            g_mailbox.SetNewestFirst(on);
         } else if (name == "hide_ignored") {
             g_mailbox.SetHideIgnored(on);
         } else if (name == "hide_read") {
@@ -1654,6 +1659,8 @@ constexpr ULONG_PTR kTestBadge = 0x42414447;
 constexpr ULONG_PTR kTestFromStore = 0x53544F52;
 // with --test-hooks only: the picture of the list's row of the message whose subject is the text (TestRowPicture)
 constexpr ULONG_PTR kTestRowPicture = 0x50494354;
+// with --test-hooks only: the count drawn beside a conversation's row (TestThreadLabel)
+constexpr ULONG_PTR kTestThreadLabel = 0x544C424C;
 // with --test-hooks only: where the list's top row starts, and whether its header is shown (TestListTop)
 constexpr ULONG_PTR kTestListTop = 0x4C544F50;
 // with --test-hooks only: the compose windows gone as a crash takes them, and opened again (TestAbandonCompose); how
@@ -1790,6 +1797,9 @@ void OnCommand(WORD id, WORD code) {
     case IDM_PRINT:
         g_mailbox.PrintShown();
         return;
+    case IDM_PRINT_CONVERSATION:
+        g_mailbox.PrintConversation();
+        return;
     case IDM_PROPERTIES:
         g_mailbox.ShowProperties(g_main);
         return;
@@ -1892,6 +1902,8 @@ void OnCommand(WORD id, WORD code) {
         shown.notify = g_notify;
         shown.codes = pe_codes_in_notifications();
         shown.threads = g_mailbox.Grouped();
+        shown.wholeConversation = WholeConversation();
+        shown.newestFirst = ConversationNewestFirst();
         shown.layout = static_cast<int>(g_layoutMode);
         shown.listPictures = g_mailbox.ListPicturesShown();
         shown.previews = pe_show_previews(g_core.get());
@@ -1906,6 +1918,8 @@ void OnCommand(WORD id, WORD code) {
             SetPreference(kCodesPreference, set.codes ? 1 : 0);
             pe_set_codes_in_notifications(set.codes);
             g_mailbox.SetGrouped(set.threads);
+            g_mailbox.SetWholeConversation(set.wholeConversation);
+            g_mailbox.SetNewestFirst(set.newestFirst);
             // the messages shown with or without the previews of their files
             if (set.previews != pe_show_previews(g_core.get()) || set.pdfPreviews != pe_pdf_previews(g_core.get())) {
                 pe_set_show_previews(g_core.get(), set.previews);
@@ -2200,6 +2214,10 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         if (g_arguments.testHooks && data->dwData == kTestCrashCompose) {
             return static_cast<LRESULT>(TestAbandonCompose(hwnd, g_core.get()) + 10);
+        }
+        if (g_arguments.testHooks && data->dwData == kTestThreadLabel && data->cbData % sizeof(wchar_t) == 0) {
+            std::wstring text(static_cast<const wchar_t*>(data->lpData), data->cbData / sizeof(wchar_t));
+            return g_mailbox.TestThreadLabel(text);
         }
         if (g_arguments.testHooks && data->dwData == kTestRowPicture && data->cbData % sizeof(wchar_t) == 0) {
             std::wstring subject(static_cast<const wchar_t*>(data->lpData), data->cbData / sizeof(wchar_t));

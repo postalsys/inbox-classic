@@ -39,6 +39,8 @@ final class Reader: NSObject {
     private(set) var remoteImages = false
     /// a download asked for and not answered yet: MessageReady or MessageFailed for it is this reader's
     private var waiting = false
+    /// the next message opened is shown in its conversation (Show the whole conversation), not alone
+    var inConversation = false
     private var viewRequest: UInt64 = 0
     private var logoRequest: UInt64 = 0
     /// without a logo, the sender's picture from the Address Book drawn for the logo's place
@@ -555,12 +557,15 @@ final class Reader: NSObject {
         return nil
     }
 
-    /// parsing, folding and sanitizing a large message takes a while: on a worker, ViewReady follows
+    /// parsing, folding and sanitizing a large message takes a while: on a worker, ViewReady follows; in its
+    /// conversation, the conversation's view
     private func makeView() {
         if viewRequest != 0 {
             pe_message_view_cancel(core.handle, viewRequest)
         }
-        viewRequest = pe_message_view_start(core.handle, folder, uid, remoteImages)
+        viewRequest = inConversation
+            ? pe_conversation_view_start(core.handle, folder, uid, remoteImages, AppDelegate.shared.conversationNewestFirst)
+            : pe_message_view_start(core.handle, folder, uid, remoteImages)
         if viewRequest == 0 {
             showProblem(Text.uiNotShown.text)
         }
@@ -594,6 +599,9 @@ final class Reader: NSObject {
                 makeView()
             } else if event.folder == folder && event.uid == uid {
                 wholeMessageHere()
+            } else if let messageView, pe_message_view_waits_for(messageView.handle, event.folder, event.uid) {
+                // an open message of the conversation shown is downloaded: the conversation made again, where it was
+                rebuild()
             }
         case PE_EVENT_KIND_TRANSFERRING:
             // how far a large message is, then that it is all here (stored by then)
@@ -682,6 +690,17 @@ final class Reader: NSObject {
                 status(Text.pgpRecipientLooking.text)
             }
             return true
+        case PE_READER_LINK_CONVERSATION:
+            let index = pe_conversation_link_index(link)
+            onMain { [weak self] in self?.conversationLine(index) }
+            return true
+        case PE_READER_LINK_CONVERSATION_EARLIER:
+            onMain { [weak self] in
+                guard let self, self.uid != 0 else { return }
+                pe_conversation_show_earlier(self.core.handle, self.folder, self.uid)
+                self.rebuild()
+            }
+            return true
         case PE_READER_LINK_ATTACHMENT:
             // a preview after the text: its file opened as a double-click in the strip opens it; only a link of the
             // message this reader shows (the core checks its view's token)
@@ -694,6 +713,39 @@ final class Reader: NSObject {
         default:
             return false
         }
+    }
+
+    /// the view shown is a conversation's
+    var showsConversation: Bool { (messageView?.info?.pointee.conversation_count ?? 0) > 0 }
+
+    /// a line of the conversation shown clicked: its message opens or folds, and the conversation is shown again
+    /// where it was, at the message the core says has the focus (downloaded first when it is not yet)
+    func conversationLine(_ index: Int64) {
+        guard uid != 0 else { return }
+        var to: (folder: Int64, uid: UInt64) = (0, 0)
+        guard pe_conversation_click(core.handle, folder, uid, index, &to.folder, &to.uid) else { return }
+        if to.folder == folder && to.uid == uid {
+            rebuild()
+            return
+        }
+        folder = to.folder
+        uid = to.uid
+        keepScroll = true
+        waiting = true
+        pe_message_open(core.handle, folder, uid)
+    }
+
+    /// File > Print Conversation: every message of the conversation shown; the message alone outside one
+    func printConversation() {
+        guard showsMessage, uid != 0, printRequest == 0 else { return }
+        // made off the window thread, PrintReady says it is; outside a conversation, the message alone
+        let request = pe_conversation_print_start(core.handle, folder, uid, AppDelegate.shared.conversationNewestFirst)
+        guard request != 0 else {
+            print()
+            return
+        }
+        printRequest = request
+        printIdle = Pending.busy(status)
     }
 
     /// Security Details: the core's words of every part of the message shown

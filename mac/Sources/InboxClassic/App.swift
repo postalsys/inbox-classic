@@ -129,6 +129,24 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         }
     }
     private var grouping = Preference("GroupByConversation", default: true)
+    /// Settings > Show the whole conversation in the reading pane, on unless turned off
+    var wholeConversation: Bool {
+        get { whole.value }
+        set {
+            whole.value = newValue
+            main?.mailbox.reopenShown()
+        }
+    }
+    private var whole = Preference("ShowWholeConversation", default: true)
+    /// Settings > Conversation order: newest first, oldest first unless chosen
+    var conversationNewestFirst: Bool {
+        get { newestFirst.value }
+        set {
+            newestFirst.value = newValue
+            main?.mailbox.newestFirstChanged()
+        }
+    }
+    private var newestFirst = Preference("ConversationNewestFirst", default: false)
     /// Settings > Show sign-in codes in new mail notifications, off unless turned on: the core names the code
     var codesInNotifications: Bool {
         get { codes.value }
@@ -605,6 +623,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         case .find: main.focusFind()
         case .saveAs: main.mailbox.saveShownAs()
         case .print: main.mailbox.printShown()
+        case .printConversation: main.mailbox.reader.printConversation()
         case .import: main.mailbox.importMessages()
         case .outbox: main.openOutbox()
         case .properties: main.mailbox.showProperties()

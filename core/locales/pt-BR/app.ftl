@@ -43,6 +43,8 @@ cmd-accounts = &Contas...
 cmd-find = L&ocalizar mensagem
 cmd-save-as = &Salvar como...
 cmd-print = &Imprimir...
+# review: new
+cmd-print-conversation = Imprimir con&versa...
 cmd-import = I&mportar mensagens...
 cmd-outbox = Caixa de &Saída...
 cmd-properties = P&ropriedades
@@ -63,6 +65,44 @@ ui-find-not-found = “{ $words }” não está nesta mensagem
 cmd-expand-all-threads = E&xpandir todas as conversas
 cmd-collapse-all-threads = Re&colher todas as conversas
 ui-group-by-conversation = A&grupar mensagens por conversa
+# review: new
+ui-show-whole-conversation = Mostrar a conversa &inteira no painel de leitura
+# review: new
+ui-show-whole-conversation-note = A linha de uma conversa abre todas as mensagens dela, com suas respostas, seus rascunhos e as mensagens arquivadas em outras pastas. As mensagens lidas ficam recolhidas em uma linha: clique em uma linha para abri-la ou recolhê-la.
+# review: new
+ui-conversation-order = &Ordem da conversa:
+# review: new
+ui-conversation-oldest-first = Mais antiga primeiro
+# review: new
+ui-conversation-newest-first = Mais recente primeiro
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+    [one] ({ $count }, { $new } nova)
+   *[other] ({ $count }, { $new } novas)
+}
+# review: new
+ui-conversation-to = para { $people }
+# review: new
+ui-conversation-draft = Rascunho
+# review: new
+ui-conversation-alone = Assinada ou criptografada: abre separadamente
+# review: new
+ui-conversation-downloading = Baixando…
+# review: new
+ui-conversation-earlier = { $count ->
+    [one] Mostrar 1 mensagem anterior
+   *[other] Mostrar { $count } mensagens anteriores
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [one] Esta conversa também tem uma mensagem em outra pasta.
+   *[other] Esta conversa também tem { $count } mensagens em outras pastas.
+}
+# review: new
+ui-conversation-this-folder = &Apenas esta pasta
+# review: new
+ui-conversation-whole = &Toda a conversa
 cmd-folder-list = Lista de &pastas
 cmd-layout-automatic = &Automático
 cmd-layout-classic = &Clássico

@@ -159,6 +159,9 @@ pub struct Mailbox {
     undo_label: RefCell<Option<String>>,
     /// The selected draft opens once its source is fetched
     open_when_ready: Cell<bool>,
+    /// The row (its own message) the reading pane was opened from, which a conversation shown keeps while a click in
+    /// it moves the focus to another of its messages
+    reader_row: Cell<(i64, u64)>,
     /// The draft read last asked for to open: only its answer opens a compose window
     draft_reading: Cell<u64>,
     /// True while the list is reloaded: its selection changes are the reload's, not the user's
@@ -368,6 +371,7 @@ impl Mailbox {
             picks: Cell::new(0),
             undo_label: RefCell::default(),
             open_when_ready: Cell::new(false),
+            reader_row: Cell::new((0, 0)),
             draft_reading: Cell::new(0),
             reloading: Cell::new(false),
             mark_read: RefCell::new(None),
@@ -597,6 +601,12 @@ impl Mailbox {
             let open = match key {
                 gdk::Key::Right | gdk::Key::KP_Right => true,
                 gdk::Key::Left | gdk::Key::KP_Left => false,
+                // Enter on a collapsed conversation's row opens it in the list; on any other row it opens the message
+                gdk::Key::Return | gdk::Key::KP_Enter
+                    if this.upgrade().is_some_and(|this| this.selected_collapsed()) =>
+                {
+                    true
+                }
                 _ => return glib::Propagation::Proceed,
             };
             match this.upgrade() {
@@ -1369,6 +1379,16 @@ impl Mailbox {
         }
         let selected = self.list.selected();
         let (folder, uid) = selected.as_ref().map_or((0, 0), |(_, m)| (m.folder_id, m.info.uid));
+        // what the row opens: a collapsed conversation's focus (its oldest unread message, else its newest), else its
+        // own message; with Show the whole conversation, in its conversation unless it is a row of an expanded one
+        let (open_folder, open_uid) = selected
+            .as_ref()
+            .map_or((folder, uid), |(_, m)| (m.opens_at().folder, m.opens_at().uid));
+        let in_conversation = whole_conversation()
+            && selected
+                .as_ref()
+                .and_then(|(_, m)| m.thread)
+                .is_some_and(|t| t.shows_conversation());
         // grouped, the core says what the row stands for: a collapsed conversation's row all of its messages
         let grouped = self.view.borrow().grouped();
         // a row selected while still blank (its page not read) names its message through the core, read now, while
@@ -1380,7 +1400,10 @@ impl Mailbox {
         };
         *self.summary.borrow_mut() = core.summary(&refs).unwrap_or_default();
         *self.refs.borrow_mut() = refs;
-        if uid == self.reader.uid() && folder == self.reader.folder() && !self.reader.shows_summary() {
+        // a conversation shown keeps the message a click in it gave the focus
+        let shown_here = (open_uid == self.reader.uid() && open_folder == self.reader.folder())
+            || (in_conversation && self.reader.shows_conversation() && self.reader_row.get() == (folder, uid));
+        if shown_here && !self.reader.shows_summary() {
             self.selection_shown();
             return;
         }
@@ -1389,9 +1412,15 @@ impl Mailbox {
         if uid != 0 {
             // for the list to open with it when it is come back to
             let _ = core.list_shown(&self.list.view(), MessageRef { folder, uid });
-            let account = self.folder_account(folder);
-            self.reader
-                .open(account, folder, uid, selected.as_ref().map(|(_, m)| &m.info));
+            let account = self.folder_account(open_folder);
+            self.reader.set_conversation(in_conversation);
+            self.reader_row.set((folder, uid));
+            // the header from the list at once for the row's own message; a focus elsewhere has its own
+            let info = selected
+                .as_ref()
+                .map(|(_, m)| &m.info)
+                .filter(|_| (open_folder, open_uid) == (folder, uid));
+            self.reader.open(account, open_folder, open_uid, info);
         }
     }
 
@@ -1556,11 +1585,22 @@ impl Mailbox {
         let timer = glib::timeout_add_local_once(std::time::Duration::from_secs(1), move || {
             let Some(this) = this.upgrade() else { return };
             this.mark_read.borrow_mut().take();
-            if let Some((_, message)) = this.list.selected()
-                && message.info.uid == this.reader.uid()
-                && !message.info.seen()
+            let Some((_, message)) = this.list.selected() else {
+                return;
+            };
+            if this.reader_row.get() != (message.folder_id, message.info.uid) {
+                return;
+            }
+            // a conversation: the unread messages it showed open; a message alone: it, unread (a collapsed
+            // conversation's row opened at its oldest unread message while it is bold)
+            if this.reader.shows_conversation() {
+                if let Some(shown) = this.reader.message() {
+                    let _ = shell().core.conversation_shown(shown);
+                }
+            } else if message.bold()
+                && let Some(shown) = this.reader.message()
             {
-                let _ = shell().core.set_seen(message.folder_id, message.info.uid, true);
+                let _ = shell().core.set_seen(shown.folder, shown.uid, true);
             }
         });
         *self.mark_read.borrow_mut() = Some(timer);
@@ -1581,7 +1621,7 @@ impl Mailbox {
         };
         let (folder, uid) = (message.folder, message.uid);
         if !self.draft_folders.borrow().contains(&folder) {
-            crate::message_window::open(message, self.list_view());
+            crate::message_window::open(message, self.list_view(), self.reader.shows_conversation());
             return;
         }
         // read off the window thread: the compose window opens when it is. Not fetched yet, it is read again once it
@@ -1716,6 +1756,31 @@ impl Mailbox {
     }
 
     /// Group messages by conversation turned on or off in Preferences: the list again, every conversation closed
+    /// Preferences > Conversation order changed: kept, the list read again in it and the message shown opened again
+    pub fn set_newest_first(&self, newest_first: bool) {
+        shell()
+            .settings
+            .set_bool(settings::CONVERSATION_NEWEST_FIRST, newest_first);
+        self.view.borrow_mut().set_newest_first(newest_first);
+        self.reload_list();
+        self.reopen_shown();
+    }
+
+    /// Preferences > Show the whole conversation turned on or off: kept, the selected row's message opened again
+    pub fn set_whole_conversation(&self, on: bool) {
+        if whole_conversation() != on {
+            shell().settings.set_bool(settings::SHOW_WHOLE_CONVERSATION, on);
+            self.reopen_shown();
+        }
+    }
+
+    /// The selected row's message opened again (Show the whole conversation turned on or off, the order changed)
+    pub fn reopen_shown(&self) {
+        self.reader_row.set((0, 0));
+        self.clear_reader(false);
+        self.on_selection_changed();
+    }
+
     pub fn regroup(&self) {
         let changed = self.view.borrow_mut().set_grouped(grouped());
         if changed {
@@ -1725,6 +1790,15 @@ impl Mailbox {
 
     /// Right and Left in the list: Right opens the conversation of the selected row, Left closes it (from a reply
     /// too, whose conversation's row is then selected). False when the key does nothing here.
+    /// Whether the one row selected is a collapsed conversation's
+    fn selected_collapsed(&self) -> bool {
+        self.list.selected_count() == 1
+            && self
+                .list
+                .selected()
+                .is_some_and(|(_, m)| m.thread.is_some_and(|t| t.collapsed()))
+    }
+
     fn thread_key(&self, open: bool) -> bool {
         let Some((_, message)) = self.list.selected() else {
             return false;
@@ -2108,6 +2182,44 @@ impl Mailbox {
         self.act_on(self.selection(), action);
     }
 
+    /// Delete, Archive or Move (`action`) of the selection, its conversations' messages in other folders too when
+    /// there are some and the user says so (This Folder Only, Whole Conversation); false when the question was
+    /// cancelled, nothing done
+    async fn act_on_conversations(&self, action: Action) -> bool {
+        let selected = self.selection();
+        let elsewhere = shell()
+            .core
+            .conversation_elsewhere(&selected, action)
+            .unwrap_or_default();
+        if elsewhere.is_empty() {
+            self.act(action);
+            return true;
+        }
+        use crate::words::{Text, plain};
+        let question = pe_core::conversation::elsewhere_question(elsewhere.len());
+        let answers = [
+            ("cancel", t!(UiCancel)),
+            ("folder", plain(Text::UiConversationThisFolder)),
+            ("whole", plain(Text::UiConversationWhole)),
+        ];
+        let answers: Vec<(&str, &str)> = answers.iter().map(|(id, label)| (*id, label.as_str())).collect();
+        match ui::ask(&self.window, TITLE, &question, &answers, "folder", "cancel", None)
+            .await
+            .as_str()
+        {
+            "folder" => self.act(action),
+            "whole" => {
+                let Selected::Listed(mut refs) = selected else {
+                    return false;
+                };
+                refs.extend(elsewhere);
+                self.act_on(Selected::Listed(refs), action);
+            }
+            _ => return false,
+        }
+        true
+    }
+
     /// `action` done to `selected` off the window thread ([`Self::acted`] follows: its outcome in the status bar, the
     /// core's refusal said as it is); when they are the selection, a move or delete selects the message after them
     fn act_on(&self, selected: Selected, action: Action) {
@@ -2118,7 +2230,15 @@ impl Mailbox {
         // ignored conversations are hidden
         let leaves = self.view.borrow().leaves_list(&self.summary.borrow(), action);
         // the row that takes the place of the last one going
-        let after = (selected == self.selection())
+        // the selection, or the selection with its conversations' messages in other folders (Whole Conversation)
+        let of_selection = match (&selected, self.selection()) {
+            (Selected::Listed(refs), Selected::Listed(chosen)) => {
+                let refs: std::collections::HashSet<&MessageRef> = refs.iter().collect();
+                !chosen.is_empty() && chosen.iter().all(|r| refs.contains(r))
+            }
+            (selected, chosen) => *selected == chosen,
+        };
+        let after = of_selection
             .then(|| self.list.last_selected())
             .flatten()
             .map(|last| (last + 1).saturating_sub(self.list.selected_count() as u32));
@@ -2170,10 +2290,14 @@ impl Mailbox {
         self.summary.borrow().archivable
     }
 
-    /// The selected messages out of the Inbox into the account's Archive (on Gmail every label taken off)
-    pub fn archive_selected(&self) {
+    /// The selected messages out of the Inbox into the account's Archive (on Gmail every label taken off); their
+    /// conversations' messages filed elsewhere too when the user says so
+    pub fn archive_selected(self: &Rc<Self>) {
         if self.can_archive() {
-            self.act(Action::Archive);
+            let this = self.clone();
+            spawn(async move {
+                this.act_on_conversations(Action::Archive).await;
+            });
         }
     }
 
@@ -2402,7 +2526,7 @@ impl Mailbox {
         {
             return;
         }
-        self.act(Action::Delete);
+        self.act_on_conversations(Action::Delete).await;
     }
 
     /// Move to Folder (or Copy to Folder, `copy`): asks where, in the folder tree of every account, and sends the
@@ -2432,7 +2556,12 @@ impl Mailbox {
             new_folder: true,
         };
         if let Some(to) = crate::move_dialog::choose(&self.window, request).await {
-            self.act(if copy { Action::Copy(to) } else { Action::Move(to) });
+            match copy {
+                true => self.act(Action::Copy(to)),
+                false => {
+                    self.act_on_conversations(Action::Move(to)).await;
+                }
+            }
         }
     }
 
@@ -3134,6 +3263,11 @@ impl Mailbox {
         self.reader.print(&self.window);
     }
 
+    /// File > Print Conversation: every message of the shown message's conversation
+    pub fn print_conversation(&self) {
+        self.reader.print_conversation(&self.window);
+    }
+
     /// File > Import Messages: .eml files into the selected folder
     pub async fn import(&self) {
         let window = self.window.clone().upcast::<gtk::Window>();
@@ -3183,12 +3317,23 @@ pub fn grouped() -> bool {
     shell().settings.bool(settings::GROUP_BY_CONVERSATION, true)
 }
 
+/// Preferences > Show the whole conversation in the reading pane, on unless turned off
+pub fn whole_conversation() -> bool {
+    shell().settings.bool(settings::SHOW_WHOLE_CONVERSATION, true)
+}
+
+/// Preferences > Conversation order: newest first, oldest first unless chosen
+pub fn newest_first() -> bool {
+    shell().settings.bool(settings::CONVERSATION_NEWEST_FIRST, false)
+}
+
 /// The list's view as the window starts: no folder, in the order `sort`, grouped and hiding ignored conversations as
 /// the settings say
 fn start_view(sort: pe_store::Sort) -> pe_core::ListView {
     let mut view = pe_core::ListView::new();
     view.set_sort(sort);
     view.set_grouped(grouped());
+    view.set_newest_first(newest_first());
     view.set_hide_ignored(hide_ignored());
     view.set_show(show_for(hide_read()));
     view

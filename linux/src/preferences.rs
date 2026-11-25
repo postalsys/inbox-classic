@@ -99,6 +99,8 @@ fn row_of(setting: Setting) -> gtk::Widget {
         Setting::EmlDefault => eml_default_row(setting).upcast(),
         Setting::Layout => layout_row(setting).upcast(),
         Setting::GroupByConversation => group_row(setting).upcast(),
+        Setting::ShowWholeConversation => whole_conversation_row(setting).upcast(),
+        Setting::ConversationOrder => conversation_order_row(setting).upcast(),
         Setting::ListPictures => list_pictures_row(setting).upcast(),
         Setting::DarkMessages => dark_messages_row(setting).upcast(),
         Setting::ShowPreviews => show_previews_row(setting).upcast(),
@@ -162,6 +164,26 @@ fn group_row(setting: Setting) -> adw::SwitchRow {
         if crate::mailbox::grouped() != on {
             shell.settings.set_bool(settings::GROUP_BY_CONVERSATION, on);
             shell.main().regroup();
+        }
+    })
+}
+
+/// A collapsed conversation's row (or a message's own) shows the whole conversation in the reading pane, or its
+/// message alone: the message shown opened again so
+fn whole_conversation_row(setting: Setting) -> adw::SwitchRow {
+    switch_row(setting, crate::mailbox::whole_conversation(), |on| {
+        shell().main().set_whole_conversation(on)
+    })
+}
+
+/// The order of a conversation's messages in the reading pane and under its row when expanded
+fn conversation_order_row(setting: Setting) -> adw::ComboRow {
+    let names = [t!(UiConversationOldestFirst), t!(UiConversationNewestFirst)];
+    let at = usize::from(crate::mailbox::newest_first());
+    choice_row(setting, &names, at, |chosen| {
+        let newest = chosen == 1;
+        if crate::mailbox::newest_first() != newest {
+            shell().main().set_newest_first(newest);
         }
     })
 }

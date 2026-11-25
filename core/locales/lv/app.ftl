@@ -43,6 +43,8 @@ cmd-accounts = &Konti...
 cmd-find = Meklēt &ziņojumu
 cmd-save-as = &Saglabāt kā...
 cmd-print = Dr&ukāt...
+# review: new
+cmd-print-conversation = Drukāt &visu sarunu...
 cmd-import = &Importēt ziņojumus...
 cmd-outbox = &Izsūtne...
 cmd-properties = R&ekvizīti
@@ -63,6 +65,48 @@ ui-find-not-found = Šajā ziņojumā nav „{ $words }”
 cmd-expand-all-threads = Izvērst visas &sarunas
 cmd-collapse-all-threads = Sakļaut visas sar&unas
 ui-group-by-conversation = &Grupēt ziņojumus pēc sarunām
+# review: new
+ui-show-whole-conversation = Lasīšanas rūtī rādīt &visu sarunu
+# review: new
+ui-show-whole-conversation-note = Sarunas rinda atver visus tās ziņojumus kopā ar jūsu atbildēm, melnrakstiem un ziņojumiem, kas ievietoti citās mapēs. Lasītie ziņojumi ir sakļauti vienā rindā: noklikšķiniet uz rindas, lai to atvērtu vai sakļautu.
+# review: new
+ui-conversation-order = Sarunas &secība:
+# review: new
+ui-conversation-oldest-first = Vispirms vecākie
+# review: new
+ui-conversation-newest-first = Vispirms jaunākie
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+    [zero] ({ $count }, { $new } jaunu)
+    [one] ({ $count }, { $new } jauns)
+   *[other] ({ $count }, { $new } jauni)
+}
+# review: new
+ui-conversation-to = kam: { $people }
+# review: new
+ui-conversation-draft = Melnraksts
+# review: new
+ui-conversation-alone = Parakstīts vai šifrēts: tiek atvērts atsevišķi
+# review: new
+ui-conversation-downloading = Lejupielādē…
+# review: new
+ui-conversation-earlier = { $count ->
+    [zero] Rādīt { $count } agrāku ziņojumu
+    [one] Rādīt { $count } agrāku ziņojumu
+   *[other] Rādīt { $count } agrākus ziņojumus
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [1] Šai sarunai ir arī ziņojums citā mapē.
+    [zero] Šai sarunai ir arī { $count } ziņojumu citās mapēs.
+    [one] Šai sarunai ir arī { $count } ziņojums citās mapēs.
+   *[other] Šai sarunai ir arī { $count } ziņojumi citās mapēs.
+}
+# review: new
+ui-conversation-this-folder = &Tikai šajā mapē
+# review: new
+ui-conversation-whole = &Visā sarunā
 cmd-folder-list = &Mapju saraksts
 cmd-layout-automatic = &Automātisks
 cmd-layout-classic = &Klasisks

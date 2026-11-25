@@ -14,6 +14,7 @@ use base64::engine::general_purpose::STANDARD;
 
 mod bounce;
 mod card;
+mod conversation;
 mod css;
 mod dark;
 mod editor;
@@ -28,6 +29,10 @@ mod secure;
 mod visible;
 pub use bounce::{
     BOUNCED_MESSAGE_LINK, BounceCard, CardDetail, CardPicture, CardReason, bounce_card, is_bounced_message_link,
+};
+pub use conversation::{
+    CONVERSATION_EARLIER_LINK, CONVERSATION_LINK, ConversationLine, conversation_link, conversation_page,
+    is_conversation_earlier_link,
 };
 pub use dark::{dark, set_dark};
 pub use editor::{

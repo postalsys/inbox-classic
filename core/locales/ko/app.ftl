@@ -43,6 +43,8 @@ cmd-accounts = 계정(&A)...
 cmd-find = 메시지 찾기(&F)
 cmd-save-as = 다른 이름으로 저장(&S)...
 cmd-print = 인쇄(&P)...
+# review: new
+cmd-print-conversation = 대화 인쇄(&V)...
 cmd-import = 메시지 가져오기(&I)...
 cmd-outbox = 보낼 편지함(&O)...
 cmd-properties = 속성(&R)
@@ -63,6 +65,43 @@ ui-find-not-found = 이 메시지에 “{ $words }”이(가) 없습니다
 cmd-expand-all-threads = 모든 대화 펼치기(&E)
 cmd-collapse-all-threads = 모든 대화 접기(&O)
 ui-group-by-conversation = 대화별로 메시지 그룹화(&G)
+# review: new
+ui-show-whole-conversation = 읽기 창에 전체 대화 표시(&W)
+# review: new
+ui-show-whole-conversation-note = 대화의 행을 선택하면 회신, 임시 보관 메시지, 다른 폴더로 옮긴 메시지를 포함하여 그 대화의 모든 메시지가 열립니다. 읽은 메시지는 한 줄로 접힙니다. 줄을 클릭하면 열거나 접을 수 있습니다.
+# review: new
+ui-conversation-order = 대화 순서(&O):
+# review: new
+ui-conversation-oldest-first = 오래된 메시지부터
+# review: new
+ui-conversation-newest-first = 최신 메시지부터
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+   *[other] ({ $count }, 새 메시지 { $new }개)
+}
+# review: new
+ui-conversation-to = 받는 사람: { $people }
+# review: new
+ui-conversation-draft = 임시 보관
+# review: new
+ui-conversation-alone = 서명 또는 암호화됨: 따로 열립니다
+# review: new
+ui-conversation-downloading = 다운로드 중…
+# review: new
+ui-conversation-earlier = { $count ->
+    [1] 이전 메시지 1개 표시
+   *[other] 이전 메시지 { $count }개 표시
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [1] 이 대화에는 다른 폴더에도 메시지가 1개 있습니다.
+   *[other] 이 대화에는 다른 폴더에도 메시지가 { $count }개 있습니다.
+}
+# review: new
+ui-conversation-this-folder = 이 폴더만(&T)
+# review: new
+ui-conversation-whole = 전체 대화(&W)
 cmd-folder-list = 폴더 목록(&F)
 cmd-layout-automatic = 자동(&A)
 cmd-layout-classic = 클래식(&C)

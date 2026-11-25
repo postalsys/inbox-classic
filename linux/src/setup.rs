@@ -69,6 +69,8 @@ fn preferences() -> Vec<(String, String)> {
                 "notify_new_mail" => flag(shell.notify.get()),
                 "codes_in_notifications" => flag(pe_core::otp::in_notifications()),
                 "group_by_conversation" => flag(crate::mailbox::grouped()),
+                "show_whole_conversation" => flag(crate::mailbox::whole_conversation()),
+                "conversation_order" => flag(crate::mailbox::newest_first()),
                 "hide_ignored" => flag(crate::mailbox::hide_ignored()),
                 "hide_read" => flag(crate::mailbox::hide_read()),
                 "folder_list" => flag(crate::mailbox::folder_list_shown()),
@@ -101,6 +103,8 @@ fn apply_preferences(prefs: &[(String, String)]) -> bool {
                 shell.settings.set_bool(settings::GROUP_BY_CONVERSATION, on);
                 main.regroup();
             }
+            "show_whole_conversation" => main.set_whole_conversation(on),
+            "conversation_order" if crate::mailbox::newest_first() != on => main.set_newest_first(on),
             "hide_ignored" if crate::mailbox::hide_ignored() != on => main.set_hide_ignored(on),
             "hide_read" if crate::mailbox::hide_read() != on => main.set_hide_read(on),
             "folder_list" if crate::mailbox::folder_list_shown() != on => main.set_folder_list(on),

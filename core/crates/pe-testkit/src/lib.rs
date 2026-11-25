@@ -108,9 +108,9 @@ impl ImapKit {
             .unwrap_or_else(|| panic!("no UID in {response}"))
     }
 
-    /// Changes flags as another client would, `action` is `add`, `remove` or `set`
+    /// Changes flags as another client would, `action` is `add`, `remove` or `set` (ImapKit's `mode`)
     pub fn set_flags(&self, mailbox: &str, uids: &[u64], flags: &[&str], action: &str) {
-        let body = json!({ "uids": uids, "flags": flags, "action": action });
+        let body = json!({ "uids": uids, "flags": flags, "mode": action });
         self.request("POST", &messages_path(mailbox, "/flags"), Some(body));
     }
 

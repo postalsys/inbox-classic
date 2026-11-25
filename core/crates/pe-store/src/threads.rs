@@ -266,6 +266,9 @@ pub struct ThreadPlace {
     pub unread: u32,
     /// The conversation is expanded (its other messages under this row)
     pub expanded: bool,
+    /// A collapsed conversation's row: the message it opens, its oldest unread one, else its newest by arrival;
+    /// the row shows its sender and first words (its subject stays the conversation's, the first message's)
+    pub focus: Option<MessageRef>,
 }
 
 impl ThreadPlace {
@@ -277,6 +280,12 @@ impl ThreadPlace {
     /// The row stands for all of its conversation's messages, as they are not shown under it
     pub fn collapsed(&self) -> bool {
         self.opens() && !self.expanded
+    }
+
+    /// With Show the whole conversation, selecting the row shows its conversation in the reading pane: a row of its
+    /// own or a collapsed conversation's, never one of an expanded conversation's, which shows its message alone
+    pub fn shows_conversation(&self) -> bool {
+        self.depth == 0 && !self.expanded
     }
 }
 
@@ -592,7 +601,7 @@ impl Store {
     }
 
     /// The messages of the conversations `threads` in what `search` finds, by conversation, each's in the order they
-    /// arrived ([`ARRIVED`])
+    /// arrived ([`ARRIVED`]), or its first one followed by the others newest first ([`Search::newest_first`])
     fn thread_lists(&self, search: &Search, threads: &[i64]) -> Result<HashMap<i64, Vec<Message>>> {
         let mut lists: HashMap<i64, Vec<Message>> = HashMap::new();
         if threads.is_empty() {
@@ -609,6 +618,14 @@ impl Store {
                 .entry(message.info.thread_id.unwrap_or_default())
                 .or_default()
                 .push(message);
+        }
+        // newest first: the first message stays the conversation's row, the others under it turn round
+        if search.newest_first {
+            for list in lists.values_mut() {
+                if list.len() > 2 {
+                    list[1..].reverse();
+                }
+            }
         }
         Ok(lists)
     }
@@ -689,6 +706,38 @@ impl Store {
             }
         }
         Ok(senders)
+    }
+
+    /// The messages of the conversation `thread` in every folder of its account but Junk E-mail and Deleted Items (and
+    /// the folders that only show messages filed elsewhere, Gmail's All Mail and Starred), in the order they arrived,
+    /// the first first: what the reading pane shows of a conversation. A message filed in two folders (Gmail's labels)
+    /// is there once, by its Message-ID: in `prefer` when it is there, else in the first folder found.
+    pub fn conversation_messages(&self, thread: i64, prefer: FolderId) -> Result<Vec<Message>> {
+        let mut statement = self.db.prepare(&format!(
+            "SELECT {COLUMNS} FROM messages WHERE thread_id = ?1 AND folder_id IN (SELECT f.id FROM folders f \
+             WHERE f.account_id = (SELECT account_id FROM folders WHERE id = ?2) \
+             AND COALESCE(f.special_use, '') NOT IN ('\\Junk', '\\Trash', '\\All', '\\Flagged')) \
+             ORDER BY {ARRIVED}, folder_id != ?2, folder_id, uid, id"
+        ))?;
+        let found = statement.query_map(params![thread, prefer], from_row)?;
+        let mut messages: Vec<Message> = Vec::new();
+        let mut named: HashMap<String, usize> = HashMap::new();
+        for message in found {
+            let message = message?;
+            let key = message.info.message_id.clone().filter(|id| !id.is_empty());
+            match key.as_ref().and_then(|id| named.get(id)) {
+                // the copy in `prefer` wins over one found before it
+                Some(&at) if message.folder_id == prefer && messages[at].folder_id != prefer => messages[at] = message,
+                Some(_) => {}
+                None => {
+                    if let Some(id) = key {
+                        named.insert(id, messages.len());
+                    }
+                    messages.push(message);
+                }
+            }
+        }
+        Ok(messages)
     }
 
     /// The messages of the conversation `thread` in what `search` finds, in the order they arrived, the first first
@@ -925,6 +974,7 @@ impl Store {
                 count,
                 unread,
                 expanded,
+                focus: None,
             };
             let skip = std::mem::take(&mut above) as usize;
             for (at, message) in messages.into_iter().enumerate().skip(skip) {
@@ -941,7 +991,101 @@ impl Store {
             }
         }
         self.date_collapsed(search, kept, &mut rows)?;
+        self.focus_collapsed(search, &mut rows)?;
         Ok(rows)
+    }
+
+    /// Each collapsed conversation's row names the message it opens ([`ThreadPlace::focus`]) and shows its sender, its
+    /// recipients and first words, with what goes with them (the sender's checks, logo and picture, its protection),
+    /// so the row says what a click on it shows. The row stays the first message's (its place, its key, its
+    /// subject), so selection and paging do not change.
+    fn focus_collapsed(&self, search: &Search, rows: &mut [Message]) -> Result<()> {
+        let threads: Vec<i64> = rows
+            .iter()
+            .filter_map(|m| m.thread.filter(ThreadPlace::collapsed))
+            .map(|t| t.thread)
+            .collect();
+        if threads.is_empty() {
+            return Ok(());
+        }
+        let focus = self.thread_focus(search, &threads)?;
+        for row in rows {
+            let Some(place) = row.thread.as_mut().filter(|place| place.collapsed()) else {
+                continue;
+            };
+            let Some(shown) = focus.get(&place.thread) else {
+                continue;
+            };
+            place.focus = Some(shown.at());
+            let (info, from) = (&mut row.info, &shown.info);
+            info.from_name.clone_from(&from.from_name);
+            info.from_address.clone_from(&from.from_address);
+            info.sender_people.clone_from(&from.sender_people);
+            info.recipients.clone_from(&from.recipients);
+            info.recipient_people.clone_from(&from.recipient_people);
+            info.protection = from.protection;
+            row.snippet.clone_from(&shown.snippet);
+            row.sender_auth = shown.sender_auth;
+            row.logo = shown.logo;
+            row.contact = shown.contact;
+        }
+        Ok(())
+    }
+
+    /// The message each of the conversations `threads` opens in what `search` finds: its oldest unread one, else its
+    /// newest, by arrival. Two lookups a conversation on `messages_thread_focus`, each one step however long the
+    /// conversation is.
+    pub fn thread_focus(&self, search: &Search, threads: &[i64]) -> Result<HashMap<i64, Message>> {
+        let search = search.ungrouped();
+        // a search's words are a full-text match each query runs again: one query for every conversation of the page
+        if !search.text.trim().is_empty() && threads.len() > 1 {
+            return self.thread_focus_at_once(&search, threads);
+        }
+        let mut focus = HashMap::new();
+        for &thread in threads {
+            for (unread, order) in [(true, "ASC"), (false, "DESC")] {
+                let (wanted, values) = of_threads(&search, &[thread]);
+                // the newest is looked for only when none is unread: then all are read
+                let seen = if unread { " AND seen = 0" } else { " AND seen = 1" };
+                let found = self
+                    .db
+                    .prepare_cached(&format!(
+                        "SELECT {COLUMNS} FROM messages WHERE {wanted}{seen} \
+                         ORDER BY {ARRIVED} {order}, uid {order}, id {order} LIMIT 1"
+                    ))?
+                    .query_row(params_from_iter(values), from_row)
+                    .optional()?;
+                if let Some(message) = found {
+                    focus.insert(thread, message);
+                    break;
+                }
+            }
+        }
+        Ok(focus)
+    }
+
+    /// [`Store::thread_focus`] in one query for all `threads`: what `search` finds of them, each conversation's oldest
+    /// unread message, else its newest
+    fn thread_focus_at_once(&self, search: &Search, threads: &[i64]) -> Result<HashMap<i64, Message>> {
+        let (wanted, values) = of_threads(search, threads);
+        let mut statement = self.db.prepare_cached(&format!(
+            "SELECT {COLUMNS}, {ARRIVED} AS arrived FROM messages WHERE {wanted} ORDER BY arrived, uid, id"
+        ))?;
+        let found = statement
+            .query_map(params_from_iter(values), |row| {
+                Ok((from_row(row)?, row.get::<_, Option<i64>>("arrived")?))
+            })?
+            .collect::<rusqlite::Result<Vec<_>>>()?;
+        let mut focus: HashMap<i64, Message> = HashMap::new();
+        for (message, _) in found {
+            let Some(thread) = message.info.thread_id else { continue };
+            // oldest first: the first unread one stays; while none is, each newer one takes its place
+            let replace = focus.get(&thread).is_none_or(|held| held.info.seen());
+            if replace {
+                focus.insert(thread, message);
+            }
+        }
+        Ok(focus)
     }
 
     /// The conversation of the message `uid` of `folder`, None when that message is not in what `search` finds
@@ -1250,6 +1394,121 @@ mod tests {
     }
 
     #[test]
+    fn the_message_a_row_opens_is_found_by_its_index() {
+        let (store, _, inbox, _) = setup();
+        let list = Search::folder(inbox);
+        let (wanted, values) = of_threads(&list.ungrouped(), &[7]);
+        for seen in [" AND seen = 0", " AND seen = 1"] {
+            let plan: Vec<String> = store
+                .db
+                .prepare(&format!(
+                    "EXPLAIN QUERY PLAN SELECT id FROM messages WHERE {wanted}{seen} ORDER BY {ARRIVED} DESC LIMIT 1"
+                ))
+                .unwrap()
+                .query_map(params_from_iter(values.clone()), |row| row.get::<_, String>(3))
+                .unwrap()
+                .map(Result::unwrap)
+                .collect();
+            let plan = plan.join("; ");
+            assert!(
+                plan.contains("messages_thread_focus") && !plan.contains("TEMP B-TREE"),
+                "{plan}"
+            );
+        }
+    }
+
+    #[test]
+    fn a_conversation_across_the_folders_of_its_account() {
+        let store = Store::open_in_memory().unwrap();
+        let account = store.add_account(&AccountSettings::example("a@example.com")).unwrap();
+        let folder = |path: &str, special: Option<&str>| FolderInfo {
+            path: path.into(),
+            name: path.into(),
+            selectable: true,
+            special_use: special.map(str::to_string),
+            ..Default::default()
+        };
+        store
+            .set_folders(
+                account,
+                &[
+                    folder("INBOX", None),
+                    folder("Sent", Some("\\Sent")),
+                    folder("Archive", Some("\\Archive")),
+                    folder("Junk", Some("\\Junk")),
+                    folder("Trash", Some("\\Trash")),
+                    folder("All Mail", Some("\\All")),
+                ],
+            )
+            .unwrap();
+        let id = |path: &str| {
+            store
+                .folders(account)
+                .unwrap()
+                .into_iter()
+                .find(|f| f.info.path == path)
+                .unwrap()
+                .id
+        };
+        let (inbox, sent, archive, junk, trash, all) = (
+            id("INBOX"),
+            id("Sent"),
+            id("Archive"),
+            id("Junk"),
+            id("Trash"),
+            id("All Mail"),
+        );
+        // All Mail first, so its copies are found before the Inbox's
+        store
+            .add_messages(
+                all,
+                &[
+                    mail(1, 100, "<a@x>", &[], true),
+                    mail(2, 300, "<b@x>", &["<a@x>"], false),
+                ],
+            )
+            .unwrap();
+        store
+            .add_messages(
+                inbox,
+                &[
+                    mail(1, 100, "<a@x>", &[], true),
+                    mail(2, 300, "<b@x>", &["<a@x>"], false),
+                ],
+            )
+            .unwrap();
+        store
+            .add_messages(sent, &[mail(1, 350, "<e@x>", &["<a@x>"], true)])
+            .unwrap();
+        store
+            .add_messages(archive, &[mail(1, 370, "<f@x>", &["<a@x>"], true)])
+            .unwrap();
+        store
+            .add_messages(junk, &[mail(1, 360, "<j@x>", &["<a@x>"], false)])
+            .unwrap();
+        store
+            .add_messages(trash, &[mail(1, 380, "<t@x>", &["<a@x>"], true)])
+            .unwrap();
+        let thread = store.message(inbox, 1).unwrap().unwrap().info.thread_id.unwrap();
+        let shown: Vec<(FolderId, String)> = store
+            .conversation_messages(thread, inbox)
+            .unwrap()
+            .into_iter()
+            .map(|m| (m.folder_id, m.info.subject))
+            .collect();
+        assert_eq!(
+            shown,
+            [
+                (inbox, "a@x".to_string()),
+                (inbox, "b@x".to_string()),
+                (sent, "e@x".to_string()),
+                (archive, "f@x".to_string()),
+            ],
+            "every folder but Junk, Deleted Items and All Mail, each message once, the Inbox's copy"
+        );
+    }
+
+    #[test]
     fn groups_replies_into_conversations() {
         let (store, _, inbox, sent) = setup();
         // a: the start, b answers a, c answers b (naming both), d stands alone; e answers a in Sent Items
@@ -1269,7 +1528,7 @@ mod tests {
             .unwrap();
         let list = Search::folder(inbox);
         let newest = Sort::default();
-        for (uid, words) in [(1, "first words"), (4, "newest words")] {
+        for (uid, words) in [(1, "first words"), (3, "unread words"), (4, "newest words")] {
             let id = store.message(inbox, uid).unwrap().unwrap().id;
             let text = crate::IndexText {
                 snippet: words.into(),
@@ -1281,9 +1540,13 @@ mod tests {
         // collapsed: a's conversation (newest message 400) above d's (200); a stands for b and c
         let rows = store.thread_rows(&list, newest, &[], 0, 10).unwrap();
         assert_eq!(
-            rows[0].snippet.as_deref(),
-            Some("first words"),
-            "collapsed: its own snippet, of the message selecting it opens"
+            (rows[0].snippet.as_deref(), place(&rows[0]).focus),
+            (Some("unread words"), Some(MessageRef { folder: inbox, uid: 3 })),
+            "collapsed: it opens its oldest unread message, whose first words it shows"
+        );
+        assert_eq!(
+            rows[0].info.uid, 1,
+            "the row stays the first message's, for selection and paging"
         );
         assert_eq!(subjects(&rows), [("a@x".into(), 0), ("d@x".into(), 0)]);
         assert_eq!(
@@ -1297,6 +1560,35 @@ mod tests {
             "the conversation's messages in this folder"
         );
         assert_eq!(store.count_thread_rows(&list, &[]).unwrap(), 2);
+        // all read: it opens its newest message
+        store.set_flag(inbox, 3, "\\Seen", true).unwrap();
+        let read = store.thread_rows(&list, newest, &[], 0, 10).unwrap();
+        assert_eq!(
+            (read[0].snippet.as_deref(), place(&read[0]).focus),
+            (Some("newest words"), Some(MessageRef { folder: inbox, uid: 4 })),
+            "all read: it opens its newest message"
+        );
+        assert_eq!(place(&read[1]).focus, None, "a message alone has no focus");
+        store.set_flag(inbox, 3, "\\Seen", false).unwrap();
+        // a search's page asks once for all its conversations, with the same answer
+        let threads = [
+            place(&rows[0]).thread,
+            store.message(inbox, 2).unwrap().unwrap().info.thread_id.unwrap(),
+        ];
+        let one_by_one = store.thread_focus(&list, &threads).unwrap();
+        let at_once = store.thread_focus_at_once(&list, &threads).unwrap();
+        let uids = |found: &HashMap<i64, Message>| {
+            let mut uids: Vec<(i64, u64)> = found.iter().map(|(t, m)| (*t, m.info.uid)).collect();
+            uids.sort();
+            uids
+        };
+        assert_eq!(uids(&at_once), uids(&one_by_one));
+        store.set_flag(inbox, 3, "\\Seen", true).unwrap();
+        assert_eq!(
+            uids(&store.thread_focus_at_once(&list, &threads).unwrap()),
+            uids(&store.thread_focus(&list, &threads).unwrap())
+        );
+        store.set_flag(inbox, 3, "\\Seen", false).unwrap();
         // the reply in Sent Items is in the same conversation, not in this list
         let a = place(&rows[0]).thread;
         assert_eq!(store.message(sent, 1).unwrap().unwrap().info.thread_id, Some(a));
@@ -1322,6 +1614,29 @@ mod tests {
         assert_eq!(
             subjects(&store.thread_rows(&list, newest, &open, 2, 2).unwrap()),
             [("c@x".into(), 1), ("d@x".into(), 0)]
+        );
+        // newest first: its first message stays its row, the others under it turn round, page by page alike
+        let turned = Search {
+            newest_first: true,
+            ..list.clone()
+        };
+        let rows = store.thread_rows(&turned, newest, &open, 0, 10).unwrap();
+        assert_eq!(
+            subjects(&rows),
+            [
+                ("a@x".into(), 0),
+                ("c@x".into(), 1),
+                ("b@x".into(), 1),
+                ("d@x".into(), 0)
+            ]
+        );
+        let paged: Vec<(String, u32)> = (0..4)
+            .flat_map(|at| subjects(&store.thread_rows(&turned, newest, &open, at, 1).unwrap()))
+            .collect();
+        assert_eq!(
+            paged,
+            subjects(&rows),
+            "newest first: a page from inside a conversation"
         );
         // a message's row: its own when open, its conversation's otherwise
         assert_eq!(store.thread_row_index(&list, newest, &open, inbox, 4).unwrap(), Some(2));

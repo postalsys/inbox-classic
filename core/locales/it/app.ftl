@@ -42,6 +42,8 @@ cmd-accounts = &Account...
 cmd-find = T&rova messaggio
 cmd-save-as = Sal&va con nome...
 cmd-print = Stam&pa...
+# review: new
+cmd-print-conversation = Stampa &la conversazione...
 cmd-import = &Importa messaggi...
 cmd-outbox = Posta in &uscita...
 cmd-properties = Pr&oprietà
@@ -62,6 +64,44 @@ ui-find-not-found = “{ $words }” non è presente in questo messaggio
 cmd-expand-all-threads = &Espandi tutte le conversazioni
 cmd-collapse-all-threads = Comprimi &tutte le conversazioni
 ui-group-by-conversation = Raggruppa i messaggi per conversa&zione
+# review: new
+ui-show-whole-conversation = Mostra l’&intera conversazione nel riquadro di lettura
+# review: new
+ui-show-whole-conversation-note = La riga di una conversazione apre tutti i suoi messaggi, con le tue risposte, le bozze e i messaggi archiviati in altre cartelle. I messaggi letti sono ridotti a una riga: fai clic su una riga per aprirla o ridurla.
+# review: new
+ui-conversation-order = &Ordine della conversazione:
+# review: new
+ui-conversation-oldest-first = Prima il meno recente
+# review: new
+ui-conversation-newest-first = Prima il più recente
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+    [one] ({ $count }, { $new } nuovo)
+   *[other] ({ $count }, { $new } nuovi)
+}
+# review: new
+ui-conversation-to = a { $people }
+# review: new
+ui-conversation-draft = Bozza
+# review: new
+ui-conversation-alone = Firmato o crittografato: si apre da solo
+# review: new
+ui-conversation-downloading = Download in corso…
+# review: new
+ui-conversation-earlier = { $count ->
+    [one] Mostra 1 messaggio precedente
+   *[other] Mostra { $count } messaggi precedenti
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [one] Questa conversazione ha anche un messaggio in un’altra cartella.
+   *[other] Questa conversazione ha anche { $count } messaggi in altre cartelle.
+}
+# review: new
+ui-conversation-this-folder = &Solo questa cartella
+# review: new
+ui-conversation-whole = &Intera conversazione
 cmd-folder-list = Elenco &cartelle
 cmd-layout-automatic = &Automatico
 cmd-layout-classic = &Classico

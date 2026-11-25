@@ -42,6 +42,7 @@ cmd-accounts = &Accounts...
 cmd-find = &Find Message
 cmd-save-as = &Save As...
 cmd-print = &Print...
+cmd-print-conversation = Print Con&versation...
 cmd-import = &Import Messages...
 cmd-outbox = &Outbox...
 cmd-properties = P&roperties
@@ -62,6 +63,29 @@ ui-find-not-found = “{ $words }” is not in this message
 cmd-expand-all-threads = &Expand All Conversations
 cmd-collapse-all-threads = C&ollapse All Conversations
 ui-group-by-conversation = &Group messages by conversation
+ui-show-whole-conversation = Show the &whole conversation in the reading pane
+ui-show-whole-conversation-note = A conversation’s row opens all of its messages, with your replies, drafts and the messages filed in other folders. Read messages are folded to a line: click a line to open or fold it.
+ui-conversation-order = Conversation &order:
+ui-conversation-oldest-first = Oldest first
+ui-conversation-newest-first = Newest first
+ui-thread-count = { $new ->
+    [0] ({ $count })
+   *[other] ({ $count }, { $new } new)
+}
+ui-conversation-to = to { $people }
+ui-conversation-draft = Draft
+ui-conversation-alone = Signed or encrypted: opens by itself
+ui-conversation-downloading = Downloading…
+ui-conversation-earlier = { $count ->
+    [one] Show 1 earlier message
+   *[other] Show { $count } earlier messages
+}
+ui-conversation-elsewhere = { $count ->
+    [one] This conversation also has a message in another folder.
+   *[other] This conversation also has { $count } messages in other folders.
+}
+ui-conversation-this-folder = &This Folder Only
+ui-conversation-whole = &Whole Conversation
 cmd-folder-list = &Folder List
 cmd-layout-automatic = &Automatic
 cmd-layout-classic = &Classic

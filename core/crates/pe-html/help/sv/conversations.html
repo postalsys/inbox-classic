@@ -1,10 +1,21 @@
 <h1>Konversationer</h1>
 <p class="summary">Meddelanden som svarar på varandra samlas på en rad, och du kan bevaka eller ignorera en konversation.</p>
-<p>En konversation visas på en rad med uppgifterna från sitt första meddelande och antalet meddelanden. Raden är fetstilad om något meddelande är oläst. Vid sortering efter datum eller mottagningstid avgör det senaste meddelandet placeringen; annars används det första. Antalet och lässtatusen gäller meddelandena i den aktuella listan.</p>
+<p><!--review-->En hopfälld konversation har en rad. Den visar konversationens ämne, antalet meddelanden i den aktuella listan och hur många av dem som är nya, som i <i>(3, 1 ny)</i>. Avsändaren och de första orden kommer från meddelandet som raden öppnar: det äldsta olästa, eller det senaste när alla är lästa. Raden är fetstilad så länge något av dess meddelanden är oläst. Vid sortering efter datum eller mottagningstid avgör det senaste meddelandet placeringen; annars används det första.<!--/review--></p>
+<h2><!--review-->Hela konversationen i läsfönstret<!--/review--></h2>
+<p><!--review-->Markera en konversations rad för att se alla dess meddelanden i läsfönstret, under varandra, med början vid det äldsta olästa meddelandet. Olästa meddelanden är öppna; lästa är hopfällda till en rad med avsändare, datum och de första orden. Klicka på en rad för att öppna meddelandet och klicka igen för att fälla ihop det. Dina egna svar i Skickat, dina utkast och meddelanden som du har lagt i andra mappar visas också, vart och ett med namnet på sin mapp. Meddelanden i Skräppost och Borttaget utelämnas.<!--/review--></p>
 <ul>
-    <li>Om du vill se dess andra meddelanden klickar du på <b><!--os:windows-->+<!--/os--><!--os:mac,linux-->▸<!--/os--></b> framför den, eller trycker på <kbd>→</kbd>. Om du vill dölja dem klickar du på <b><!--os:windows-->-<!--/os--><!--os:mac,linux-->▾<!--/os--></b>, eller trycker på <kbd>←</kbd>.</li>
+    <li><!--review-->Svara, Svara alla, Vidarebefordra och Skriv ut gäller meddelandet med den färgade kanten: det du klickade på senast, eller det som läsfönstret öppnades vid.<!--/review--></li>
+    <li><!--review-->Olästa meddelanden som visas öppna markeras som lästa efter en stund.<!--/review--></li>
+    <li><!--review--><b data-text="menu-file"></b> &gt; <b data-text="cmd-print-conversation"></b> skriver ut alla meddelanden i konversationen, ett efter ett.<!--/review--></li>
+    <li><!--review-->Dubbelklicka på raden för att öppna konversationen i ett eget fönster.<!--/review--></li>
+    <li><!--review-->Ett signerat eller krypterat meddelande visas aldrig i följden. Dess rad talar om att det öppnas för sig; klicka på raden för att läsa det ensamt.<!--/review--></li>
+    <li><!--review-->En lång konversation visar sina senaste 20 meddelanden; klicka på länken ovanför dem för att visa de tidigare.<!--/review--></li>
+</ul>
+<p><!--review-->Om du hellre vill se ett meddelande i taget stänger du av <b data-text="ui-show-whole-conversation"></b> i <b data-settings="reading"></b>. En konversations rad öppnar då dess äldsta olästa meddelande, eller det senaste. <b data-text="ui-conversation-order"></b> på samma sida visar det senaste meddelandet först, i läsfönstret och under en expanderad konversations rad.<!--/review--></p>
+<ul>
+    <li><!--review-->Om du vill lista dess meddelanden under raden klickar du på <b><!--os:windows-->+<!--/os--><!--os:mac,linux-->▸<!--/os--></b> framför den, eller trycker på <kbd>→</kbd> eller <kbd>Enter</kbd>. Om du vill dölja dem klickar du på <b><!--os:windows-->-<!--/os--><!--os:mac,linux-->▾<!--/os--></b>, eller trycker på <kbd>←</kbd>. Om du markerar ett av meddelandena under raden visas bara det meddelandet.<!--/review--></li>
     <li><b data-text="menu-view"></b> &gt; <b data-text="cmd-expand-all-threads"></b> och <b data-text="cmd-collapse-all-threads"></b> gör samma sak för hela listan.</li>
-    <li>När du tar bort, flyttar, arkiverar, skräppostmarkerar, lästmarkerar eller flaggar en hopfälld konversation påverkas dess meddelanden i den aktuella listan.</li>
+    <li><!--review-->När du tar bort, flyttar, arkiverar, skräppostmarkerar, lästmarkerar eller flaggar en hopfälld konversation påverkas dess meddelanden i den aktuella listan. Om konversationen även har meddelanden i andra mappar frågar Inbox Classic vid borttagning, flyttning och arkivering om åtgärden ska gälla <b data-text="ui-conversation-this-folder"></b> eller <b data-text="ui-conversation-whole"></b>. Arkivering och flyttning lämnar dina skickade meddelanden och utkast där de är.<!--/review--></li>
 </ul>
 <p>Om du vill visa varje meddelande på en egen rad stänger du av <b data-text="ui-group-by-conversation"></b> i <b data-settings="reading"></b>.</p>
 <h2>Bevaka en konversation</h2>

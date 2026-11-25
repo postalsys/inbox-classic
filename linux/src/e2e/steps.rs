@@ -2118,10 +2118,22 @@ pub async fn conversations(d: &Driver) {
          References: <trip1@example.com> <trip2@example.com>\r\nDate: {}\r\n\r\nTickets bought.\r\n",
         date_now(0)
     );
-    // the first one read, the replies not
-    let added = d.add_message_in(d.ports.rest, "INBOX", &first, &["\\Seen"]).is_ok()
-        && d.add_message_to("INBOX", &second).is_ok()
-        && d.add_message_to("INBOX", &third).is_ok();
+    // the first one read, the replies not, each got by the server at its own time
+    let arrived = |minutes: i64| {
+        glib::DateTime::now_utc()
+            .and_then(|t| t.add_minutes(minutes as i32))
+            // as IMAP writes a date-time, which is what the server takes
+            .and_then(|t| t.format("%d-%b-%Y %H:%M:%S +0000"))
+            .map(|t| t.to_string())
+            .unwrap_or_default()
+    };
+    let added = d
+        .add_message_in_at(d.ports.rest, "INBOX", &first, &["\\Seen"], Some(&arrived(-2)))
+        .is_ok()
+        && d.add_message_in_at(d.ports.rest, "INBOX", &second, &[], Some(&arrived(-1)))
+            .is_ok()
+        && d.add_message_in_at(d.ports.rest, "INBOX", &third, &[], Some(&arrived(0)))
+            .is_ok();
     d.check(
         added,
         "three messages of one conversation are put into the Inbox on the server",
@@ -2137,8 +2149,56 @@ pub async fn conversations(d: &Driver) {
             .enumerate()
             .find(|(_, m)| m.info.subject == subject && m.thread.is_some_and(|t| t.count == 3))
     };
-    let Some((at, message)) = wait_for(30, head).await else {
+    if wait_for(30, head).await.is_none() {
         d.check(false, "the Inbox lists the conversation once, with its three messages");
+        return;
+    }
+    // the list may open the conversation by itself as new mail comes (and read it): another row selected, the two
+    // replies unread again on the server, as they came
+    if let Some(other) = main
+        .list_view()
+        .rows(core, 0, 100)
+        .unwrap_or_default()
+        .iter()
+        .position(|m| m.info.subject != subject && !m.info.subject.ends_with(subject))
+    {
+        select_row(other as u32).await;
+    }
+    // what the app marked read itself on showing them reaches the server first, or it would mark them read again after
+    let mine = ["Message-ID: <trip2@example.com>", "Message-ID: <trip3@example.com>"];
+    wait_until(10, || mine.iter().all(|needle| d.seen(needle))).await;
+    let unmarked = d.set_flags(
+        &["Message-ID: <trip2@example.com>", "Message-ID: <trip3@example.com>"],
+        &["\\Seen"],
+        "remove",
+    );
+    let after: Vec<bool> = mine.iter().map(|needle| d.seen(needle)).collect();
+    run_command(Command::Sync);
+    // the row and the store agree: two unread here, and the row read again after they are (not a page read before)
+    let unread_here = |m: &pe_store::Message| {
+        (m.info.uid..m.info.uid + 3)
+            .filter(|uid| {
+                core.message(m.folder_id, *uid)
+                    .ok()
+                    .flatten()
+                    .is_some_and(|x| !x.info.seen())
+            })
+            .count()
+    };
+    let unread = || {
+        head().and_then(|(at, m)| (m.thread.is_some_and(|t| t.unread == 2) && unread_here(&m) == 2).then_some((at, m)))
+    };
+    let Some((at, message)) = wait_for(30, unread).await else {
+        let here = head().map(|(_, m)| unread_here(&m));
+        let server: Vec<bool> = mine.iter().map(|needle| d.seen(needle)).collect();
+        let selected = main.list.selected().map(|(_, m)| m.info.subject.clone());
+        let shown = main.reader.shows_conversation();
+        d.check(
+            false,
+            &format!(
+                "its two replies are unread, in the row and here ({here:?} here, seen on the server {server:?} (unmarked {unmarked:?}, then {after:?}), selected {selected:?}, a conversation shown {shown})"
+            ),
+        );
         return;
     };
     let Some(place) = message.thread else { return };
@@ -2148,8 +2208,7 @@ pub async fn conversations(d: &Driver) {
         place.depth == 0 && !place.expanded && u64::from(collapsed_rows) == listed,
         &format!("the Inbox lists the conversation once, on its first message ({collapsed_rows} rows)"),
     );
-    select_row(at as u32).await;
-    let counted = format!("{subject} (3)");
+    let counted = format!("{subject} {}", pe_core::thread_count(3, 2));
     let bold = wait_until(5, || {
         subject_labels(&counted)
             .first()
@@ -2158,9 +2217,120 @@ pub async fn conversations(d: &Driver) {
     .await;
     d.check(
         bold && message.info.seen(),
-        "with the count of its messages, bold while one is unread though the first is read",
+        &format!("with the count of its messages and of the new ones ({counted}), bold while one is unread though the first is read"),
+    );
+    // the row names the message it opens: the oldest unread, Ann's answer
+    d.check(
+        message.info.from_name == "Ann Example" && place.focus.is_some_and(|f| f.uid != message.info.uid),
+        &format!(
+            "the row shows the sender of its oldest unread message ({}, row {} focus {:?}, {} new, here {:?})",
+            message.info.from_name,
+            message.info.uid,
+            place.focus.map(|f| f.uid),
+            place.unread,
+            (message.info.uid..message.info.uid + 4)
+                .map(|uid| (
+                    uid,
+                    core.message(message.folder_id, uid)
+                        .ok()
+                        .flatten()
+                        .map(|m| m.info.seen())
+                ))
+                .collect::<Vec<_>>()
+        ),
+    );
+    let Some(focus) = place.focus else {
+        d.check(false, "the collapsed row names the message it opens");
+        return;
+    };
+    select_row(at as u32).await;
+    let stacked = wait_until(15, || {
+        main.reader.shows(focus.folder, focus.uid) && main.reader.shows_conversation()
+    })
+    .await;
+    // each line's state: open (pe-o), the focus (pe-f), unread (pe-u); an unread line is always open, the focus open,
+    // the read first message folded (which unread ones open is the core's, tests/conversation.rs)
+    let shown = main.reader.preview.shown_with_parts();
+    let lines: Vec<Vec<&str>> = shown
+        .split("<section class=\"")
+        .skip(1)
+        .map(|s| s.split('"').next().unwrap_or_default().split(' ').collect())
+        .collect();
+    d.check(
+        stacked
+            && lines.len() == 3
+            && lines.iter().all(|l| !l.contains(&"pe-u") || l.contains(&"pe-o"))
+            && lines.iter().any(|l| l.contains(&"pe-f") && l.contains(&"pe-o"))
+            && !lines[0].contains(&"pe-o"),
+        &format!(
+            "selecting it shows the whole conversation at its oldest unread message: the unread ones open, the read one folded ({lines:?})"
+        ),
+    );
+    d.check(
+        (0..3).all(|n| shown.contains(&format!("inboxclassic:conversation-{n}"))),
+        "each message has its line",
     );
     d.shot(main.window(), "threads-1-collapsed").await;
+    // a moment on screen: the unread messages it showed are read on the server
+    let read = wait_until(20, || {
+        ["<trip2@example.com>", "<trip3@example.com>"]
+            .iter()
+            .all(|id| d.seen(&format!("Message-ID: {id}")))
+    })
+    .await;
+    d.check(
+        read,
+        "after a moment on screen, the unread messages it showed open are read on the server",
+    );
+    // the read first message's line: it opens, and Reply now answers it
+    main.reader.click_conversation_line(0);
+    let opened = wait_until(15, || {
+        main.reader.shows_conversation()
+            && main.reader.message().is_some_and(|m| m.uid == message.info.uid)
+            && main
+                .reader
+                .preview
+                .shown_with_parts()
+                .contains("Shall we take the early train?")
+    })
+    .await;
+    d.check(
+        opened,
+        "a click on a folded line opens its message, which takes the focus",
+    );
+    d.shot(main.window(), "threads-6-conversation-line").await;
+    // Print Conversation: every message, one after another
+    let window = main.window().clone().upcast::<gtk::Window>();
+    run_command(Command::PrintConversation);
+    let dialog = wait_for(40, || {
+        windows()
+            .into_iter()
+            .find(|w| w != &window && w.is::<gtk::PrintUnixDialog>())
+    })
+    .await;
+    let printed = crate::reader::printing().unwrap_or_default();
+    d.check(
+        dialog.is_some()
+            && [
+                "Shall we take the early train?",
+                "The early one, yes.",
+                "Tickets bought.",
+            ]
+            .iter()
+            .all(|text| printed.contains(text)),
+        &format!(
+            "Print Conversation prints all three messages (dialog {}, {} characters)",
+            dialog.is_some(),
+            printed.len()
+        ),
+    );
+    if let Some(dialog) = dialog {
+        let closed = dialog.downgrade();
+        dialog.close();
+        drop(dialog);
+        wait_until(10, || closed.upgrade().is_none_or(|w| !w.is_visible())).await;
+    }
+    wait_until(10, || crate::reader::printing().is_none()).await;
 
     // what a click on its triangle does
     main.set_thread_expanded(place.thread, true);
@@ -2174,14 +2344,16 @@ pub async fn conversations(d: &Driver) {
         let labels = subject_labels(&format!("Re: {subject}"));
         labels.len() == 2
             && labels.iter().all(|l| {
-                l.parent()
-                    .is_some_and(|cell| cell.margin_start() > 0 && l.has_css_class("unread"))
+                // read by now: the conversation showed them open
+                l.parent().is_some_and(|cell| cell.margin_start() > 0)
             })
     })
     .await;
     d.check(
         opened && under && indented,
-        "expanding it shows its replies under it, indented",
+        &format!(
+            "expanding it shows its replies under it, indented (opened {opened}, under {under}, indented {indented})"
+        ),
     );
     d.check(
         main.list
@@ -2209,6 +2381,25 @@ pub async fn conversations(d: &Driver) {
         all_read,
         "Mark Read on the collapsed row marks all three read on the server",
     );
+
+    // Show the whole conversation off: the row opens its message alone
+    shell()
+        .settings
+        .set_bool(crate::settings::SHOW_WHOLE_CONVERSATION, false);
+    main.reopen_shown();
+    select_row(at as u32).await;
+    let alone = wait_until(15, || {
+        main.reader.has_view() && !main.reader.shows_conversation() && main.reader.message().is_some()
+    })
+    .await;
+    d.check(
+        alone,
+        "with Show the whole conversation off, the row opens one message alone",
+    );
+    shell()
+        .settings
+        .set_bool(crate::settings::SHOW_WHOLE_CONVERSATION, true);
+    main.reopen_shown();
 
     group_by_conversation(d, false).await;
     let apart = wait_until(10, || {
@@ -2333,14 +2524,15 @@ pub(super) async fn open_by_subject(folder: i64, subject: &str) -> bool {
                 .iter()
                 .position(|m| m.folder_id == folder && m.info.subject == subject)?;
             main.list.select(u32::try_from(at).ok()?);
-            Some(shown[at].info.uid)
+            // what the row opens: a collapsed conversation's focus, else its own message
+            Some(shown[at].opens_at())
         })
         .await;
-        let Some(uid) = selected else {
+        let Some(opened) = selected else {
             return false;
         };
         // the list read again between the two would have shown another message: selected again
-        if wait_until(15, || main.reader.shows(folder, uid)).await {
+        if wait_until(15, || main.reader.shows(opened.folder, opened.uid)).await {
             return true;
         }
     }

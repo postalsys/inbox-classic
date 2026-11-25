@@ -1,10 +1,21 @@
 <h1>Converses</h1>
 <p class="summary">Els missatges de la mateixa conversa s’agrupen en una sola fila, i podeu seguir o ignorar la conversa.</p>
-<p>Cada conversa ocupa una fila, que mostra el primer missatge i el nombre de missatges de la conversa. La fila apareix en negreta si hi ha algun missatge no llegit. En ordenar per data o recepció, la posició a la llista depèn del missatge més recent; amb altres criteris, depèn del primer missatge. El recompte i l’estat de lectura es refereixen als missatges de la llista actual.</p>
+<p><!--review-->Una conversa plegada ocupa una fila. Mostra l’assumpte de la conversa, el nombre dels seus missatges a la llista actual i quants són nous, com a <i>(3, 1 nou)</i>. El remitent i les primeres paraules són els del missatge que obre: el no llegit més antic, o el més recent si tots són llegits. La fila apareix en negreta mentre algun dels seus missatges no s’hagi llegit. En ordenar per data o recepció s’utilitza el missatge més recent; amb altres criteris, el primer missatge.<!--/review--></p>
+<h2><!--review-->Tota la conversa a la subfinestra de lectura<!--/review--></h2>
+<p><!--review-->Seleccioneu la fila d’una conversa per veure’n tots els missatges a la subfinestra de lectura, l’un sota l’altre, a partir del missatge no llegit més antic. Els missatges no llegits apareixen oberts; els llegits es pleguen en una línia amb el remitent, la data i les primeres paraules. Feu clic en una línia per obrir aquell missatge, i torneu-hi a fer clic per plegar-lo. També es mostren les vostres respostes d’Elements enviats, els esborranys i els missatges que heu desat en altres carpetes, cadascun amb el nom de la seva carpeta. Els missatges de Correu brossa i d’Elements suprimits no s’hi inclouen.<!--/review--></p>
 <ul>
-    <li>Per veure’n els altres missatges, feu clic al <b><!--os:windows-->+<!--/os--><!--os:mac,linux-->▸<!--/os--></b> del davant, o premeu <kbd>→</kbd>. Per amagar-los, feu clic al <b><!--os:windows-->-<!--/os--><!--os:mac,linux-->▾<!--/os--></b>, o premeu <kbd>←</kbd>.</li>
+    <li><!--review-->Respon, Respon a tothom, Reenvia i Imprimeix actuen sobre el missatge de la vora de color: el darrer on heu fet clic, o aquell on s’ha obert la subfinestra.<!--/review--></li>
+    <li><!--review-->Els missatges no llegits que es mostren oberts es marquen com a llegits al cap d’un moment.<!--/review--></li>
+    <li><!--review--><b data-text="menu-file"></b> &gt; <b data-text="cmd-print-conversation"></b> imprimeix tots els missatges de la conversa, l’un darrere l’altre.<!--/review--></li>
+    <li><!--review-->Feu doble clic a la fila per obrir la conversa en una finestra pròpia.<!--/review--></li>
+    <li><!--review-->Un missatge signat o xifrat no es mostra mai a la pila. La seva línia indica que s’obre per separat; feu clic a la línia per llegir-lo sol.<!--/review--></li>
+    <li><!--review-->Una conversa llarga mostra els darrers 20 missatges; feu clic a l’enllaç que hi ha a sobre per mostrar els anteriors.<!--/review--></li>
+</ul>
+<p><!--review-->Per veure un sol missatge cada vegada, desactiveu <b data-text="ui-show-whole-conversation"></b> a <b data-settings="reading"></b>. Aleshores, la fila d’una conversa obre el missatge no llegit més antic, o el més recent. <b data-text="ui-conversation-order"></b>, a la mateixa pàgina, mostra primer el missatge més recent, a la subfinestra de lectura i sota la fila d’una conversa desplegada.<!--/review--></p>
+<ul>
+    <li><!--review-->Per mostrar-ne els missatges sota la fila, feu clic al <b><!--os:windows-->+<!--/os--><!--os:mac,linux-->▸<!--/os--></b> del davant, o premeu <kbd>→</kbd> o <kbd>Enter</kbd>. Per amagar-los, feu clic al <b><!--os:windows-->-<!--/os--><!--os:mac,linux-->▾<!--/os--></b>, o premeu <kbd>←</kbd>. Si seleccioneu un dels missatges de sota la fila, es mostra només aquell missatge.<!--/review--></li>
     <li><b data-text="menu-view"></b> &gt; <b data-text="cmd-expand-all-threads"></b> i <b data-text="cmd-collapse-all-threads"></b> fan el mateix per a tota la llista.</li>
-    <li>Les ordres per suprimir, moure, arxivar, marcar com a correu brossa, marcar com a llegit i marcar amb bandera afecten els missatges de la conversa plegada inclosos a la llista actual.</li>
+    <li><!--review-->Les ordres per suprimir, moure, arxivar, marcar com a correu brossa, marcar com a llegit i marcar amb bandera afecten els missatges de la conversa plegada inclosos a la llista actual. Quan la conversa també té missatges en altres carpetes, Suprimeix, Mou i Arxiva pregunten si cal actuar a <b data-text="ui-conversation-this-folder"></b> o a <b data-text="ui-conversation-whole"></b>. Arxiva i Mou deixen els vostres missatges enviats i esborranys on són.<!--/review--></li>
 </ul>
 <p>Per mostrar cada missatge en una fila pròpia, desactiveu <b data-text="ui-group-by-conversation"></b> a <b data-settings="reading"></b>.</p>
 <h2>Seguir una conversa</h2>

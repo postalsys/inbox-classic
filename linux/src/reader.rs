@@ -90,6 +90,10 @@ pub struct Reader {
     /// The view shown was made of the message's text while the rest of it was still coming: the message's arrival
     /// makes it again
     text_first: Cell<bool>,
+    /// The message is opened in its conversation (Show the whole conversation): its view is the conversation's
+    conversation: Cell<bool>,
+    /// A line of the conversation shown took the focus: its message, once downloaded, is shown in place
+    refocus: Cell<bool>,
     remote_images: Cell<bool>,
     /// The view and the logo being made for it, and the one-click unsubscribe on the way; 0 for none
     view_request: Cell<u64>,
@@ -295,6 +299,8 @@ impl Reader {
             file: RefCell::default(),
             view: RefCell::default(),
             text_first: Cell::new(false),
+            conversation: Cell::new(false),
+            refocus: Cell::new(false),
             remote_images: Cell::new(false),
             view_request: Cell::new(0),
             logo_request: Cell::new(0),
@@ -371,6 +377,19 @@ impl Reader {
             };
             spawn(async move { this.open_attachment(index).await });
         };
+        // a line of a conversation's page, or its "Show N earlier messages": after the view's signal, as the page is
+        // shown again in this view
+        let this = Rc::downgrade(self);
+        let conversation = move |index: Option<usize>| {
+            let this = this.clone();
+            glib::idle_add_local_once(move || {
+                let Some(this) = this.upgrade() else { return };
+                match index {
+                    Some(index) => this.conversation_line(index),
+                    None => this.conversation_earlier(),
+                }
+            });
+        };
         // Find Key beside the label of a part signed by a key not known here: the core reads the fingerprint from the
         // link and looks it up; nothing is opened
         let this = Rc::downgrade(self);
@@ -398,6 +417,14 @@ impl Reader {
             }
             if pe_html::is_open_calendar_link(uri) {
                 calendar();
+                return true;
+            }
+            if let Some(index) = pe_html::conversation_link(uri) {
+                conversation(Some(index));
+                return true;
+            }
+            if pe_html::is_conversation_earlier_link(uri) {
+                conversation(None);
                 return true;
             }
             if !pe_html::is_bounced_message_link(uri) {
@@ -616,6 +643,12 @@ impl Reader {
         self.view.borrow().as_ref().and_then(|v| v.bounced_message)
     }
 
+    /// Whether the next message opened ([`Reader::open`]) is shown in its conversation (a row of its own or a collapsed
+    /// conversation's, with Show the whole conversation on) or alone
+    pub fn set_conversation(&self, on: bool) {
+        self.conversation.set(on);
+    }
+
     /// The message `uid` of `folder` (of `account`) asked for: its header from the list at once when there is `info`,
     /// the message once the core has it ([`Reader::on_event`]); tried again when it could not be downloaded and the
     /// account syncs again
@@ -637,7 +670,7 @@ impl Reader {
             // another window may have asked for the same message: a view shown whole stays, as the core makes only
             // the newest view asked for, and one made here at the same time would leave the other window without its
             Event::MessageReady { folder, uid }
-                if shown(*folder, *uid) && (!self.has_view() || self.text_first.get()) =>
+                if shown(*folder, *uid) && (!self.has_view() || self.text_first.get() || self.refocus.get()) =>
             {
                 self.stop_downloading_note();
                 self.start_view();
@@ -650,6 +683,11 @@ impl Reader {
                 message,
             } if shown(*folder, *uid) => {
                 self.not_downloaded(*kind, message);
+                None
+            }
+            // an open message of the conversation shown is downloaded: the conversation built again, where it was
+            Event::MessageReady { folder, uid } if self.waits_for(*folder, *uid) => {
+                self.view_again();
                 None
             }
             // a view for a message no longer shown was cancelled, its event is not this one
@@ -698,15 +736,72 @@ impl Reader {
         self.view.borrow().as_ref().and_then(|v| v.preview_token.as_deref()) == Some(token)
     }
 
-    /// The view of the message asked for, built on a worker; [`Reader::show_view`] shows it when it comes
+    /// Whether the conversation shown waits for the message `uid` of `folder`, an open one still downloading
+    fn waits_for(&self, folder: i64, uid: u64) -> bool {
+        let at = MessageRef { folder, uid };
+        self.view
+            .borrow()
+            .as_ref()
+            .and_then(|v| v.conversation.as_ref())
+            .is_some_and(|c| c.waiting.contains(&at))
+    }
+
+    /// A line of the conversation shown clicked: its message opens or folds; the conversation is shown again where it
+    /// was, at the message the core says has the focus (downloaded first when it is not yet)
+    fn conversation_line(&self, index: usize) {
+        let Some(current) = self.message() else { return };
+        let Some(at) = shell().core.conversation_click(current, index) else {
+            return;
+        };
+        if at == current {
+            self.view_again();
+            return;
+        }
+        self.folder.set(at.folder);
+        self.uid.set(at.uid);
+        self.refocus.set(true);
+        let _ = shell().core.open_message(at.folder, at.uid);
+    }
+
+    /// "Show N earlier messages" clicked: every line of the conversation shown
+    fn conversation_earlier(&self) {
+        if let Some(current) = self.message() {
+            shell().core.conversation_show_earlier(current);
+            self.view_again();
+        }
+    }
+
+    /// A line of the conversation shown clicked, as its link does (the UI test)
+    #[cfg(feature = "e2e")]
+    pub fn click_conversation_line(&self, index: usize) {
+        self.conversation_line(index);
+    }
+
+    /// Whether the view shown is a conversation's
+    pub fn shows_conversation(&self) -> bool {
+        self.view.borrow().as_ref().is_some_and(|v| v.conversation.is_some())
+    }
+
+    /// The view of the message asked for, built on a worker, alone or in its conversation; [`Reader::show_view`]
+    /// shows it when it comes
     fn start_view(&self) {
         let core = &shell().core;
         if self.view_request.get() != 0 {
             core.message_view_cancel(self.view_request.get());
         }
-        let request = core
-            .message_view_start(self.folder.get(), self.uid.get(), self.remote_images.get())
-            .unwrap_or(0);
+        self.refocus.set(false);
+        let request = match self.conversation.get() {
+            true => core.conversation_view_start(
+                MessageRef {
+                    folder: self.folder.get(),
+                    uid: self.uid.get(),
+                },
+                self.remote_images.get(),
+                crate::mailbox::newest_first(),
+            ),
+            false => core.message_view_start(self.folder.get(), self.uid.get(), self.remote_images.get()),
+        }
+        .unwrap_or(0);
         self.view_request.set(request);
         if request == 0 {
             self.failed();
@@ -837,6 +932,26 @@ impl Reader {
             return;
         };
         print_document(&document, self.pictures_shown(), window.as_ref().clone());
+    }
+
+    /// File > Print Conversation: every message of the conversation shown, one after another
+    pub fn print_conversation(&self, window: &impl IsA<gtk::Window>) {
+        let Some(current) = self.message() else { return };
+        if self.print_request.get() != 0 {
+            return;
+        }
+        // made off the window thread, PrintReady says it is; in no conversation, the message alone, as Print does
+        let Some(request) = shell()
+            .core
+            .conversation_print_start(current, crate::mailbox::newest_first())
+        else {
+            self.print(window);
+            return;
+        };
+        let window = window.as_ref().clone();
+        window.set_cursor_from_name(Some("progress"));
+        self.print_request.set(request);
+        self.print_window.replace(Some(window));
     }
 
     /// Whether the message's pictures from the internet are shown: asked for, or by themselves
@@ -1036,8 +1151,9 @@ impl Reader {
             view.preview_token.as_deref(),
             remote_images || view.pictures_loaded,
         );
-        // a signed or encrypted message's parts are frames, each sized to its document
-        self.preview.measure_frames(view.protection.is_some());
+        // a signed or encrypted message's parts are frames, each sized to its document, as a conversation's messages
+        self.preview
+            .measure_frames(view.protection.is_some() || view.conversation.is_some());
         self.security.show(view);
         self.show_pictures_bar(view);
     }

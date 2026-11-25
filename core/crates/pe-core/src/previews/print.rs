@@ -81,6 +81,11 @@ impl Core {
         Some(print)
     }
 
+    /// A printout made off the window thread, kept for [`Core::print_result`] (Print Conversation's)
+    pub(crate) fn keep_printout(&self, request: u64, document: String) {
+        keep_printout(&mut unpoisoned(&self.previews.prints), request, String::new(), document);
+    }
+
     /// The document of a printout [`Core::print_start`] made, once, after its [`Event::PrintReady`]
     pub fn print_result(&self, request: u64) -> Option<String> {
         unpoisoned(&self.previews.prints)

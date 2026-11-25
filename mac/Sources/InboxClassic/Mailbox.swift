@@ -234,6 +234,7 @@ public final class Mailbox: NSObject {
         super.init()
         pictures.arrived = { [weak self] picture in self?.pictureArrived(picture) }
         listView.setGrouped(AppDelegate.shared?.groupByConversation ?? true)
+        listView.setNewestFirst(AppDelegate.shared?.conversationNewestFirst ?? false)
         listView.setHideIgnored(AppDelegate.shared?.hideIgnored ?? false)
         listView.setUnreadOnly(AppDelegate.shared?.hideRead ?? false)
         listView.setSort(sort, ascending: ascending)
@@ -1404,6 +1405,15 @@ public final class Mailbox: NSObject {
         reader.clear(loading: loading)
     }
 
+    /// a row of the list by its own message
+    struct RowKey: Equatable {
+        let folder: Int64
+        let uid: UInt64
+    }
+
+    /// the row the reading pane was opened from, which a conversation shown keeps while a click in it moves the focus
+    private var readerRow: RowKey?
+
     /// `same`: the list was reloaded with the same messages selected, whose numbers alone may have changed
     fileprivate func selectionDidChange(same: Bool = false) {
         guard !reloading else { return }
@@ -1438,17 +1448,28 @@ public final class Mailbox: NSObject {
             return
         }
         let row = selectedRow
-        let newUid = row?.uid ?? 0
-        let newFolder = row?.folder ?? 0
-        if newUid == uid && newFolder == messageFolder && !reader.showsSummary {
+        // what the row opens: a collapsed conversation's focus (its oldest unread message, else its newest), else its
+        // own message; with Show the whole conversation, in its conversation unless it is a row of an expanded one
+        let newUid = row?.openUid ?? 0
+        let newFolder = row?.openFolder ?? 0
+        let inConversation = (AppDelegate.shared?.wholeConversation ?? true) && row?.showsConversation == true
+        let rowKey = row.map { RowKey(folder: $0.folder, uid: $0.uid) }
+        // a conversation shown keeps the message a click in it gave the focus
+        let shownHere = (newUid == uid && newFolder == messageFolder)
+            || (inConversation && reader.showsConversation && readerRow == rowKey)
+        if shownHere && !reader.showsSummary {
             selectionChanged()
             return
         }
         clearReader(loading: newUid != 0)
-        if newUid != 0 {
+        if newUid != 0, let row {
             // for the list to open with it when it is come back to
-            core.listShown(listView, folder: newFolder, uid: newUid)
-            reader.open(folder: newFolder, uid: newUid, account: folderAccount(newFolder), row: row)
+            core.listShown(listView, folder: row.folder, uid: row.uid)
+            reader.inConversation = inConversation
+            readerRow = rowKey
+            // the header from the list at once for the row's own message; a focus elsewhere has its own
+            let ownRow = newFolder == row.folder && newUid == row.uid ? row : nil
+            reader.open(folder: newFolder, uid: newUid, account: folderAccount(newFolder), row: ownRow)
         }
         // after the message is the reader's: Reply and Print ask for it
         selectionChanged()
@@ -1488,9 +1509,17 @@ public final class Mailbox: NSObject {
         markReadTimer?.invalidate()
         markReadTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { [weak self] _ in
             MainActor.assumeIsolated {
-                guard let self, let row = self.selectedRow, row.uid == self.uid, !row.seen else { return }
-                // the message shown alone, not the rest of a closed conversation whose row it is
-                let shown = newSelection([(row.folder, row.uid)])
+                guard let self, let row = self.selectedRow, self.readerRow == RowKey(folder: row.folder, uid: row.uid),
+                      self.uid != 0 else { return }
+                // a conversation: the unread messages it showed open
+                if self.reader.showsConversation {
+                    pe_conversation_shown(self.core.handle, self.messageFolder, self.uid)
+                    return
+                }
+                // the message shown alone (a collapsed conversation's row opens its oldest unread while it is bold),
+                // not the rest of a closed conversation whose row it is
+                guard row.bold else { return }
+                let shown = newSelection([(self.messageFolder, self.uid)])
                 defer { pe_selection_free(shown) }
                 self.act(PE_ACTION_READ, on: shown, quiet: true)
             }
@@ -1579,6 +1608,9 @@ public final class Mailbox: NSObject {
 
     /// Right on the list: the selected conversation opened; Left: closed, from its row or a message under it. False
     /// when there is nothing to do, for the list to take the key
+    /// the one row selected is a collapsed conversation's
+    var selectedCollapsed: Bool { selectedCount == 1 && selectedRow?.collapsed == true }
+
     func openOrClose(_ open: Bool) -> Bool {
         guard grouped, list.numberOfSelectedRows == 1, let message = row(list.selectedRow), message.thread != 0 else {
             return false
@@ -1616,6 +1648,20 @@ public final class Mailbox: NSObject {
     }
 
     /// grouping turned on or off in Settings: the list again, the message shown still selected
+    /// Settings > Conversation order changed: the list read again in it, the message shown opened again
+    func newestFirstChanged() {
+        listView.setNewestFirst(AppDelegate.shared?.conversationNewestFirst ?? false)
+        reloadList(keepSelection: true, covering: true)
+        reopenShown()
+    }
+
+    /// the selected row's message opened again: Show the whole conversation turned on or off, the order changed
+    func reopenShown() {
+        readerRow = nil
+        clearReader(loading: false)
+        selectionDidChange()
+    }
+
     func groupingChanged() {
         listView.setGrouped(AppDelegate.shared?.groupByConversation ?? true)
         reloadList(keepSelection: true, covering: true)
@@ -1792,7 +1838,8 @@ public final class Mailbox: NSObject {
     @objc func openSelected() {
         guard uid != 0 else { return }
         guard folderInfo[messageFolder]?.specialUse == PE_SPECIAL_USE_DRAFTS else {
-            MessageWindow.open(core: core, mailbox: self, folder: messageFolder, uid: uid)
+            MessageWindow.open(core: core, mailbox: self, folder: messageFolder, uid: uid,
+                               conversation: reader.showsConversation)
             return
         }
         // read off the window thread, the compose window opened once it is
@@ -1899,6 +1946,27 @@ public final class Mailbox: NSObject {
         return apply(action, to: to, on: messages) { [weak self] in self?.selectAfterRemoval(next) }
     }
 
+    /// Delete, Archive or Move (`action`, `to` the folder) of the selection, its conversations' messages in other folders
+    /// too when there are some and the user says so (This Folder Only, Whole Conversation); nothing on Cancel
+    private func actOnConversations(_ action: PeAction, to: Int64 = 0) {
+        let count = pe_selection_conversation_elsewhere(core.handle, selection, action, to)
+        guard count > 0 else {
+            actAndRemove(action, to: to)
+            return
+        }
+        let question = taken(pe_conversation_elsewhere_question(count)) ?? ""
+        switch askYesNoCancel(question, yes: Text.uiConversationThisFolder.text, no: Text.uiConversationWhole.text) {
+        case .yes:
+            actAndRemove(action, to: to)
+        case .no:
+            // the selection itself takes them, as the list reads its selection again after the action
+            guard pe_selection_add_conversation(core.handle, selection, action, to) else { return }
+            actAndRemove(action, to: to)
+        case .cancel:
+            return
+        }
+    }
+
     /// every selected message can be archived (from the Inbox or a folder of the user's)
     var canArchive: Bool { hasSelection && summary.archivable }
 
@@ -1906,7 +1974,7 @@ public final class Mailbox: NSObject {
     func archiveSelected() {
         if afterSummary({ [weak self] in self?.archiveSelected() }) { return }
         guard canArchive else { return }
-        actAndRemove(PE_ACTION_ARCHIVE)
+        actOnConversations(PE_ACTION_ARCHIVE)
     }
 
     /// Watch Conversation (`PE_ACTION_WATCH`) or Ignore Conversation (`PE_ACTION_IGNORE`): the conversations of the
@@ -1976,7 +2044,7 @@ public final class Mailbox: NSObject {
            !ask(question, yes: Text.uiTbDelete.text, no: Text.uiCancel.text, destructive: true) {
             return
         }
-        actAndRemove(PE_ACTION_DELETE)
+        actOnConversations(PE_ACTION_DELETE)
     }
 
     /// Move to Folder, or Copy to Folder (`copy`): the window of every account's folders; to another account they go in
@@ -1994,7 +2062,7 @@ public final class Mailbox: NSObject {
         if copy {
             act(PE_ACTION_COPY, to: to)
         } else {
-            actAndRemove(PE_ACTION_MOVE, to: to)
+            actOnConversations(PE_ACTION_MOVE, to: to)
         }
     }
 
@@ -3295,8 +3363,8 @@ final class SubjectCell: NSTableCellView, ConversationCell {
     required init?(coder: NSCoder) { fatalError() }
 
     func show(_ message: Message, grouped: Bool) {
-        // the count is a number alone, which needs no words of a language
-        label.stringValue = message.opens ? "\(message.subject) (\(message.threadCount))" : message.subject
+        // the core says how many messages and how many new, "(3, 1 new)"
+        label.stringValue = message.opens ? "\(message.subject) \(message.threadLabel)" : message.subject
         label.font = message.bold ? .boldSystemFont(ofSize: NSFont.systemFontSize) : .systemFont(ofSize: NSFont.systemFontSize)
         grey = message.dimmed
         disclosure.isHidden = !message.opens
@@ -3474,8 +3542,8 @@ final class MessageRowCell: NSTableCellView, ConversationCell {
         // "Encrypted message" is the core's word for a state, not the sender's: in italics, so it reads as one
         snippet.font = message.snippetIsState ? NSFontManager.shared.convert(.systemFont(ofSize: 12), toHaveTrait: .italicFontMask)
             : .systemFont(ofSize: 12)
-        // the count is a number alone, which needs no words of a language
-        count.stringValue = "\(message.threadCount)"
+        // the core says how many messages and how many new, "(3, 1 new)"
+        count.stringValue = message.threadLabel
         count.isHidden = !message.opens
         disclosure.isHidden = !message.opens
         disclosure.state = message.threadExpanded ? .on : .off
@@ -3682,6 +3750,9 @@ public final class MessageTable: NSTableView {
         // Right opens the selected conversation, Left closes it (from a message under it too)
         case 124 where mailbox?.openOrClose(true) == true, 123 where mailbox?.openOrClose(false) == true:
             break
+        // Return on a collapsed conversation's row opens it in the list; on any other row it opens the message
+        case 36 where mailbox?.selectedCollapsed == true, 76 where mailbox?.selectedCollapsed == true:
+            _ = mailbox?.openOrClose(true)
         default:
             super.keyDown(with: event)
         }

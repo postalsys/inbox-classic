@@ -344,7 +344,7 @@ fn bind_thread(parts: &Parts, m: &Message) {
     parts.count.set_visible(opens);
     parts.expander.set_visible(opens);
     if let Some(place) = place.filter(|p| p.opens()) {
-        parts.count.set_text(&place.count.to_string());
+        parts.count.set_text(&pe_core::thread_count(place.count, place.unread));
         crate::icons::set(
             &parts.expander,
             Some(if place.collapsed() {

@@ -165,6 +165,8 @@ private enum SetupPrefs {
             "notify_new_mail": bool(\.notify),
             "codes_in_notifications": bool(\.codesInNotifications),
             "group_by_conversation": bool(\.groupByConversation),
+            "show_whole_conversation": bool(\.wholeConversation),
+            "conversation_order": bool(\.conversationNewestFirst),
             "hide_ignored": bool(\.hideIgnored),
             "hide_read": bool(\.hideRead),
             "folder_list": bool(\.folderList),

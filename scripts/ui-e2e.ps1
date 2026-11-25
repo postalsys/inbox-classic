@@ -362,7 +362,7 @@ $VK_RETURN = 0x0D; $VK_ESCAPE = 0x1B; $VK_SPACE = 0x20; $VK_HOME = 0x24; $VK_UP 
 $IDM_NEW_ACCOUNT = 100; $IDM_EXIT = 101; $IDM_SYNC = 102; $IDM_MARK_READ = 103; $IDM_MARK_UNREAD = 104; $IDM_PICTURES = 105
 $IDM_VIEW_SOURCE = 132; $IDM_AI_AGENTS = 133
 $IDM_ABOUT = 106; $IDM_NEW_MAIL = 107; $IDM_REPLY = 108; $IDM_REPLY_ALL = 109; $IDM_FORWARD = 110; $IDM_HELP = 111
-$IDM_DELETE = 112; $IDM_MOVE = 113; $IDM_FLAG = 114; $IDM_NEW_FOLDER = 115; $IDM_RENAME_FOLDER = 116; $IDM_DELETE_FOLDER = 117; $IDM_ACCOUNTS = 118; $IDM_SAVE_AS = 121; $IDM_PRINT = 122; $IDM_IMPORT = 123; $IDM_OUTBOX = 124; $IDM_PROPERTIES = 125; $IDC_SAVE = 309;
+$IDM_DELETE = 112; $IDM_MOVE = 113; $IDM_FLAG = 114; $IDM_NEW_FOLDER = 115; $IDM_RENAME_FOLDER = 116; $IDM_DELETE_FOLDER = 117; $IDM_ACCOUNTS = 118; $IDM_SAVE_AS = 121; $IDM_PRINT = 122; $IDM_PRINT_CONVERSATION = 179; $IDM_IMPORT = 123; $IDM_OUTBOX = 124; $IDM_PROPERTIES = 125; $IDC_SAVE = 309;
 $LB_GETTEXT = 0x0189; $LB_GETCOUNT = 0x018B; $LB_SETCURSEL = 0x0186; $CB_SELECTSTRING = 0x014D
 $IDC_TREE = 200; $IDC_LIST = 201; $IDC_ATTACHMENTS = 202; $IDC_PICTURES = 203
 $IDC_SEND = 300; $IDC_ATTACH = 301; $IDC_FILES = 307; $IDC_FROM = 310; $IDC_SHOW_CC = 311; $IDC_SHOW_BCC = 312; $IDC_BCC = 304; $IDC_TO = 302; $IDC_CC = 303; $IDC_SUBJECT = 305; $IDC_BODY = 306; $IDF_BOLD = 330; $IDF_UNDERLINE = 332; $IDF_LINK = 341
@@ -5222,7 +5222,7 @@ public static class Dragger {
     $agentFlagged = @(Messages 'INBOX' | Where-Object { $_.flags -contains '\Flagged' -and (RawText $_) -match 'Subject: Quarterly report draft' })
     if ($agentFlagged.Count) {
         [void](Invoke-RestMethod -Method Post -ContentType 'application/json' "$rest/INBOX/messages/flags" -Body (@{
-            uids = @($agentFlagged | ForEach-Object { $_.uid }); flags = @('\Flagged', '$MailFlagBit2'); action = 'remove' } | ConvertTo-Json))
+            uids = @($agentFlagged | ForEach-Object { $_.uid }); flags = @('\Flagged', '$MailFlagBit2'); mode = 'remove' } | ConvertTo-Json))
         Command $main $IDM_SYNC
         [void](WaitFor { -not @(Messages 'INBOX' | Where-Object { $_.flags -contains '\Flagged' -and (RawText $_) -match 'Subject: Quarterly report draft' }).Count } 10)
     }
@@ -5987,9 +5987,46 @@ public static class Dragger {
     Check ($null -ne $grouped -and $head.Count -eq 1 -and $grouped -lt $flat) "the Inbox lists the conversation once, on its first message ($(Rows) rows of $flat messages)"
     if ($head.Count -eq 1) {
         $at = [int]$head[0]
+        # the list may open the conversation by itself as new mail comes (and read it): another row selected, the three
+        # unread again on the server, as they came
+        SelectRow ([int](@(0..([math]::Max(0, (Rows) - 1))) | Where-Object { $_ -ne $at } | Select-Object -First 1))
+        # what the app marked read itself on showing them reaches the server first, or it would mark them read again
+        [void](WaitFor { -not @(Messages 'INBOX' | Where-Object { $m = $_; @($coast | Where-Object { (RawText $m) -match [regex]::Escape("<$_>") }).Count -and $m.flags -notcontains '\Seen' }).Count } 10)
+        $coastUids = @(Messages 'INBOX' | Where-Object { $m = $_; @($coast | Where-Object { (RawText $m) -match [regex]::Escape("<$_>") }).Count } | ForEach-Object { $_.uid })
+        [void](Invoke-RestMethod -Method Post -ContentType 'application/json' "$rest/INBOX/messages/flags" -Body (@{
+            uids = $coastUids; flags = @('\Seen'); mode = 'remove' } | ConvertTo-Json))
+        Command $main $IDM_SYNC
+        # the count drawn beside the subject (not the row's text): what the core says for three, three of them new
+        $kTestThreadLabel = 0x544C424C
+        $label = '(3, 3 new)'
+        $labelled = WaitFor { if ((& $coastSeen) -eq 0 -and [Native.Win]::SendText($main, $kTestThreadLabel, "$topic`n$label") -eq 1) { 1 } } 20
+        Check ($null -ne $labelled) "with the count of its messages and of the new ones ($($label): $([Native.Win]::SendText($main, $kTestThreadLabel, "$topic`n$label")))"
         SelectRow $at
         Check ((SelectedRow) -eq $at) "its row can be selected ($(SelectedRow))"
+        # the whole conversation in the reading pane: all three unread, so all three open, each a frame sized to it
+        $kTestFrames = 0x46524D53
+        $framed = WaitFor { $v = [Native.Win]::SendText($main, $kTestFrames, ''); if (($v % 1000) -eq 103) { $v } } 20
+        Check ($null -ne $framed) "selecting it shows the whole conversation, its three unread messages open, each sized to its document ($([Native.Win]::SendText($main, $kTestFrames, '')))"
+        Check ([bool](WaitFor { (& $coastSeen) -eq 3 } 20)) "after a moment on screen, the messages it showed open are read on the server ($(& $coastSeen) of 3)"
         Shot $main 'threads-1-collapsed'
+        # a line clicked: that message folds, two frames left
+        $kTestLink = 0x4C494E4B
+        Check ([Native.Win]::SendText($main, $kTestLink, 'inboxclassic:conversation-0') -eq 1) 'a line of the conversation is its own link'
+        Check ([bool](WaitFor { $v = [Native.Win]::SendText($main, $kTestFrames, ''); ($v % 1000) -eq 102 } 20)) "a click on an open message's line folds it"
+        Shot $main 'threads-6-conversation-line'
+        # Print Conversation: the three messages, one after another
+        $kTestPrint = 0x50524E54
+        Command $main $IDM_PRINT_CONVERSATION
+        $print = WaitWindow 'InboxClassicPrint' $null 20
+        if ($print) {
+            $printedAll = "Shall we go to the coast on Sunday?`nI am in.`nMe too, I will bring the sandwiches."
+            $looked = WaitFor { $v = [Native.Win]::SendText($main, $kTestPrint, $printedAll); if ($v -ge 0 -and ($v % 10) -eq 1) { $v } } 20
+            Check ($null -ne $looked) 'Print Conversation prints all three messages'
+            [void][Native.Win]::PostMessage($print, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+            [void](WaitFor { -not [Native.Win]::IsWindow($print) } 10)
+        } else {
+            Check $false 'Print Conversation opens the print preview'
+        }
         Key $list $VK_RIGHT
         Check ([bool](WaitFor { (Rows) -eq $grouped + 2 } 10)) "Right expands it ($(Rows) rows)"
         $under = @(($at + 1), ($at + 2) | ForEach-Object { [Native.Win]::RemoteListText($list, $_, $COL_SUBJECT) })
@@ -6002,8 +6039,11 @@ public static class Dragger {
         Check ([bool](WaitFor { (Rows) -eq $flat } 10)) "Expand All Conversations shows every message ($(Rows) of $flat)"
         Command $main $IDM_COLLAPSE_ALL_THREADS
         Check ([bool](WaitFor { (Rows) -eq $grouped } 10)) "Collapse All Conversations hides the replies again ($(Rows))"
-        # the replies are still unread; the first message is read once it was shown
-        Check ((& $coastSeen) -lt 3) "not all of the conversation is read yet ($(& $coastSeen))"
+        # shown whole, its open messages were read; one unread again on the server for Mark Read to read
+        [void](Invoke-RestMethod -Method Post -ContentType 'application/json' "$rest/INBOX/messages/flags" -Body (@{
+            uids = @($coastUids | Select-Object -Last 1); flags = @('\Seen'); mode = 'remove' } | ConvertTo-Json))
+        Command $main $IDM_SYNC
+        Check ([bool](WaitFor { (& $coastSeen) -eq 2 } 20)) "one of the conversation unread again ($(& $coastSeen) of 3 read)"
         $at = [int](@(SubjectRows $topic)[0])
         SelectRow $at
         Command $main $IDM_MARK_READ

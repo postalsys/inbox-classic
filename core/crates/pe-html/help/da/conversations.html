@@ -1,10 +1,21 @@
 <h1>Samtaler</h1>
 <p class="summary">Saml meddelelser og svar i samtaler, som du kan folde ud, følge eller ignorere.</p>
-<p>En sammenfoldet samtale vises med den første meddelelse og antallet af meddelelser. Rækken vises med fed skrift, hvis mindst én meddelelse er ulæst. Ved sortering efter dato eller modtagelsestid bestemmes placeringen af den nyeste meddelelse; ved andre sorteringer bruges den første. Antallet og læsestatus gælder meddelelserne på den aktuelle liste.</p>
+<p><!--review-->En sammenfoldet samtale har én række. Den viser samtalens emne, antallet af dens meddelelser på den aktuelle liste og hvor mange af dem der er nye, som i <i>(3, 1 ny)</i>. Afsenderen og de første ord kommer fra den meddelelse, rækken åbner: den ældste ulæste, eller den nyeste, når alle er læst. Rækken vises med fed skrift, så længe en af dens meddelelser er ulæst. Ved sortering efter dato eller modtagelsestid bestemmes placeringen af den nyeste meddelelse; ved andre sorteringer bruges den første.<!--/review--></p>
+<h2><!--review-->Hele samtalen i læseruden<!--/review--></h2>
+<p><!--review-->Vælg en samtales række for at se alle dens meddelelser i læseruden, under hinanden, startende ved den ældste ulæste meddelelse. Ulæste meddelelser er åbne; læste er foldet sammen til en linje med afsender, dato og de første ord. Klik på en linje for at åbne meddelelsen, og klik igen for at folde den sammen. Dine egne svar i Sendt post, dine kladder og meddelelser, du har lagt i andre mapper, vises også, hver med navnet på sin mappe. Meddelelser i Uønsket mail og Slettet post udelades.<!--/review--></p>
 <ul>
-    <li>Klik på <b><!--os:windows-->+<!--/os--><!--os:mac,linux-->▸<!--/os--></b> foran den, eller tryk på <kbd>→</kbd>, for at se dens andre meddelelser. Klik på <b><!--os:windows-->-<!--/os--><!--os:mac,linux-->▾<!--/os--></b>, eller tryk på <kbd>←</kbd>, for at skjule dem.</li>
+    <li><!--review-->Svar, svar alle, videresendelse og udskrivning gælder meddelelsen med den farvede kant: den, du sidst klikkede på, eller den, læseruden åbnede ved.<!--/review--></li>
+    <li><!--review-->De ulæste meddelelser, der vises åbne, markeres som læst efter et øjeblik.<!--/review--></li>
+    <li><!--review--><b data-text="menu-file"></b> &gt; <b data-text="cmd-print-conversation"></b> udskriver alle samtalens meddelelser, den ene efter den anden.<!--/review--></li>
+    <li><!--review-->Dobbeltklik på rækken for at åbne samtalen i sit eget vindue.<!--/review--></li>
+    <li><!--review-->En signeret eller krypteret meddelelse vises aldrig i stakken. Dens linje fortæller, at den åbnes for sig; klik på linjen for at læse den alene.<!--/review--></li>
+    <li><!--review-->En lang samtale viser sine sidste 20 meddelelser; klik på linket over dem for at vise de tidligere.<!--/review--></li>
+</ul>
+<p><!--review-->Hvis du hellere vil se én meddelelse ad gangen, skal du slå <b data-text="ui-show-whole-conversation"></b> fra under <b data-settings="reading"></b>. En samtales række åbner så den ældste ulæste meddelelse eller den nyeste. <b data-text="ui-conversation-order"></b> på samme side viser den nyeste meddelelse først, i læseruden og under rækken for en udvidet samtale.<!--/review--></p>
+<ul>
+    <li><!--review-->Klik på <b><!--os:windows-->+<!--/os--><!--os:mac,linux-->▸<!--/os--></b> foran den, eller tryk på <kbd>→</kbd> eller <kbd>Enter</kbd>, for at vise dens meddelelser under rækken. Klik på <b><!--os:windows-->-<!--/os--><!--os:mac,linux-->▾<!--/os--></b>, eller tryk på <kbd>←</kbd>, for at skjule dem. Vælger du en af meddelelserne under rækken, vises kun den meddelelse.<!--/review--></li>
     <li><b data-text="menu-view"></b> &gt; <b data-text="cmd-expand-all-threads"></b> og <b data-text="cmd-collapse-all-threads"></b> gør det samme for hele listen.</li>
-    <li>Sletter, flytter eller arkiverer du en sammenfoldet samtale, gælder handlingen samtalens meddelelser på den aktuelle liste, ikke automatisk alle dens meddelelser i andre mapper. Det samme gælder, når du markerer samtalen som uønsket eller læst eller sætter flag på den.</li>
+    <li><!--review-->Sletter, flytter eller arkiverer du en sammenfoldet samtale, gælder handlingen samtalens meddelelser på den aktuelle liste. Det samme gælder, når du markerer samtalen som uønsket eller læst eller sætter flag på den. Har samtalen også meddelelser i andre mapper, spørger Inbox Classic ved sletning, flytning og arkivering, om handlingen skal gælde <b data-text="ui-conversation-this-folder"></b> eller <b data-text="ui-conversation-whole"></b>. Arkivering og flytning lader dine sendte meddelelser og kladder blive, hvor de er.<!--/review--></li>
 </ul>
 <p>Hvis hver meddelelse skal have sin egen række, skal du slå <b data-text="ui-group-by-conversation"></b> fra under <b data-settings="reading"></b>.</p>
 <h2>Følg en samtale</h2>

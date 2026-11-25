@@ -104,6 +104,9 @@ pub struct Search {
     /// Grouped by conversation, with these conversations expanded (any number, see `selection::id_list`); None for one
     /// row a message
     pub threads: Option<Vec<i64>>,
+    /// An expanded conversation lists its other messages under its first one newest first (the reading pane's
+    /// Conversation order); false: in the order they arrived
+    pub newest_first: bool,
     /// View > Hide Ignored Conversations: the messages of ignored conversations left out
     pub hide_ignored: bool,
     /// Only these messages of the folder of `scope` (the new mail a message rule looks at); None for all

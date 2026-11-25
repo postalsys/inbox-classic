@@ -4,6 +4,7 @@
 import AppKit
 import CInboxClassic
 import Darwin
+import PDFKit
 import UniformTypeIdentifiers
 import WebKit
 
@@ -38,6 +39,20 @@ extension UITest {
     func readerText() async -> String {
         guard let web = views(WKWebView.self, in: main.mailbox.reader.view).first else { return "" }
         return (try? await web.evaluateJavaScript("document.body ? document.body.innerText : ''")) as? String ?? ""
+    }
+
+    /// the reading pane's page and the documents of its frames (a conversation's open messages), as text
+    func readerTextWithFrames() async -> String {
+        guard let web = views(WKWebView.self, in: main.mailbox.reader.view).first else { return "" }
+        let script = "[document.body ? document.body.innerText : ''].concat(Array.from(document.querySelectorAll('iframe'))"
+            + ".map(f => f.contentDocument && f.contentDocument.body ? f.contentDocument.body.innerText : '')).join('\\n')"
+        return (try? await web.evaluateJavaScript(script)) as? String ?? ""
+    }
+
+    /// the reading pane's page source: a conversation's lines and links
+    func readerPage() async -> String {
+        guard let web = views(WKWebView.self, in: main.mailbox.reader.view).first else { return "" }
+        return (try? await web.evaluateJavaScript("document.documentElement.outerHTML")) as? String ?? ""
     }
 
     /// a message the server does not give yet, and then can not: the pane says it is downloading, then why it is not
@@ -424,7 +439,7 @@ extension UITest {
         // the message selected once the list is drawn, and shown in the reading pane
         func shown() async -> Message? {
             _ = await waitUntil(20) {
-                !mailbox.listLoading && mailbox.selectedRow.map { mailbox.reader.uid == $0.uid } == true
+                !mailbox.listLoading && mailbox.selectedRow.map { mailbox.reader.uid == $0.openUid } == true
             }
             return mailbox.selectedRow
         }
@@ -1222,26 +1237,95 @@ extension UITest {
         let tripStart = Date()
         try await addMessage("From: Dave <dave@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Plans for the trip\r\n"
             + "Message-ID: <trip1@example.com>\r\nDate: \(rfc2822(tripStart.addingTimeInterval(-7200)))\r\n\r\nWhere do we go?\r\n",
-            flags: ["\\Seen"])
+            flags: ["\\Seen"], arrived: tripStart.addingTimeInterval(-7200))
         try await addMessage("From: Carol <carol@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Re: Plans for the trip\r\n"
             + "Message-ID: <trip2@example.com>\r\nIn-Reply-To: <trip1@example.com>\r\nReferences: <trip1@example.com>\r\n"
-            + "Date: \(rfc2822(tripStart.addingTimeInterval(-3600)))\r\n\r\nThe lake.\r\n")
+            + "Date: \(rfc2822(tripStart.addingTimeInterval(-3600)))\r\n\r\nThe lake.\r\n",
+            arrived: tripStart.addingTimeInterval(-3600))
         try await addMessage("From: Bob Harris <bob@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Re: Plans for the trip\r\n"
             + "Message-ID: <trip3@example.com>\r\nIn-Reply-To: <trip2@example.com>\r\n"
-            + "References: <trip1@example.com> <trip2@example.com>\r\nDate: \(rfc2822(tripStart))\r\n\r\nThe lake it is.\r\n")
+            + "References: <trip1@example.com> <trip2@example.com>\r\nDate: \(rfc2822(tripStart))\r\n\r\nThe lake it is.\r\n",
+            arrived: tripStart)
         command(.sync)
         check(await waitUntil(30) { tripRows().count == 1 && tripRows().first?.message.threadCount == 3 },
               "the Inbox lists the conversation once (\(tripRows().count) rows)")
+        // the list may open the conversation by itself as new mail comes (and read it): another row selected, the two
+        // replies unread again on the server, as they came
+        if let other = (0..<list.numberOfRows).first(where: { at in !(main.mailbox.row(at)?.subject.hasSuffix("Plans for the trip") ?? true) }) {
+            await selectRow(other)
+        }
+        // what the app marked read itself on showing them reaches the server first, or it would mark them read again
+        _ = await waitUntil(10) {
+            let all = await messages("INBOX").filter { raw($0).contains("Message-ID: <trip2@") || raw($0).contains("Message-ID: <trip3@") }
+            return all.count == 2 && all.allSatisfy { ($0["flags"] as? [String])?.contains("\\Seen") == true }
+        }
+        let replies = await messages("INBOX").filter { raw($0).contains("trip2@") || raw($0).contains("trip3@") }.compactMap { $0["uid"] as? Int }
+        try await setFlags("INBOX", uids: replies, flags: ["\\Seen"], action: "remove")
+        command(.sync)
+        check(await waitUntil(30) { tripRows().first?.message.threadUnread == 2 }, "its two replies are unread")
         guard let tripHead = tripRows().first else { throw Failed(description: "the conversation is not in the list") }
         check(tripHead.message.subject == "Plans for the trip" && tripHead.message.seen,
               "on its first message (\(tripHead.message.subject))")
         let headCell = subjectCell(tripHead.index)
-        check(headCell?.textField?.stringValue == "Plans for the trip (3)" && headCell?.disclosure.isHidden == false,
-              "with the count of its messages and a triangle to open it (\(headCell?.textField?.stringValue ?? ""))")
+        let counted = tripHead.message.threadLabel
+        check(headCell?.textField?.stringValue == "Plans for the trip \(counted)" && counted.contains("2")
+              && headCell?.disclosure.isHidden == false,
+              "with the count of its messages and of the new ones, and a triangle to open it (\(headCell?.textField?.stringValue ?? ""))")
         check(headCell?.textField?.font?.fontDescriptor.symbolicTraits.contains(.bold) == true,
               "bold while one is unread, though the first is read")
+        check(tripHead.message.from.contains("Carol") && tripHead.message.openUid != tripHead.message.uid,
+              "the row shows the sender of its oldest unread message (\(tripHead.message.from))")
         await selectRow(tripHead.index)
+        let focus = (tripHead.message.openFolder, tripHead.message.openUid)
+        check(await waitUntil(15) {
+            main.mailbox.reader.showsConversation && main.mailbox.reader.folder == focus.0 && main.mailbox.reader.uid == focus.1
+        }, "selecting it shows the whole conversation at its oldest unread message")
+        var stacked = ""
+        _ = await waitUntil(15) {
+            stacked = await readerTextWithFrames()
+            return stacked.contains("The lake.") && stacked.contains("The lake it is.")
+        }
+        // each line's state: open (pe-o), the focus (pe-f), unread (pe-u); an unread line is always open, the focus
+        // open, Dave's read question folded (which unread ones open is the core's, tests/conversation.rs)
+        let page = await readerPage()
+        let lines = page.components(separatedBy: "<section class=\"").dropFirst()
+            .map { $0.prefix(while: { $0 != "\"" }).split(separator: " ").map(String.init) }
+        check(lines.count == 3 && lines.allSatisfy { !$0.contains("pe-u") || $0.contains("pe-o") }
+              && lines.contains { $0.contains("pe-f") && $0.contains("pe-o") } && !lines[0].contains("pe-o"),
+              "the unread messages open, the read one folded to its line (\(lines))")
+        check((0..<3).allSatisfy { page.contains("inboxclassic:conversation-\($0)") }, "each message has its line")
         await shot(main.window, "threads-1-collapsed")
+        check(await waitUntil(20) {
+            let all = await messages("INBOX").filter { raw($0).contains("trip2@") || raw($0).contains("trip3@") }
+            return all.count == 2 && all.allSatisfy { ($0["flags"] as? [String])?.contains("\\Seen") == true }
+        }, "after a moment on screen, the unread messages it showed open are read on the server")
+        // the read first message's line: it opens and takes the focus
+        main.mailbox.reader.conversationLine(0)
+        let lineOpened = await waitUntil(15) {
+            guard main.mailbox.reader.uid == tripHead.message.uid else { return false }
+            return await readerTextWithFrames().contains("Where do we go?")
+        }
+        check(lineOpened, "a click on a folded line opens its message, which takes the focus")
+        await shot(main.window, "threads-6-conversation-line")
+        // Print Conversation: every message, one after another
+        let pdf = out.appendingPathComponent("conversation-print.pdf")
+        try? FileManager.default.removeItem(at: pdf)
+        var printed = false
+        TestHooks.printTo = pdf
+        TestHooks.printed = { printed = $0 }
+        command(.printConversation)
+        _ = await waitUntil(40) { printed }
+        TestHooks.printTo = nil
+        TestHooks.printed = nil
+        let paper = (PDFDocument(url: pdf)?.string ?? "").replacingOccurrences(of: "\n", with: " ")
+        check(printed && ["Where do we go?", "The lake.", "The lake it is."].allSatisfy { paper.contains($0) },
+              "Print Conversation prints all three messages (printed \(printed), \(paper.prefix(200)))")
+        // Show the whole conversation off: the row opens one message alone
+        AppDelegate.shared.wholeConversation = false
+        await selectRow(tripRows().first?.index ?? 0)
+        check(await waitUntil(15) { !main.mailbox.reader.showsConversation && main.mailbox.reader.uid != 0 && !main.mailbox.reader.waitingForView },
+              "with Show the whole conversation off, the row opens one message alone")
+        AppDelegate.shared.wholeConversation = true
 
         press(subjectCell(tripHead.index)?.disclosure)
         check(await waitUntil(5) { tripRows().count == 3 }, "the triangle opens it: its replies under it")

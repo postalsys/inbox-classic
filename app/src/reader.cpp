@@ -368,6 +368,14 @@ bool Reader::FollowLink(const wchar_t* uri) {
     case PE_READER_LINK_FIND_KEY:
         FindSignerKey(uri);
         return true;
+    case PE_READER_LINK_CONVERSATION:
+        // a line of a conversation's page: the page shown again once the WebView2's event is over
+        conversationLine_ = pe_conversation_link_index(core::Narrow(uri).c_str());
+        PostMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_CONVERSATION_LINE, 0), 0);
+        return true;
+    case PE_READER_LINK_CONVERSATION_EARLIER:
+        PostMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_CONVERSATION_EARLIER, 0), 0);
+        return true;
     case PE_READER_LINK_COPY_CODE:
         if (const PeMessageInfo* info = Info(); info && info->otp_code && *info->otp_code &&
                                                 CopyText(parent_, core::Widen(info->otp_code)) && onFound) {
@@ -638,7 +646,8 @@ void Reader::StartView() {
     if (viewRequest_) {
         pe_message_view_cancel(core_, viewRequest_);
     }
-    viewRequest_ = pe_message_view_start(core_, folder_, uid_, remoteImages_);
+    viewRequest_ = conversation_ ? pe_conversation_view_start(core_, folder_, uid_, remoteImages_, ConversationNewestFirst())
+                                 : pe_message_view_start(core_, folder_, uid_, remoteImages_);
     if (!viewRequest_) {
         SetWindowTextW(header_, (L" " + core::T(PE_TEXT_UI_NOT_SHOWN)).c_str());
     }
@@ -678,7 +687,9 @@ void Reader::ShowInfo() {
     // a signed or encrypted message is a page of parts, each in a frame sized to its document: once it loaded, and
     // again while it is shown (pictures loading, "..." unfolded, another width or text size)
     std::vector<std::string> parts;
-    for (size_t i = 0; info->protection != PE_PROTECTION_TONE_NONE && i < info->part_count; i++) {
+    // a conversation's open messages too, each a document in its frame
+    bool framed = info->protection != PE_PROTECTION_TONE_NONE || info->conversation_count > 0;
+    for (size_t i = 0; framed && i < info->part_count; i++) {
         const char* part = pe_message_view_part(view_.get(), i);
         parts.emplace_back(part ? part : "");
     }
@@ -1338,6 +1349,54 @@ void Reader::Print(HWND owner) {
     OpenPrintWindow(owner, preview_.Environment(), info->print_document, PicturesShown(), Text(info->subject));
 }
 
+void Reader::PrintConversation(HWND owner) {
+    if (!Info() || !uid_) {
+        return;
+    }
+    if (printRequest_) {
+        printOwner_ = owner;
+        return;
+    }
+    // made off the window thread (PrintReady), the busy pointer meanwhile; outside a conversation, the message alone
+    uint64_t request = pe_conversation_print_start(core_, folder_, uid_, ConversationNewestFirst());
+    if (!request) {
+        Print(owner);
+        return;
+    }
+    printRequest_ = request;
+    printOwner_ = owner;
+    BusyStart();
+}
+
+bool Reader::ShowsConversation() const {
+    const PeMessageInfo* info = pe_message_view_info(view_.get());
+    return info && info->conversation_count > 0;
+}
+
+void Reader::ConversationLine(int64_t index) {
+    int64_t folder = 0;
+    uint64_t uid = 0;
+    if (!uid_ || !pe_conversation_click(core_, folder_, uid_, index, &folder, &uid)) {
+        return;
+    }
+    // the same message: its conversation built again where it was; another: downloaded first when it is not yet,
+    // then shown in place (MessageReady)
+    if (folder == folder_ && uid == uid_) {
+        StartView();
+        return;
+    }
+    folder_ = folder;
+    uid_ = uid;
+    pe_message_open(core_, folder, uid);
+}
+
+void Reader::ConversationEarlier() {
+    if (uid_) {
+        pe_conversation_show_earlier(core_, folder_, uid_);
+        StartView();
+    }
+}
+
 void Reader::PrintReady(uint64_t request) {
     if (std::erase(g_droppedPrints, request) > 0) {
         core::String dropped(pe_print_result(core_, request));
@@ -1599,6 +1658,12 @@ bool Reader::OnCommand(WORD id, WORD) {
     case IDC_OPEN_PREVIEW:
         OpenAttachment(StripItemOf(std::exchange(previewOpen_, -1)));
         return true;
+    case IDC_CONVERSATION_LINE:
+        ConversationLine(std::exchange(conversationLine_, -1));
+        return true;
+    case IDC_CONVERSATION_EARLIER:
+        ConversationEarlier();
+        return true;
     case IDC_BOUNCED_MESSAGE:
         if (const PeMessageInfo* info = Info(); info && info->has_bounced_message && onBouncedMessage) {
             onBouncedMessage(info->bounced_folder, info->bounced_uid);
@@ -1662,6 +1727,9 @@ void Reader::OnEvent(const UiEvent& event) {
         if (uid_ && event.folder == folder_ && event.uid == uid_) {
             KillTimer(parent_, TIMER_DOWNLOADING);
             ShowRetry(false);
+            StartView();
+        } else if (view_ && pe_message_view_waits_for(view_.get(), event.folder, event.uid)) {
+            // an open message of the conversation shown is downloaded: the conversation built again, where it was
             StartView();
         }
         break;

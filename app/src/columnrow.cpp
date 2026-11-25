@@ -298,7 +298,7 @@ void Mailbox::DrawColumnsRow(HDC dc, int index, const PeMessage& row) {
     if (row.thread_opens) {
         RECT box = ColumnsThreadBox(area);
         DrawThreadBox(dc, box, row.thread_collapsed);
-        int count = DrawRight(paint, 2, box.left - Scale(4), box.left - paint.left, std::to_wstring(row.thread_count), normal_, faint);
+        int count = DrawRight(paint, 2, box.left - Scale(4), box.left - paint.left, Text(row.thread_label), normal_, faint);
         threadRight = box.left - Scale(4) - count - Scale(8);
     }
     if (row.snippet && *row.snippet) {
@@ -495,6 +495,22 @@ int Mailbox::TestListTop() const {
         return 0;
     }
     return 1000 + row.top;
+}
+
+int Mailbox::TestThreadLabel(const std::wstring& text) {
+    size_t newline = text.find(L'\n');
+    if (newline == std::wstring::npos) {
+        return 0;
+    }
+    std::wstring subject = text.substr(0, newline), label = text.substr(newline + 1);
+    int count = ListView_GetItemCount(list_);
+    for (int index = 0; index < count; index++) {
+        const PeMessage* row = RowNow(index);
+        if (row && row->thread_opens && Text(row->subject) == subject) {
+            return Text(row->thread_label) == label ? 1 : 2;
+        }
+    }
+    return 0;
 }
 
 int Mailbox::TestRowPicture(const std::wstring& subject) {

@@ -53,7 +53,8 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
 
     /// opens the message `uid` of `folder` of the list of `mailbox` in a window, or brings its window to the front
     @discardableResult
-    static func open(core: Core, mailbox: Mailbox, folder: Int64, uid: UInt64) -> MessageWindow {
+    /// `conversation`: shown in its conversation, as the reading pane showed it (Previous and Next show each alone)
+    static func open(core: Core, mailbox: Mailbox, folder: Int64, uid: UInt64, conversation: Bool = false) -> MessageWindow {
         if let shown = open.first(where: { $0.folder == folder && $0.uid == uid }) {
             shown.window.makeKeyAndOrderFront(nil)
             return shown
@@ -66,7 +67,7 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
             made.window.center()
         }
         open.append(made)
-        made.show(folder: folder, uid: uid)
+        made.show(folder: folder, uid: uid, conversation: conversation)
         made.window.makeKeyAndOrderFront(nil)
         return made
     }
@@ -164,7 +165,10 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
     // ---- the message shown ----
 
     /// shows the message `uid` of `folder`, marked read, as opening it in Outlook Express does
-    private func show(folder id: Int64, uid message: UInt64) {
+    /// the message `uid` of `folder` in the window: in its conversation for `conversation` (as a double-click opened
+    /// it), else alone, as Previous and Next go message by message
+    private func show(folder id: Int64, uid message: UInt64, conversation: Bool = false) {
+        reader.inConversation = conversation
         folder = id
         uid = message
         let row = self.row(folder: id, uid: message)
