@@ -44,6 +44,14 @@ sudo apt update && sudo apt install inbox-classic
 
 The repository is signed with the same release key as `hashes.txt`. Or install the `.deb` of the [latest release](https://github.com/postalsys/inbox-classic/releases/latest) for your machine, `InboxClassic-amd64.deb` or `InboxClassic-arm64.deb`, with `sudo apt install ./InboxClassic-amd64.deb`. It needs Ubuntu 26.04 or newer (GTK 4, libadwaita and WebKitGTK come from Ubuntu). Mail is in `~/.local/share/inbox-classic`, passwords in the keyring (GNOME Keyring).
 
+**Fedora**: install the package of the [latest release](https://github.com/postalsys/inbox-classic/releases/latest) for your machine, and new versions come with the system's own updates:
+
+```
+sudo dnf install https://github.com/postalsys/inbox-classic/releases/latest/download/InboxClassic-x86_64.rpm
+```
+
+(`InboxClassic-aarch64.rpm` on ARM). It needs Fedora 44 or newer. The package adds the repository https://rpm.inboxclassic.com and brings its key, the same release key as `hashes.txt`, so `dnf upgrade` brings each release (`DNF_REPOSITORY=no` in `/etc/default/inbox-classic` before installing leaves the repository out). Fedora Workstation's GNOME shows no tray icons without an extension such as AppIndicator; without one, closing the window ends Inbox Classic, as GNOME apps do, rather than leaving it running out of sight.
+
 **Arch Linux and Omarchy**: download `InboxClassic-x86_64.pkg.tar.zst` (or `InboxClassic-aarch64.pkg.tar.zst` on ARM) from the [latest release](https://github.com/postalsys/inbox-classic/releases/latest) and install it with `sudo pacman -U InboxClassic-x86_64.pkg.tar.zst`; pacman adds GTK 4, libadwaita and WebKitGTK from Arch's repositories (on a new Omarchy, run its Update first, so pacman has its package lists). Install a newer one the same way. Omarchy's package repository also carries it. Or build it from [`linux/arch/PKGBUILD`](linux/arch/PKGBUILD) with `makepkg -si`, which compiles the release's source.
 
 The user help is in the app (F1) and on https://inboxclassic.com.
