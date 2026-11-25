@@ -40,6 +40,8 @@ cmd-accounts = &Paskyros...
 cmd-find = &Ieškoti laiško
 cmd-save-as = Įrašyti &kaip...
 cmd-print = &Spausdinti...
+# review: new
+cmd-print-conversation = Spausdinti p&okalbį...
 cmd-import = Importuoti &laiškus...
 cmd-outbox = &Siunčiami laiškai...
 cmd-properties = &Ypatybės
@@ -60,6 +62,48 @@ ui-find-not-found = „{ $words }“ šiame laiške nėra
 cmd-expand-all-threads = Išskleisti &visus pokalbius
 cmd-collapse-all-threads = S&utraukti visus pokalbius
 ui-group-by-conversation = &Grupuoti laiškus pagal pokalbius
+# review: new
+ui-show-whole-conversation = Skaitymo srityje rodyti &visą pokalbį
+# review: new
+ui-show-whole-conversation-note = Pokalbio eilutė atveria visus jo laiškus kartu su jūsų atsakymais, juodraščiais ir laiškais, perkeltais į kitus aplankus. Skaityti laiškai suskleidžiami į eilutę: spustelėkite eilutę, kad ją išskleistumėte arba suskleistumėte.
+# review: new
+ui-conversation-order = Pokalbio laiškų tvar&ka:
+# review: new
+ui-conversation-oldest-first = Seniausi pirmiau
+# review: new
+ui-conversation-newest-first = Naujausi pirmiau
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+    [one] ({ $count }, { $new } naujas)
+    [few] ({ $count }, { $new } nauji)
+   *[other] ({ $count }, { $new } naujų)
+}
+# review: new
+ui-conversation-to = kam: { $people }
+# review: new
+ui-conversation-draft = Juodraštis
+# review: new
+ui-conversation-alone = Pasirašytas arba užšifruotas: atidaromas atskirai
+# review: new
+ui-conversation-downloading = Atsisiunčiama…
+# review: new
+ui-conversation-earlier = { $count ->
+    [one] Rodyti { $count } ankstesnį laišką
+    [few] Rodyti { $count } ankstesnius laiškus
+   *[other] Rodyti { $count } ankstesnių laiškų
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [1] Šis pokalbis dar turi laišką kitame aplanke.
+    [one] Šis pokalbis dar turi { $count } laišką kituose aplankuose.
+    [few] Šis pokalbis dar turi { $count } laiškus kituose aplankuose.
+   *[other] Šis pokalbis dar turi { $count } laiškų kituose aplankuose.
+}
+# review: new
+ui-conversation-this-folder = &Tik šis aplankas
+# review: new
+ui-conversation-whole = &Visas pokalbis
 cmd-folder-list = &Aplankų sąrašas
 cmd-layout-automatic = &Automatinis
 cmd-layout-classic = &Klasikinis

@@ -42,6 +42,8 @@ cmd-accounts = C&omptes...
 cmd-find = Ce&rca un missatge
 cmd-save-as = &Desa com a...
 cmd-print = &Imprimeix...
+# review: new
+cmd-print-conversation = Imprimeix la &conversa...
 cmd-import = Importa missat&ges...
 cmd-outbox = Safata de s&ortida...
 cmd-properties = P&ropietats
@@ -62,6 +64,44 @@ ui-find-not-found = «{ $words }» no és en aquest missatge
 cmd-expand-all-threads = &Expandeix totes les converses
 cmd-collapse-all-threads = C&ontrau totes les converses
 ui-group-by-conversation = Ag&rupa els missatges per conversa
+# review: new
+ui-show-whole-conversation = Mostra &tota la conversa a la subfinestra de lectura
+# review: new
+ui-show-whole-conversation-note = La fila d’una conversa n’obre tots els missatges, amb les vostres respostes, els esborranys i els missatges desats en altres carpetes. Els missatges llegits es pleguen en una línia: feu clic en una línia per obrir-la o plegar-la.
+# review: new
+ui-conversation-order = &Ordre de la conversa:
+# review: new
+ui-conversation-oldest-first = Primer el més antic
+# review: new
+ui-conversation-newest-first = Primer el més recent
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+    [one] ({ $count }, { $new } nou)
+   *[other] ({ $count }, { $new } nous)
+}
+# review: new
+ui-conversation-to = per a { $people }
+# review: new
+ui-conversation-draft = Esborrany
+# review: new
+ui-conversation-alone = Signat o xifrat: s’obre per separat
+# review: new
+ui-conversation-downloading = S’està baixant…
+# review: new
+ui-conversation-earlier = { $count ->
+    [one] Mostra 1 missatge anterior
+   *[other] Mostra { $count } missatges anteriors
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [one] Aquesta conversa també té un missatge en una altra carpeta.
+   *[other] Aquesta conversa també té { $count } missatges en altres carpetes.
+}
+# review: new
+ui-conversation-this-folder = &Només aquesta carpeta
+# review: new
+ui-conversation-whole = &Tota la conversa
 cmd-folder-list = Llista de &carpetes
 cmd-layout-automatic = &Automàtica
 cmd-layout-classic = &Clàssica

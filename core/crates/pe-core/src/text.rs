@@ -109,6 +109,12 @@ pub fn word_list(words: &[String]) -> String {
     words.join(&tr(Text::ListSeparator))
 }
 
+/// What a collapsed conversation's row says after its subject: how many messages it has in the list, and how many of
+/// them are new: "(3)", "(3, 1 new)"
+pub fn thread_count(count: u32, unread: u32) -> String {
+    tr_args(Text::UiThreadCount, &[("count", count.into()), ("new", unread.into())])
+}
+
 pub fn messages(count: u64) -> String {
     tr_args(Text::Messages, &[("count", count.into())])
 }

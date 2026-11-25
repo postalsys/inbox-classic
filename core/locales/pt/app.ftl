@@ -43,6 +43,8 @@ cmd-accounts = &Contas...
 cmd-find = &Localizar mensagem
 cmd-save-as = &Guardar como...
 cmd-print = &Imprimir...
+# review: new
+cmd-print-conversation = Imprimir con&versa...
 cmd-import = I&mportar mensagens...
 cmd-outbox = Caixa de &Saída...
 cmd-properties = P&ropriedades
@@ -63,6 +65,44 @@ ui-find-not-found = Não foi encontrado «{ $words }» nesta mensagem
 cmd-expand-all-threads = E&xpandir todas as conversas
 cmd-collapse-all-threads = Re&duzir todas as conversas
 ui-group-by-conversation = A&grupar mensagens por conversa
+# review: new
+ui-show-whole-conversation = Mostrar a conversa &inteira no painel de leitura
+# review: new
+ui-show-whole-conversation-note = A linha de uma conversa abre todas as suas mensagens, com as suas respostas, os rascunhos e as mensagens arquivadas noutras pastas. As mensagens lidas ficam recolhidas numa linha: clique numa linha para a abrir ou recolher.
+# review: new
+ui-conversation-order = &Ordem da conversa:
+# review: new
+ui-conversation-oldest-first = Mais antiga primeiro
+# review: new
+ui-conversation-newest-first = Mais recente primeiro
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+    [one] ({ $count }, { $new } nova)
+   *[other] ({ $count }, { $new } novas)
+}
+# review: new
+ui-conversation-to = para { $people }
+# review: new
+ui-conversation-draft = Rascunho
+# review: new
+ui-conversation-alone = Assinada ou encriptada: abre-se à parte
+# review: new
+ui-conversation-downloading = A transferir…
+# review: new
+ui-conversation-earlier = { $count ->
+    [one] Mostrar 1 mensagem anterior
+   *[other] Mostrar { $count } mensagens anteriores
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [one] Esta conversa também tem uma mensagem noutra pasta.
+   *[other] Esta conversa também tem { $count } mensagens noutras pastas.
+}
+# review: new
+ui-conversation-this-folder = &Apenas esta pasta
+# review: new
+ui-conversation-whole = &Toda a conversa
 cmd-folder-list = Lista de &pastas
 cmd-layout-automatic = &Automático
 cmd-layout-classic = &Clássico

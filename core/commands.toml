@@ -353,6 +353,12 @@ key = "Mod+P"
 one = true
 
 [[command]]
+id = "print_conversation"
+windows = 179
+menu = "file"
+one = true
+
+[[command]]
 id = "import"
 windows = 123
 menu = "file"

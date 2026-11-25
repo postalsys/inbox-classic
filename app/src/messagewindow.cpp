@@ -117,8 +117,8 @@ void Layout(MessageWindow* state) {
 }
 
 // the message `uid` of `folder` shown in the window, and marked read; the header from `row` (NULL for none) until the
-// message is there
-void Show(MessageWindow* state, int64_t folder, uint64_t uid, const PeMessage* row = nullptr) {
+// message is there; in its conversation for `conversation` (the window as a double-click opened it), else alone
+void Show(MessageWindow* state, int64_t folder, uint64_t uid, const PeMessage* row = nullptr, bool conversation = false) {
     state->folder = folder;
     state->uid = uid;
     state->previousFolder = state->nextFolder = 0;
@@ -126,6 +126,7 @@ void Show(MessageWindow* state, int64_t folder, uint64_t uid, const PeMessage* r
     FindNeighbours(state);
     state->subject = row ? Text(row->subject) : L"";
     state->reader.Clear(true);
+    state->reader.SetConversation(conversation);
     state->reader.Open(folder, uid, state->mailbox->AccountOf(folder), row);
     PeSelectionSummary summary;
     SelectionOf(state, summary);
@@ -566,7 +567,7 @@ void ShowOpened(MessageWindow* state) {
 }  // namespace
 
 void OpenMessageWindow(HWND main, PeCore* core, Mailbox* mailbox, MessageListOrder order, int64_t folder, uint64_t uid,
-                       const PeMessage* row) {
+                       const PeMessage* row, bool conversation) {
     // open already: brought to the front
     if (BringOpen([&](const MessageWindow& open) { return open.file.empty() && open.folder == folder && open.uid == uid; })) {
         return;
@@ -576,7 +577,7 @@ void OpenMessageWindow(HWND main, PeCore* core, Mailbox* mailbox, MessageListOrd
         return;
     }
     state->order = std::move(order);
-    Show(state, folder, uid, row);
+    Show(state, folder, uid, row, conversation);
     ShowOpened(state);
 }
 

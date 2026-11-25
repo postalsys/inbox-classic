@@ -827,6 +827,7 @@ pub fn run_command(command: Command) {
         Command::Find => main.focus_find(),
         Command::SaveAs => spawn(async move { main.save_shown_as().await }),
         Command::Print => main.print_shown(),
+        Command::PrintConversation => main.print_conversation(),
         Command::Import => spawn(async move { main.import().await }),
         Command::Outbox => spawn(async move {
             crate::outbox::outbox_dialog(main.window()).await;

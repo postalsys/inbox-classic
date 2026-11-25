@@ -467,6 +467,15 @@ final class UITest {
         _ = try await URLSession.shared.data(for: request)
     }
 
+    /// flags changed on the server as another client would: `action` is add, remove or set
+    func setFlags(_ mailbox: String, uids: [Int], flags: [String], action: String, at server: String? = nil) async throws {
+        var request = URLRequest(url: URL(string: "\(server ?? rest)/\(mailbox)/messages/flags")!)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: ["uids": uids, "flags": flags, "mode": action])
+        _ = try await URLSession.shared.data(for: request)
+    }
+
     /// the mail the Windows test reads too: in the list newest first the newsletter, Ann's message, the minutes, and a
     /// reply with the message it answers quoted below
     func seed() async throws {

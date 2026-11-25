@@ -40,6 +40,8 @@ cmd-accounts = &Računi...
 cmd-find = &Traži poruku
 cmd-save-as = &Spremi kao...
 cmd-print = Ispi&ši...
+# review: new
+cmd-print-conversation = Ispiši raz&govor...
 cmd-import = &Uvezi poruke...
 cmd-outbox = &Izlazna pošta...
 cmd-properties = Svo&jstva
@@ -60,6 +62,47 @@ ui-find-not-found = „{ $words }“ nije u ovoj poruci
 cmd-expand-all-threads = Proširi sve r&azgovore
 cmd-collapse-all-threads = Sažmi sve ra&zgovore
 ui-group-by-conversation = &Grupiraj poruke po razgovoru
+# review: new
+ui-show-whole-conversation = Prikaži &cijeli razgovor u oknu za čitanje
+# review: new
+ui-show-whole-conversation-note = Redak razgovora otvara sve njegove poruke, zajedno s vašim odgovorima, skicama i porukama spremljenima u druge mape. Pročitane poruke sažete su u jedan redak: kliknite redak da biste ga otvorili ili saželi.
+# review: new
+ui-conversation-order = Redoslijed poru&ka u razgovoru:
+# review: new
+ui-conversation-oldest-first = Najstarije prvo
+# review: new
+ui-conversation-newest-first = Najnovije prvo
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+    [one] ({ $count }, { $new } nova)
+    [few] ({ $count }, { $new } nove)
+   *[other] ({ $count }, { $new } novih)
+}
+# review: new
+ui-conversation-to = za { $people }
+# review: new
+ui-conversation-draft = Skica
+# review: new
+ui-conversation-alone = Potpisana ili šifrirana: otvara se zasebno
+# review: new
+ui-conversation-downloading = Preuzimanje…
+# review: new
+ui-conversation-earlier = { $count ->
+    [one] Prikaži { $count } raniju poruku
+    [few] Prikaži { $count } ranije poruke
+   *[other] Prikaži { $count } ranijih poruka
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [one] Ovaj razgovor ima i { $count } poruku u drugoj mapi.
+    [few] Ovaj razgovor ima i { $count } poruke u drugim mapama.
+   *[other] Ovaj razgovor ima i { $count } poruka u drugim mapama.
+}
+# review: new
+ui-conversation-this-folder = Samo &ova mapa
+# review: new
+ui-conversation-whole = &Cijeli razgovor
 cmd-folder-list = Popis &mapa
 cmd-layout-automatic = &Automatski
 cmd-layout-classic = &Klasični

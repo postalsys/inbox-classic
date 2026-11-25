@@ -40,6 +40,8 @@ cmd-accounts = Kon&ta...
 cmd-find = Zn&ajdź wiadomość
 cmd-save-as = Zapisz &jako...
 cmd-print = &Drukuj...
+# review: new
+cmd-print-conversation = Drukuj konwe&rsację...
 cmd-import = &Importuj wiadomości...
 cmd-outbox = Skrzynka &nadawcza...
 cmd-properties = &Właściwości
@@ -60,6 +62,50 @@ ui-find-not-found = W tej wiadomości nie ma „{ $words }”
 cmd-expand-all-threads = Rozwiń wszystkie &konwersacje
 cmd-collapse-all-threads = &Zwiń wszystkie konwersacje
 ui-group-by-conversation = &Grupuj wiadomości według konwersacji
+# review: new
+ui-show-whole-conversation = Pokaż &całą konwersację w okienku odczytu
+# review: new
+ui-show-whole-conversation-note = Wiersz konwersacji otwiera wszystkie jej wiadomości, razem z Twoimi odpowiedziami, wersjami roboczymi i wiadomościami odłożonymi do innych folderów. Przeczytane wiadomości są zwinięte do jednego wiersza: kliknij wiersz, aby go otworzyć lub zwinąć.
+# review: new
+ui-conversation-order = Kolejność &wiadomości w konwersacji:
+# review: new
+ui-conversation-oldest-first = Najstarsze najpierw
+# review: new
+ui-conversation-newest-first = Najnowsze najpierw
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+    [one] ({ $count }, { $new } nowa)
+    [few] ({ $count }, { $new } nowe)
+    [many] ({ $count }, { $new } nowych)
+   *[other] ({ $count }, { $new } nowych)
+}
+# review: new
+ui-conversation-to = do { $people }
+# review: new
+ui-conversation-draft = Wersja robocza
+# review: new
+ui-conversation-alone = Podpisana lub zaszyfrowana: otwiera się osobno
+# review: new
+ui-conversation-downloading = Pobieranie…
+# review: new
+ui-conversation-earlier = { $count ->
+    [one] Pokaż { $count } wcześniejszą wiadomość
+    [few] Pokaż { $count } wcześniejsze wiadomości
+    [many] Pokaż { $count } wcześniejszych wiadomości
+   *[other] Pokaż { $count } wcześniejszych wiadomości
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [one] Ta konwersacja ma też { $count } wiadomość w innym folderze.
+    [few] Ta konwersacja ma też { $count } wiadomości w innych folderach.
+    [many] Ta konwersacja ma też { $count } wiadomości w innych folderach.
+   *[other] Ta konwersacja ma też { $count } wiadomości w innych folderach.
+}
+# review: new
+ui-conversation-this-folder = &Tylko ten folder
+# review: new
+ui-conversation-whole = &Cała konwersacja
 cmd-folder-list = Lista &folderów
 cmd-layout-automatic = &Automatyczny
 cmd-layout-classic = &Klasyczny

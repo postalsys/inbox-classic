@@ -84,7 +84,7 @@ enum SettingsGroup {
         case .sending: return [.sendDelay]
         case .defaultApps: return [.defaultMailApp, .emlDefault]
         case .updates: return [.checkForUpdates]
-        case .messageList: return [.layout, .groupByConversation, .listPictures]
+        case .messageList: return [.layout, .groupByConversation, .showWholeConversation, .conversationOrder, .listPictures]
         case .messages: return [.darkMessages, .showPreviews, .pdfPreviews, .picturesAlways, .trustedSenders]
         case .encryption: return [.searchEncrypted, .keyserver]
         case .downloading: return [.downloadAhead, .downloadLimit]
@@ -108,6 +108,8 @@ enum Setting {
     case checkForUpdates
     case layout
     case groupByConversation
+    case showWholeConversation
+    case conversationOrder
     case listPictures
     case darkMessages
     case showPreviews
@@ -130,6 +132,8 @@ enum Setting {
         case .checkForUpdates: return .toggle
         case .layout: return .choice
         case .groupByConversation: return .toggle
+        case .showWholeConversation: return .toggle
+        case .conversationOrder: return .choice
         case .listPictures: return .toggle
         case .darkMessages: return .toggle
         case .showPreviews: return .toggle
@@ -155,6 +159,8 @@ enum Setting {
         case .checkForUpdates: return .macCheckUpdatesAutomatically
         case .layout: return .uiLayoutLabel
         case .groupByConversation: return .uiGroupByConversation
+        case .showWholeConversation: return .uiShowWholeConversation
+        case .conversationOrder: return .uiConversationOrder
         case .listPictures: return .uiListPictures
         case .darkMessages: return .uiDarkMessages
         case .showPreviews: return .uiPreviewShow
@@ -180,6 +186,8 @@ enum Setting {
         case .checkForUpdates: return nil
         case .layout: return nil
         case .groupByConversation: return nil
+        case .showWholeConversation: return .uiShowWholeConversationNote
+        case .conversationOrder: return nil
         case .listPictures: return .uiListPicturesNote
         case .darkMessages: return nil
         case .showPreviews: return .uiPreviewShowNote
@@ -205,6 +213,8 @@ enum Setting {
         case .checkForUpdates: return nil
         case .layout: return nil
         case .groupByConversation: return nil
+        case .showWholeConversation: return .groupByConversation
+        case .conversationOrder: return .groupByConversation
         case .listPictures: return nil
         case .darkMessages: return nil
         case .showPreviews: return nil

@@ -844,6 +844,11 @@ UPDATE messages SET sender_auth = NULL, logo_id = NULL, auth_headers = NULL
     WHERE (sender_auth IS NOT NULL OR auth_headers IS NOT NULL)
     AND COALESCE(date, internal_date) > CAST(strftime('%s', 'now') AS INTEGER) - 90 * 86400;
 "#,
+    // a collapsed conversation's row opens its oldest unread message, else its newest (pe-store threads.rs
+    // thread_focus): each found by this index in one step, however long the conversation
+    r#"
+CREATE INDEX messages_thread_focus ON messages (folder_id, thread_id, seen, COALESCE(internal_date, date));
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

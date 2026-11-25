@@ -182,6 +182,17 @@ pub unsafe extern "C" fn pe_list_view_set_hide_ignored(view: *mut PeListView, hi
     unsafe { change(view, (), |view| view.set_hide_ignored(hide)) }
 }
 
+/// The Conversation order setting: an expanded conversation lists its other messages under its first one newest first
+/// (true) or as they arrived. The view reads its list again with its next load.
+///
+/// # Safety
+/// `view` must be NULL or a live view.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_list_view_set_newest_first(view: *mut PeListView, newest_first: bool) {
+    // SAFETY: as the caller guarantees
+    unsafe { change(view, (), |view| view.set_newest_first(newest_first)) }
+}
+
 /// Whether words are searched for: the list is then of every folder (its Folder column shown)
 ///
 /// # Safety

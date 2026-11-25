@@ -42,6 +42,8 @@ cmd-accounts = &Fiókok...
 cmd-find = Üzenet ke&resése
 cmd-save-as = Me&ntés másként...
 cmd-print = N&yomtatás...
+# review: new
+cmd-print-conversation = Be&szélgetés nyomtatása...
 cmd-import = Üzenetek &importálása...
 cmd-outbox = &Postázandó üzenetek...
 cmd-properties = &Tulajdonságok
@@ -62,6 +64,43 @@ ui-find-not-found = „{ $words }” nem szerepel ebben az üzenetben
 cmd-expand-all-threads = Minden beszélgetés kibon&tása
 cmd-collapse-all-threads = Minden beszélgetés össze&csukása
 ui-group-by-conversation = Üzenetek csoportosítása beszélgetés &szerint
+# review: new
+ui-show-whole-conversation = Teljes &beszélgetés megjelenítése az olvasóablakban
+# review: new
+ui-show-whole-conversation-note = A beszélgetés sora megnyitja az összes üzenetét, az Ön válaszaival és piszkozataival, valamint a más mappákba áthelyezett üzenetekkel együtt. Az olvasott üzenetek egy sorrá vannak összecsukva: kattintson egy sorra a kibontásához vagy összecsukásához.
+# review: new
+ui-conversation-order = Üzenetek so&rrendje a beszélgetésben:
+# review: new
+ui-conversation-oldest-first = Legrégebbi elöl
+# review: new
+ui-conversation-newest-first = Legújabb elöl
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+   *[other] ({ $count }, { $new } új)
+}
+# review: new
+ui-conversation-to = címzett: { $people }
+# review: new
+ui-conversation-draft = Piszkozat
+# review: new
+ui-conversation-alone = Aláírt vagy titkosított: külön nyílik meg
+# review: new
+ui-conversation-downloading = Letöltés…
+# review: new
+ui-conversation-earlier = { $count ->
+    [one] { $count } korábbi üzenet megjelenítése
+   *[other] { $count } korábbi üzenet megjelenítése
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [one] A beszélgetés egy másik mappában is tartalmaz egy üzenetet.
+   *[other] A beszélgetés más mappákban is tartalmaz { $count } üzenetet.
+}
+# review: new
+ui-conversation-this-folder = &Csak ez a mappa
+# review: new
+ui-conversation-whole = &Teljes beszélgetés
 cmd-folder-list = &Mappalista
 cmd-layout-automatic = &Automatikus
 cmd-layout-classic = &Klasszikus

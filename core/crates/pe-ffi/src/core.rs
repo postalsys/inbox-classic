@@ -1814,6 +1814,17 @@ pub struct PeMessage {
     /// The row stands for all of its conversation's messages, which are not shown under it (it shows a +, and an action
     /// on it acts on them all). The apps read this rather than decide from the numbers above.
     pub thread_collapsed: bool,
+    /// What the row says after its subject when it opens and closes its conversation: how many messages it has in the
+    /// list and how many are new, "(3)", "(3, 1 new)"; empty for any other row
+    pub thread_label: *const c_char,
+    /// The message selecting the row opens in the reading pane: a collapsed conversation's focus (its oldest unread
+    /// message, else its newest, whose sender and first words the row shows), else the row's own message
+    pub open_folder: i64,
+    pub open_uid: u64,
+    /// With Show the whole conversation on, selecting the row shows its conversation in the reading pane
+    /// (`pe_conversation_view_start`), not its message alone: a row of its own or a collapsed conversation's, never one
+    /// of an expanded conversation's (which shows its message alone)
+    pub shows_conversation: bool,
     /// Its conversation's mark: watched (the Watch column's glasses) or ignored (the Watch column's sign, and the row
     /// grey)
     pub mark: PeThreadMark,
@@ -1931,6 +1942,15 @@ pub(crate) fn message_list(messages: &[pe_store::Message]) -> *mut PeMessageList
             thread_expanded: m.thread.is_some_and(|t| t.expanded),
             thread_opens: m.thread.is_some_and(|t| t.opens()),
             thread_collapsed: m.thread.is_some_and(|t| t.collapsed()),
+            thread_label: strings.add(
+                &m.thread
+                    .filter(|t| t.opens())
+                    .map(|t| pe_core::thread_count(t.count, t.unread))
+                    .unwrap_or_default(),
+            ),
+            open_folder: m.opens_at().folder,
+            open_uid: m.opens_at().uid,
+            shows_conversation: m.thread.is_some_and(|t| t.shows_conversation()),
             bounce: info.bounce,
             mark: m.mark.into(),
             dimmed: m.dimmed(),
@@ -2371,6 +2391,10 @@ pub struct PeMessageInfo {
     /// link is checked against it (`pe_preview_link`, a part's link too), and the window ends them with
     /// `pe_previews_end` when it shows another document or closes
     pub preview_token: *const c_char,
+    /// The view is a conversation's (`pe_conversation_view_start`): `document` its page, each open message a part;
+    /// the header, attachments and bars are its focus message's, which Reply, Forward and Print act on. Its messages,
+    /// 0 for a message shown alone
+    pub conversation_count: usize,
 }
 
 /// The colour of the security bar: green, blue, amber, grey; none without one
@@ -2404,6 +2428,8 @@ pub struct PeMessageView {
     info: PeMessageInfo,
     attachments: Vec<PeAttachment>,
     parts: Vec<*const c_char>,
+    /// A conversation's open messages still downloading
+    waiting: Vec<pe_store::MessageRef>,
     _invitation: Option<Box<PeInvitation>>,
     _strings: Strings,
 }
@@ -2502,7 +2528,9 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
         protection_details: strings.add(&view.protection.as_ref().map(|p| p.details()).unwrap_or_default()),
         part_count: view.part_documents.len(),
         preview_token: strings.add(view.preview_token.as_deref().unwrap_or_default()),
+        conversation_count: view.conversation.as_ref().map_or(0, |c| c.count),
     };
+    let waiting = view.conversation.map(|c| c.waiting).unwrap_or_default();
     let parts = view
         .part_documents
         .iter()
@@ -2512,6 +2540,7 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
         info,
         attachments,
         parts,
+        waiting,
         _invitation: invitation,
         _strings: strings,
     })
@@ -2571,6 +2600,11 @@ pub enum PeReaderLink {
     /// key id>`): `pe_pgp_find_handle` with the link, then on its `KeysFound` `pe_pgp_find_result` and the view built
     /// again
     FindKey = 6,
+    /// A message's line on a conversation's page (`inboxclassic:conversation-N`): `pe_conversation_click` with the
+    /// reader's message and N (`pe_conversation_link_index`), then the reader opens the message it gives
+    Conversation = 7,
+    /// "Show N earlier messages" on a conversation's page: `pe_conversation_show_earlier`, then the view built again
+    ConversationEarlier = 8,
 }
 
 /// Words an instant (seconds since the Unix epoch) for the event cards: its day in full (`time` false) or its time of
@@ -2658,6 +2692,10 @@ pub unsafe extern "C" fn pe_reader_link(uri: *const c_char) -> PeReaderLink {
             PeReaderLink::FindKey
         } else if pe_html::is_preview_link(uri) {
             PeReaderLink::Attachment
+        } else if pe_html::conversation_link(uri).is_some() {
+            PeReaderLink::Conversation
+        } else if pe_html::is_conversation_earlier_link(uri) {
+            PeReaderLink::ConversationEarlier
         } else {
             PeReaderLink::Other
         }
@@ -2717,6 +2755,150 @@ pub unsafe extern "C" fn pe_message_view_start(
     unsafe {
         with_shared(core, 0, |core| {
             core.message_view_start(folder, uid, allow_remote_images).unwrap_or(0)
+        })
+    }
+}
+
+/// Builds the view of the conversation of the message `folder`/`uid` (whose source is in the store, after
+/// `MessageReady`) off the window thread, opened at it: the whole conversation in the reading pane, or the message
+/// alone when it is in no conversation of several messages, or is signed or encrypted. `ViewReady` with this request
+/// follows and `pe_message_view_result` gives the view, as for `pe_message_view_start`; `conversation_count` of its
+/// info says which it is. `newest_first`: the Conversation order setting. 0 on failure.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_conversation_view_start(
+    core: *const PeCore,
+    folder: i64,
+    uid: u64,
+    allow_remote_images: bool,
+    newest_first: bool,
+) -> u64 {
+    let focus = pe_store::MessageRef { folder, uid };
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with_shared(core, 0, |core| {
+            core.conversation_view_start(focus, allow_remote_images, newest_first)
+                .unwrap_or(0)
+        })
+    }
+}
+
+/// Whether a conversation's view waits for the message `folder`/`uid`, an open message still downloading: on its
+/// `MessageReady` the reader builds the view again
+///
+/// # Safety
+/// `view` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_view_waits_for(view: *const PeMessageView, folder: i64, uid: u64) -> bool {
+    // SAFETY: as the caller guarantees
+    let Some(view) = (unsafe { view.as_ref() }) else {
+        return false;
+    };
+    guard(|| view.waiting.contains(&pe_store::MessageRef { folder, uid })).unwrap_or(false)
+}
+
+/// The N of a conversation line's link (`inboxclassic:conversation-N`), -1 for any other link
+///
+/// # Safety
+/// `uri` must be NULL or a NUL-terminated UTF-8 string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_conversation_link_index(uri: *const c_char) -> i64 {
+    // SAFETY: as the caller guarantees
+    let Some(uri) = (unsafe { arg(uri) }) else {
+        return -1;
+    };
+    guard(|| pe_html::conversation_link(uri).map_or(-1, |index| index as i64)).unwrap_or(-1)
+}
+
+/// A conversation line clicked in the view of the reader's message `folder`/`uid`: that message opens and takes the
+/// focus, or folds. The message the reader shows now in `out_folder` and `out_uid` (its conversation view built with
+/// `pe_conversation_view_start`); false when the line is not of a conversation shown.
+///
+/// # Safety
+/// `core` must be a live handle, `out_folder` and `out_uid` valid pointers.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_conversation_click(
+    core: *const PeCore,
+    folder: i64,
+    uid: u64,
+    index: i64,
+    out_folder: *mut i64,
+    out_uid: *mut u64,
+) -> bool {
+    let Ok(index) = usize::try_from(index) else {
+        return false;
+    };
+    // SAFETY: as the caller guarantees
+    let found = unsafe {
+        with(core, None, |core| {
+            core.conversation_click(pe_store::MessageRef { folder, uid }, index)
+        })
+    };
+    let Some(found) = found else {
+        return false;
+    };
+    // SAFETY: as the caller guarantees
+    unsafe {
+        if let (Some(f), Some(u)) = (out_folder.as_mut(), out_uid.as_mut()) {
+            *f = found.folder;
+            *u = found.uid;
+            return true;
+        }
+    }
+    false
+}
+
+/// "Show N earlier messages" clicked in the view of the reader's message `folder`/`uid`: every line shows once the
+/// view is built again
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_conversation_show_earlier(core: *const PeCore, folder: i64, uid: u64) {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, (), |core| {
+            core.conversation_show_earlier(pe_store::MessageRef { folder, uid })
+        })
+    }
+}
+
+/// The reader shows the conversation view of `folder`/`uid` (a moment after it came, as a message alone is marked
+/// read then): the unread messages it showed open are marked read. False on failure.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_conversation_shown(core: *const PeCore, folder: i64, uid: u64) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, false, |core| {
+            core.conversation_shown(pe_store::MessageRef { folder, uid }).is_ok()
+        })
+    }
+}
+
+/// File > Print Conversation: one document of each message of the conversation of `folder`/`uid` (its header lines
+/// and text, in the order of `newest_first`), made off the window thread as Print's printout with pictures is:
+/// `PrintReady` follows with the request this returns, and `pe_print_result` gives the document for `pe_print_page`.
+/// 0 when the message is in no conversation: Print prints it alone.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_conversation_print_start(
+    core: *const PeCore,
+    folder: i64,
+    uid: u64,
+    newest_first: bool,
+) -> u64 {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with_shared(core, 0, |core| {
+            core.conversation_print_start(pe_store::MessageRef { folder, uid }, newest_first)
+                .unwrap_or(0)
         })
     }
 }

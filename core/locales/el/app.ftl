@@ -42,6 +42,8 @@ cmd-accounts = &Λογαριασμοί...
 cmd-find = &Εύρεση μηνύματος
 cmd-save-as = &Αποθήκευση ως...
 cmd-print = Ε&κτύπωση...
+# review: new
+cmd-print-conversation = Εκτύπωση συ&ζήτησης...
 cmd-import = &Εισαγωγή μηνυμάτων...
 cmd-outbox = Ε&ξερχόμενα...
 cmd-properties = Ιδιό&τητες
@@ -62,6 +64,44 @@ ui-find-not-found = Το «{ $words }» δεν υπάρχει σε αυτό το
 cmd-expand-all-threads = Ανάπτυ&ξη όλων των συζητήσεων
 cmd-collapse-all-threads = Σύμπτυξη όλων των συ&ζητήσεων
 ui-group-by-conversation = &Ομαδοποίηση μηνυμάτων ανά συζήτηση
+# review: new
+ui-show-whole-conversation = Εμφάνιση ολόκληρης της συ&ζήτησης στο παράθυρο ανάγνωσης
+# review: new
+ui-show-whole-conversation-note = Η γραμμή μιας συζήτησης ανοίγει όλα τα μηνύματά της, μαζί με τις απαντήσεις σας, τα πρόχειρα και τα μηνύματα που έχετε τοποθετήσει σε άλλους φακέλους. Τα αναγνωσμένα μηνύματα συμπτύσσονται σε μία γραμμή: κάντε κλικ σε μια γραμμή για να την ανοίξετε ή να τη συμπτύξετε.
+# review: new
+ui-conversation-order = Σει&ρά συζήτησης:
+# review: new
+ui-conversation-oldest-first = Παλαιότερα πρώτα
+# review: new
+ui-conversation-newest-first = Νεότερα πρώτα
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+    [one] ({ $count }, { $new } νέο)
+   *[other] ({ $count }, { $new } νέα)
+}
+# review: new
+ui-conversation-to = προς { $people }
+# review: new
+ui-conversation-draft = Πρόχειρο
+# review: new
+ui-conversation-alone = Υπογεγραμμένο ή κρυπτογραφημένο: ανοίγει μόνο του
+# review: new
+ui-conversation-downloading = Γίνεται λήψη…
+# review: new
+ui-conversation-earlier = { $count ->
+    [one] Εμφάνιση 1 παλαιότερου μηνύματος
+   *[other] Εμφάνιση { $count } παλαιότερων μηνυμάτων
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [one] Αυτή η συζήτηση έχει επίσης ένα μήνυμα σε άλλον φάκελο.
+   *[other] Αυτή η συζήτηση έχει επίσης { $count } μηνύματα σε άλλους φακέλους.
+}
+# review: new
+ui-conversation-this-folder = &Μόνο αυτός ο φάκελος
+# review: new
+ui-conversation-whole = &Ολόκληρη η συζήτηση
 cmd-folder-list = &Λίστα φακέλων
 cmd-layout-automatic = &Αυτόματη
 cmd-layout-classic = &Κλασική

@@ -42,6 +42,8 @@ cmd-accounts = &Konti...
 cmd-find = Find &meddelelse
 cmd-save-as = &Gem som...
 cmd-print = &Udskriv...
+# review: new
+cmd-print-conversation = Udskriv sa&mtale...
 cmd-import = &Importer meddelelser...
 cmd-outbox = &Udbakke...
 cmd-properties = &Egenskaber
@@ -62,6 +64,44 @@ ui-find-not-found = »{ $words }« findes ikke i denne meddelelse
 cmd-expand-all-threads = Ud&vid alle samtaler
 cmd-collapse-all-threads = F&old alle samtaler sammen
 ui-group-by-conversation = Grupper meddelelser efter samta&le
+# review: new
+ui-show-whole-conversation = Vis hele sa&mtalen i læseruden
+# review: new
+ui-show-whole-conversation-note = En samtales række åbner alle dens meddelelser, med dine svar, kladder og de meddelelser, du har lagt i andre mapper. Læste meddelelser er foldet sammen til en linje: klik på en linje for at åbne eller folde den.
+# review: new
+ui-conversation-order = &Rækkefølge i samtaler:
+# review: new
+ui-conversation-oldest-first = Ældste først
+# review: new
+ui-conversation-newest-first = Nyeste først
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+    [one] ({ $count }, { $new } ny)
+   *[other] ({ $count }, { $new } nye)
+}
+# review: new
+ui-conversation-to = til { $people }
+# review: new
+ui-conversation-draft = Kladde
+# review: new
+ui-conversation-alone = Signeret eller krypteret: åbnes for sig
+# review: new
+ui-conversation-downloading = Henter…
+# review: new
+ui-conversation-earlier = { $count ->
+    [one] Vis 1 tidligere meddelelse
+   *[other] Vis { $count } tidligere meddelelser
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [one] Denne samtale har også en meddelelse i en anden mappe.
+   *[other] Denne samtale har også { $count } meddelelser i andre mapper.
+}
+# review: new
+ui-conversation-this-folder = Kun &denne mappe
+# review: new
+ui-conversation-whole = &Hele samtalen
 cmd-folder-list = &Mappeliste
 cmd-layout-automatic = &Automatisk
 cmd-layout-classic = &Klassisk

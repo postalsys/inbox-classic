@@ -44,6 +44,8 @@ cmd-accounts = Naloz&i...
 cmd-find = &Pronađi poruku
 cmd-save-as = &Sačuvaj kao...
 cmd-print = Od&štampaj...
+# review: new
+cmd-print-conversation = Odštampaj &razgovor...
 cmd-import = &Uvezi poruke...
 cmd-outbox = &Izlazno sanduče...
 cmd-properties = Svo&jstva
@@ -64,6 +66,48 @@ ui-find-not-found = „{ $words }“ nije u ovoj poruci
 cmd-expand-all-threads = Proširi sve r&azgovore
 cmd-collapse-all-threads = Sažmi sve ra&zgovore
 ui-group-by-conversation = &Grupiši poruke po razgovoru
+# review: new
+ui-show-whole-conversation = Prikaži &ceo razgovor u oknu za čitanje
+# review: new
+ui-show-whole-conversation-note = Red razgovora otvara sve njegove poruke, sa vašim odgovorima, radnim verzijama i porukama premeštenim u druge fascikle. Pročitane poruke sažete su u jedan red: kliknite na red da biste ga otvorili ili sažeti.
+# review: new
+ui-conversation-order = Redosl&ed poruka u razgovoru:
+# review: new
+ui-conversation-oldest-first = Prvo najstarije
+# review: new
+ui-conversation-newest-first = Prvo najnovije
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+    [one] ({ $count }, { $new } nova)
+    [few] ({ $count }, { $new } nove)
+   *[other] ({ $count }, { $new } novih)
+}
+# review: new
+ui-conversation-to = za { $people }
+# review: new
+ui-conversation-draft = Radna verzija
+# review: new
+ui-conversation-alone = Potpisana ili šifrovana: otvara se zasebno
+# review: new
+ui-conversation-downloading = Preuzimanje…
+# review: new
+ui-conversation-earlier = { $count ->
+    [one] Prikaži { $count } raniju poruku
+    [few] Prikaži { $count } ranije poruke
+   *[other] Prikaži { $count } ranijih poruka
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [1] Ovaj razgovor ima i poruku u drugoj fascikli.
+    [one] Ovaj razgovor ima i { $count } poruku u drugim fasciklama.
+    [few] Ovaj razgovor ima i { $count } poruke u drugim fasciklama.
+   *[other] Ovaj razgovor ima i { $count } poruka u drugim fasciklama.
+}
+# review: new
+ui-conversation-this-folder = Samo &ova fascikla
+# review: new
+ui-conversation-whole = &Ceo razgovor
 cmd-folder-list = Lista &fascikli
 cmd-layout-automatic = &Automatski
 cmd-layout-classic = &Klasični

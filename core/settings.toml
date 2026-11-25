@@ -119,6 +119,19 @@ kind = "switch"
 label = "ui-group-by-conversation"
 
 [[page.group.setting]]
+id = "show_whole_conversation"
+kind = "switch"
+label = "ui-show-whole-conversation"
+note = "ui-show-whole-conversation-note"
+depends_on = "group_by_conversation"
+
+[[page.group.setting]]
+id = "conversation_order"
+kind = "choice"
+label = "ui-conversation-order"
+depends_on = "group_by_conversation"
+
+[[page.group.setting]]
 id = "list_pictures"
 kind = "switch"
 label = "ui-list-pictures"

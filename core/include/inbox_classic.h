@@ -423,6 +423,11 @@ typedef enum PeReaderLink {
   // key id>`): `pe_pgp_find_handle` with the link, then on its `KeysFound` `pe_pgp_find_result` and the view built
   // again
   PE_READER_LINK_FIND_KEY = 6,
+  // A message's line on a conversation's page (`inboxclassic:conversation-N`): `pe_conversation_click` with the
+  // reader's message and N (`pe_conversation_link_index`), then the reader opens the message it gives
+  PE_READER_LINK_CONVERSATION = 7,
+  // "Show N earlier messages" on a conversation's page: `pe_conversation_show_earlier`, then the view built again
+  PE_READER_LINK_CONVERSATION_EARLIER = 8,
 } PeReaderLink;
 
 // How a message lets its reader leave its mailing list
@@ -1333,6 +1338,17 @@ typedef struct PeMessage {
   // The row stands for all of its conversation's messages, which are not shown under it (it shows a +, and an action
   // on it acts on them all). The apps read this rather than decide from the numbers above.
   bool thread_collapsed;
+  // What the row says after its subject when it opens and closes its conversation: how many messages it has in the
+  // list and how many are new, "(3)", "(3, 1 new)"; empty for any other row
+  const char *thread_label;
+  // The message selecting the row opens in the reading pane: a collapsed conversation's focus (its oldest unread
+  // message, else its newest, whose sender and first words the row shows), else the row's own message
+  int64_t open_folder;
+  uint64_t open_uid;
+  // With Show the whole conversation on, selecting the row shows its conversation in the reading pane
+  // (`pe_conversation_view_start`), not its message alone: a row of its own or a collapsed conversation's, never one
+  // of an expanded conversation's (which shows its message alone)
+  bool shows_conversation;
   // Its conversation's mark: watched (the Watch column's glasses) or ignored (the Watch column's sign, and the row
   // grey)
   enum PeThreadMark mark;
@@ -1471,6 +1487,10 @@ typedef struct PeMessageInfo {
   // link is checked against it (`pe_preview_link`, a part's link too), and the window ends them with
   // `pe_previews_end` when it shows another document or closes
   const char *preview_token;
+  // The view is a conversation's (`pe_conversation_view_start`): `document` its page, each open message a part;
+  // the header, attachments and bars are its focus message's, which Reply, Forward and Print act on. Its messages,
+  // 0 for a message shown alone
+  size_t conversation_count;
 } PeMessageInfo;
 
 typedef struct PeAttachment {
@@ -3195,6 +3215,78 @@ uint64_t pe_message_view_start(const struct PeCore *core,
                                uint64_t uid,
                                bool allow_remote_images);
 
+// Builds the view of the conversation of the message `folder`/`uid` (whose source is in the store, after
+// `MessageReady`) off the window thread, opened at it: the whole conversation in the reading pane, or the message
+// alone when it is in no conversation of several messages, or is signed or encrypted. `ViewReady` with this request
+// follows and `pe_message_view_result` gives the view, as for `pe_message_view_start`; `conversation_count` of its
+// info says which it is. `newest_first`: the Conversation order setting. 0 on failure.
+//
+// # Safety
+// `core` must be a live handle.
+uint64_t pe_conversation_view_start(const struct PeCore *core,
+                                    int64_t folder,
+                                    uint64_t uid,
+                                    bool allow_remote_images,
+                                    bool newest_first);
+
+// Whether a conversation's view waits for the message `folder`/`uid`, an open message still downloading: on its
+// `MessageReady` the reader builds the view again
+//
+// # Safety
+// `view` must be NULL or live.
+bool pe_message_view_waits_for(const struct PeMessageView *view,
+                               int64_t folder,
+                               uint64_t uid);
+
+// The N of a conversation line's link (`inboxclassic:conversation-N`), -1 for any other link
+//
+// # Safety
+// `uri` must be NULL or a NUL-terminated UTF-8 string.
+int64_t pe_conversation_link_index(const char *uri);
+
+// A conversation line clicked in the view of the reader's message `folder`/`uid`: that message opens and takes the
+// focus, or folds. The message the reader shows now in `out_folder` and `out_uid` (its conversation view built with
+// `pe_conversation_view_start`); false when the line is not of a conversation shown.
+//
+// # Safety
+// `core` must be a live handle, `out_folder` and `out_uid` valid pointers.
+bool pe_conversation_click(const struct PeCore *core,
+                           int64_t folder,
+                           uint64_t uid,
+                           int64_t index,
+                           int64_t *out_folder,
+                           uint64_t *out_uid);
+
+// "Show N earlier messages" clicked in the view of the reader's message `folder`/`uid`: every line shows once the
+// view is built again
+//
+// # Safety
+// `core` must be a live handle.
+void pe_conversation_show_earlier(const struct PeCore *core,
+                                  int64_t folder,
+                                  uint64_t uid);
+
+// The reader shows the conversation view of `folder`/`uid` (a moment after it came, as a message alone is marked
+// read then): the unread messages it showed open are marked read. False on failure.
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_conversation_shown(const struct PeCore *core,
+                           int64_t folder,
+                           uint64_t uid);
+
+// File > Print Conversation: one document of each message of the conversation of `folder`/`uid` (its header lines
+// and text, in the order of `newest_first`), made off the window thread as Print's printout with pictures is:
+// `PrintReady` follows with the request this returns, and `pe_print_result` gives the document for `pe_print_page`.
+// 0 when the message is in no conversation: Print prints it alone.
+//
+// # Safety
+// `core` must be a live handle.
+uint64_t pe_conversation_print_start(const struct PeCore *core,
+                                     int64_t folder,
+                                     uint64_t uid,
+                                     bool newest_first);
+
 // The view a request built, after its `ViewReady`, once; NULL when the message was not in the store. Free with
 // `pe_message_view_free`.
 //
@@ -4532,6 +4624,14 @@ bool pe_list_view_set_grouped(struct PeListView *view,
 void pe_list_view_set_hide_ignored(struct PeListView *view,
                                    bool hide);
 
+// The Conversation order setting: an expanded conversation lists its other messages under its first one newest first
+// (true) or as they arrived. The view reads its list again with its next load.
+//
+// # Safety
+// `view` must be NULL or a live view.
+void pe_list_view_set_newest_first(struct PeListView *view,
+                                   bool newest_first);
+
 // Whether words are searched for: the list is then of every folder (its Folder column shown)
 //
 // # Safety
@@ -5174,6 +5274,33 @@ uint64_t pe_selection_act_start(const struct PeCore *core,
                                 const struct PeSelection *selection,
                                 enum PeAction action,
                                 int64_t to);
+
+// Before Delete, Archive or Move (`action`) of the selection: how many messages of its conversations are in other
+// folders, which "Whole Conversation" would take too (`pe_selection_add_conversation`); 0 when there is nothing to
+// ask (one message of a conversation chosen, a whole list, any other action). The question is
+// `pe_conversation_elsewhere_question` with this count, its answers `ui-conversation-this-folder` and
+// `ui-conversation-whole`.
+//
+// # Safety
+// `core` must be a live handle, `selection` NULL or a live selection.
+size_t pe_selection_conversation_elsewhere(const struct PeCore *core,
+                                           const struct PeSelection *selection,
+                                           enum PeAction action,
+                                           int64_t to);
+
+// "Whole Conversation" answered: the messages `pe_selection_conversation_elsewhere` counted added to the selection,
+// for `pe_selection_act_start` with the same action. False on failure.
+//
+// # Safety
+// `core` must be a live handle, `selection` NULL or a live selection.
+bool pe_selection_add_conversation(const struct PeCore *core,
+                                   struct PeSelection *selection,
+                                   enum PeAction action,
+                                   int64_t to);
+
+// What to ask before Delete, Archive or Move of a conversation with `count` messages in other folders: "This
+// conversation also has 2 messages in other folders." Free with `pe_string_free`.
+char *pe_conversation_elsewhere_question(size_t count);
 
 // Mark All Read off the window thread, as `pe_selection_act_start` does an action: `Acted` follows with the request
 // this returns in `uid` and what the status bar says ("Marked 3 messages as read"); `ActionUndone` when the server

@@ -257,6 +257,8 @@ pub struct ListView {
     grouped: bool,
     /// View > Hide Ignored Conversations
     hide_ignored: bool,
+    /// Conversation order newest first: an expanded conversation's other messages under its first one, newest first
+    newest_first: bool,
     /// The open conversations of a grouped list
     expanded: BTreeSet<i64>,
     /// With Show Unread: when this list began (milliseconds since the epoch); the messages read since stay in it, until
@@ -383,6 +385,11 @@ impl ListView {
         self.hide_ignored
     }
 
+    /// The Conversation order setting: an expanded conversation's other messages newest first, or as they arrived
+    pub fn set_newest_first(&mut self, newest_first: bool) {
+        self.newest_first = newest_first;
+    }
+
     /// View > Hide Ignored Conversations; the open conversations stay open
     pub fn set_hide_ignored(&mut self, hide: bool) {
         self.hide_ignored = hide;
@@ -467,6 +474,7 @@ impl ListView {
             text: self.text.clone(),
             threads: self.grouped.then(|| self.expanded.iter().copied().collect()),
             hide_ignored: self.hide_ignored,
+            newest_first: self.newest_first,
             read_since: (self.show == Show::Unread).then_some(self.since),
             no_decrypted: false,
             uids: None,

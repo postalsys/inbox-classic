@@ -328,6 +328,10 @@ int CurrentValue(const OptionsState& state, PeSetting setting, const WindowOptio
         return std::clamp(window.layout, 0, 2);
     case PE_SETTING_GROUP_BY_CONVERSATION:
         return window.threads;
+    case PE_SETTING_SHOW_WHOLE_CONVERSATION:
+        return window.wholeConversation;
+    case PE_SETTING_CONVERSATION_ORDER:
+        return window.newestFirst ? 1 : 0;
     case PE_SETTING_LIST_PICTURES:
         return window.listPictures;
     case PE_SETTING_SHOW_PREVIEWS:
@@ -370,6 +374,12 @@ void StoreValue(PeCore* core, PeSetting setting, int value, WindowOptions& windo
         return;
     case PE_SETTING_GROUP_BY_CONVERSATION:
         window.threads = value != 0;
+        return;
+    case PE_SETTING_SHOW_WHOLE_CONVERSATION:
+        window.wholeConversation = value != 0;
+        return;
+    case PE_SETTING_CONVERSATION_ORDER:
+        window.newestFirst = value == 1;
         return;
     case PE_SETTING_LIST_PICTURES:
         window.listPictures = value != 0;
@@ -514,11 +524,14 @@ std::vector<std::wstring> ChoiceItems(const OptionsState& state, PeSetting setti
         return {core::T(PE_TEXT_UI_DOWNLOAD_AHEAD_RECENT), core::T(PE_TEXT_UI_DOWNLOAD_AHEAD_ALL), core::T(PE_TEXT_UI_DOWNLOAD_AHEAD_NEVER)};
     case PE_SETTING_DOWNLOAD_LIMIT:
         return CoreItems(pe_download_limit_count, pe_download_limit_text);
+    case PE_SETTING_CONVERSATION_ORDER:
+        return {core::T(PE_TEXT_UI_CONVERSATION_OLDEST_FIRST), core::T(PE_TEXT_UI_CONVERSATION_NEWEST_FIRST)};
     case PE_SETTING_NOTIFY_NEW_MAIL:
     case PE_SETTING_CODES_IN_NOTIFICATIONS:
     case PE_SETTING_DEFAULT_MAIL_APP:
     case PE_SETTING_EML_DEFAULT:
     case PE_SETTING_GROUP_BY_CONVERSATION:
+    case PE_SETTING_SHOW_WHOLE_CONVERSATION:
     case PE_SETTING_LIST_PICTURES:
     case PE_SETTING_SHOW_PREVIEWS:
     case PE_SETTING_PDF_PREVIEWS:
@@ -556,6 +569,10 @@ SettingIds Ids(PeSetting setting) {
         return {IDC_OPTIONS_LAYOUT};
     case PE_SETTING_GROUP_BY_CONVERSATION:
         return {IDC_OPTIONS_THREADS};
+    case PE_SETTING_SHOW_WHOLE_CONVERSATION:
+        return {IDC_OPTIONS_WHOLE_CONVERSATION, IDC_OPTIONS_WHOLE_CONVERSATION_NOTE};
+    case PE_SETTING_CONVERSATION_ORDER:
+        return {IDC_OPTIONS_CONVERSATION_ORDER};
     case PE_SETTING_LIST_PICTURES:
         return {IDC_OPTIONS_LIST_PICTURES, IDC_OPTIONS_LIST_PICTURES_NOTE};
     case PE_SETTING_SHOW_PREVIEWS:

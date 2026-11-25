@@ -42,6 +42,8 @@ cmd-accounts = A&ccounts...
 cmd-find = &Bericht zoeken
 cmd-save-as = Op&slaan als...
 cmd-print = Af&drukken...
+# review: new
+cmd-print-conversation = &Gesprek afdrukken...
 cmd-import = Berichten &importeren...
 cmd-outbox = &Postvak UIT...
 cmd-properties = &Eigenschappen
@@ -62,6 +64,43 @@ ui-find-not-found = “{ $words }” staat niet in dit bericht
 cmd-expand-all-threads = Alle gesprekken &uitvouwen
 cmd-collapse-all-threads = Alle gesprekken &samenvouwen
 ui-group-by-conversation = Berichten groeperen &per gesprek
+# review: new
+ui-show-whole-conversation = &Hele gesprek tonen in het leesvenster
+# review: new
+ui-show-whole-conversation-note = De regel van een gesprek opent al zijn berichten, met je antwoorden, concepten en de berichten die je in andere mappen hebt opgeborgen. Gelezen berichten zijn ingeklapt tot één regel: klik op een regel om die te openen of in te klappen.
+# review: new
+ui-conversation-order = Volg&orde in gesprekken:
+# review: new
+ui-conversation-oldest-first = Oudste eerst
+# review: new
+ui-conversation-newest-first = Nieuwste eerst
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+   *[other] ({ $count }, { $new } nieuw)
+}
+# review: new
+ui-conversation-to = aan { $people }
+# review: new
+ui-conversation-draft = Concept
+# review: new
+ui-conversation-alone = Ondertekend of versleuteld: wordt apart geopend
+# review: new
+ui-conversation-downloading = Downloaden…
+# review: new
+ui-conversation-earlier = { $count ->
+    [one] 1 eerder bericht tonen
+   *[other] { $count } eerdere berichten tonen
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [one] Dit gesprek heeft ook een bericht in een andere map.
+   *[other] Dit gesprek heeft ook { $count } berichten in andere mappen.
+}
+# review: new
+ui-conversation-this-folder = Alleen &deze map
+# review: new
+ui-conversation-whole = &Hele gesprek
 cmd-folder-list = &Mappenlijst
 cmd-layout-automatic = &Automatisch
 cmd-layout-classic = &Klassiek

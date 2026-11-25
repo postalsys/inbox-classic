@@ -41,6 +41,8 @@ cmd-accounts = R&ačuni...
 cmd-find = Na&jdi sporočilo
 cmd-save-as = &Shrani kot...
 cmd-print = Na&tisni...
+# review: new
+cmd-print-conversation = Natisni &pogovor...
 cmd-import = &Uvozi sporočila...
 cmd-outbox = &Odpošiljanje...
 cmd-properties = &Lastnosti
@@ -61,6 +63,50 @@ ui-find-not-found = »{ $words }« ni v tem sporočilu
 cmd-expand-all-threads = &Razširi vse pogovore
 cmd-collapse-all-threads = Strni vse po&govore
 ui-group-by-conversation = Z&druži sporočila po pogovorih
+# review: new
+ui-show-whole-conversation = Pokaži &celoten pogovor v podoknu za branje
+# review: new
+ui-show-whole-conversation-note = Vrstica pogovora odpre vsa njegova sporočila, skupaj z vašimi odgovori, osnutki in sporočili, shranjenimi v drugih mapah. Prebrana sporočila so strnjena v eno vrstico: kliknite vrstico, da jo odprete ali strnete.
+# review: new
+ui-conversation-order = Vrstni &red v pogovoru:
+# review: new
+ui-conversation-oldest-first = Najstarejša najprej
+# review: new
+ui-conversation-newest-first = Najnovejša najprej
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+    [one] ({ $count }, { $new } novo)
+    [two] ({ $count }, { $new } novi)
+    [few] ({ $count }, { $new } nova)
+   *[other] ({ $count }, { $new } novih)
+}
+# review: new
+ui-conversation-to = za { $people }
+# review: new
+ui-conversation-draft = Osnutek
+# review: new
+ui-conversation-alone = Podpisano ali šifrirano: odpre se posebej
+# review: new
+ui-conversation-downloading = Prenašanje…
+# review: new
+ui-conversation-earlier = { $count ->
+    [one] Pokaži { $count } starejše sporočilo
+    [two] Pokaži { $count } starejši sporočili
+    [few] Pokaži { $count } starejša sporočila
+   *[other] Pokaži { $count } starejših sporočil
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [one] Ta pogovor ima še { $count } sporočilo v drugi mapi.
+    [two] Ta pogovor ima še { $count } sporočili v drugih mapah.
+    [few] Ta pogovor ima še { $count } sporočila v drugih mapah.
+   *[other] Ta pogovor ima še { $count } sporočil v drugih mapah.
+}
+# review: new
+ui-conversation-this-folder = &Samo ta mapa
+# review: new
+ui-conversation-whole = &Celoten pogovor
 cmd-folder-list = &Seznam map
 cmd-layout-automatic = &Samodejno
 cmd-layout-classic = &Klasično

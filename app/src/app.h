@@ -13,6 +13,7 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include "commands.h"
@@ -214,6 +215,9 @@ void SetAccessibleName(HWND control, const std::wstring& text);
 // until `done` and destroys it, the owner disabled meanwhile
 HWND CreateModalWindow(HWND owner, const wchar_t* className, const wchar_t* title, int clientWidth, int clientHeight);
 void RunModal(HWND dialog, HWND focus, const bool& done);
+// a question with answers of its own (label, id), left to right, the first the default; the id of the one chosen,
+// `safe` for Esc or the window's close box
+int AskAnswers(HWND owner, const std::wstring& text, const std::vector<std::pair<std::wstring, int>>& answers, int safe);
 // RunModal sends it to the dialog with each key pressed in it (wParam the key, as WM_KEYDOWN has it) before the dialog
 // keys: a dialog that answers TRUE took the key (Options' Ctrl+Tab)
 constexpr UINT WM_MODAL_KEY = WM_APP + 90;
@@ -510,6 +514,10 @@ TrayAction TrayMessage(HWND main, UINT message, WPARAM wParam, LPARAM lParam, in
 // a plain preference of the app (HKEY_CURRENT_USER\Software\Postal Systems\InboxClassic), `fallback` when it is
 // not set
 DWORD GetPreference(const wchar_t* name, DWORD fallback);
+// Tools > Options > Show the whole conversation in the reading pane (on unless turned off)
+bool WholeConversation();
+// Tools > Options > Conversation order: newest first (oldest first unless chosen)
+bool ConversationNewestFirst();
 void SetPreference(const wchar_t* name, DWORD value);
 // a text preference there, empty when it is not set
 std::wstring GetTextPreference(const wchar_t* name);
@@ -526,6 +534,9 @@ struct WindowOptions {
     bool notify = false;
     bool codes = false;
     bool threads = false;
+    // Show the whole conversation in the reading pane; Conversation order newest first
+    bool wholeConversation = true;
+    bool newestFirst = false;
     int layout = 0;
     bool listPictures = true;
     // the core's, set by the window as the views of the messages shown are built again with them
@@ -633,9 +644,10 @@ struct MessageListOrder {
 // the message `uid` of `folder` in a window of its own (double-click or Enter in the list), marked read; brought to the
 // front when it is open already. A window of its own on the taskbar, as a compose window is; what it does to the
 // message the status bar of `main` says (through `mailbox`)
-// (`row`: its row of the list, for the header until the message is there; NULL for none)
+// (`row`: its row of the list, for the header until the message is there; NULL for none). `conversation`: shown in
+// its conversation, as the reading pane showed it (Previous and Next then show each message alone)
 void OpenMessageWindow(HWND main, PeCore* core, Mailbox* mailbox, MessageListOrder order, int64_t folder, uint64_t uid,
-                       const PeMessage* row);
+                       const PeMessage* row, bool conversation = false);
 // a message file (.eml) opened from File Explorer in a window of its own: Reply, Reply All and Forward (from the
 // account the main window has), Print and Save As; it is no folder's, so it can not be moved, flagged or deleted.
 // Brought to the front when it is open already; false with what to say over `main` for a file that is no message.
@@ -780,6 +792,8 @@ public:
     // File > Save As (the message shown, as an .eml), Print (the message shown), Import Messages (into the folder)
     void SaveShownAs(HWND owner);
     void PrintShown();
+    // File > Print Conversation: every message of the shown message's conversation
+    void PrintConversation();
     // File > Properties (Alt+Enter): the Internet headers of the message shown
     void ShowProperties(HWND owner);
     // View Source: the whole message as the server has it
@@ -949,6 +963,10 @@ public:
     // whether the list has a row a conversation (Tools > Options, kept for the next start), and turning that on or off
     bool Grouped() const { return pe_list_view_grouped(view_.get()); }
     void SetGrouped(bool on);
+    // Options' Show the whole conversation and Conversation order changed: kept, the list read again in the order,
+    // the selected row's message opened again
+    void SetWholeConversation(bool on);
+    void SetNewestFirst(bool on);
     // View > Expand All Conversations (`open`) and Collapse All Conversations
     void ExpandAll(bool open);
     // Message > Watch Conversation (PE_ACTION_WATCH) and Ignore Conversation (PE_ACTION_IGNORE) on the selected
@@ -1139,6 +1157,11 @@ private:
     const PeMessage* SelectedRow();
     // the reading pane emptied; with "There is no message selected." in it unless a message is `loading`
     void ClearReader(bool loading = false);
+    // the selected row's message opened again (Show the whole conversation turned on or off, the order changed)
+    void ReopenShown();
+    // the row (its own message) the reading pane was opened from, which a conversation shown keeps while a click in
+    // it moves the focus to another of its messages
+    std::pair<int64_t, uint64_t> readerRow_{};
     // the message of the reading pane marked read a moment after it is shown (TIMER_MARK_READ)
     void OnMessageShown();
     // in the middle of the list while it has no rows: why, and what to do about it
@@ -1152,6 +1175,9 @@ private:
     // `action` done to the selected messages off the window thread (pe_selection_act_start); once done (Acted) the status
     // bar told what was done, and the row after them selected when they left the list; true when it was started
     bool Act(PeAction action, int64_t to = 0);
+    // Delete, Archive or Move of the selection, its conversations' messages in other folders too when there are some
+    // and the user says so (This Folder Only, Whole Conversation)
+    void ActOnConversations(PeAction action, int64_t to = 0);
     // an Acted of an action started here
     void OnActed(const UiEvent& event);
     // a command that needs the numbers of a whole list's selection (Select All), counted off the window thread: `then`
@@ -1514,6 +1540,8 @@ enum ControlId : WORD {
     IDC_BOUNCED_MESSAGE,
     // no control: a preview of an attachment after the message's text clicked, likewise
     IDC_OPEN_PREVIEW,
+    IDC_CONVERSATION_LINE,
+    IDC_CONVERSATION_EARLIER,
     // in the status bar: takes back the message that waits to be sent (Undo Send)
     IDC_UNDO_SEND = 225,
     // the toolbar of a message window, and its Previous and Next buttons
@@ -1609,6 +1637,9 @@ enum OptionsControlId : WORD {
     IDC_OPTIONS_NOTIFY,
     IDC_OPTIONS_NOTE,
     IDC_OPTIONS_THREADS,
+    IDC_OPTIONS_WHOLE_CONVERSATION,
+    IDC_OPTIONS_WHOLE_CONVERSATION_NOTE,
+    IDC_OPTIONS_CONVERSATION_ORDER,
     // under the notifications: whether they name a message's sign-in code
     IDC_OPTIONS_CODES,
     // pictures in every message, its warning, the Trusted Senders window; Open .eml Files with Inbox Classic

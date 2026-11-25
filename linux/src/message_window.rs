@@ -60,8 +60,9 @@ pub fn windows() -> Vec<Rc<MessageWindow>> {
 }
 
 /// `message` in a window of its own, Previous and Next going through the list `view` shows, message by message (its
-/// grouping turned off); the window that shows it already brought to the front
-pub fn open(message: MessageRef, mut view: ListView) {
+/// grouping turned off); the window that shows it already brought to the front. `conversation`: shown in its
+/// conversation, as the reading pane showed it (Previous and Next then show each message alone)
+pub fn open(message: MessageRef, mut view: ListView, conversation: bool) {
     view.set_grouped(false);
     if let Some(open) = windows().into_iter().find(|w| w.message.get() == message) {
         open.window.present();
@@ -70,7 +71,7 @@ pub fn open(message: MessageRef, mut view: ListView) {
     let window = MessageWindow::new(message, view, None);
     WINDOWS.with(|windows| windows.borrow_mut().push(window.clone()));
     window.window.present();
-    window.show(message);
+    window.show(message, conversation);
 }
 
 /// The message file `path` (a .eml opened with the app) in a window of its own; the window that shows it already
@@ -239,12 +240,14 @@ impl MessageWindow {
         });
     }
 
-    /// `message` in the window: its header from the store at once, the message once the core has it; marked read
-    fn show(&self, message: MessageRef) {
+    /// `message` in the window: its header from the store at once, the message once the core has it; marked read. In
+    /// its conversation for `conversation` (as a double-click opened it), else alone, as Previous and Next go
+    fn show(&self, message: MessageRef, conversation: bool) {
         let core = &shell().core;
         self.message.set(message);
         let stored = core.message(message.folder, message.uid).ok().flatten();
         self.reader.clear(true);
+        self.reader.set_conversation(conversation);
         let account = shell().main().folder_account(message.folder);
         self.reader
             .open(account, message.folder, message.uid, stored.as_ref().map(|m| &m.info));
@@ -300,7 +303,7 @@ impl MessageWindow {
     fn step(&self, forward: bool) {
         let (previous, next) = self.neighbours.get();
         if let Some(message) = if forward { next } else { previous } {
-            self.show(message);
+            self.show(message, false);
         }
     }
 
@@ -309,7 +312,7 @@ impl MessageWindow {
     fn next_unread(&self) {
         let message = self.message.get();
         match self.view.next_unread_step(&shell().core, message.folder, message.uid) {
-            Ok(pe_core::NextUnread::Message(next)) => self.show(next),
+            Ok(pe_core::NextUnread::Message(next)) => self.show(next, false),
             _ => self.toasts.add_toast(adw::Toast::new(&t!(NoUnreadLeft))),
         }
     }
@@ -427,7 +430,7 @@ impl MessageWindow {
             Ok(text) => {
                 main.set_status(&text);
                 match next.or(previous) {
-                    Some(next) => self.show(next),
+                    Some(next) => self.show(next, false),
                     None => self.window.close(),
                 }
             }

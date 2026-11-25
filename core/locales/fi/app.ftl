@@ -43,6 +43,8 @@ cmd-accounts = &Tilit...
 cmd-find = &Etsi viesti
 cmd-save-as = Tallenna ni&mellä...
 cmd-print = T&ulosta...
+# review: new
+cmd-print-conversation = Tulosta keskustelu&n viestit...
 cmd-import = Tuo &viestejä...
 cmd-outbox = Lä&htevät...
 cmd-properties = &Ominaisuudet
@@ -63,6 +65,44 @@ ui-find-not-found = ”{ $words }” ei löydy tästä viestistä
 cmd-expand-all-threads = Laa&jenna kaikki keskustelut
 cmd-collapse-all-threads = Su&pista kaikki keskustelut
 ui-group-by-conversation = &Ryhmittele viestit keskusteluittain
+# review: new
+ui-show-whole-conversation = Näytä k&oko keskustelu lukuruudussa
+# review: new
+ui-show-whole-conversation-note = Keskustelun rivi avaa kaikki sen viestit, myös vastauksesi, luonnoksesi ja muihin kansioihin siirretyt viestit. Luetut viestit on supistettu riviksi: avaa tai supista viesti napsauttamalla sen riviä.
+# review: new
+ui-conversation-order = Keskustelun &järjestys:
+# review: new
+ui-conversation-oldest-first = Vanhin ensin
+# review: new
+ui-conversation-newest-first = Uusin ensin
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+    [one] ({ $count }, { $new } uusi)
+   *[other] ({ $count }, { $new } uutta)
+}
+# review: new
+ui-conversation-to = vastaanottaja: { $people }
+# review: new
+ui-conversation-draft = Luonnos
+# review: new
+ui-conversation-alone = Allekirjoitettu tai salattu: avautuu erikseen
+# review: new
+ui-conversation-downloading = Ladataan…
+# review: new
+ui-conversation-earlier = { $count ->
+    [one] Näytä { $count } aiempi viesti
+   *[other] Näytä { $count } aiempaa viestiä
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [one] Keskusteluun kuuluu myös viesti toisessa kansiossa.
+   *[other] Keskusteluun kuuluu myös { $count } viestiä muissa kansioissa.
+}
+# review: new
+ui-conversation-this-folder = Vain &tämä kansio
+# review: new
+ui-conversation-whole = &Koko keskustelu
 cmd-folder-list = &Kansioluettelo
 cmd-layout-automatic = &Automaattinen
 cmd-layout-classic = &Perinteinen

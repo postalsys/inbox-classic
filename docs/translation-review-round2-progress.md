@@ -1730,7 +1730,6 @@ Additional context for later languages: a TLS-required server response does not 
 a malformed message is unreadable by this app, not necessarily every mail app. Attachment opening uses an
 external handler after saving a temporary copy. The sign-in-page-file switch writes a URL, not page HTML.
 
-
 ### Remaining key help additions reviewed in all earlier languages
 
 Reviewed and improved all 42 inserted passages in Dutch, Italian, European and Brazilian Portuguese, Catalan,
@@ -1760,7 +1759,6 @@ At that checkpoint: 19,943 catalog entries and 800 help topics fully completed; 
 Remaining: 12,773 catalog entries and 520 help topics in hu/lt/lv/pl/ro/ru/sk/sl/sv/uk. Scope: 32,716 entries and
 1,320 topics. Next: Hungarian core.ftl (450 entries), then its remaining catalogs and all 52 help topics.
 `REVIEWED` remains unchanged until the full queue and final late-arrival audit are complete.
-
 
 ### Hungarian core catalog completed; agent Undo status clarified
 
@@ -1799,7 +1797,6 @@ Remaining: 12,323 catalog entries and 520 help topics across ten languages. Scop
 Next: Hungarian help.ftl (24), linux.ftl (87), mac.ftl (65), windows.ftl (69), then all 52 help topics.
 All 18 earlier languages are caught up. `REVIEWED` remains unchanged; the final late-arrival audit is still required.
 
-
 ### Hungarian platform catalogs and getting-started help reviewed
 
 Reviewed the remaining 245 Hungarian catalog entries: 24 help titles, 87 Linux, 65 Mac and 69 Windows entries.
@@ -1837,7 +1834,6 @@ Remaining here: 12,078 catalog entries and 516 help topics. Scope: 32,720 entrie
 48 help topics left. The next batch is the compose source integration and followup review, then Hungarian help.
 `REVIEWED` remains unchanged; the full queue and final late-arrival audit are still required.
 
-
 ### Compose signing/encryption source integrated; review pending
 
 Merged feature `162c0dd2` (observed in origin/master merge `a6ed91d6`) after Hungarian checkpoint `040b7373`.
@@ -1866,7 +1862,6 @@ icons vary by platform. This corrects the initial integration note after inspect
 remain. Encrypted drafts use the sender's key only and are not signed; sent copies retain encryption.
 Remove from Message removes recipient fields, not contacts. All details and source callers are in state.
 Review German next, followed by Spanish, Estonian and French, then the other earlier languages and Hungarian.
-
 
 ### German compose additions reviewed; another late source reason found
 
@@ -1901,7 +1896,6 @@ impersonation. No other source values or languages changed. Exact hashes and cal
 focused integration next; these 28 additions are not yet counted in the active inventory. The guide and root
 translation files are unchanged. Other source-branch changes remain untouched. `REVIEWED` is unchanged.
 
-
 ### Active-key signature reason imported for review
 
 Inserted the exact new pgp-why-not-key-in-use source entry into English and all 28 translations, preserving every
@@ -1915,7 +1909,6 @@ removed/partial-mark diagnostics. Full catalogs, variables and pending inventori
 marked, with no linguistic review claimed yet. Scope33868/1352, pending13186/560, completed20682/792.
 All20,716 unmarked messages and10,391 changed help lines reconcile, with14 verified baseline pairs; current hashes match.
 HTML regenerated; git diff --check passes. No test suite was run. Next: review all28 reasons and their encrypted-message wrapper, then Spanish compose.
-
 
 ### Signature-key warning reviewed in all 28 languages
 
@@ -1936,7 +1929,6 @@ All seven source refs remain unchanged; no further strings or languages were fou
 no relevant edits, and the existing key-help source and active-key entry remain verified. Dependent hardening code
 and corpus work remain separate. Current scope33868/1352; completed20711/792; pending13157/560. Historical catalog
 improvements3546. Continue Spanish compose next, then Estonian and French. REVIEWED remains unchanged.
-
 
 ### Spanish compose signing and encryption reviewed
 
@@ -1966,7 +1958,6 @@ code and corpus changes remain separate. Completed: 20,751 entries and 794 topic
 and 558 topics. Scope remains 33,868/1,352; historical catalog improvements: 3,561. Continue Estonian, then
 French compose additions. REVIEWED is unchanged; the complete queue and final late-arrival audit remain.
 
-
 ### Estonian compose signing and encryption reviewed
 
 Reviewed 40 additions, keeping all17 app labels and improving17 core values. Replaced informal sina with the
@@ -1992,7 +1983,6 @@ Fresh fetch/seven-ref audit found no new strings or languages; existing source i
 root has no relevant edits. Other hardening/corpus changes untouched. Completed20791 entries/796 topics;
 pending13077/556; scope33868/1352; historical catalog improvements3578. French compose is next. REVIEWED unchanged.
 
-
 ### French compose signing and encryption reviewed
 
 Reviewed all 40 additions, retaining the 17 app labels and improving 17 core values. Status now describes
@@ -2016,7 +2006,6 @@ Fresh fetch confirms all seven audited source tips unchanged, with no new string
 imports and guide unchanged; root has no relevant edits. Other hardening/corpus work untouched.
 Completed: 20,831 entries/798 topics; pending: 13,037/554; scope:33,868/1,352; historical improvements:3,595.
 Dutch compose is next. REVIEWED remains unchanged.
-
 
 ### Dutch compose signing and encryption reviewed
 
@@ -2045,7 +2034,6 @@ Completed: 20,871 entries and 800 topics; pending: 12,997/552; scope:33,868/1,35
 Italian compose is next, followed by the recorded languages and remaining Hungarian help. REVIEWED is unchanged;
 the complete queue and final late-arrival audit are still required.
 
-
 ### Italian compose signing and encryption reviewed
 
 Reviewed 40 additions, retaining all 17 app labels and seven good core values while improving 16 core values.
@@ -2070,7 +2058,6 @@ changes; all290 old copies retain exact cfdf55ab contents. The reusable source-w
 verified manifest provenance are recorded in state. Completed20,911 entries/802 topics; pending12,957/550;
 scope33,868/1,352; historical improvements3,626. Portuguese is next. REVIEWED remains unchanged.
 
-
 ### European Portuguese compose signing and encryption reviewed
 
 Reviewed all 40 additions, retaining all 17 app labels and seven good core values while improving 16 core values. Kept encriptar/ficheiro and polite third-person wording without você. Status describes protection no envio; signature integrity is distinct from verified ownership. Chave utilizável includes unusable keys, full key-state reasons follow Motivo and dates follow Última pesquisa. Unencrypted sending is conditional on removing inherited protected text, images and attachments.
@@ -2081,7 +2068,6 @@ All 53 mnemonic scopes pass. Structural checker:1,446 expected removed-mark diag
 
 Seven source refs unchanged after fetch, guide unchanged; no new strings/languages. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 1,173 entries/201 passages reconcile. No tests.
 Completed 20,951 entries/804 topics; pending 12,917/548; scope 33,868/1,352; historical catalog improvements 3,642. Next: Brazilian Portuguese. REVIEWED remains unchanged.
-
 
 ### Brazilian Portuguese compose signing and encryption reviewed
 
@@ -2094,7 +2080,6 @@ All 53 mnemonic scopes pass. Structural checker:1,446 expected removed-mark diag
 Seven source refs unchanged after fetch, guide unchanged; no new strings/languages. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 1,133 entries/199 passages reconcile. No tests.
 Completed 20,991 entries/806 topics; pending 12,877/546; scope 33,868/1,352; historical catalog improvements 3,657. Next: Catalan. REVIEWED remains unchanged.
 
-
 ### Catalan compose signing and encryption reviewed
 
 Reviewed all 40 additions, improving 17 core values and two app access keys. Insert now uses Alt+N to avoid Tools; Find Key uses Alt+E to avoid Keep Current. Short commands retain imperative singular, while explanatory prose and tooltips use polite vós. Protection is applied en enviar-lo; signature integrity is distinct from verified ownership. Clau utilitzable covers unusable keys, complete reasons follow Motiu, and names/addresses need no forced article. Unencrypted sending depends on removing inherited protected text, images and attachments.
@@ -2105,7 +2090,6 @@ All 53 mnemonic scopes pass. Structural checker: 1,446 expected removed-mark dia
 
 Fresh fetch found origin/master advanced to cb5e4778, including hardening merge 3161dddc; chore/pgp-hardening advanced to 51d67bb4. All 87 help files and 29 core catalogs introduced upstream exactly match the already tracked help/signature source imports; no additional strings, edited translations or languages. The hardening-tip delta only changes a Windows UI-test wait. The guide is unchanged. Dependent hardening implementation is now on origin/master but remains outside this translation worktree; unrelated code/corpus changes were not merged. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 1,093 entries/197 passages reconcile. No tests.
 Completed 21,031 entries/808 topics; pending 12,837/544; scope 33,868/1,352; historical catalog improvements 3,676. Next: Norwegian Bokmål. REVIEWED remains unchanged.
-
 
 ### Norwegian Bokmål compose signing and encryption reviewed
 
@@ -2118,7 +2102,6 @@ All 53 mnemonic scopes pass. Structural checker: 1,446 expected removed-mark dia
 Seven source refs unchanged after fetch, guide unchanged; no new strings/languages. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 1,053 entries/195 passages reconcile. No tests.
 Completed 21,071 entries/810 topics; pending 12,797/542; scope 33,868/1,352; historical catalog improvements 3,692. Next: Serbian Latin. REVIEWED remains unchanged.
 
-
 ### Serbian Latin compose signing and encryption reviewed
 
 Reviewed all 40 compose additions. Retained 17 natural app labels and seven core values; improved 16 core values. Kept Ekavian, formal plural prose, feminine agreement with poruka and protection pri slanju. Expanded the encrypted/missing statuses to exact [1] plus [one]/[few]/*[other], with numeric count placeholders and natural primalac/primaoca/primalaca forms. Signature checks remain distinct from ownership. Usable keys, complete Razlog explanations and Poslednja pretraga dates fit actual callers. Sending without encryption requires removal of inherited protected text, images and attachments.
@@ -2129,7 +2112,6 @@ All 53 mnemonic scopes pass. Structural checker: 1,446 expected removed-mark dia
 
 Seven source refs unchanged after fetch, guide unchanged; no new strings/languages. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 1,013 entries/193 passages reconcile. No tests.
 Completed 21,111 entries/812 topics; pending 12,757/540; scope 33,868/1,352; historical catalog improvements 3,708. Next: Turkish. REVIEWED remains unchanged.
-
 
 ### Turkish compose signing and encryption reviewed
 
@@ -2142,7 +2124,6 @@ All 53 mnemonic scopes pass; the changed label maps to GTK Şifrelemeden Gö_nde
 Seven source refs unchanged after fetch, guide unchanged; no new strings/languages. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 973 entries/191 passages reconcile. No tests.
 Completed 21,151 entries/814 topics; pending 12,717/538; scope 33,868/1,352; historical catalog improvements 3,725. Next: Bulgarian. REVIEWED remains unchanged.
 
-
 ### Bulgarian compose signing and encryption reviewed
 
 Reviewed all 40 compose additions, improving 16 core values and one app shortcut. Find Key now uses Cyrillic Alt+К, avoiding Use New Key Alt+Н. Kept verbal-noun controls/tooltips and polite plural explanations. Protection is applied при изпращане; digital signatures do not by themselves confirm ownership. Използваем ключ includes unusable keys; complete reasons follow Причина and dates follow Последно търсене. Counts use the ordinary plural получатели for people. Replaced literal encryption-for-a-key wording and explained when inherited protected text, images and attachments prevent unencrypted sending.
@@ -2154,7 +2135,6 @@ All 53 mnemonic scopes pass; GTK label Намиране на _ключ checked a
 Seven source refs unchanged after fetch, guide unchanged; no new strings/languages. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 933 entries/189 passages reconcile. No tests.
 Completed 21,191 entries/816 topics; pending 12,677/536; scope 33,868/1,352; historical catalog improvements 3,742. Next: Czech. REVIEWED remains unchanged.
 
-
 ### Czech compose signing and encryption reviewed
 
 Reviewed all 40 compose additions, improving 17 core values and one app shortcut. Find Key now uses Alt+K, avoiding Use New Key Alt+N. Kept infinitive controls/tooltips and formal plural explanations. Added few branches to the encrypted/missing statuses: natural 2 příjemci versus5 příjemců, and pro2 příjemce in missing-key guidance. Rephrased lookup around uninflected names/addresses. Protection is applied při odeslání; signatures do not prove ownership. Použitelný klíč covers unusable keys; complete reasons follow Důvod and dates follow Poslední hledání. Unencrypted sending requires removing protected text, images and attachments.
@@ -2165,7 +2145,6 @@ All53 mnemonic scopes pass; GTK Najít _klíč checked. Structural checker:1,446
 
 Seven source refs unchanged after fetch, guide unchanged; no new strings/languages. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 893 entries/187 passages reconcile. No tests.
 Completed 21,231 entries/818 topics; pending 12,637/534; scope 33,868/1,352; historical catalog improvements 3,760. Next: Danish. REVIEWED remains unchanged.
-
 
 ### Danish compose signing and encryption reviewed
 

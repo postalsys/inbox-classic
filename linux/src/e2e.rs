@@ -374,6 +374,22 @@ impl Driver {
             .collect()
     }
 
+    /// Flags of the Inbox's messages that hold `needles` changed as another client would: `action` add, remove or set
+    fn set_flags(&self, needles: &[&str], flags: &[&str], action: &str) -> Result<(), String> {
+        let uids: Vec<Value> = needles
+            .iter()
+            .filter_map(|needle| self.find("INBOX", needle).map(|m| m["uid"].clone()))
+            .collect();
+        let body = serde_json::json!({ "uids": uids, "flags": flags, "mode": action }).to_string();
+        http(
+            self.ports.rest,
+            "POST",
+            "/v1/mailboxes/INBOX/messages/flags",
+            Some(&body),
+        )
+        .map(|_| ())
+    }
+
     fn seen(&self, needle: &str) -> bool {
         self.flags("INBOX", needle).iter().any(|f| f == "\\Seen")
     }
@@ -1179,6 +1195,13 @@ async fn scenario(d: Rc<Driver>) {
     steps::waiting(&d).await;
     if !synced(&d).await {
         d.blocked("the first sync did not bring the account's folders and messages");
+        return;
+    }
+    // while working on one step: PE_E2E_ONLY=conversations (in LINUX_DOCKER="-e PE_E2E_ONLY=...") runs only it after
+    // the account is set up
+    if std::env::var("PE_E2E_ONLY").as_deref() == Ok("conversations") {
+        steps::conversations(&d).await;
+        steps::closing(&d).await;
         return;
     }
     reading(&d).await;

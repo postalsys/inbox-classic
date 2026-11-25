@@ -270,6 +270,12 @@ impl Message {
         self.info.outer_subject.as_deref().unwrap_or(&self.info.subject)
     }
 
+    /// The message selecting its row opens: a collapsed conversation's focus (its oldest unread message, else its
+    /// newest), else its own
+    pub fn opens_at(&self) -> crate::MessageRef {
+        self.thread.and_then(|t| t.focus).unwrap_or_else(|| self.at())
+    }
+
     /// Whether its row is bold: it is unread, or it is a collapsed conversation's row and one of its messages is
     pub fn bold(&self) -> bool {
         !self.info.seen() || self.thread.is_some_and(|t| t.collapsed() && t.unread > 0)

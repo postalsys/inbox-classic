@@ -43,6 +43,8 @@ cmd-accounts = &Akun...
 cmd-find = &Cari Pesan
 cmd-save-as = &Simpan Sebagai...
 cmd-print = &Cetak...
+# review: new
+cmd-print-conversation = Cetak &Percakapan...
 cmd-import = &Impor Pesan...
 cmd-outbox = &Kotak Keluar...
 cmd-properties = P&roperti
@@ -63,6 +65,43 @@ ui-find-not-found = “{ $words }” tidak ada di pesan ini
 cmd-expand-all-threads = Perluas &Semua Percakapan
 cmd-collapse-all-threads = &Ciutkan Semua Percakapan
 ui-group-by-conversation = &Kelompokkan pesan menurut percakapan
+# review: new
+ui-show-whole-conversation = T&ampilkan seluruh percakapan di panel baca
+# review: new
+ui-show-whole-conversation-note = Baris percakapan membuka semua pesannya, termasuk balasan dan draf Anda serta pesan yang Anda simpan di folder lain. Pesan yang sudah dibaca diciutkan menjadi satu baris: klik baris untuk membuka atau menciutkannya.
+# review: new
+ui-conversation-order = Urutan per&cakapan:
+# review: new
+ui-conversation-oldest-first = Terlama dulu
+# review: new
+ui-conversation-newest-first = Terbaru dulu
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+   *[other] ({ $count }, { $new } baru)
+}
+# review: new
+ui-conversation-to = kepada { $people }
+# review: new
+ui-conversation-draft = Draf
+# review: new
+ui-conversation-alone = Ditandatangani atau dienkripsi: dibuka tersendiri
+# review: new
+ui-conversation-downloading = Mengunduh…
+# review: new
+ui-conversation-earlier = { $count ->
+    [1] Tampilkan 1 pesan sebelumnya
+   *[other] Tampilkan { $count } pesan sebelumnya
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [1] Percakapan ini juga memiliki 1 pesan di folder lain.
+   *[other] Percakapan ini juga memiliki { $count } pesan di folder lain.
+}
+# review: new
+ui-conversation-this-folder = &Hanya Folder Ini
+# review: new
+ui-conversation-whole = &Seluruh Percakapan
 cmd-folder-list = Daftar &Folder
 cmd-layout-automatic = &Otomatis
 cmd-layout-classic = Kla&sik

@@ -51,6 +51,7 @@ enum PeCommandId : unsigned short {
     IDM_FIND = 120,
     IDM_SAVE_AS = 121,
     IDM_PRINT = 122,
+    IDM_PRINT_CONVERSATION = 179,
     IDM_IMPORT = 123,
     IDM_OUTBOX = 124,
     IDM_PROPERTIES = 125,
@@ -92,6 +93,7 @@ inline bool CommandNeedsOne(unsigned id) {
     case IDM_REPLY:
     case IDM_REPLY_ALL:
     case IDM_PRINT:
+    case IDM_PRINT_CONVERSATION:
     case IDM_PROPERTIES:
     case IDM_VIEW_SOURCE:
     case IDM_CREATE_RULE_FROM_MESSAGE:
@@ -150,6 +152,7 @@ inline bool CommandActsOnList(unsigned id) {
     case IDM_NEXT_UNREAD:
     case IDM_SAVE_AS:
     case IDM_PRINT:
+    case IDM_PRINT_CONVERSATION:
     case IDM_PROPERTIES:
     case IDM_MARK_ALL_READ:
     case IDM_JUNK:
@@ -232,6 +235,7 @@ inline PeText CommandText(PeCommandId id) {
     case IDM_FIND: return PE_TEXT_CMD_FIND;
     case IDM_SAVE_AS: return PE_TEXT_CMD_SAVE_AS;
     case IDM_PRINT: return PE_TEXT_CMD_PRINT;
+    case IDM_PRINT_CONVERSATION: return PE_TEXT_CMD_PRINT_CONVERSATION;
     case IDM_IMPORT: return PE_TEXT_CMD_IMPORT;
     case IDM_OUTBOX: return PE_TEXT_CMD_OUTBOX;
     case IDM_PROPERTIES: return PE_TEXT_CMD_PROPERTIES;

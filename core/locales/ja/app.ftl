@@ -40,6 +40,8 @@ cmd-accounts = アカウント(&A)...
 cmd-find = メッセージの検索(&F)
 cmd-save-as = 名前を付けて保存(&S)...
 cmd-print = 印刷(&P)...
+# review: new
+cmd-print-conversation = スレッドを印刷(&V)...
 cmd-import = メッセージのインポート(&I)...
 cmd-outbox = 送信トレイ(&O)...
 cmd-properties = プロパティ(&R)
@@ -60,6 +62,43 @@ ui-find-not-found = 「{ $words }」はこのメッセージにありません
 cmd-expand-all-threads = すべてのスレッドを展開(&E)
 cmd-collapse-all-threads = すべてのスレッドを折りたたむ(&O)
 ui-group-by-conversation = メッセージをスレッドごとにまとめる(&G)
+# review: new
+ui-show-whole-conversation = 閲覧ウィンドウにスレッド全体を表示する(&W)
+# review: new
+ui-show-whole-conversation-note = スレッドの行を選択すると、返信、下書き、ほかのフォルダーに整理したメッセージも含めて、そのすべてのメッセージが開きます。既読のメッセージは1行に折りたたまれます。行をクリックすると、開いたり折りたたんだりできます。
+# review: new
+ui-conversation-order = スレッドの表示順(&O):
+# review: new
+ui-conversation-oldest-first = 古い順
+# review: new
+ui-conversation-newest-first = 新しい順
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+   *[other] ({ $count }、新着 { $new })
+}
+# review: new
+ui-conversation-to = 宛先: { $people }
+# review: new
+ui-conversation-draft = 下書き
+# review: new
+ui-conversation-alone = 署名または暗号化されています: 単独で開きます
+# review: new
+ui-conversation-downloading = ダウンロード中…
+# review: new
+ui-conversation-earlier = { $count ->
+    [1] 以前のメッセージを1件表示
+   *[other] 以前のメッセージを{ $count }件表示
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [1] このスレッドには、ほかのフォルダーにもメッセージが1件あります。
+   *[other] このスレッドには、ほかのフォルダーにもメッセージが{ $count }件あります。
+}
+# review: new
+ui-conversation-this-folder = このフォルダーのみ(&T)
+# review: new
+ui-conversation-whole = スレッド全体(&W)
 cmd-folder-list = フォルダー一覧(&F)
 cmd-layout-automatic = 自動(&A)
 cmd-layout-classic = クラシック(&C)

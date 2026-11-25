@@ -675,9 +675,22 @@ const sections = [
             {
                 shot: 'threads-1-collapsed',
                 name: 'Conversations',
-                what: "The list groups the messages that answer each other into conversations (by their Message-IDs, In-Reply-To and References; on Gmail by Gmail's own conversations), one row each on its first message with how many it has, bold while one is unread, placed by its newest message. An action on a collapsed conversation acts on all of its messages.",
-                how: 'On by default; Group messages by conversation on the Reading page of Tools > Options turns it off.',
-                checked: ['The Inbox lists the conversation once, with its count', 'Mark Read on the collapsed row marks all three read on the server']
+                what: "The list groups the messages that answer each other into conversations (by their Message-IDs, In-Reply-To and References; on Gmail by Gmail's own conversations), one row each with how many messages it has and how many are new, the sender and first words of the message it opens (its oldest unread, else its newest), bold while one is unread, placed by its newest message. Selecting the row shows the whole conversation in the reading pane: the unread messages open, the read ones folded to a line, with the user's replies, drafts and the messages filed in other folders. An action on a collapsed conversation acts on all of its messages; Delete, Move and Archive ask about the ones in other folders.",
+                how: 'On by default; Group messages by conversation and Show the whole conversation on the Reading page of Tools > Options turn them off.',
+                checked: [
+                    'The Inbox lists the conversation once, with its count and how many are new',
+                    'Selecting it shows the whole conversation at its oldest unread message, the read one folded',
+                    'The unread messages it showed are marked read on the server',
+                    'Print Conversation prints every message',
+                    'Mark Read on the collapsed row marks all three read on the server'
+                ]
+            },
+            {
+                shot: 'threads-6-conversation-line',
+                name: 'A line of the conversation',
+                what: "In the conversation in the reading pane, a folded message's line opens it, and it takes the focus that Reply, Forward and Print act on; an open message's line folds it.",
+                how: 'Click a line in the reading pane.',
+                checked: ["A click on the read message's line opens it and gives it the focus"]
             },
             {
                 shot: 'threads-2-expanded',

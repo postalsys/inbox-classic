@@ -58,6 +58,13 @@ public:
     bool PicturesShown() const;
     // the message as it is shown, with the pictures the user allowed, in the Print window over `owner`
     void Print(HWND owner);
+    // File > Print Conversation: every message of the conversation shown, one after another; the message alone
+    // outside one
+    void PrintConversation(HWND owner);
+    // the next message opened is shown in its conversation (Show the whole conversation), not alone
+    void SetConversation(bool on) { conversation_ = on; }
+    // the view shown is a conversation's
+    bool ShowsConversation() const;
     // a reply, reply to all or forward of the message shown, made off the window thread (a message file's at once, from
     // `account`): `done` gets it, empty when the message is not here; false while no message is shown. A newer one
     // replaces one not done yet
@@ -258,6 +265,12 @@ private:
     static void RebuildNext();
     // the file of the message whose preview was clicked, opened once the WebView2's event is over; -1 for none
     int64_t previewOpen_ = -1;
+    // opened in its conversation; the line of its page clicked, waiting for the WebView2's event to end
+    bool conversation_ = false;
+    int64_t conversationLine_ = -1;
+    // a line of the conversation shown, or its earlier lines, clicked: the message the core gives shown in place
+    void ConversationLine(int64_t index);
+    void ConversationEarlier();
     // the preview shows a document of the message shown (not a page of the pane's own): one built again keeps its
     // scroll
     bool documentShown_ = false;

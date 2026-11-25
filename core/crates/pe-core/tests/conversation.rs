@@ -1,0 +1,404 @@
+//! A conversation in the reading pane: its messages in every folder of the account, the read ones folded to a line,
+//! the unread ones and the focus open, each open message a document of its own, and what a click on a line does.
+
+use pe_core::{Action, Core, Options, PasswordStore, Selected};
+use pe_store::{AccountSettings, Auth, FolderInfo, MessageInfo, MessageRef, Security, Store};
+
+struct World {
+    core: Core,
+    dir: pe_testkit::TempDir,
+    inbox: i64,
+    sent: i64,
+    drafts: i64,
+}
+
+fn raw(id: &str, answers: &str, from: &str, text: &str) -> String {
+    let refs = if answers.is_empty() {
+        String::new()
+    } else {
+        format!("In-Reply-To: {answers}\r\nReferences: {answers}\r\n")
+    };
+    format!(
+        "From: {from}\r\nTo: Me <me@example.org>\r\nSubject: Plans for the trip\r\nMessage-ID: {id}\r\n{refs}\
+         Date: Sun, 22 Nov 2026 09:04:00 +0000\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n{text}\r\n"
+    )
+}
+
+/// The account me@example.org with an Inbox, Sent Items and Drafts, and a conversation: Dave's question (read), Carol's
+/// answer (unread), the user's own answer in Sent Items, a draft, and Bob's answer (unread, not downloaded yet)
+fn world(name: &str) -> World {
+    let dir = pe_testkit::TempDir::new(name);
+    let path = dir.path().join("store.db");
+    let store = Store::open(&path).unwrap();
+    let account = store
+        .add_account(&AccountSettings {
+            name: "Me".into(),
+            email: "me@example.org".into(),
+            username: "me@example.org".into(),
+            imap_host: "imap.invalid".into(),
+            imap_port: 993,
+            imap_security: Security::Tls,
+            smtp_host: "smtp.invalid".into(),
+            smtp_port: 465,
+            smtp_security: Security::Tls,
+            auth: Auth::Password,
+        })
+        .unwrap();
+    let folder = |path: &str, special: Option<&str>| FolderInfo {
+        path: path.into(),
+        name: path.into(),
+        selectable: true,
+        special_use: special.map(str::to_string),
+        ..Default::default()
+    };
+    store
+        .set_folders(
+            account,
+            &[
+                folder("INBOX", None),
+                folder("Sent", Some("\\Sent")),
+                folder("Drafts", Some("\\Drafts")),
+            ],
+        )
+        .unwrap();
+    let id = |path: &str| {
+        store
+            .folders(account)
+            .unwrap()
+            .into_iter()
+            .find(|f| f.info.path == path)
+            .unwrap()
+            .id
+    };
+    let (inbox, sent, drafts) = (id("INBOX"), id("Sent"), id("Drafts"));
+    let put = |folder: i64,
+               uid: u64,
+               at: i64,
+               message_id: &str,
+               answers: &str,
+               from: &str,
+               text: Option<&str>,
+               seen: bool| {
+        let info = MessageInfo {
+            uid,
+            date: Some(at),
+            internal_date: Some(at),
+            subject: "Plans for the trip".into(),
+            from_name: from.split(" <").next().unwrap().into(),
+            from_address: from.into(),
+            message_id: Some(message_id.into()),
+            references: if answers.is_empty() {
+                Vec::new()
+            } else {
+                vec![answers.into()]
+            },
+            flags: if seen { vec!["\\Seen".into()] } else { Vec::new() },
+            ..Default::default()
+        };
+        store.add_messages(folder, &[info]).unwrap();
+        if let Some(text) = text {
+            store
+                .set_source(folder, uid, raw(message_id, answers, from, text).as_bytes())
+                .unwrap();
+        }
+    };
+    put(
+        inbox,
+        1,
+        100,
+        "<a@x>",
+        "",
+        "Dave <dave@example.com>",
+        Some("Where do we go?"),
+        true,
+    );
+    put(
+        inbox,
+        2,
+        200,
+        "<b@x>",
+        "<a@x>",
+        "Carol <carol@example.com>",
+        Some("The lake."),
+        false,
+    );
+    put(
+        sent,
+        1,
+        300,
+        "<c@x>",
+        "<a@x>",
+        "Me <me@example.org>",
+        Some("The lake works for me."),
+        true,
+    );
+    put(
+        drafts,
+        1,
+        350,
+        "<d@x>",
+        "<a@x>",
+        "Me <me@example.org>",
+        Some("I will book the cabin."),
+        true,
+    );
+    put(inbox, 3, 400, "<e@x>", "<a@x>", "Bob <bob@example.com>", None, false);
+    drop(store);
+    let core = Core::open_with(
+        &path,
+        Options {
+            passwords: PasswordStore::Memory,
+            ..Default::default()
+        },
+        |_| {},
+    )
+    .unwrap();
+    World {
+        core,
+        dir,
+        inbox,
+        sent,
+        drafts,
+    }
+}
+
+fn at(folder: i64, uid: u64) -> MessageRef {
+    MessageRef { folder, uid }
+}
+
+#[test]
+fn the_conversation_stacks_its_messages_at_the_first_unread() {
+    pe_core::i18n::set_language("en");
+    let w = world("conversation-stack");
+    let focus = at(w.inbox, 2);
+    let view = w.core.conversation_view(focus, false, false).unwrap();
+    let info = view.conversation.clone().expect("a conversation's view");
+    assert_eq!(
+        info.count, 5,
+        "the Inbox's three, the reply in Sent Items and the draft"
+    );
+    assert_eq!(
+        info.waiting,
+        [at(w.inbox, 3)],
+        "Bob's answer is not downloaded yet: asked for"
+    );
+    // Dave's read question folded, Carol's unread answer open with its document, the rest folded
+    let parts: Vec<bool> = view.part_documents.iter().map(|d| !d.is_empty()).collect();
+    assert_eq!(parts, [false, true, false, false, false]);
+    assert!(view.part_documents[1].contains("The lake."));
+    for index in 0..5 {
+        assert!(
+            view.document.contains(&format!("inboxclassic:conversation-{index}")),
+            "line {index}"
+        );
+    }
+    assert!(view.document.contains("Sent Items") && view.document.contains("Drafts"));
+    assert!(view.document.contains(">Draft<"), "the draft says so");
+    assert!(
+        view.document.contains("Downloading"),
+        "Bob's answer says it is on its way"
+    );
+    // nothing of any message in the page itself
+    assert!(!view.document.contains("The lake."));
+    // the window around it is Carol's message's, and Print prints it alone
+    assert!(view.from.contains("Carol"));
+    assert!(
+        view.print_document
+            .as_deref()
+            .is_some_and(|d| d.contains("The lake.") && !d.contains("Where do we go?"))
+    );
+}
+
+#[test]
+fn a_click_opens_or_folds_a_line_and_the_shown_ones_are_marked_read() {
+    pe_core::i18n::set_language("en");
+    let w = world("conversation-click");
+    let focus = at(w.inbox, 2);
+    w.core.conversation_view(focus, false, false).unwrap();
+    // Dave's line: his message opens and takes the focus
+    assert_eq!(w.core.conversation_click(focus, 0), Some(at(w.inbox, 1)));
+    let view = w.core.conversation_view(at(w.inbox, 1), false, false).unwrap();
+    assert!(view.part_documents[0].contains("Where do we go?") && view.part_documents[1].contains("The lake."));
+    assert!(view.from.contains("Dave"));
+    // the reply in Sent Items opens too, labelled with its folder
+    assert_eq!(w.core.conversation_click(at(w.inbox, 1), 2), Some(at(w.sent, 1)));
+    let view = w.core.conversation_view(at(w.sent, 1), false, false).unwrap();
+    assert!(view.part_documents[2].contains("The lake works for me."));
+    // Carol's line again: it folds, the focus stays
+    assert_eq!(w.core.conversation_click(at(w.sent, 1), 1), Some(at(w.sent, 1)));
+    let view = w.core.conversation_view(at(w.sent, 1), false, false).unwrap();
+    assert!(view.part_documents[1].is_empty());
+    // shown: the unread messages it showed open are marked read (Carol's was folded by then: it stays unread)
+    let _ = w.core.conversation_shown(at(w.sent, 1));
+    let store = Store::open(w.dir.path().join("store.db")).unwrap();
+    assert!(!store.message(w.inbox, 2).unwrap().unwrap().info.seen());
+    // opened again at Carol's, then shown: hers is marked read
+    let carol = at(w.inbox, 2);
+    w.core.conversation_click(at(w.sent, 1), 1);
+    w.core.conversation_view(carol, false, false).unwrap();
+    let _ = w.core.conversation_shown(carol);
+    assert!(store.message(w.inbox, 2).unwrap().unwrap().info.seen());
+}
+
+#[test]
+fn a_message_with_signed_parts_inside_stays_folded() {
+    pe_core::i18n::set_language("en");
+    let w = world("conversation-sealed");
+    let store = Store::open(w.dir.path().join("store.db")).unwrap();
+    // inline signed text: the store sees a plain message, the view finds the signature
+    let signed = "-----BEGIN PGP SIGNED MESSAGE-----\r\nHash: SHA256\r\n\r\nPay the new account.\r\n\
+                  -----BEGIN PGP SIGNATURE-----\r\n\r\niQEzBAEBCAAdFiEE\r\n=abcd\r\n-----END PGP SIGNATURE-----";
+    store
+        .add_messages(
+            w.inbox,
+            &[MessageInfo {
+                uid: 11,
+                date: Some(450),
+                internal_date: Some(450),
+                subject: "Re: Plans for the trip".into(),
+                message_id: Some("<p@x>".into()),
+                references: vec!["<a@x>".into()],
+                ..Default::default()
+            }],
+        )
+        .unwrap();
+    store
+        .set_source(
+            w.inbox,
+            11,
+            raw("<p@x>", "<a@x>", "Pat <pat@example.com>", signed).as_bytes(),
+        )
+        .unwrap();
+    let view = w.core.conversation_view(at(w.inbox, 2), false, false).unwrap();
+    let info = view.conversation.clone().expect("a conversation's view");
+    let place = 5;
+    assert_eq!(info.count, 6);
+    assert!(
+        view.part_documents[place].is_empty(),
+        "its labelled parts never enter the stack"
+    );
+    assert!(view.document.contains("opens by itself"), "its line says so");
+    let _ = w.core.conversation_shown(at(w.inbox, 2));
+    assert!(
+        !store.message(w.inbox, 11).unwrap().unwrap().info.seen(),
+        "and it is not marked read"
+    );
+    // opened at it, it is shown alone, with its labels
+    let alone = w.core.conversation_view(at(w.inbox, 11), false, false).unwrap();
+    assert!(alone.conversation.is_none() && alone.protection.is_some());
+}
+
+#[test]
+fn newest_first_and_the_printout() {
+    pe_core::i18n::set_language("en");
+    let w = world("conversation-order");
+    let view = w.core.conversation_view(at(w.inbox, 2), false, true).unwrap();
+    let first = view.document.find("Bob").unwrap();
+    let last = view.document.find("Dave").unwrap();
+    assert!(first < last, "newest first: Bob's line before Dave's");
+    let printout = w.core.conversation_printout(at(w.inbox, 2), false).unwrap();
+    assert!(!printout.is_empty());
+    let (dave, carol) = (
+        printout.find("Where do we go?").unwrap(),
+        printout.find("The lake.").unwrap(),
+    );
+    assert!(dave < carol, "printed in the conversation's order");
+    assert!(printout.contains("I will book the cabin."), "the draft too");
+}
+
+#[test]
+fn a_message_alone_or_encrypted_is_shown_by_itself() {
+    pe_core::i18n::set_language("en");
+    let w = world("conversation-alone");
+    let store = Store::open(w.dir.path().join("store.db")).unwrap();
+    let lonely = MessageInfo {
+        uid: 9,
+        date: Some(500),
+        subject: "Alone".into(),
+        message_id: Some("<z@x>".into()),
+        ..Default::default()
+    };
+    store.add_messages(w.inbox, &[lonely]).unwrap();
+    store
+        .set_source(
+            w.inbox,
+            9,
+            raw("<z@x>", "", "Zed <z@example.com>", "Just me.").as_bytes(),
+        )
+        .unwrap();
+    let view = w.core.conversation_view(at(w.inbox, 9), false, false).unwrap();
+    assert!(view.conversation.is_none() && view.document.contains("Just me."));
+    // a signed message, in a conversation or not, is shown by itself (the store's lock let go before its view is built)
+    store
+        .add_messages(
+            w.inbox,
+            &[MessageInfo {
+                uid: 10,
+                date: Some(600),
+                subject: "Signed".into(),
+                message_id: Some("<s@x>".into()),
+                references: vec!["<a@x>".into()],
+                protection: pe_store::Protection::Signed,
+                ..Default::default()
+            }],
+        )
+        .unwrap();
+    store
+        .set_source(
+            w.inbox,
+            10,
+            raw("<s@x>", "<a@x>", "Sid <sid@example.com>", "Signed words.").as_bytes(),
+        )
+        .unwrap();
+    let view = w.core.conversation_view(at(w.inbox, 10), false, false).unwrap();
+    assert!(view.conversation.is_none() && view.document.contains("Signed words."));
+}
+
+#[test]
+fn whole_conversation_takes_the_other_folders_messages() {
+    pe_core::i18n::set_language("en");
+    let w = world("conversation-elsewhere");
+    // the collapsed row's messages in the Inbox
+    let row = Selected::Listed(vec![at(w.inbox, 1), at(w.inbox, 2), at(w.inbox, 3)]);
+    let delete = w.core.conversation_elsewhere(&row, Action::Delete).unwrap();
+    assert_eq!(
+        delete,
+        [at(w.sent, 1), at(w.drafts, 1)],
+        "Delete takes the reply and the draft too"
+    );
+    assert!(
+        w.core.conversation_elsewhere(&row, Action::Archive).unwrap().is_empty(),
+        "Archive leaves Sent Items and Drafts"
+    );
+    assert!(
+        w.core
+            .conversation_elsewhere(&row, Action::Read(true))
+            .unwrap()
+            .is_empty()
+    );
+    // one message of the conversation chosen by itself: no question
+    let one = Selected::Listed(vec![at(w.inbox, 2)]);
+    assert!(w.core.conversation_elsewhere(&one, Action::Delete).unwrap().is_empty());
+    assert_eq!(
+        pe_core::conversation::elsewhere_question(2),
+        "This conversation also has 2 messages in other folders."
+    );
+}
+
+#[test]
+fn a_message_unread_since_the_conversation_was_shown_opens() {
+    pe_core::i18n::set_language("en");
+    let w = world("conversation-unread-since");
+    let focus = at(w.inbox, 2);
+    let view = w.core.conversation_view(focus, false, false).unwrap();
+    assert!(view.part_documents[0].is_empty(), "Dave's read question folded");
+    // marked unread elsewhere (or a reply that came): open the next time it is shown
+    let store = Store::open(w.dir.path().join("store.db")).unwrap();
+    store.set_flag(w.inbox, 1, "\\Seen", false).unwrap();
+    let view = w.core.conversation_view(focus, false, false).unwrap();
+    assert!(view.part_documents[0].contains("Where do we go?"));
+    // an unread message the user folds stays folded
+    w.core.conversation_click(focus, 0);
+    let view = w.core.conversation_view(focus, false, false).unwrap();
+    assert!(view.part_documents[0].is_empty());
+}

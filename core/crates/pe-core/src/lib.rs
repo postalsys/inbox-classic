@@ -21,6 +21,7 @@ mod compose;
 pub mod compose_keys;
 mod connections;
 mod contentline;
+pub mod conversation;
 mod export;
 mod fold;
 pub mod keys;
@@ -97,7 +98,7 @@ pub use text::{
     DOWNLOAD_LIMITS_MB, ReaderState, SEND_DELAYS, TEXT_SIZE_MEDIUM, TEXT_ZOOMS, account_label, account_shown_name,
     account_title, account_titles, default_account_name, download_limit_index, download_limit_text, downloading_text,
     folder_kind, folder_name, format_size, initials, list_counts, messages, protection_words, quoted_subject,
-    reader_page, retry_note, saved_text, send_delay_index, send_delay_text, sentence,
+    reader_page, retry_note, saved_text, send_delay_index, send_delay_text, sentence, thread_count,
 };
 pub use view::{AttachmentView, MessageView, PartView, Protection, ProtectionView};
 use worker::{Command, Role, Worker};
@@ -418,6 +419,9 @@ impl From<pe_store::Error> for Error {
 
 pub type Result<T> = std::result::Result<T, Error>;
 
+/// How long Print Conversation waits for the messages it downloads
+const PRINT_WAIT: std::time::Duration = std::time::Duration::from_secs(60);
+
 pub(crate) type EventSink = Arc<dyn Fn(Event) + Send + Sync>;
 
 /// How many changes of folders a listener that falls behind may miss before it is told it missed some
@@ -587,6 +591,8 @@ pub struct Core {
     logo_downloads: LogoDownloads,
     /// Message views built off the window thread: parsing, folding and sanitizing a large message takes a while
     views: Requests<Option<MessageView>>,
+    /// The conversations the reading pane and the message windows showed lately: what is open in each
+    conversations: conversation::Conversations,
     /// The connection the views built in the background look up and mark bounces with, opened by the first that
     /// needs it
     /// Sign-ins in the browser: the provider and the refresh token, or why not
@@ -712,6 +718,7 @@ impl Core {
             pictures: Requests::default(),
             logo_downloads: Arc::default(),
             views: Requests::default(),
+            conversations: Default::default(),
             sign_ins: Requests::default(),
             checks: Requests::default(),
             discoveries: Discoveries::default(),
@@ -1810,6 +1817,239 @@ impl Core {
                 Event::ViewReady { request }
             });
         Ok(request)
+    }
+
+    /// Builds the view of the conversation of the message `focus` in the background, opened at it: the whole
+    /// conversation in the reading pane ([`conversation`]); the message alone when it is in no conversation of
+    /// several messages or is signed or encrypted. [`Event::ViewReady`] follows with the request this returns, and
+    /// [`Core::message_view_result`] gives the view, as for [`Core::message_view_start`]. The open messages whose
+    /// source is not in the store are asked for ([`Core::open_message`]); the view lists them in
+    /// [`conversation::ConversationInfo::waiting`], and the window builds it again when one is ready.
+    pub fn conversation_view_start(
+        self: &Arc<Self>,
+        focus: pe_store::MessageRef,
+        allow_remote_images: bool,
+        newest_first: bool,
+    ) -> Result<u64> {
+        let request = self.next_request.fetch_add(1, Ordering::Relaxed);
+        let events = self.events.clone();
+        let work = self.in_background(Connection::Reads, move |core| {
+            let dropped = || !core.views.is_running(request);
+            if dropped() {
+                return None;
+            }
+            core.build_conversation_view(focus, allow_remote_images, newest_first, &dropped, &*events)
+        });
+        let work = async move { work.await.flatten() };
+        self.views
+            .start(self.runtime()?, request, work, self.events.clone(), |request| {
+                Event::ViewReady { request }
+            });
+        Ok(request)
+    }
+
+    /// [`Core::conversation_view_start`] on the calling thread, for tests and tools
+    pub fn conversation_view(
+        &self,
+        focus: pe_store::MessageRef,
+        allow_remote_images: bool,
+        newest_first: bool,
+    ) -> Option<MessageView> {
+        let view = self.build_conversation_view(focus, allow_remote_images, newest_first, &|| false, &|event| {
+            let _ = self.post(event);
+        });
+        view.map(|view| self.learned(view))
+    }
+
+    /// The conversation of `focus` as its view, built on this thread ([`Core::conversation_view_start`])
+    fn build_conversation_view(
+        &self,
+        focus: pe_store::MessageRef,
+        allow_remote_images: bool,
+        newest_first: bool,
+        dropped: &dyn Fn() -> bool,
+        events: &dyn Fn(Event),
+    ) -> Option<MessageView> {
+        let (folder, uid) = (focus.folder, focus.uid);
+        let build = |at: pe_store::MessageRef, pictures: bool, previews: bool| {
+            let found = self.view_source(at.folder, at.uid).ok().flatten()?;
+            let plan = previews.then(|| {
+                self.preview_plan(&previews::PreviewSource::Stored {
+                    folder: at.folder,
+                    uid: at.uid,
+                })
+            });
+            let view = finish_view(&found, pictures, dropped, || Some(self.store()), events, plan)?;
+            if previews {
+                self.timings.view_built(at.folder, at.uid, std::time::Instant::now());
+                self.remember_attachments(at.folder, at.uid, &view);
+            }
+            Some(view)
+        };
+        let alone = || build(focus, allow_remote_images, true);
+        // read with the store, which is let go before any view is built (building one takes it again)
+        let found = {
+            let store = self.store();
+            store.message(folder, uid).ok().flatten().and_then(|message| {
+                let thread = message.info.thread_id.filter(|thread| *thread > 0)?;
+                // a signed or encrypted message is shown by itself
+                if conversation::alone(&message) {
+                    return None;
+                }
+                let messages = store.conversation_messages(thread, folder).ok()?;
+                let account = store.folder_info(folder).map(|(account, _)| account).ok()?;
+                let folders: HashMap<FolderId, pe_store::FolderInfo> = store
+                    .folders(account)
+                    .unwrap_or_default()
+                    .into_iter()
+                    .map(|f| (f.id, f.info))
+                    .collect();
+                Some((messages, folders, thread))
+            })
+        };
+        let Some((messages, folders, thread)) = found else {
+            return alone();
+        };
+        if messages.len() < 2 || !messages.iter().any(|m| m.at() == focus) {
+            return alone();
+        }
+        let view = alone()?;
+        // signed or encrypted parts inside, found as the view was built: shown by itself, its labels on its own parts
+        if view.protection.is_some() {
+            return Some(view);
+        }
+        let plan = self.conversations.plan(thread, messages, focus, newest_first);
+        let mut documents = HashMap::new();
+        let mut waiting = Vec::new();
+        let mut protected = std::collections::BTreeSet::new();
+        let mut pictures = false;
+        for (message, open) in plan.messages.iter().skip(plan.first) {
+            let at = message.at();
+            if !open || at == focus {
+                continue;
+            }
+            if dropped() {
+                return None;
+            }
+            match build(at, false, false) {
+                // a page of labelled parts never goes into the stack, where its frames would show the
+                // conversation's documents: its line says it opens by itself
+                Some(shown) if shown.protection.is_some() => {
+                    protected.insert(at);
+                }
+                Some(shown) => {
+                    pictures |= shown.pictures_loaded;
+                    documents.insert(at, shown.document);
+                }
+                None => {
+                    // asked for now; the window builds the view again once it is here
+                    let _ = self.open_message(at.folder, at.uid);
+                    waiting.push(at);
+                }
+            }
+        }
+        self.conversations.alone_found(thread, &protected);
+        let lines = conversation::lines(&plan, folder, &folders, &waiting, &protected);
+        Some(conversation::into_view(
+            view,
+            &plan,
+            &lines,
+            documents,
+            pictures || allow_remote_images,
+            waiting,
+        ))
+    }
+
+    /// A line of a conversation's page clicked (`inboxclassic:conversation-N`) in the view of `focus`: that message
+    /// opens and takes the focus, or folds. The message to show now, whose conversation view the window builds with
+    /// [`Core::conversation_view_start`]; None when the line is not of a conversation shown.
+    pub fn conversation_click(&self, focus: pe_store::MessageRef, index: usize) -> Option<pe_store::MessageRef> {
+        let thread = self.thread_of(focus)?;
+        self.conversations.click(thread, index)
+    }
+
+    /// "Show N earlier messages" clicked in the view of `focus`: every line shows when the view is built again
+    pub fn conversation_show_earlier(&self, focus: pe_store::MessageRef) {
+        if let Some(thread) = self.thread_of(focus) {
+            self.conversations.show_all(thread);
+        }
+    }
+
+    /// The window shows the conversation view of `focus` (a moment after it came, as a message alone is marked read):
+    /// the unread messages it showed open are marked read
+    pub fn conversation_shown(&self, focus: pe_store::MessageRef) -> Result<()> {
+        let Some(thread) = self.thread_of(focus) else {
+            return Ok(());
+        };
+        // one change a folder, as Mark Read of several messages
+        let mut by_folder: HashMap<FolderId, Vec<u64>> = HashMap::new();
+        for at in self.conversations.marks(thread) {
+            by_folder.entry(at.folder).or_default().push(at.uid);
+        }
+        for (folder, uids) in by_folder {
+            self.set_flag_many(folder, &uids, "\\Seen", true)?;
+        }
+        Ok(())
+    }
+
+    /// File > Print Conversation for the conversation of `focus`: one document of each of its messages' header and
+    /// text, in the order of `newest_first`; None when `focus` is in no conversation
+    pub fn conversation_printout(&self, focus: pe_store::MessageRef, newest_first: bool) -> Option<String> {
+        let thread = self.thread_of(focus)?;
+        let store = self.store();
+        let mut messages = store.conversation_messages(thread, focus.folder).ok()?;
+        if newest_first {
+            messages.reverse();
+        }
+        Some(conversation::printout(&store, &messages))
+    }
+
+    /// [`Core::conversation_printout`] off the window thread, as a printout with previews is made: [`Event::PrintReady`]
+    /// follows with the request this returns, and [`Core::print_result`] gives the document. None when `focus` is in
+    /// no conversation (Print prints it alone)
+    pub fn conversation_print_start(self: &Arc<Self>, focus: pe_store::MessageRef, newest_first: bool) -> Option<u64> {
+        self.thread_of(focus)?;
+        let request = self.next_request.fetch_add(1, Ordering::Relaxed);
+        let work = self.in_background(Connection::Reads, move |core| {
+            core.download_conversation(focus, PRINT_WAIT);
+            let document = core.conversation_printout(focus, newest_first).unwrap_or_default();
+            core.keep_printout(request, document);
+            let _ = core.post(Event::PrintReady { request });
+        });
+        self.runtime().ok()?.spawn(work);
+        Some(request)
+    }
+
+    /// The messages of `focus`'s conversation whose sources are not here yet asked for, and waited for up to `wait`
+    /// (Print Conversation prints every message, folded or not)
+    fn download_conversation(&self, focus: pe_store::MessageRef, wait: std::time::Duration) {
+        let Some(thread) = self.thread_of(focus) else { return };
+        let missing = || -> Vec<pe_store::MessageRef> {
+            let store = self.store();
+            let messages = store.conversation_messages(thread, focus.folder).unwrap_or_default();
+            messages
+                .iter()
+                .filter(|m| !matches!(store.source(m.folder_id, m.info.uid), Ok(Some(_))))
+                .map(|m| pe_store::MessageRef {
+                    folder: m.folder_id,
+                    uid: m.info.uid,
+                })
+                .collect()
+        };
+        let asked = missing();
+        for at in &asked {
+            let _ = self.open_message(at.folder, at.uid);
+        }
+        let until = std::time::Instant::now() + wait;
+        while !asked.is_empty() && !missing().is_empty() && std::time::Instant::now() < until {
+            std::thread::sleep(std::time::Duration::from_millis(200));
+        }
+    }
+
+    /// The conversation a message is in, None for one not threaded yet
+    fn thread_of(&self, at: pe_store::MessageRef) -> Option<i64> {
+        let message = self.store().message(at.folder, at.uid).ok().flatten()?;
+        message.info.thread_id.filter(|thread| *thread > 0)
     }
 
     /// The view a [`Core::message_view_start`] built, once: None while it is built, for an unknown request, or when

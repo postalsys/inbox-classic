@@ -40,6 +40,8 @@ cmd-accounts = Ú&čty...
 cmd-find = Na&jít zprávu
 cmd-save-as = &Uložit jako...
 cmd-print = &Tisknout...
+# review: new
+cmd-print-conversation = Tisknout konver&zaci...
 cmd-import = &Importovat zprávy...
 cmd-outbox = &Pošta k odeslání...
 cmd-properties = &Vlastnosti
@@ -60,6 +62,47 @@ ui-find-not-found = „{ $words }“ v této zprávě není
 cmd-expand-all-threads = &Rozbalit všechny konverzace
 cmd-collapse-all-threads = Sbal&it všechny konverzace
 ui-group-by-conversation = &Seskupovat zprávy podle konverzace
+# review: new
+ui-show-whole-conversation = Zobrazit &celou konverzaci v podokně čtení
+# review: new
+ui-show-whole-conversation-note = Řádek konverzace otevře všechny její zprávy, včetně vašich odpovědí, konceptů a zpráv založených v jiných složkách. Přečtené zprávy jsou sbalené do jednoho řádku: kliknutím na řádek zprávu otevřete nebo znovu sbalíte.
+# review: new
+ui-conversation-order = Řaz&ení zpráv v konverzaci:
+# review: new
+ui-conversation-oldest-first = Nejstarší první
+# review: new
+ui-conversation-newest-first = Nejnovější první
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+    [one] ({ $count }, { $new } nová)
+    [few] ({ $count }, { $new } nové)
+   *[other] ({ $count }, { $new } nových)
+}
+# review: new
+ui-conversation-to = komu: { $people }
+# review: new
+ui-conversation-draft = Koncept
+# review: new
+ui-conversation-alone = Podepsaná nebo šifrovaná: otevře se samostatně
+# review: new
+ui-conversation-downloading = Stahování…
+# review: new
+ui-conversation-earlier = { $count ->
+    [one] Zobrazit { $count } starší zprávu
+    [few] Zobrazit { $count } starší zprávy
+   *[other] Zobrazit { $count } starších zpráv
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [one] Tato konverzace má ještě { $count } zprávu v jiné složce.
+    [few] Tato konverzace má ještě { $count } zprávy v jiných složkách.
+   *[other] Tato konverzace má ještě { $count } zpráv v jiných složkách.
+}
+# review: new
+ui-conversation-this-folder = &Jen tato složka
+# review: new
+ui-conversation-whole = &Celá konverzace
 cmd-folder-list = &Seznam složek
 cmd-layout-automatic = &Automatické
 cmd-layout-classic = &Klasické

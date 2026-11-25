@@ -842,6 +842,11 @@ final class ListView {
         pe_list_view_set_grouped(handle, grouped)
     }
 
+    /// Conversation order: an expanded conversation's other messages newest first
+    func setNewestFirst(_ newestFirst: Bool) {
+        pe_list_view_set_newest_first(handle, newestFirst)
+    }
+
     func setHideIgnored(_ hide: Bool) {
         pe_list_view_set_hide_ignored(handle, hide)
     }
@@ -1058,6 +1063,13 @@ struct Message {
     let opens: Bool
     /// the row stands for all of its conversation's messages, not shown under it
     let collapsed: Bool
+    /// what the row says after its subject when it opens and closes its conversation: "(3, 1 new)"; empty otherwise
+    let threadLabel: String
+    /// the message selecting the row opens: a collapsed conversation's oldest unread, else its newest; else its own
+    let openFolder: Int64
+    let openUid: UInt64
+    /// with Show the whole conversation on, the row shows its conversation in the reading pane
+    let showsConversation: Bool
     /// a notice that a message was not delivered, or not yet: its mark in the attachment column's place
     let bounce: Bool
     /// its conversation watched (the Watch column's glasses) or ignored (the Watch column's sign)
@@ -1100,6 +1112,10 @@ struct Message {
         bold = message.bold
         opens = message.thread_opens
         collapsed = message.thread_collapsed
+        threadLabel = text(message.thread_label)
+        openFolder = message.open_folder
+        openUid = message.open_uid
+        showsConversation = message.shows_conversation
         bounce = message.bounce
         mark = message.mark
         dimmed = message.dimmed

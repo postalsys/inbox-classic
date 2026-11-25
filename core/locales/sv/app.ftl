@@ -42,6 +42,8 @@ cmd-accounts = &Konton...
 cmd-find = &Sök efter meddelande
 cmd-save-as = &Spara som...
 cmd-print = Skriv &ut...
+# review: new
+cmd-print-conversation = Skriv ut konve&rsation...
 cmd-import = &Importera meddelanden...
 cmd-outbox = &Utkorgen...
 cmd-properties = &Egenskaper
@@ -62,6 +64,44 @@ ui-find-not-found = ”{ $words }” finns inte i det här meddelandet
 cmd-expand-all-threads = &Expandera alla konversationer
 cmd-collapse-all-threads = Komprimera &alla konversationer
 ui-group-by-conversation = Gr&uppera meddelanden efter konversation
+# review: new
+ui-show-whole-conversation = Visa hela konversationen i läs&fönstret
+# review: new
+ui-show-whole-conversation-note = En konversations rad öppnar alla dess meddelanden, med dina svar, utkast och de meddelanden du har lagt i andra mappar. Lästa meddelanden är hopfällda till en rad: klicka på en rad för att öppna eller fälla ihop den.
+# review: new
+ui-conversation-order = &Ordning i konversationer:
+# review: new
+ui-conversation-oldest-first = Äldsta först
+# review: new
+ui-conversation-newest-first = Nyaste först
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+    [one] ({ $count }, { $new } ny)
+   *[other] ({ $count }, { $new } nya)
+}
+# review: new
+ui-conversation-to = till { $people }
+# review: new
+ui-conversation-draft = Utkast
+# review: new
+ui-conversation-alone = Signerat eller krypterat: öppnas för sig
+# review: new
+ui-conversation-downloading = Hämtar…
+# review: new
+ui-conversation-earlier = { $count ->
+    [one] Visa 1 tidigare meddelande
+   *[other] Visa { $count } tidigare meddelanden
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [one] Den här konversationen har också ett meddelande i en annan mapp.
+   *[other] Den här konversationen har också { $count } meddelanden i andra mappar.
+}
+# review: new
+ui-conversation-this-folder = Endast &den här mappen
+# review: new
+ui-conversation-whole = &Hela konversationen
 cmd-folder-list = &Mapplista
 cmd-layout-automatic = &Automatisk
 cmd-layout-classic = &Klassisk

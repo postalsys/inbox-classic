@@ -40,6 +40,8 @@ cmd-accounts = &Cuentas...
 cmd-find = &Buscar mensaje
 cmd-save-as = &Guardar como...
 cmd-print = Im&primir...
+# review: new
+cmd-print-conversation = Imprimir c&onversación...
 cmd-import = &Importar mensajes...
 cmd-outbox = Bandeja de &salida...
 cmd-properties = P&ropiedades
@@ -60,6 +62,44 @@ ui-find-not-found = No se encontró «{ $words }» en este mensaje
 cmd-expand-all-threads = &Expandir todas las conversaciones
 cmd-collapse-all-threads = &Contraer todas las conversaciones
 ui-group-by-conversation = Agrupar lo&s mensajes por conversación
+# review: new
+ui-show-whole-conversation = Mostrar &toda la conversación en el panel de lectura
+# review: new
+ui-show-whole-conversation-note = La fila de una conversación abre todos sus mensajes, con sus respuestas, sus borradores y los mensajes archivados en otras carpetas. Los mensajes leídos se contraen en una línea: haga clic en una línea para abrirla o contraerla.
+# review: new
+ui-conversation-order = &Orden de la conversación:
+# review: new
+ui-conversation-oldest-first = Primero el más antiguo
+# review: new
+ui-conversation-newest-first = Primero el más reciente
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+    [one] ({ $count }, { $new } nuevo)
+   *[other] ({ $count }, { $new } nuevos)
+}
+# review: new
+ui-conversation-to = para { $people }
+# review: new
+ui-conversation-draft = Borrador
+# review: new
+ui-conversation-alone = Firmado o cifrado: se abre por separado
+# review: new
+ui-conversation-downloading = Descargando…
+# review: new
+ui-conversation-earlier = { $count ->
+    [one] Mostrar 1 mensaje anterior
+   *[other] Mostrar { $count } mensajes anteriores
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [one] Esta conversación también tiene un mensaje en otra carpeta.
+   *[other] Esta conversación también tiene { $count } mensajes en otras carpetas.
+}
+# review: new
+ui-conversation-this-folder = &Solo esta carpeta
+# review: new
+ui-conversation-whole = &Toda la conversación
 cmd-folder-list = Lis&ta de carpetas
 cmd-layout-automatic = &Automático
 cmd-layout-classic = &Clásico

@@ -96,8 +96,30 @@ pub const MEASURE_SCRIPT: &str = "for(const f of document.querySelectorAll('ifra
 const r=d&&d.documentElement;if(!r)continue;const h=Math.max(48,Math.ceil(r.getBoundingClientRect().height))+'px';\
 if(f.style.height!==h)f.style.height=h}";
 
+/// The frame of the document at `part-N` (N `index`) on a page of documents in frames, titled `title`: sandboxed with no
+/// scripts, forms or popups, the page around it navigated by a click only; the same for every such page
+pub(crate) fn part_frame(index: usize, title: &str) -> String {
+    format!(
+        "<iframe class=\"pe-d\" sandbox=\"allow-same-origin allow-top-navigation-by-user-activation\" title=\"{}\" \
+         src=\"{PART_DOCUMENT}{index}\"></iframe>",
+        attribute(title)
+    )
+}
+
+/// The head of a page of documents in frames up to its own styles: no script, no request but its frames (`frame-src
+/// 'self'`) and pictures as `remote_images` allows, in the system's colors
+pub(crate) fn framed_head(remote_images: bool) -> String {
+    let images = if remote_images { "data: http: https:" } else { "data:" };
+    format!(
+        "<!doctype html><html><head><meta charset=\"utf-8\">\
+         <meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; frame-src 'self'; \
+         img-src {images}; style-src 'unsafe-inline'; font-src 'none'\">\
+         <meta name=\"color-scheme\" content=\"light dark\">"
+    )
+}
+
 /// A text as the value of an attribute
-fn attribute(text: &str) -> String {
+pub(crate) fn attribute(text: &str) -> String {
     let mut out = String::with_capacity(text.len() + text.len() / 8);
     for c in text.chars() {
         match c {
@@ -114,7 +136,7 @@ fn attribute(text: &str) -> String {
 /// The page of `parts`, in their order. `remote_images`: some part may load pictures from the internet (each part's
 /// own policy still decides for it).
 pub fn secure_page(parts: &[SecurePart], remote_images: bool) -> String {
-    let images = if remote_images { "data: http: https:" } else { "data:" };
+    let head = framed_head(remote_images);
     let mut body = String::new();
     for (index, part) in parts.iter().enumerate() {
         let label = editor::text(part.label);
@@ -132,19 +154,12 @@ pub fn secure_page(parts: &[SecurePart], remote_images: bool) -> String {
             None => body.push_str(&format!("<section class=\"pe-p pe-{tone}\">{label}")),
         }
         if part.shown {
-            body.push_str(&format!(
-                "<iframe class=\"pe-d\" sandbox=\"allow-same-origin allow-top-navigation-by-user-activation\" title=\"{}\" src=\"{PART_DOCUMENT}{index}\"></iframe>",
-                attribute(part.label),
-            ));
+            body.push_str(&part_frame(index, part.label));
         }
         body.push_str("</section>");
     }
     format!(
-        "<!doctype html><html><head><meta charset=\"utf-8\">\
-         <meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; frame-src 'self'; \
-         img-src {images}; style-src 'unsafe-inline'; font-src 'none'\">\
-         <meta name=\"color-scheme\" content=\"light dark\">\
-         <style>\
+        "{head}<style>\
          html{{background:Canvas}}body{{margin:6px 8px;font:10pt Arial,sans-serif}}\
          .pe-p{{border:2px solid var(--c);border-radius:6px;margin:0 0 10px;overflow:hidden}}\
          .pe-l{{display:block;padding:4px 10px;font-weight:bold;font-size:9pt;color:var(--t);background:var(--b);\

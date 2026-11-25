@@ -99,6 +99,10 @@ pub const COLUMNS_NOTE: &str = "ColumnsNoteShown";
 pub const LANGUAGE: &str = "Language";
 /// Preferences > Group messages by conversation (on when not set)
 pub const GROUP_BY_CONVERSATION: &str = "GroupByConversation";
+/// Preferences > Show the whole conversation in the reading pane (on when not set)
+pub const SHOW_WHOLE_CONVERSATION: &str = "ShowWholeConversation";
+/// Preferences > Conversation order: newest first (oldest first when not set)
+pub const CONVERSATION_NEWEST_FIRST: &str = "ConversationNewestFirst";
 /// View > Hide Ignored Conversations (off when not set)
 pub const HIDE_IGNORED: &str = "HideIgnoredConversations";
 /// Whether a new message's notification names its sign-in code (the core does it), off unless chosen

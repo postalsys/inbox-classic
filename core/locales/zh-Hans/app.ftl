@@ -43,6 +43,8 @@ cmd-accounts = 帐户(&A)...
 cmd-find = 查找邮件(&F)
 cmd-save-as = 另存为(&S)...
 cmd-print = 打印(&P)...
+# review: new
+cmd-print-conversation = 打印对话(&V)...
 cmd-import = 导入邮件(&I)...
 cmd-outbox = 发件箱(&O)...
 cmd-properties = 属性(&R)
@@ -63,6 +65,43 @@ ui-find-not-found = 此邮件中没有“{ $words }”
 cmd-expand-all-threads = 展开所有对话(&E)
 cmd-collapse-all-threads = 折叠所有对话(&O)
 ui-group-by-conversation = 按对话分组邮件(&G)
+# review: new
+ui-show-whole-conversation = 在阅读窗格中显示整个对话(&W)
+# review: new
+ui-show-whole-conversation-note = 选择对话所在的行会打开它的所有邮件，包括您的答复、草稿以及归档到其他文件夹的邮件。已读邮件折叠为一行：单击该行可将其展开或折叠。
+# review: new
+ui-conversation-order = 对话顺序(&O)：
+# review: new
+ui-conversation-oldest-first = 最早的在前
+# review: new
+ui-conversation-newest-first = 最新的在前
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+   *[other] ({ $count }，{ $new } 封新邮件)
+}
+# review: new
+ui-conversation-to = 收件人：{ $people }
+# review: new
+ui-conversation-draft = 草稿
+# review: new
+ui-conversation-alone = 已签名或已加密：单独打开
+# review: new
+ui-conversation-downloading = 正在下载…
+# review: new
+ui-conversation-earlier = { $count ->
+    [1] 显示 1 封更早的邮件
+   *[other] 显示 { $count } 封更早的邮件
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [1] 此对话在其他文件夹中还有 1 封邮件。
+   *[other] 此对话在其他文件夹中还有 { $count } 封邮件。
+}
+# review: new
+ui-conversation-this-folder = 仅此文件夹(&T)
+# review: new
+ui-conversation-whole = 整个对话(&W)
 cmd-folder-list = 文件夹列表(&F)
 cmd-layout-automatic = 自动(&A)
 cmd-layout-classic = 经典(&C)

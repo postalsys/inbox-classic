@@ -39,6 +39,8 @@ cmd-accounts = &Comptes...
 cmd-find = &Rechercher un message
 cmd-save-as = Enregistrer &sous...
 cmd-print = &Imprimer...
+# review: new
+cmd-print-conversation = Imprimer &la conversation...
 cmd-import = I&mporter des messages...
 cmd-outbox = Boîte d'en&voi...
 cmd-properties = &Propriétés
@@ -59,6 +61,44 @@ ui-find-not-found = Aucune occurrence de « { $words } » dans ce message
 cmd-expand-all-threads = &Développer toutes les conversations
 cmd-collapse-all-threads = Réd&uire toutes les conversations
 ui-group-by-conversation = &Regrouper les messages par conversation
+# review: new
+ui-show-whole-conversation = Affic&her toute la conversation dans le volet de lecture
+# review: new
+ui-show-whole-conversation-note = La ligne d'une conversation ouvre tous ses messages, avec vos réponses, vos brouillons et les messages classés dans d'autres dossiers. Les messages lus sont réduits à une ligne : cliquez sur une ligne pour l'ouvrir ou la réduire.
+# review: new
+ui-conversation-order = &Ordre de la conversation :
+# review: new
+ui-conversation-oldest-first = Le plus ancien en premier
+# review: new
+ui-conversation-newest-first = Le plus récent en premier
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+    [one] ({ $count }, { $new } nouveau)
+   *[other] ({ $count }, { $new } nouveaux)
+}
+# review: new
+ui-conversation-to = à { $people }
+# review: new
+ui-conversation-draft = Brouillon
+# review: new
+ui-conversation-alone = Signé ou chiffré : s'ouvre seul
+# review: new
+ui-conversation-downloading = Téléchargement…
+# review: new
+ui-conversation-earlier = { $count ->
+    [one] Afficher 1 message plus ancien
+   *[other] Afficher { $count } messages plus anciens
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [one] Cette conversation a aussi un message dans un autre dossier.
+   *[other] Cette conversation a aussi { $count } messages dans d'autres dossiers.
+}
+# review: new
+ui-conversation-this-folder = &Ce dossier uniquement
+# review: new
+ui-conversation-whole = &Toute la conversation
 cmd-folder-list = Liste des d&ossiers
 cmd-layout-automatic = &Automatique
 cmd-layout-classic = &Classique

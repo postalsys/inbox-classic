@@ -42,6 +42,8 @@ cmd-accounts = 帳戶(&A)...
 cmd-find = 尋找郵件(&F)
 cmd-save-as = 另存新檔(&S)...
 cmd-print = 列印(&P)...
+# review: new
+cmd-print-conversation = 列印交談(&V)...
 cmd-import = 匯入郵件(&I)...
 cmd-outbox = 寄件匣(&O)...
 cmd-properties = 內容(&R)
@@ -62,6 +64,43 @@ ui-find-not-found = 這封郵件中沒有「{ $words }」
 cmd-expand-all-threads = 展開所有交談(&E)
 cmd-collapse-all-threads = 摺疊所有交談(&O)
 ui-group-by-conversation = 依交談將郵件分組(&G)
+# review: new
+ui-show-whole-conversation = 在讀取窗格中顯示整個交談(&W)
+# review: new
+ui-show-whole-conversation-note = 選取交談所在的列會開啟它的所有郵件，包括您的回覆、草稿，以及歸檔到其他資料夾的郵件。已讀取的郵件會收合成一行：按一下該行即可展開或收合。
+# review: new
+ui-conversation-order = 交談順序(&O)：
+# review: new
+ui-conversation-oldest-first = 最舊的在前
+# review: new
+ui-conversation-newest-first = 最新的在前
+# review: new
+ui-thread-count = { $new ->
+    [0] ({ $count })
+   *[other] ({ $count }，{ $new } 封新郵件)
+}
+# review: new
+ui-conversation-to = 收件者：{ $people }
+# review: new
+ui-conversation-draft = 草稿
+# review: new
+ui-conversation-alone = 已簽署或已加密：單獨開啟
+# review: new
+ui-conversation-downloading = 正在下載…
+# review: new
+ui-conversation-earlier = { $count ->
+    [1] 顯示 1 封較早的郵件
+   *[other] 顯示 { $count } 封較早的郵件
+}
+# review: new
+ui-conversation-elsewhere = { $count ->
+    [1] 這個交談在其他資料夾中還有 1 封郵件。
+   *[other] 這個交談在其他資料夾中還有 { $count } 封郵件。
+}
+# review: new
+ui-conversation-this-folder = 僅此資料夾(&T)
+# review: new
+ui-conversation-whole = 整個交談(&W)
 cmd-folder-list = 資料夾清單(&F)
 cmd-layout-automatic = 自動(&A)
 cmd-layout-classic = 傳統(&C)

@@ -1348,3 +1348,80 @@ std::vector<std::wstring> OpenFilesDialog(HWND owner, const wchar_t* title, cons
     }
     return files;
 }
+
+// ---- a question with answers of its own ----
+
+namespace {
+
+struct AskState {
+    int answer = 0;
+    int safe = 0;
+    bool done = false;
+};
+
+LRESULT CALLBACK AskProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
+    auto* state = reinterpret_cast<AskState*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
+    if (!state) {
+        return DefWindowProcW(hwnd, message, wParam, lParam);
+    }
+    switch (message) {
+    case WM_COMMAND:
+        if (HIWORD(wParam) == BN_CLICKED) {
+            // Esc gives the safe answer
+            state->answer = LOWORD(wParam) == IDCANCEL ? state->safe : LOWORD(wParam);
+            state->done = true;
+        }
+        return 0;
+    case WM_CLOSE:
+        state->answer = state->safe;
+        state->done = true;
+        return 0;
+    case WM_CTLCOLORSTATIC:
+        return ButtonFaceColor(reinterpret_cast<HDC>(wParam));
+    }
+    return DefWindowProcW(hwnd, message, wParam, lParam);
+}
+
+}  // namespace
+
+int AskAnswers(HWND owner, const std::wstring& text, const std::vector<std::pair<std::wstring, int>>& answers, int safe) {
+    static const wchar_t* kAskClass = L"InboxClassicAsk";
+    RegisterDialogClass(kAskClass, AskProc);
+    int pad = Scale(12);
+    int width = Scale(440);
+    HDC dc = GetDC(owner);
+    HGDIOBJ old = SelectObject(dc, UiFont());
+    RECT bounds = {0, 0, width - 2 * pad, 0};
+    DrawTextW(dc, text.c_str(), -1, &bounds, DT_CALCRECT | DT_WORDBREAK | DT_NOPREFIX);
+    SelectObject(dc, old);
+    ReleaseDC(owner, dc);
+    int textHeight = bounds.bottom;
+    int height = pad + textHeight + Scale(18) + Scale(25) + pad;
+    HWND dialog = CreateModalWindow(owner, kAskClass, L"Inbox Classic", width, height);
+    if (!dialog) {
+        return safe;
+    }
+    AskState state;
+    state.answer = state.safe = safe;
+    SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
+    CreateChild(dialog, L"STATIC", text.c_str(), SS_LEFT | SS_NOPREFIX, 0, {pad, pad, width - pad, pad + textHeight});
+    // the answers at the bottom right, left to right, the first the default
+    std::vector<std::wstring> labels;
+    for (const auto& answer : answers) {
+        labels.push_back(answer.first);
+    }
+    int button = ButtonWidth(labels, 80);
+    int count = static_cast<int>(answers.size());
+    int y = pad + textHeight + Scale(18);
+    HWND first = nullptr;
+    for (int i = 0; i < count; i++) {
+        int right = width - pad - (count - 1 - i) * (button + Scale(8));
+        HWND made = CreateChild(dialog, L"BUTTON", answers[i].first.c_str(), WS_TABSTOP | (i == 0 ? BS_DEFPUSHBUTTON : 0),
+                                answers[i].second, {right - button, y, right, y + Scale(25)});
+        if (i == 0) {
+            first = made;
+        }
+    }
+    RunModal(dialog, first, state.done);
+    return state.answer;
+}

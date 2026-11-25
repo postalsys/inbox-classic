@@ -176,6 +176,9 @@ pub struct MessageView {
     pub preparing: bool,
     /// Those files, and what came of them since
     pub(crate) preview_preparing: Option<std::sync::Arc<crate::previews::Preparing>>,
+    /// The view is a conversation's ([`crate::conversation`]): `document` its page, `part_documents` its open
+    /// messages' documents; None for a message shown alone
+    pub conversation: Option<crate::conversation::ConversationInfo>,
 }
 
 /// What a signed or encrypted message is, for the bar over it (which mail can not draw) and its Details
@@ -505,6 +508,7 @@ pub(crate) fn build_unless(
         preview_source: None,
         preparing: false,
         preview_preparing: None,
+        conversation: None,
     })
 }
 
@@ -824,19 +828,10 @@ fn print_parts(
     texts: &[(usize, String)],
 ) -> pe_html::PrintParts {
     use pe_i18n::{Text, tr, tr_args};
-    let date = message
-        .timestamp
-        .map(crate::calendar::local_date_time)
-        .unwrap_or_default();
     let part_name = |index: usize| tr_args(Text::HeaderPart, &[("number", (index + 1).into())]);
-    let mut lines: Vec<(String, String)> = vec![
-        (tr(Text::HeaderFrom), text_addresses(message.from.as_slice())),
-        (tr(Text::HeaderDate), date),
-        (tr(Text::HeaderTo), text_addresses(&message.to)),
-        (tr(Text::HeaderCc), text_addresses(&message.cc)),
-        (tr(Text::HeaderSubject), message.subject.clone().unwrap_or_default()),
-        (tr(Text::HeaderSecurity), bar.to_string()),
-    ];
+    let mut lines = printed_header(message);
+    lines.push((tr(Text::HeaderSubject), message.subject.clone().unwrap_or_default()));
+    lines.push((tr(Text::HeaderSecurity), bar.to_string()));
     for (index, part) in parts.iter().enumerate() {
         lines.push((part_name(index), part.label.clone()));
     }
@@ -857,6 +852,43 @@ fn print_parts(
         })
         .collect();
     pe_html::print_parts(&body, &header)
+}
+
+/// The header lines a printout gives a message: From, Date, To and Cc, in the reader's words
+fn printed_header(message: &parser::Message) -> Vec<(String, String)> {
+    use pe_i18n::{Text, tr};
+    let date = message
+        .timestamp
+        .map(crate::calendar::local_date_time)
+        .unwrap_or_default();
+    vec![
+        (tr(Text::HeaderFrom), text_addresses(message.from.as_slice())),
+        (tr(Text::HeaderDate), date),
+        (tr(Text::HeaderTo), text_addresses(&message.to)),
+        (tr(Text::HeaderCc), text_addresses(&message.cc)),
+    ]
+}
+
+/// A message for a conversation's printout: its header lines ([`printed_header`]), then its text (its HTML, or its plain
+/// text as HTML), to be sanitized with the rest ([`pe_html::print_parts`]); None when it can not be read
+pub(crate) fn print_body(source: &[u8]) -> Option<String> {
+    let message = parser::parse(source).ok()?;
+    let mut out = String::from("<hr>");
+    for (name, value) in printed_header(&message) {
+        if !value.is_empty() {
+            out.push_str(&format!(
+                "<p><b>{}:</b> {}</p>",
+                escape_html(&name),
+                escape_html(&value)
+            ));
+        }
+    }
+    match (message.html, message.text) {
+        (Some(html), _) => out.push_str(&html),
+        (None, Some(text)) => out.push_str(&text_to_html(&text)),
+        (None, None) => {}
+    }
+    Some(out)
 }
 
 /// Text as HTML text

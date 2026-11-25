@@ -509,6 +509,76 @@ pub unsafe extern "C" fn pe_selection_act_start(
     unsafe { with_shared(core, 0, |core| core.act_start(selected, action).unwrap_or(0)) }
 }
 
+/// Before Delete, Archive or Move (`action`) of the selection: how many messages of its conversations are in other
+/// folders, which "Whole Conversation" would take too (`pe_selection_add_conversation`); 0 when there is nothing to
+/// ask (one message of a conversation chosen, a whole list, any other action). The question is
+/// `pe_conversation_elsewhere_question` with this count, its answers `ui-conversation-this-folder` and
+/// `ui-conversation-whole`.
+///
+/// # Safety
+/// `core` must be a live handle, `selection` NULL or a live selection.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_selection_conversation_elsewhere(
+    core: *const PeCore,
+    selection: *const PeSelection,
+    action: PeAction,
+    to: i64,
+) -> usize {
+    // SAFETY: as the caller guarantees
+    let Some(selection) = (unsafe { selection.as_ref() }) else {
+        return 0;
+    };
+    let Some(action) = action_of(action, to) else {
+        return 0;
+    };
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, 0, |core| {
+            core.conversation_elsewhere(&selection.0, action)
+                .map_or(0, |found| found.len())
+        })
+    }
+}
+
+/// "Whole Conversation" answered: the messages `pe_selection_conversation_elsewhere` counted added to the selection,
+/// for `pe_selection_act_start` with the same action. False on failure.
+///
+/// # Safety
+/// `core` must be a live handle, `selection` NULL or a live selection.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_selection_add_conversation(
+    core: *const PeCore,
+    selection: *mut PeSelection,
+    action: PeAction,
+    to: i64,
+) -> bool {
+    // SAFETY: as the caller guarantees
+    let Some(selection) = (unsafe { selection.as_mut() }) else {
+        return false;
+    };
+    let Some(action) = action_of(action, to) else {
+        return false;
+    };
+    // SAFETY: as the caller guarantees
+    let found = unsafe {
+        with(core, None, |core| {
+            core.conversation_elsewhere(&selection.0, action).ok()
+        })
+    };
+    let (Some(found), pe_core::Selected::Listed(refs)) = (found, &mut selection.0) else {
+        return false;
+    };
+    refs.extend(found);
+    true
+}
+
+/// What to ask before Delete, Archive or Move of a conversation with `count` messages in other folders: "This
+/// conversation also has 2 messages in other folders." Free with `pe_string_free`.
+#[unsafe(no_mangle)]
+pub extern "C" fn pe_conversation_elsewhere_question(count: usize) -> *mut c_char {
+    guard(|| into_c_string(pe_core::conversation::elsewhere_question(count))).unwrap_or(null_mut())
+}
+
 /// What Mark All Read marks (`pe_mark_read_start`)
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

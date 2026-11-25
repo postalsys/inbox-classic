@@ -768,10 +768,16 @@ Screenshots: `read-17-find`, `read-18-go-to`
 
 ## 34e. Conversations
 
-Screenshots: `threads-1-collapsed`, `threads-2-expanded`, `threads-3-options-off`
+Screenshots: `threads-1-collapsed`, `threads-6-conversation-line`, `threads-2-expanded`, `threads-3-options-off`
 
-- three messages of one conversation (replies naming the first in References) are put into the Inbox on the server
-- the Inbox lists the conversation once, on its first message, with the count of its messages, bold while one is unread
+- three messages of one conversation (replies naming the first in References) are put into the Inbox on the server, the first read
+- the Inbox lists the conversation once, with the count of its messages and of the new ones ("(3, 2 new)"), bold while one is unread
+- the row shows the sender of its oldest unread message
+- selecting it shows the whole conversation in the reading pane at that message: the unread ones open, the read one folded to its line, each message with its line
+- after a moment on screen, the unread messages it showed open are read on the server
+- a click on the read message's line opens it, and it takes the focus (`threads-6-conversation-line`)
+- File > Print Conversation prints all three messages
+- with Show the whole conversation off (Options, Reading page), the row opens one message alone
 - expanding it shows its replies under it, indented
 - collapsing it hides them again
 - Mark Read on the collapsed row marks all three read on the server

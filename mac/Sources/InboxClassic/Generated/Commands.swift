@@ -49,6 +49,7 @@ enum Command: Int, CaseIterable {
     case find = 120
     case saveAs = 121
     case print = 122
+    case printConversation = 179
     case `import` = 123
     case outbox = 124
     case properties = 125
@@ -131,6 +132,7 @@ enum Command: Int, CaseIterable {
         case .find: return "edit"
         case .saveAs: return "file"
         case .print: return "file"
+        case .printConversation: return "file"
         case .import: return "file"
         case .outbox: return "tools"
         case .properties: return "file"
@@ -215,6 +217,7 @@ enum Command: Int, CaseIterable {
         case .find: return "main"
         case .saveAs: return "main"
         case .print: return "main"
+        case .printConversation: return "main"
         case .import: return "main"
         case .outbox: return "main"
         case .properties: return "main"
@@ -304,6 +307,7 @@ enum Command: Int, CaseIterable {
         case .find: return .cmdFind
         case .saveAs: return .cmdSaveAs
         case .print: return .cmdPrint
+        case .printConversation: return .cmdPrintConversation
         case .import: return .cmdImport
         case .outbox: return .cmdOutbox
         case .properties: return .cmdProperties
@@ -388,6 +392,7 @@ enum Command: Int, CaseIterable {
         case .find: return ("f", [.command])
         case .saveAs: return ("s", [.command, .shift])
         case .print: return ("p", [.command])
+        case .printConversation: return nil
         case .import: return nil
         case .outbox: return nil
         case .properties: return ("u", [.command, .option])
@@ -472,6 +477,7 @@ enum Command: Int, CaseIterable {
         case .find: return false
         case .saveAs: return false
         case .print: return false
+        case .printConversation: return false
         case .import: return false
         case .outbox: return false
         case .properties: return false
@@ -556,6 +562,7 @@ enum Command: Int, CaseIterable {
         case .find: return false
         case .saveAs: return true
         case .print: return false
+        case .printConversation: return false
         case .import: return false
         case .outbox: return false
         case .properties: return false
@@ -640,6 +647,7 @@ enum Command: Int, CaseIterable {
         case .find: return false
         case .saveAs: return false
         case .print: return true
+        case .printConversation: return true
         case .import: return false
         case .outbox: return false
         case .properties: return true
@@ -724,6 +732,7 @@ enum Command: Int, CaseIterable {
         case .find: return false
         case .saveAs: return true
         case .print: return true
+        case .printConversation: return true
         case .import: return false
         case .outbox: return false
         case .properties: return true
@@ -808,6 +817,7 @@ enum Command: Int, CaseIterable {
         case .find: return nil
         case .saveAs: return nil
         case .print: return nil
+        case .printConversation: return nil
         case .import: return nil
         case .outbox: return nil
         case .properties: return nil
