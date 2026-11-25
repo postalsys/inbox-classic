@@ -943,3 +943,11 @@ ui-keys-publish-now = Publicar
 ui-keys-paste = Importar da área de &transferência
 ui-keys-paste-none = A área de transferência não contém nenhuma chave OpenPGP.
 ui-contact-find-key = Pro&curar chave
+# review: new
+ui-reactions-label = Reações:
+# review: new
+ui-reaction-open-email = Abrir o e-mail da reação
+# review: new
+ui-reaction-show-as-email = Mostrar como e-mail
+# review: new
+ui-reaction-when = Reação: { $when }

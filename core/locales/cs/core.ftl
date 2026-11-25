@@ -1170,3 +1170,10 @@ preview-not-printed = { $name } ({ $details }) se netiskne. Chcete-li jej vytisk
 
 pgp-error-attached-private = Tato příloha obsahuje soukromý klíč. Přímo z pošty lze importovat pouze veřejné klíče. Chcete-li obnovit svůj soukromý klíč, uložte přílohu a importujte její soubor v okně Šifrovací klíče.
 pgp-part-find-key = Najít klíč
+# review: new
+reaction-notification-title = { $name }: reakce { $emoji }
+# review: new
+reaction-notification-text = { $count ->
+    [one] na zprávu { $subject }
+   *[other] na zprávu { $subject }, celkem reakcí: { $count }
+}

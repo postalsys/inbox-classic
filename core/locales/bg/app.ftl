@@ -937,3 +937,11 @@ ui-keys-publish-now = Публикуване
 ui-keys-paste = Импортиране от &клипборда
 ui-keys-paste-none = Клипбордът не съдържа OpenPGP ключ.
 ui-contact-find-key = Намиране на &ключ
+# review: new
+ui-reactions-label = Реакции:
+# review: new
+ui-reaction-open-email = Отваряне на имейла с реакцията
+# review: new
+ui-reaction-show-as-email = Показване като имейл
+# review: new
+ui-reaction-when = Реакция: { $when }

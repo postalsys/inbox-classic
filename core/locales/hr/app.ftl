@@ -945,3 +945,11 @@ ui-keys-publish-now = Objavi
 ui-keys-paste = Uvezi iz &međuspremnika
 ui-keys-paste-none = U međuspremniku nema ključa OpenPGP.
 ui-contact-find-key = Pronađi &ključ
+# review: new
+ui-reactions-label = Reakcije:
+# review: new
+ui-reaction-open-email = Otvori poruku e-pošte s reakcijom
+# review: new
+ui-reaction-show-as-email = Prikaži kao poruku e-pošte
+# review: new
+ui-reaction-when = Reakcija: { $when }

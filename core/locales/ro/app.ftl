@@ -949,3 +949,11 @@ ui-keys-publish-now = Publicare
 ui-keys-paste = Import din clip&board
 ui-keys-paste-none = Clipboardul nu conține nicio cheie OpenPGP.
 ui-contact-find-key = &Găsire cheie
+# review: new
+ui-reactions-label = Reacții:
+# review: new
+ui-reaction-open-email = Deschidere e-mail cu reacția
+# review: new
+ui-reaction-show-as-email = Afișare ca e-mail
+# review: new
+ui-reaction-when = Reacție: { $when }

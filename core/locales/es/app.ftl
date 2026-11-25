@@ -932,3 +932,11 @@ ui-keys-publish-now = Publicar
 ui-keys-paste = Importar del por&tapapeles
 ui-keys-paste-none = El portapapeles no contiene ninguna clave OpenPGP.
 ui-contact-find-key = &Buscar clave
+# review: new
+ui-reactions-label = Reacciones:
+# review: new
+ui-reaction-open-email = Abrir el correo de la reacción
+# review: new
+ui-reaction-show-as-email = Mostrar como correo
+# review: new
+ui-reaction-when = Reacción: { $when }

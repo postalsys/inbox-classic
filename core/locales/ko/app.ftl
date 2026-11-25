@@ -920,3 +920,11 @@ ui-keys-publish-now = 게시
 ui-keys-paste = 클립보드에서 가져오기(&L)
 ui-keys-paste-none = 클립보드에 OpenPGP 키가 없습니다.
 ui-contact-find-key = 키 찾기(&F)
+# review: new
+ui-reactions-label = 반응:
+# review: new
+ui-reaction-open-email = 반응 메일 열기
+# review: new
+ui-reaction-show-as-email = 메일로 표시
+# review: new
+ui-reaction-when = 반응한 시간: { $when }

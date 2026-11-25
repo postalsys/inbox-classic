@@ -931,3 +931,10 @@ preview-not-printed = { $name } ({ $details }) không được in. Hãy mở t�
 
 pgp-error-attached-private = Tệp đính kèm này chứa khóa riêng tư. Chỉ có thể nhập khóa công khai trực tiếp từ thư. Để khôi phục khóa riêng tư của chính bạn, hãy lưu tệp đính kèm rồi nhập tệp đó trong Khóa mã hóa.
 pgp-part-find-key = Tìm khóa
+# review: new
+reaction-notification-title = { $name } đã bày tỏ cảm xúc { $emoji }
+# review: new
+reaction-notification-text = { $count ->
+    [1] về { $subject }
+   *[other] về { $subject }, tổng cộng { $count } cảm xúc
+}

@@ -838,3 +838,10 @@ preview-not-printed = { $name }（{ $details }）は印刷されません。印�
 
 pgp-error-attached-private = この添付ファイルには秘密キーが含まれています。メールから直接インポートできるのは公開キーだけです。自分の秘密キーを復元するには、添付ファイルを保存し、［暗号化キー］でそのファイルをインポートしてください。
 pgp-part-find-key = キーを検索
+# review: new
+reaction-notification-title = { $name }が{ $emoji }でリアクションしました
+# review: new
+reaction-notification-text = { $count ->
+    [1] 対象: { $subject }
+   *[other] 対象: { $subject }（リアクションは合計{ $count }件）
+}

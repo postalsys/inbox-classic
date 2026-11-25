@@ -948,3 +948,11 @@ ui-keys-publish-now = Skelbti
 ui-keys-paste = Importuoti iš iš&karpinės
 ui-keys-paste-none = Iškarpinėje nėra OpenPGP rakto.
 ui-contact-find-key = &Rasti raktą
+# review: new
+ui-reactions-label = Reakcijos:
+# review: new
+ui-reaction-open-email = Atidaryti reakcijos laišką
+# review: new
+ui-reaction-show-as-email = Rodyti kaip laišką
+# review: new
+ui-reaction-when = Reakcija: { $when }

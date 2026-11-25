@@ -1126,3 +1126,10 @@ preview-not-printed = Το { $name } ({ $details }) δεν εκτυπώνετα�
 
 pgp-error-attached-private = Αυτό το συνημμένο περιέχει ιδιωτικό κλειδί. Μόνο δημόσια κλειδιά μπορούν να εισαχθούν απευθείας από την αλληλογραφία. Για να επαναφέρετε το δικό σας ιδιωτικό κλειδί, αποθηκεύστε το συνημμένο και εισαγάγετε το αρχείο από το παράθυρο «Κλειδιά κρυπτογράφησης».
 pgp-part-find-key = Αναζήτηση κλειδιού
+# review: new
+reaction-notification-title = { $name }: αντίδραση { $emoji }
+# review: new
+reaction-notification-text = { $count ->
+    [one] στο μήνυμα { $subject }
+   *[other] στο μήνυμα { $subject }, συνολικά αντιδράσεις: { $count }
+}

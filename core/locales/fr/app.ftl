@@ -931,3 +931,11 @@ ui-keys-publish-now = Publier
 ui-keys-paste = Importer depuis le pres&se-papiers
 ui-keys-paste-none = Le presse-papiers ne contient aucune clé OpenPGP.
 ui-contact-find-key = Recherch&er la clé
+# review: new
+ui-reactions-label = Réactions :
+# review: new
+ui-reaction-open-email = Ouvrir l’e-mail de réaction
+# review: new
+ui-reaction-show-as-email = Afficher comme e-mail
+# review: new
+ui-reaction-when = Réaction : { $when }

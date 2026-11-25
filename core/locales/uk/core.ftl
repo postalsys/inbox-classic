@@ -1257,3 +1257,10 @@ preview-not-printed = Файл «{ $name }» ({ $details }) не включен�
 
 pgp-error-attached-private = Це вкладення містить закритий ключ. Безпосередньо з пошти можна імпортувати лише відкриті ключі. Щоб відновити власний закритий ключ, збережіть вкладення та імпортуйте його файл у вікні «Ключі шифрування».
 pgp-part-find-key = Знайти ключ
+# review: new
+reaction-notification-title = { $name }: реакція { $emoji }
+# review: new
+reaction-notification-text = { $count ->
+    [1] на { $subject }
+   *[other] на { $subject }, усього реакцій: { $count }
+}

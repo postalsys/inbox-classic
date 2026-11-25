@@ -916,3 +916,11 @@ ui-keys-publish-now = Công bố
 ui-keys-paste = Nhập từ bộ nhớ &tạm
 ui-keys-paste-none = Bộ nhớ tạm không chứa khóa OpenPGP.
 ui-contact-find-key = Tìm khó&a
+# review: new
+ui-reactions-label = Cảm xúc:
+# review: new
+ui-reaction-open-email = Mở email cảm xúc
+# review: new
+ui-reaction-show-as-email = Hiển thị dưới dạng email
+# review: new
+ui-reaction-when = Bày tỏ lúc { $when }

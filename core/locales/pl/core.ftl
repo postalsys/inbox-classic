@@ -1258,3 +1258,10 @@ preview-not-printed = Plik { $name } ({ $details }) nie jest uwzględniany na wy
 
 pgp-error-attached-private = Ten załącznik zawiera klucz prywatny. Bezpośrednio z poczty można importować tylko klucze publiczne. Aby przywrócić własny klucz prywatny, zapisz załącznik, a następnie zaimportuj jego plik w oknie Klucze szyfrowania.
 pgp-part-find-key = Znajdź klucz
+# review: new
+reaction-notification-title = { $name }: reakcja { $emoji }
+# review: new
+reaction-notification-text = { $count ->
+    [one] na { $subject }
+   *[other] na { $subject }, łącznie reakcji: { $count }
+}

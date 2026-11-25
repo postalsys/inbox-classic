@@ -1132,3 +1132,10 @@ preview-not-printed = O ficheiro { $name } ({ $details }) não está incluído n
 
 pgp-error-attached-private = Este anexo contém uma chave privada. Só é possível importar chaves públicas diretamente do correio. Para restaurar a sua própria chave privada, guarde o anexo e importe o ficheiro em Chaves de encriptação.
 pgp-part-find-key = Procurar chave
+# review: new
+reaction-notification-title = { $name } reagiu com { $emoji }
+# review: new
+reaction-notification-text = { $count ->
+    [one] a { $subject }
+   *[other] a { $subject }, e { $count } reações no total
+}

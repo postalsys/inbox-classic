@@ -964,3 +964,11 @@ ui-keys-publish-now = Opublikuj
 ui-keys-paste = Importuj ze sc&howka
 ui-keys-paste-none = W schowku nie ma klucza OpenPGP.
 ui-contact-find-key = Znajdź &klucz
+# review: new
+ui-reactions-label = Reakcje:
+# review: new
+ui-reaction-open-email = Otwórz e-mail z reakcją
+# review: new
+ui-reaction-show-as-email = Pokaż jako e-mail
+# review: new
+ui-reaction-when = Reakcja: { $when }

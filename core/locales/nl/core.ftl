@@ -1082,3 +1082,10 @@ preview-not-printed = { $name } ({ $details }) wordt niet afgedrukt. Open het om
 
 pgp-error-attached-private = Deze bijlage bevat een privésleutel. Je kunt alleen openbare sleutels rechtstreeks uit berichten importeren. Om je eigen privésleutel te herstellen, sla je de bijlage op en importeer je het bestand in Versleutelingssleutels.
 pgp-part-find-key = Sleutel zoeken
+# review: new
+reaction-notification-title = { $name } reageerde met { $emoji }
+# review: new
+reaction-notification-text = { $count ->
+    [one] op { $subject }
+   *[other] op { $subject }, en { $count } reacties in totaal
+}

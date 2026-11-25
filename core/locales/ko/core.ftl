@@ -927,3 +927,10 @@ preview-not-printed = 다음 파일은 인쇄되지 않습니다: { $name } ({ $
 
 pgp-error-attached-private = 이 첨부 파일에는 개인 키가 들어 있습니다. 메일에서는 공개 키만 직접 가져올 수 있습니다. 본인의 개인 키를 복원하려면 첨부 파일을 저장한 다음 암호화 키 창에서 해당 파일을 가져오십시오.
 pgp-part-find-key = 키 찾기
+# review: new
+reaction-notification-title = { $name }: { $emoji } 반응
+# review: new
+reaction-notification-text = { $count ->
+    [1] 대상: { $subject }
+   *[other] 대상: { $subject }, 총 반응 { $count }개
+}

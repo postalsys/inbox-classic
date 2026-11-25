@@ -934,3 +934,11 @@ ui-keys-publish-now = Közzététel
 ui-keys-paste = Importálás a &vágólapról
 ui-keys-paste-none = A vágólapon nincs OpenPGP-kulcs.
 ui-contact-find-key = Kulcs ke&resése
+# review: new
+ui-reactions-label = Reakciók:
+# review: new
+ui-reaction-open-email = Reakciós e-mail megnyitása
+# review: new
+ui-reaction-show-as-email = Megjelenítés e-mailként
+# review: new
+ui-reaction-when = Reakció: { $when }

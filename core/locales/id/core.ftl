@@ -931,3 +931,10 @@ preview-not-printed = { $name } ({ $details }) tidak dicetak. Buka file untuk me
 
 pgp-error-attached-private = Lampiran ini berisi kunci privat. Hanya kunci publik yang dapat diimpor langsung dari email. Untuk memulihkan kunci privat Anda sendiri, simpan lampiran lalu impor file tersebut di Kunci Enkripsi.
 pgp-part-find-key = Cari Kunci
+# review: new
+reaction-notification-title = { $name } bereaksi { $emoji }
+# review: new
+reaction-notification-text = { $count ->
+    [1] pada { $subject }
+   *[other] pada { $subject }, dan total { $count } reaksi
+}

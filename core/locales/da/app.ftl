@@ -936,3 +936,11 @@ ui-keys-publish-now = Udgiv
 ui-keys-paste = Importer fra &udklipsholder
 ui-keys-paste-none = Udklipsholderen indeholder ingen OpenPGP-nøgle.
 ui-contact-find-key = Find nø&gle
+# review: new
+ui-reactions-label = Reaktioner:
+# review: new
+ui-reaction-open-email = Åbn reaktionens e-mail
+# review: new
+ui-reaction-show-as-email = Vis som e-mail
+# review: new
+ui-reaction-when = Reaktion: { $when }

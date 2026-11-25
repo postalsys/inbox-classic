@@ -915,3 +915,11 @@ ui-keys-publish-now = Publikasikan
 ui-keys-paste = Impor dari K&lipboard
 ui-keys-paste-none = Klipboard tidak berisi kunci OpenPGP.
 ui-contact-find-key = &Cari Kunci
+# review: new
+ui-reactions-label = Reaksi:
+# review: new
+ui-reaction-open-email = Buka Email Reaksi
+# review: new
+ui-reaction-show-as-email = Tampilkan sebagai Email
+# review: new
+ui-reaction-when = Bereaksi pada { $when }

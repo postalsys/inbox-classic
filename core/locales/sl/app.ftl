@@ -963,3 +963,11 @@ ui-keys-publish-now = Objavi
 ui-keys-paste = Uvozi iz odlo&žišča
 ui-keys-paste-none = Odložišče ne vsebuje ključa OpenPGP.
 ui-contact-find-key = Najdi &ključ
+# review: new
+ui-reactions-label = Odzivi:
+# review: new
+ui-reaction-open-email = Odpri e-poštno sporočilo z odzivom
+# review: new
+ui-reaction-show-as-email = Pokaži kot e-poštno sporočilo
+# review: new
+ui-reaction-when = Odziv: { $when }

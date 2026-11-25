@@ -1250,3 +1250,10 @@ preview-not-printed = Datoteka »{ $name }« ({ $details }) ni vključena v izpi
 
 pgp-error-attached-private = Ta priponka vsebuje zasebni ključ. Neposredno iz pošte lahko uvozite le javne ključe. Če želite obnoviti svoj zasebni ključ, priponko shranite in njeno datoteko uvozite v oknu Šifrirni ključi.
 pgp-part-find-key = Najdi ključ
+# review: new
+reaction-notification-title = { $name }: odziv { $emoji }
+# review: new
+reaction-notification-text = { $count ->
+    [1] na { $subject }
+   *[other] na { $subject }, skupaj odzivov: { $count }
+}

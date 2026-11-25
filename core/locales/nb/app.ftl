@@ -937,3 +937,11 @@ ui-keys-publish-now = Publiser
 ui-keys-paste = Importer fra &utklippstavlen
 ui-keys-paste-none = Utklippstavlen inneholder ingen OpenPGP-nøkkel.
 ui-contact-find-key = Finn nøk&kel
+# review: new
+ui-reactions-label = Reaksjoner:
+# review: new
+ui-reaction-open-email = Åpne reaksjons-e-posten
+# review: new
+ui-reaction-show-as-email = Vis som e-post
+# review: new
+ui-reaction-when = Reaksjon: { $when }

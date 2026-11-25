@@ -935,3 +935,11 @@ ui-keys-publish-now = Yayımla
 ui-keys-paste = &Panodan İçe Aktar
 ui-keys-paste-none = Panoda OpenPGP anahtarı yok.
 ui-contact-find-key = Anahtar &Bul
+# review: new
+ui-reactions-label = Tepkiler:
+# review: new
+ui-reaction-open-email = Tepki E-postasını Aç
+# review: new
+ui-reaction-show-as-email = E-posta Olarak Göster
+# review: new
+ui-reaction-when = Tepki: { $when }

@@ -1106,3 +1106,10 @@ preview-not-printed = { $name } ({ $details }) n’est pas imprimé. Ouvrez-le p
 
 pgp-error-attached-private = Cette pièce jointe contient une clé privée. Seules les clés publiques peuvent être importées directement depuis un message. Pour restaurer votre propre clé privée, enregistrez la pièce jointe et importez son fichier dans Clés de chiffrement.
 pgp-part-find-key = Rechercher la clé
+# review: new
+reaction-notification-title = { $name } a réagi avec { $emoji }
+# review: new
+reaction-notification-text = { $count ->
+    [one] à { $subject }
+   *[other] à { $subject }, et { $count } réactions au total
+}

@@ -1208,3 +1208,10 @@ preview-not-printed = Súbor { $name } ({ $details }) sa nevytlačí. Ak ho chce
 
 pgp-error-attached-private = Táto príloha obsahuje súkromný kľúč. Priamo z pošty možno importovať iba verejné kľúče. Ak chcete obnoviť svoj súkromný kľúč, uložte prílohu a importujte jej súbor v okne Šifrovacie kľúče.
 pgp-part-find-key = Nájsť kľúč
+# review: new
+reaction-notification-title = { $name }: reakcia { $emoji }
+# review: new
+reaction-notification-text = { $count ->
+    [one] na správu { $subject }
+   *[other] na správu { $subject }, reakcií spolu: { $count }
+}

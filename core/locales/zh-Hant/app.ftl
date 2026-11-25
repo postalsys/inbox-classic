@@ -915,3 +915,11 @@ ui-keys-publish-now = 發佈
 ui-keys-paste = 從剪貼簿匯入(&L)
 ui-keys-paste-none = 剪貼簿中沒有 OpenPGP 金鑰。
 ui-contact-find-key = 尋找金鑰(&F)
+# review: new
+ui-reactions-label = 回應：
+# review: new
+ui-reaction-open-email = 開啟回應郵件
+# review: new
+ui-reaction-show-as-email = 顯示為郵件
+# review: new
+ui-reaction-when = 回應時間：{ $when }

@@ -1051,3 +1051,10 @@ preview-not-printed = Faili { $name } ({ $details }) ei prindita. Printimiseks a
 
 pgp-error-attached-private = See manus sisaldab privaatvõtit. Otse kirjast saab importida ainult avalikke võtmeid. Oma privaatvõtme taastamiseks salvestage manus ja importige see fail aknas Krüpteerimisvõtmed.
 pgp-part-find-key = Otsi võtit
+# review: new
+reaction-notification-title = { $name } reageeris: { $emoji }
+# review: new
+reaction-notification-text = { $count ->
+    [one] kirjale { $subject }
+   *[other] kirjale { $subject }, kokku reaktsioone: { $count }
+}

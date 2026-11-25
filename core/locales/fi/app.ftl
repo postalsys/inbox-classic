@@ -937,3 +937,11 @@ ui-keys-publish-now = Julkaise
 ui-keys-paste = Tuo &leikepöydältä
 ui-keys-paste-none = Leikepöydällä ei ole OpenPGP-avainta.
 ui-contact-find-key = &Etsi avain
+# review: new
+ui-reactions-label = Reaktiot:
+# review: new
+ui-reaction-open-email = Avaa reaktioviesti
+# review: new
+ui-reaction-show-as-email = Näytä sähköpostina
+# review: new
+ui-reaction-when = Reaktio: { $when }
