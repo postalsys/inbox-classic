@@ -64,6 +64,14 @@ ui-find-in-message-hint = Pronađi u ovoj poruci
 ui-find-not-found = „{ $words }“ nije u ovoj poruci
 cmd-expand-all-threads = Proširi sve r&azgovore
 cmd-collapse-all-threads = Sažmi sve ra&zgovore
+# review: new
+cmd-next-in-conversation = Sle&deća poruka u razgovoru
+# review: new
+cmd-previous-in-conversation = Pret&hodna poruka u razgovoru
+# review: new
+cmd-open-all-messages = O&tvori sve poruke
+# review: new
+cmd-fold-all-messages = Saž&mi sve poruke
 ui-group-by-conversation = &Grupiši poruke po razgovoru
 ui-show-whole-conversation = Prikaži &ceo razgovor u oknu za čitanje
 ui-show-whole-conversation-note = Otvorite poruke razgovora zajedno, uključujući svoje odgovore, radne verzije i poruke u drugim fasciklama. Pročitane poruke su obično sažete u jedan red; kliknite na red da biste poruku otvorili ili saželi.
@@ -78,13 +86,37 @@ ui-thread-count = { $new ->
 }
 ui-conversation-to = Primaoci: { $people }
 ui-conversation-draft = Radna verzija
-ui-conversation-alone = Potpisana ili šifrovana: otvara se zasebno
 ui-conversation-downloading = Preuzimanje…
-ui-conversation-earlier = { $count ->
-    [one] Prikaži { $count } raniju poruku
-    [few] Prikaži { $count } ranije poruke
-   *[other] Prikaži { $count } ranijih poruka
+# review: new
+ui-conversation-you = Ja
+# review: new
+ui-conversation-messages = { $count ->
+    [one] { $count } poruka
+    [few] { $count } poruke
+   *[other] { $count } poruka
 }
+# review: new
+ui-conversation-unread = { $count ->
+    [one] { $count } nepročitana
+    [few] { $count } nepročitane
+   *[other] { $count } nepročitanih
+}
+# review: new
+ui-conversation-found-in = Pronađeno u fascikli { $folder }
+# review: new
+ui-conversation-hidden = { $count ->
+    [one] Još { $count } poruka
+    [few] Još { $count } poruke
+   *[other] Još { $count } poruka
+}
+# review: new
+ui-conversation-open-message = Otvori poruku
+# review: new
+ui-conversation-fold-message = Sažmi poruku
+# review: new
+ui-conversation-more = Više
+# review: new
+ui-conversation-edit = Uredi
 ui-conversation-elsewhere = { $count ->
     [1] Ovaj razgovor ima i poruku u drugoj fascikli.
     [one] Ovaj razgovor ima i { $count } poruku u drugim fasciklama.

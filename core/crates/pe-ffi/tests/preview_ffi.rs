@@ -139,10 +139,6 @@ fn show_in_message_and_the_printout_through_the_c_api() {
     assert_eq!(unsafe { pe_print_start(core, unknown.as_ptr()) }, 0);
     assert_eq!(unsafe { pe_print_start(core, c"".as_ptr()) }, 0);
 
-    // the scroll kept across the new document
-    assert_eq!(text(pe_scroll_script()), "Math.round(window.scrollY||0)");
-    assert_eq!(taken(pe_scroll_to_script(640.2)), "window.scrollTo(0,640)");
-
     unsafe { pe_core_close(core) };
     drop(unsafe { Box::from_raw(context) });
 }

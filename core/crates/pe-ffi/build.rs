@@ -373,7 +373,7 @@ impl Key {
                     if !key.key.is_empty() {
                         return None;
                     }
-                    let known = matches!(other, "Enter" | "Delete" | "/" | "," | "." | "[" | "]")
+                    let known = matches!(other, "Enter" | "Delete" | "Up" | "Down" | "/" | "," | "." | "[" | "]")
                         || (other.len() == 1 && other.chars().all(|c| c.is_ascii_uppercase() || c.is_ascii_digit()))
                         || other
                             .strip_prefix('F')
@@ -395,6 +395,9 @@ impl Key {
         let equivalent = match self.key.as_str() {
             "Enter" => "\\r".to_string(),
             "Delete" => "\\u{8}".to_string(),
+            // NSUpArrowFunctionKey, NSDownArrowFunctionKey
+            "Up" => "\\u{F700}".to_string(),
+            "Down" => "\\u{F701}".to_string(),
             // Command-? is typed as Command-Shift-/; the menu names it by the character
             "/" if shift => {
                 shift = false;

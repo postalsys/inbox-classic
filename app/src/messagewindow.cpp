@@ -312,6 +312,11 @@ bool OnCommand(MessageWindow* state, WORD id, WORD code) {
     case IDM_FIND_IN_MESSAGE:
         state->reader.FindInMessage(state->hwnd, code == 1);
         return true;
+    case IDM_NEXT_IN_CONVERSATION:
+    case IDM_PREVIOUS_IN_CONVERSATION:
+    case IDM_OPEN_ALL_MESSAGES:
+    case IDM_FOLD_ALL_MESSAGES:
+        return state->reader.ConversationCommand(id);
     case IDM_NEXT_UNREAD:
         NextUnread(state);
         return true;
@@ -540,6 +545,10 @@ MessageWindow* CreateMessageWindow(HWND main, PeCore* core, Mailbox* mailbox, co
             PostMessageW(state->hwnd, WM_KEY_FOUND, 0, 0);
         }
     };
+    // a frame of its stack: done by the main window's mailbox, on that one message
+    state->reader.onFrameAction = [state](int64_t folder, uint64_t uid, PeAction action) { state->mailbox->FrameAction(folder, uid, action); };
+    state->reader.onOpenMessage = [state](int64_t folder, uint64_t uid) { state->mailbox->OpenMessage(folder, uid); };
+    state->reader.onEditDraft = [state](int64_t folder, uint64_t uid) { state->mailbox->EditDraft(folder, uid); };
     // the message a bounce names: selected in the main window, which comes to the front
     state->reader.onBouncedMessage = [state](int64_t folder, uint64_t uid) {
         ShowMain();

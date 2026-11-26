@@ -60,6 +60,14 @@ ui-find-in-message-hint = このメッセージ内を検索
 ui-find-not-found = 「{ $words }」はこのメッセージにありません
 cmd-expand-all-threads = すべてのスレッドを展開(&E)
 cmd-collapse-all-threads = すべてのスレッドを折りたたむ(&O)
+# review: new
+cmd-next-in-conversation = スレッドの次のメッセージ(&X)
+# review: new
+cmd-previous-in-conversation = スレッドの前のメッセージ(&I)
+# review: new
+cmd-open-all-messages = すべてのメッセージを開く(&A)
+# review: new
+cmd-fold-all-messages = すべてのメッセージを折りたたむ(&D)
 ui-group-by-conversation = メッセージをスレッドごとにまとめる(&G)
 ui-show-whole-conversation = 閲覧ウィンドウにスレッド全体を表示する(&W)
 ui-show-whole-conversation-note = 返信、下書き、ほかのフォルダーにあるメッセージも含めて、スレッドのメッセージをまとめて開きます。既読のメッセージは通常1行に折りたたまれます。行をクリックすると、開いたり折りたたんだりできます。
@@ -72,12 +80,25 @@ ui-thread-count = { $new ->
 }
 ui-conversation-to = 宛先: { $people }
 ui-conversation-draft = 下書き
-ui-conversation-alone = 署名または暗号化されています: 単独で開きます
 ui-conversation-downloading = ダウンロード中…
-ui-conversation-earlier = { $count ->
-    [1] 以前のメッセージを1件表示
-   *[other] 以前のメッセージを{ $count }件表示
-}
+# review: new
+ui-conversation-you = 自分
+# review: new
+ui-conversation-messages = { $count }件のメッセージ
+# review: new
+ui-conversation-unread = 未読{ $count }件
+# review: new
+ui-conversation-found-in = { $folder }にあります
+# review: new
+ui-conversation-hidden = ほかに{ $count }件のメッセージ
+# review: new
+ui-conversation-open-message = メッセージを開く
+# review: new
+ui-conversation-fold-message = メッセージを折りたたむ
+# review: new
+ui-conversation-more = その他
+# review: new
+ui-conversation-edit = 編集
 ui-conversation-elsewhere = { $count ->
     [1] このスレッドには、ほかのフォルダーにもメッセージが1件あります。
    *[other] このスレッドには、ほかのフォルダーにもメッセージが{ $count }件あります。

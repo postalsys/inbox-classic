@@ -106,6 +106,8 @@ impl AttachmentView {
 pub struct MessageView {
     pub subject: String,
     pub from: String,
+    /// The sender's initials, as the list draws them where there is no picture (`text::initials`)
+    pub initials: String,
     pub to: String,
     pub cc: String,
     /// The Date header, the received date without one, seconds since the Unix epoch
@@ -321,6 +323,15 @@ fn text_lang(source: &[u8]) -> &'static str {
         .unwrap_or_else(pe_i18n::language)
 }
 
+/// The initials of the first sender, empty for none
+fn from_initials(from: &[pe_mime::parser::ParsedAddress]) -> String {
+    match from.first() {
+        Some(pe_mime::parser::ParsedAddress::Mailbox(a)) => crate::text::initials(&a.name, &a.address),
+        Some(group) => crate::text::initials(group.name(), ""),
+        None => String::new(),
+    }
+}
+
 #[cfg(test)]
 pub(crate) fn build(source: &[u8], allow_remote_images: bool) -> MessageView {
     build_unless(source, allow_remote_images, &Trust::default(), &|| false, &|_| None).unwrap_or_default()
@@ -479,6 +490,7 @@ pub(crate) fn build_unless(
         .collect();
     Some(MessageView {
         subject,
+        initials: from_initials(message.from.as_slice()),
         from,
         to,
         cc,
@@ -791,6 +803,7 @@ fn protected_view(
         .unwrap_or_default();
     MessageView {
         subject,
+        initials: from_initials(message.from.as_slice()),
         from: text_addresses(message.from.as_slice()),
         to: text_addresses(&message.to),
         cc: text_addresses(&message.cc),
@@ -1159,6 +1172,7 @@ mod tests {
         let view = build(MESSAGE, false);
         assert_eq!(view.subject, "Report");
         assert_eq!(view.from, "Andris <andris@example.com>");
+        assert_eq!(view.initials, "A", "the sender's initials, as the list draws them");
         assert_eq!(view.to, "a@example.com, Team:b@example.com;");
         assert_eq!(view.date, Some(1_759_744_800));
         assert!(view.document.contains("Content-Security-Policy"));

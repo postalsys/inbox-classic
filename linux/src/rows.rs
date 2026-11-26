@@ -400,7 +400,7 @@ pub fn shown(row: &RowWidget) -> Option<(String, String, String, i32)> {
 
 /// The date as the Columns list writes it, by the core's rule: the time today, the weekday this week, the day and
 /// month this year, the whole date before
-fn short_date(seconds: i64, clock: Clock) -> String {
+pub(crate) fn short_date(seconds: i64, clock: Clock) -> String {
     let Ok(date) = glib::DateTime::from_unix_local(seconds) else {
         return String::new();
     };

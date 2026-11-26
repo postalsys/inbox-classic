@@ -67,6 +67,10 @@ enum PeCommandId : unsigned short {
     IDM_VIEW_SOURCE = 132,
     IDM_EXPAND_ALL_THREADS = 145,
     IDM_COLLAPSE_ALL_THREADS = 146,
+    IDM_NEXT_IN_CONVERSATION = 180,
+    IDM_PREVIOUS_IN_CONVERSATION = 181,
+    IDM_OPEN_ALL_MESSAGES = 182,
+    IDM_FOLD_ALL_MESSAGES = 183,
     IDM_HIDE_IGNORED = 153,
     IDM_HIDE_READ = 154,
     IDM_AI_AGENTS = 133,
@@ -96,6 +100,10 @@ inline bool CommandNeedsOne(unsigned id) {
     case IDM_PRINT_CONVERSATION:
     case IDM_PROPERTIES:
     case IDM_VIEW_SOURCE:
+    case IDM_NEXT_IN_CONVERSATION:
+    case IDM_PREVIOUS_IN_CONVERSATION:
+    case IDM_OPEN_ALL_MESSAGES:
+    case IDM_FOLD_ALL_MESSAGES:
     case IDM_CREATE_RULE_FROM_MESSAGE:
     case IDM_UNSUBSCRIBE:
     case IDM_ADD_SENDER_TO_BOOK:
@@ -163,6 +171,10 @@ inline bool CommandActsOnList(unsigned id) {
     case IDM_VIEW_SOURCE:
     case IDM_EXPAND_ALL_THREADS:
     case IDM_COLLAPSE_ALL_THREADS:
+    case IDM_NEXT_IN_CONVERSATION:
+    case IDM_PREVIOUS_IN_CONVERSATION:
+    case IDM_OPEN_ALL_MESSAGES:
+    case IDM_FOLD_ALL_MESSAGES:
     case IDM_HIDE_IGNORED:
     case IDM_HIDE_READ:
     case IDM_CREATE_RULE_FROM_MESSAGE:
@@ -251,6 +263,10 @@ inline PeText CommandText(PeCommandId id) {
     case IDM_VIEW_SOURCE: return PE_TEXT_CMD_VIEW_SOURCE;
     case IDM_EXPAND_ALL_THREADS: return PE_TEXT_CMD_EXPAND_ALL_THREADS;
     case IDM_COLLAPSE_ALL_THREADS: return PE_TEXT_CMD_COLLAPSE_ALL_THREADS;
+    case IDM_NEXT_IN_CONVERSATION: return PE_TEXT_CMD_NEXT_IN_CONVERSATION;
+    case IDM_PREVIOUS_IN_CONVERSATION: return PE_TEXT_CMD_PREVIOUS_IN_CONVERSATION;
+    case IDM_OPEN_ALL_MESSAGES: return PE_TEXT_CMD_OPEN_ALL_MESSAGES;
+    case IDM_FOLD_ALL_MESSAGES: return PE_TEXT_CMD_FOLD_ALL_MESSAGES;
     case IDM_HIDE_IGNORED: return PE_TEXT_CMD_HIDE_IGNORED;
     case IDM_HIDE_READ: return PE_TEXT_CMD_HIDE_READ;
     case IDM_AI_AGENTS: return PE_TEXT_CMD_AI_AGENTS;
@@ -298,6 +314,8 @@ inline const wchar_t* CommandKeys(PeCommandId id) {
     case IDM_MARK_ALL_READ: return L"Ctrl+Shift+A";
     case IDM_JUNK: return L"Ctrl+J";
     case IDM_VIEW_SOURCE: return L"Ctrl+U";
+    case IDM_NEXT_IN_CONVERSATION: return L"Alt+Down";
+    case IDM_PREVIOUS_IN_CONVERSATION: return L"Alt+Up";
     case IDM_ADDRESS_BOOK: return L"Ctrl+Shift+B";
     case IDM_COMPOSE_SIGN: return L"Ctrl+Shift+D";
     case IDM_COMPOSE_ENCRYPT: return L"Ctrl+Shift+E";

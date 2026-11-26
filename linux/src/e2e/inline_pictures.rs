@@ -32,7 +32,7 @@ pub(super) async fn banner(view: &webkit::WebView) -> Vec<String> {
 }
 
 pub(super) async fn pictures_in_text(d: &Driver) {
-    let view = shell().main().reader.preview.view.clone();
+    let view = shell().main().reader.preview().view.clone();
     let banner = banner(&view).await;
     let src = banner.first().cloned().unwrap_or_default();
     d.check(

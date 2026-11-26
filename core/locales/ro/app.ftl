@@ -62,6 +62,14 @@ ui-find-in-message-hint = Căutare în acest mesaj
 ui-find-not-found = „{ $words }” nu apare în acest mesaj
 cmd-expand-all-threads = &Extindere toate conversațiile
 cmd-collapse-all-threads = &Restrângere toate conversațiile
+# review: new
+cmd-next-in-conversation = Mesaju&l următor din conversație
+# review: new
+cmd-previous-in-conversation = Mesajul anterior din con&versație
+# review: new
+cmd-open-all-messages = Desc&hidere toate mesajele
+# review: new
+cmd-fold-all-messages = Restrângere t&oate mesajele
 ui-group-by-conversation = Grupare mesa&je după conversație
 ui-show-whole-conversation = Afișare conversație întrea&gă în panoul de citire
 ui-show-whole-conversation-note = Deschideți împreună mesajele conversației, inclusiv răspunsurile dvs., schițele și mesajele din alte foldere. Mesajele citite sunt de obicei restrânse la un rând; faceți clic pe un rând pentru a deschide sau a restrânge mesajul.
@@ -75,13 +83,37 @@ ui-thread-count = { $new ->
 }
 ui-conversation-to = către { $people }
 ui-conversation-draft = Schiță
-ui-conversation-alone = Semnat sau criptat: se deschide separat
 ui-conversation-downloading = Se descarcă…
-ui-conversation-earlier = { $count ->
-    [one] Afișați 1 mesaj anterior
-    [few] Afișați { $count } mesaje anterioare
-   *[other] Afișați { $count } de mesaje anterioare
+# review: new
+ui-conversation-you = Eu
+# review: new
+ui-conversation-messages = { $count ->
+    [one] 1 mesaj
+    [few] { $count } mesaje
+   *[other] { $count } de mesaje
 }
+# review: new
+ui-conversation-unread = { $count ->
+    [one] 1 necitit
+    [few] { $count } necitite
+   *[other] { $count } de necitite
+}
+# review: new
+ui-conversation-found-in = Găsit în { $folder }
+# review: new
+ui-conversation-hidden = { $count ->
+    [one] Încă 1 mesaj
+    [few] Încă { $count } mesaje
+   *[other] Încă { $count } de mesaje
+}
+# review: new
+ui-conversation-open-message = Deschidere mesaj
+# review: new
+ui-conversation-fold-message = Restrângere mesaj
+# review: new
+ui-conversation-more = Mai multe
+# review: new
+ui-conversation-edit = Editare
 ui-conversation-elsewhere = { $count ->
     [one] Această conversație are și un mesaj în alt folder.
     [few] Această conversație are și { $count } mesaje în alte foldere.

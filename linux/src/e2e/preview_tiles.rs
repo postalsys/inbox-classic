@@ -4,7 +4,7 @@
 
 use super::attach::{close_menu, menu_item_sensitive};
 use super::previews::{all_come, close, opened, previews_shown, reading_page, run_script, switch};
-use super::steps::{document_text, open_by_subject};
+use super::steps::{document_text, open_by_subject, shown_body};
 use super::*;
 
 pub(super) const TILES: &str = "The boat trip, and the booking";
@@ -15,17 +15,23 @@ const TILE_TEXTS: &str = "(function(){var s=document.querySelector('section[clas
     return Array.prototype.slice.call(s.querySelectorAll('a.t')).map(function(a){\
     return a.textContent+'|'+Math.round(a.getBoundingClientRect().height)}).join('\\n')})()";
 
-/// How far down the page shown is scrolled, in CSS pixels; None when it could not be read
-async fn scrolled(view: &webkit::WebView) -> Option<i64> {
-    run_script(view, "Math.round(window.scrollY)").await.parse().ok()
+/// How far down the message shown is scrolled: the reading pane's stack (its frame is as tall as its page, which
+/// does not scroll), in pixels
+async fn scrolled(_view: &webkit::WebView) -> Option<i64> {
+    Some(shell().main().reader.stack.widget.vadjustment().value().round() as i64)
+}
+
+/// The reading pane's stack scrolled down `y` pixels
+fn scroll_to(y: f64) {
+    shell().main().reader.stack.widget.vadjustment().set_value(y);
 }
 
 /// The tiles of the HEIC picture and the protected PDF file, the photo between them drawn; Tab and Enter on a tile
 /// opens its file
 pub(super) async fn tiles(d: &Driver, inbox: i64) {
     let main = shell().main();
-    let view = main.reader.preview.view.clone();
     open_by_subject(inbox, TILES).await;
+    let view = shown_body().await;
     let come = all_come(&view, 1, 20).await;
     let tiles = run_script(&view, TILE_TEXTS).await;
     let lines: Vec<&str> = tiles.lines().collect();
@@ -118,12 +124,13 @@ async fn shows(view: &webkit::WebView, previews: usize, invoice: usize) -> Optio
 /// where it was scrolled to; chosen again, it is back. With the previews off it draws the invoice alone
 pub(super) async fn show_in_message(d: &Driver, inbox: i64, photo: &str) {
     let main = shell().main();
-    let view = main.reader.preview.view.clone();
     let strip = &main.reader.strip;
     open_by_subject(inbox, photo).await;
+    let view = shown_body().await;
     all_come(&view, 4, 20).await;
     // down into the text, short of where the page without the invoice ends
-    run_script(&view, "window.scrollTo(0, 60)").await;
+    scroll_to(60.0);
+    pause(200).await;
     let before = scrolled(&view).await;
     let item = menu_of(strip, 1).await;
     let labels = item.as_ref().map(|i| i.0.clone()).unwrap_or_default();

@@ -5,6 +5,7 @@
 
 #include <functional>
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -22,13 +23,10 @@ public:
     void Create(HWND parent, std::function<void(const std::wstring&)> onError, HWND owner = nullptr, UINT_PTR findTimer = 0);
     // remoteImages lets images from the network load, for this document only. `parts`: the documents of a page of
     // parts (a signed or encrypted message, UTF-8), each in a frame of its own that asks for `part-N` beside the page;
-    // their frames are sized to their documents once it loaded and on each Measure()
+    // their frames are sized to their documents once it loaded
     // `previewToken`: the token of the view whose document it is (PeMessageInfo.preview_token), whose previews' pictures
     // its page asks for under /pv/ (ServePreviews); the previews of the document before are ended
-    // `keepScroll`: the same message's document again (Show in Message, the whole message after its text), shown where
-    // the one before was scrolled to (pe_scroll_script read first, pe_scroll_to_script once it has loaded)
-    void Show(const std::wstring& html, bool remoteImages = false, std::vector<std::string> parts = {}, const char* previewToken = nullptr,
-              bool keepScroll = false);
+    void Show(const std::wstring& html, bool remoteImages = false, std::vector<std::string> parts = {}, const char* previewToken = nullptr);
     // before Create: the pictures of the previews of attachments its documents show, asked of `core` (pe_preview_ask)
     // and answered once the core has them (Answered), never waited for on the window thread
     void ServePreviews(PeCore* core) { core_ = core; }
@@ -46,9 +44,14 @@ public:
     // width once loaded), "banner" (the middle of the text's first picture, as "photo"), "menu" (the items of the last
     // context menu after TrimMenu: 1,000, plus 100 with Copy Link, 10 with Copy Image, 1 with any other image item)
     int64_t TestPreviews(const std::wstring& query);
-    // the frames of the page shown sized again to their documents (the core's script, run by the app with the page's
-    // own scripts off), when it is a page of parts
-    void Measure();
+    // a frame of the reading pane's stack (stack.h): the document's height in pixels of the window (its CSS pixels
+    // times the text size's zoom and the screen's scale), its parts' frames sized first, by the core's script; `done`
+    // gets it, not when there is no document yet
+    void MeasureHeight(std::function<void(int pixels)> done);
+    // a click in the document or the keyboard to it: `focused` is told (the stack selects its message)
+    void OnFocus(std::function<void()> focused);
+    // its text size changed (View > Text Size): `zoomed` is told (the stack measures its body again)
+    void OnZoom(std::function<void()> zoomed);
     // the UI test's look at the frames of the page shown: the answer to the last look (how many frames, plus 100 when
     // each is as tall as its document, plus 1000 times their heights in pixels; -1 before there is one), and looks
     // again
@@ -98,17 +101,9 @@ public:
 
 private:
     void Configure();
-    // a document to show (Show), held while the scroll of the one shown is read
-    struct Next {
-        std::wstring html;
-        bool remoteImages = false;
-        std::vector<std::string> parts;
-        std::string previewToken;
-    };
-    // `next` shown in place of the document shown, scrolled to `scrollTo` once it has loaded (none when negative)
-    void Put(Next next, double scrollTo);
-    // DOMContentLoaded: the document loading scrolled to scrollTo_, when it is the one that keeps the scroll
-    void Scrolled();
+    // the frames of the page shown sized to their documents once it loaded (the core's script, run by the app with the
+    // page's own scripts off), when it is a page of parts
+    void Measure();
     // the document given (document_) loaded, at an address of its own
     void Load();
     // a request of the page for a preview's picture (under /pv/): kept until the core answers it (Answered), or
@@ -136,11 +131,6 @@ private:
     unsigned shown_ = 0;
     // the number of the newest of those that finished loading (Loaded)
     unsigned loaded_ = 0;
-    // documents asked for (Show): a scroll read for one that is not the newest is dropped
-    unsigned asked_ = 0;
-    // where the document loading is scrolled to once its DOM is there (none when negative), and its address
-    double scrollTo_ = -1;
-    std::wstring scrollPage_;
     bool remoteImages_ = false;
     // the documents of the parts of the page shown, in frames sized by Measure(); none for another page
     std::vector<std::string> parts_;
@@ -163,6 +153,11 @@ private:
     std::function<void(const std::wstring&)> onError_;
     std::function<bool(UINT key)> keys_;
     std::function<bool(const wchar_t* uri)> links_;
+    std::function<void()> focused_;
+    std::function<void()> zoomed_;
+    // shared with the WebView2's creation, which finishes later: false once closed, so a WebView2 that arrives after
+    // is closed at once and nothing of this one is touched
+    std::shared_ptr<bool> alive_ = std::make_shared<bool>(true);
     // a link clicked: to the window when it is one of its own, else to the browser
     void Follow(const wchar_t* uri);
     // the find going on in the document shown, and what is told how many places it found once that is known

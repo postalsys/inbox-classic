@@ -62,6 +62,14 @@ ui-find-in-message-hint = Keresés ebben az üzenetben
 ui-find-not-found = „{ $words }” nem szerepel ebben az üzenetben
 cmd-expand-all-threads = Minden beszélgetés kibon&tása
 cmd-collapse-all-threads = Minden beszélgetés össze&csukása
+# review: new
+cmd-next-in-conversation = Következő üze&net a beszélgetésben
+# review: new
+cmd-previous-in-conversation = Előző üzenet a be&szélgetésben
+# review: new
+cmd-open-all-messages = Minden üzenet me&gnyitása
+# review: new
+cmd-fold-all-messages = Min&den üzenet összecsukása
 ui-group-by-conversation = Üzenetek csoportosítása beszélgetés &szerint
 ui-show-whole-conversation = Teljes &beszélgetés megjelenítése az olvasóablakban
 ui-show-whole-conversation-note = A beszélgetés üzeneteinek megnyitása együtt, a válaszokkal, piszkozatokkal és a más mappákban lévő üzenetekkel együtt. Az olvasott üzenetek általában egy sorrá vannak összecsukva; kattintson a sorra az üzenet megnyitásához vagy összecsukásához.
@@ -74,12 +82,34 @@ ui-thread-count = { $new ->
 }
 ui-conversation-to = címzett: { $people }
 ui-conversation-draft = Piszkozat
-ui-conversation-alone = Aláírt vagy titkosított: külön nyílik meg
 ui-conversation-downloading = Letöltés…
-ui-conversation-earlier = { $count ->
-    [one] { $count } korábbi üzenet megjelenítése
-   *[other] { $count } korábbi üzenet megjelenítése
+# review: new
+ui-conversation-you = Én
+# review: new
+ui-conversation-messages = { $count ->
+    [one] 1 üzenet
+   *[other] { $count } üzenet
 }
+# review: new
+ui-conversation-unread = { $count ->
+    [one] 1 olvasatlan
+   *[other] { $count } olvasatlan
+}
+# review: new
+ui-conversation-found-in = Megtalálható itt: { $folder }
+# review: new
+ui-conversation-hidden = { $count ->
+    [one] Még 1 üzenet
+   *[other] Még { $count } üzenet
+}
+# review: new
+ui-conversation-open-message = Üzenet megnyitása
+# review: new
+ui-conversation-fold-message = Üzenet összecsukása
+# review: new
+ui-conversation-more = Továbbiak
+# review: new
+ui-conversation-edit = Szerkesztés
 ui-conversation-elsewhere = { $count ->
     [one] A beszélgetés egy másik mappában is tartalmaz egy üzenetet.
    *[other] A beszélgetés más mappákban is tartalmaz { $count } üzenetet.

@@ -63,6 +63,14 @@ ui-find-in-message-hint = Finn i denne meldingen
 ui-find-not-found = «{ $words }» finnes ikke i denne meldingen
 cmd-expand-all-threads = Utvid &alle samtaler
 cmd-collapse-all-threads = Trekk &sammen alle samtaler
+# review: new
+cmd-next-in-conversation = Neste mel&ding i samtalen
+# review: new
+cmd-previous-in-conversation = Fo&rrige melding i samtalen
+# review: new
+cmd-open-all-messages = Å&pne alle meldinger
+# review: new
+cmd-fold-all-messages = Trekk sammen &hver melding
 ui-group-by-conversation = &Grupper meldinger etter samtale
 ui-show-whole-conversation = Vis &hele samtalen i leseruten
 ui-show-whole-conversation-note = Åpne meldingene i en samtale samlet, inkludert svarene dine, utkast og meldinger i andre mapper. Leste meldinger er vanligvis trukket sammen til én linje: Klikk på en linje for å åpne den eller trekke den sammen.
@@ -76,12 +84,34 @@ ui-thread-count = { $new ->
 }
 ui-conversation-to = til { $people }
 ui-conversation-draft = Utkast
-ui-conversation-alone = Signert eller kryptert: åpnes for seg
 ui-conversation-downloading = Laster ned…
-ui-conversation-earlier = { $count ->
-    [one] Vis 1 tidligere melding
-   *[other] Vis { $count } tidligere meldinger
+# review: new
+ui-conversation-you = Meg
+# review: new
+ui-conversation-messages = { $count ->
+    [one] 1 melding
+   *[other] { $count } meldinger
 }
+# review: new
+ui-conversation-unread = { $count ->
+    [one] 1 ulest
+   *[other] { $count } uleste
+}
+# review: new
+ui-conversation-found-in = Funnet i { $folder }
+# review: new
+ui-conversation-hidden = { $count ->
+    [one] 1 melding til
+   *[other] { $count } meldinger til
+}
+# review: new
+ui-conversation-open-message = Åpne melding
+# review: new
+ui-conversation-fold-message = Trekk sammen melding
+# review: new
+ui-conversation-more = Mer
+# review: new
+ui-conversation-edit = Rediger
 ui-conversation-elsewhere = { $count ->
     [one] Denne samtalen har også en melding i en annen mappe.
    *[other] Denne samtalen har også { $count } meldinger i andre mapper.

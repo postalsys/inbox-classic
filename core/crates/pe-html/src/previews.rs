@@ -419,17 +419,6 @@ pub(crate) fn print_section(items: &[PrintItem]) -> String {
     )
 }
 
-/// The script the apps run in the reading pane before they show the same message's document again (Show in
-/// Message, the whole message after its text): how far down it is scrolled, a number of CSS pixels
-pub const SCROLL_SCRIPT: &str = "Math.round(window.scrollY||0)";
-
-/// The script that scrolls the new document back to `y` ([`SCROLL_SCRIPT`]'s answer), run once it has loaded: its
-/// text is where it was, as the previews after it keep their sizes
-pub fn scroll_to_script(y: f64) -> String {
-    let y = if y.is_finite() { y.clamp(0.0, 1e7).round() } else { 0.0 };
-    format!("window.scrollTo(0,{y})")
-}
-
 /// A text as the value of an attribute, cut as a card's values are
 fn attribute(text: &str) -> String {
     shown(text, MAX_VALUE).replace('"', "&quot;")
@@ -698,14 +687,5 @@ mod tests {
         let css = html.split("<style>").nth(1).unwrap().split("</style>").next().unwrap();
         assert_eq!(css.matches(';').count(), css.matches("!important;").count(), "{css}");
         assert!(print_section(&[]).is_empty());
-    }
-
-    #[test]
-    fn the_scroll_scripts() {
-        assert_eq!(SCROLL_SCRIPT, "Math.round(window.scrollY||0)");
-        assert_eq!(scroll_to_script(120.4), "window.scrollTo(0,120)");
-        assert_eq!(scroll_to_script(-5.0), "window.scrollTo(0,0)");
-        assert_eq!(scroll_to_script(f64::NAN), "window.scrollTo(0,0)");
-        assert_eq!(scroll_to_script(f64::INFINITY), "window.scrollTo(0,0)");
     }
 }

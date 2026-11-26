@@ -72,7 +72,7 @@ async fn frames() -> Vec<(i64, i64, i64)> {
     let script = "(function(){return Array.from(document.querySelectorAll('iframe.pe-d')).map(function(f){\
         var d=f.contentDocument;return f.offsetHeight+'/'+(d&&d.documentElement?d.documentElement.scrollHeight:-1)+'/'+(d&&d.body?d.body.textContent.length:0)})\
         .join(',')})()";
-    let view = shell().main().reader.preview.view.clone();
+    let view = shell().main().reader.preview().view.clone();
     let Ok(value) = view.evaluate_javascript_future(script, None, None).await else {
         return Vec::new();
     };
@@ -104,7 +104,7 @@ async fn measured(count: usize) -> (bool, Vec<(i64, i64, i64)>) {
 
 /// The document's words: the labels and the text of each part
 fn shown_text() -> String {
-    document_text(&shell().main().reader.preview.shown_with_parts())
+    document_text(&shell().main().reader.preview().shown_with_parts())
 }
 
 /// The bar of the message shown says `words`, in `tone`, with `pictures`; its frames number `count`, each as tall as
@@ -334,7 +334,7 @@ pub(super) async fn signed_and_encrypted(d: &Driver) {
 
     show(inbox, FAKE, SIGNED).await;
     check_bar(d, "a painted frame", "This message has 2 parts", "neutral", &[], 2).await;
-    let page = main.reader.preview.shown();
+    let page = main.reader.preview().shown();
     let labels: Vec<String> = page
         .split("class=\"pe-l\"")
         .skip(1)
@@ -427,8 +427,8 @@ async fn in_window(d: &Driver, inbox: i64) {
 
 /// "The mill" clicked in part 1's frame of the message of three parts: the link goes to the browser, the page stays
 async fn link_in_part(d: &Driver) {
-    let view = shell().main().reader.preview.view.clone();
-    let before = shell().main().reader.preview.shown();
+    let view = shell().main().reader.preview().view.clone();
+    let before = shell().main().reader.preview().shown();
     crate::ui::take_opened_links();
     let script = "(function(){var f=document.querySelectorAll('iframe.pe-d')[0];var d=f&&f.contentDocument;\
         var a=d&&d.querySelector('a[href=\"https://example.org/mill\"]');if(!a)return 'no';a.click();return 'yes'})()";
@@ -444,7 +444,7 @@ async fn link_in_part(d: &Driver) {
         &format!("\"The mill\" clicked in part 1's frame opens https://example.org/mill in the browser ({opened:?})"),
     );
     d.check(
-        shell().main().reader.preview.shown() == before && fits && shown_text().contains("The mill"),
+        shell().main().reader.preview().shown() == before && fits && shown_text().contains("The mill"),
         &format!("and the page stays, its three frames showing their parts ({frames:?})"),
     );
 }
@@ -498,7 +498,7 @@ async fn details(d: &Driver) {
     click(dialog.upcast_ref(), "protection-details-close");
     d.check(wait_gone(10, crate::security::DIALOG_NAME).await, "Close closes it");
     // a click on a part's label: the page's navigation to its link
-    main.reader.preview.view.load_uri(&format!("{}1", pe_html::PART_LINK));
+    main.reader.preview().view.load_uri(&format!("{}1", pe_html::PART_LINK));
     let opened = wait_dialog(10, crate::security::DIALOG_NAME).await;
     d.check(opened.is_some(), "a part's label opens Details too");
     if let Some(dialog) = opened {
@@ -594,7 +594,7 @@ async fn long(d: &Driver, inbox: i64) {
         if(!s)return 'none';s.open=true;return 'open'})()";
     let opened = main
         .reader
-        .preview
+        .preview()
         .view
         .evaluate_javascript_future(unfold, None, None)
         .await
@@ -646,7 +646,7 @@ async fn page_scripts_off(d: &Driver, inbox: i64) {
          <script>document.title='script ran'</script><p>Scripts</p>\
          <img src=\"http://127.0.0.1:{port}/picture.png\"></body></html>"
     );
-    let view = &main.reader.preview;
+    let view = &main.reader.preview();
     view.show(&document, false);
     wait_until(10, || !view.view.is_loading()).await;
     pause(1500).await;
@@ -797,7 +797,7 @@ async fn printout(d: &Driver, printed: &str) {
 
 /// Each frame's previews as (pictures, come, names)
 async fn frame_previews() -> Vec<(usize, usize, String)> {
-    let view = shell().main().reader.preview.view.clone();
+    let view = shell().main().reader.preview().view.clone();
     previews::run_script(&view, FRAME_PREVIEWS)
         .await
         .split(',')
@@ -818,7 +818,7 @@ async fn click_in_frame(frame: usize) -> bool {
         "(function(){{var f=document.querySelectorAll('iframe.pe-d')[{frame}];var d=f&&f.contentDocument;\
          var a=d&&d.querySelector('section[class^=\"pe-att-\"] figure > a');if(!a)return 'no';a.click();return 'yes'}})()"
     );
-    let view = shell().main().reader.preview.view.clone();
+    let view = shell().main().reader.preview().view.clone();
     previews::run_script(&view, &script).await == "yes"
 }
 
@@ -884,7 +884,7 @@ pub(super) async fn attachment_previews(d: &Driver) {
         &format!("the bar counts the encrypted part and the plain one ({})", bar.0),
     );
     strip_parts(d).await;
-    let page = main.reader.preview.shown();
+    let page = main.reader.preview().shown();
     d.check(
         !page.contains("/pv/") && !page.contains("pe-att-"),
         "the page itself has no preview, only its frames",
@@ -913,7 +913,7 @@ pub(super) async fn attachment_previews(d: &Driver) {
     );
     // where the plain part ends and the encrypted one starts: the harbour's end, the encrypted part's label over the
     // floor plan
-    let view = main.reader.preview.view.clone();
+    let view = main.reader.preview().view.clone();
     previews::run_script(&view, BOUNDARY).await;
     pause(300).await;
     d.shot(main.window(), "secure-14-attachment-previews").await;

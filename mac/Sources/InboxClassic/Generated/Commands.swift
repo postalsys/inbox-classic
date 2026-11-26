@@ -65,6 +65,10 @@ enum Command: Int, CaseIterable {
     case viewSource = 132
     case expandAllThreads = 145
     case collapseAllThreads = 146
+    case nextInConversation = 180
+    case previousInConversation = 181
+    case openAllMessages = 182
+    case foldAllMessages = 183
     case hideIgnored = 153
     case hideRead = 154
     case aiAgents = 133
@@ -148,6 +152,10 @@ enum Command: Int, CaseIterable {
         case .viewSource: return "view"
         case .expandAllThreads: return "view"
         case .collapseAllThreads: return "view"
+        case .nextInConversation: return "view"
+        case .previousInConversation: return "view"
+        case .openAllMessages: return "view"
+        case .foldAllMessages: return "view"
         case .hideIgnored: return "view"
         case .hideRead: return "view"
         case .aiAgents: return "tools"
@@ -233,6 +241,10 @@ enum Command: Int, CaseIterable {
         case .viewSource: return "main"
         case .expandAllThreads: return "main"
         case .collapseAllThreads: return "main"
+        case .nextInConversation: return "main"
+        case .previousInConversation: return "main"
+        case .openAllMessages: return "main"
+        case .foldAllMessages: return "main"
         case .hideIgnored: return "main"
         case .hideRead: return "main"
         case .aiAgents: return "main"
@@ -323,6 +335,10 @@ enum Command: Int, CaseIterable {
         case .viewSource: return .cmdViewSource
         case .expandAllThreads: return .cmdExpandAllThreads
         case .collapseAllThreads: return .cmdCollapseAllThreads
+        case .nextInConversation: return .cmdNextInConversation
+        case .previousInConversation: return .cmdPreviousInConversation
+        case .openAllMessages: return .cmdOpenAllMessages
+        case .foldAllMessages: return .cmdFoldAllMessages
         case .hideIgnored: return .cmdHideIgnored
         case .hideRead: return .cmdHideRead
         case .aiAgents: return .cmdAiAgents
@@ -408,6 +424,10 @@ enum Command: Int, CaseIterable {
         case .viewSource: return nil
         case .expandAllThreads: return nil
         case .collapseAllThreads: return nil
+        case .nextInConversation: return ("\u{F701}", [.option])
+        case .previousInConversation: return ("\u{F700}", [.option])
+        case .openAllMessages: return nil
+        case .foldAllMessages: return nil
         case .hideIgnored: return nil
         case .hideRead: return nil
         case .aiAgents: return nil
@@ -493,6 +513,10 @@ enum Command: Int, CaseIterable {
         case .viewSource: return false
         case .expandAllThreads: return false
         case .collapseAllThreads: return false
+        case .nextInConversation: return false
+        case .previousInConversation: return false
+        case .openAllMessages: return false
+        case .foldAllMessages: return false
         case .hideIgnored: return true
         case .hideRead: return true
         case .aiAgents: return false
@@ -578,6 +602,10 @@ enum Command: Int, CaseIterable {
         case .viewSource: return false
         case .expandAllThreads: return false
         case .collapseAllThreads: return false
+        case .nextInConversation: return false
+        case .previousInConversation: return false
+        case .openAllMessages: return false
+        case .foldAllMessages: return false
         case .hideIgnored: return false
         case .hideRead: return false
         case .aiAgents: return false
@@ -663,6 +691,10 @@ enum Command: Int, CaseIterable {
         case .viewSource: return true
         case .expandAllThreads: return false
         case .collapseAllThreads: return false
+        case .nextInConversation: return true
+        case .previousInConversation: return true
+        case .openAllMessages: return true
+        case .foldAllMessages: return true
         case .hideIgnored: return false
         case .hideRead: return false
         case .aiAgents: return false
@@ -748,6 +780,10 @@ enum Command: Int, CaseIterable {
         case .viewSource: return true
         case .expandAllThreads: return true
         case .collapseAllThreads: return true
+        case .nextInConversation: return true
+        case .previousInConversation: return true
+        case .openAllMessages: return true
+        case .foldAllMessages: return true
         case .hideIgnored: return true
         case .hideRead: return true
         case .aiAgents: return false
@@ -833,6 +869,10 @@ enum Command: Int, CaseIterable {
         case .viewSource: return nil
         case .expandAllThreads: return nil
         case .collapseAllThreads: return nil
+        case .nextInConversation: return nil
+        case .previousInConversation: return nil
+        case .openAllMessages: return nil
+        case .foldAllMessages: return nil
         case .hideIgnored: return nil
         case .hideRead: return nil
         case .aiAgents: return nil

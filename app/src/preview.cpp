@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <climits>
+#include <cmath>
 #include <cstring>
 #include <cwctype>
 #include <map>
@@ -96,18 +97,43 @@ void Preview::Create(HWND parent, std::function<void(const std::wstring&)> onErr
     owner_ = owner;
     findTimer_ = findTimer;
     onError_ = std::move(onError);
+    std::shared_ptr<bool> alive = alive_;
     webview::Create(
         parent_,
-        [this](ICoreWebView2Environment* environment, ICoreWebView2Controller* controller) {
+        [this, alive](ICoreWebView2Environment* environment, ICoreWebView2Controller* controller) {
+            if (!*alive) {
+                controller->Close();
+                return;
+            }
             environment_ = environment;
             controller_ = controller;
             controller_->get_CoreWebView2(&view_);
             Configure();
         },
-        [this](const std::wstring& error) { onError_(error + L" " + core::T(PE_TEXT_WIN_NO_BODIES)); });
+        [this, alive](const std::wstring& error) {
+            if (*alive) {
+                onError_(error + L" " + core::T(PE_TEXT_WIN_NO_BODIES));
+            }
+        });
 }
 
 void Preview::Configure() {
+    // a click in the document or the keyboard to it, for the stack (stack.h)
+    controller_->add_GotFocus(Callback<ICoreWebView2FocusChangedEventHandler>([this](ICoreWebView2Controller*, IUnknown*) {
+                                  if (focused_) {
+                                      focused_();
+                                  }
+                                  return S_OK;
+                              }).Get(),
+                              nullptr);
+    // View > Text Size changed its size, for the stack (stack.h): the document's height with it
+    controller_->add_ZoomFactorChanged(Callback<ICoreWebView2ZoomFactorChangedEventHandler>([this](ICoreWebView2Controller*, IUnknown*) {
+                                           if (zoomed_) {
+                                               zoomed_();
+                                           }
+                                           return S_OK;
+                                       }).Get(),
+                                       nullptr);
     ComPtr<ICoreWebView2Settings> settings;
     view_->get_Settings(&settings);
     settings->put_IsScriptEnabled(FALSE);
@@ -211,15 +237,6 @@ void Preview::Configure() {
                                        return S_OK;
                                    }).Get(),
                                    nullptr);
-    // the same message's document again: scrolled to where the one before was, once its DOM is there (before its
-    // pictures, which NavigationCompleted waits for)
-    if (ComPtr<ICoreWebView2_2> loaded; SUCCEEDED(view_.As(&loaded))) {
-        loaded->add_DOMContentLoaded(Callback<ICoreWebView2DOMContentLoadedEventHandler>([this](ICoreWebView2*, ICoreWebView2DOMContentLoadedEventArgs*) {
-                                         Scrolled();
-                                         return S_OK;
-                                     }).Get(),
-                                     nullptr);
-    }
     view_->add_NewWindowRequested(
         Callback<ICoreWebView2NewWindowRequestedEventHandler>([this](ICoreWebView2*, ICoreWebView2NewWindowRequestedEventArgs* args) {
             LPWSTR uri = nullptr;
@@ -528,39 +545,16 @@ void Preview::Follow(const wchar_t* uri) {
     OpenExternally(uri);
 }
 
-void Preview::Show(const std::wstring& html, bool remoteImages, std::vector<std::string> parts, const char* previewToken, bool keepScroll) {
-    unsigned asked = ++asked_;
-    Next next{html, remoteImages, std::move(parts), previewToken ? previewToken : ""};
-    if (!keepScroll || !view_ || pending_) {
-        Put(std::move(next), -1);
-        return;
-    }
-    // how far the document shown is scrolled, then the new one in its place (the one shown stays whole until then, its
-    // previews still answered); dropped when another was asked for meanwhile
-    auto held = std::make_shared<Next>(std::move(next));
-    static const std::wstring script = core::Widen(pe_scroll_script());
-    HRESULT started = view_->ExecuteScript(script.c_str(), Callback<ICoreWebView2ExecuteScriptCompletedHandler>([this, asked, held](HRESULT result, LPCWSTR json) {
-                                                               if (asked == asked_) {
-                                                                   Put(std::move(*held), SUCCEEDED(result) && json ? _wtof(json) : 0);
-                                                               }
-                                                               return S_OK;
-                                                           }).Get());
-    if (FAILED(started)) {
-        Put(std::move(*held), -1);
-    }
-}
-
-void Preview::Put(Next next, double scrollTo) {
+void Preview::Show(const std::wstring& html, bool remoteImages, std::vector<std::string> parts, const char* previewToken) {
     // the places found were in the document before, its previews too
     StopFind();
     EndPreviews();
-    previewToken_ = std::move(next.previewToken);
-    remoteImages_ = next.remoteImages;
-    parts_ = std::move(next.parts);
+    previewToken_ = previewToken ? previewToken : "";
+    remoteImages_ = remoteImages;
+    parts_ = std::move(parts);
     remoteRequests_ = 0;
     testFrames_ = -1;
-    document_ = std::move(next.html);
-    scrollTo_ = scrollTo;
+    document_ = html;
     if (!view_) {
         pending_ = true;
         return;
@@ -573,24 +567,7 @@ void Preview::Load() {
     // a new address for each document, so it is loaded again rather than taken from history; a folder, so the frames of
     // a page of parts ask for theirs beside it (part-N)
     std::wstring url = std::wstring(kPageUrl) + std::to_wstring(++shown_) + L"/";
-    scrollPage_ = scrollTo_ >= 0 ? url : L"";
     view_->Navigate(url.c_str());
-}
-
-void Preview::Scrolled() {
-    // its text where it was: every preview's size is in its markup, so the same offset shows the same text, before
-    // the pictures arrive
-    LPWSTR source = nullptr;
-    if (scrollPage_.empty() || FAILED(view_->get_Source(&source)) || !source) {
-        return;
-    }
-    bool same = scrollPage_ == source;
-    CoTaskMemFree(source);
-    if (same) {
-        core::String script(pe_scroll_to_script(std::exchange(scrollTo_, -1)));
-        scrollPage_.clear();
-        view_->ExecuteScript(core::Widen(script.get()).c_str(), nullptr);
-    }
 }
 
 void Preview::Measure() {
@@ -598,6 +575,36 @@ void Preview::Measure() {
     if (view_ && !parts_.empty()) {
         view_->ExecuteScript(MeasureScript().c_str(), nullptr);
     }
+}
+
+void Preview::MeasureHeight(std::function<void(int pixels)> done) {
+    if (!view_ || !controller_) {
+        return;
+    }
+    static const std::wstring script = core::Widen(pe_height_script());
+    ComPtr<ICoreWebView2Controller> controller = controller_;
+    view_->ExecuteScript(script.c_str(), Callback<ICoreWebView2ExecuteScriptCompletedHandler>([controller, done](HRESULT result, LPCWSTR json) {
+                             double css = SUCCEEDED(result) && json ? _wtof(json) : 0;
+                             if (css <= 0) {
+                                 return S_OK;
+                             }
+                             double zoom = 1, scale = 1;
+                             controller->get_ZoomFactor(&zoom);
+                             ComPtr<ICoreWebView2Controller3> scaled;
+                             if (SUCCEEDED(controller.As(&scaled))) {
+                                 scaled->get_RasterizationScale(&scale);
+                             }
+                             done(static_cast<int>(std::ceil(css * zoom * scale)));
+                             return S_OK;
+                         }).Get());
+}
+
+void Preview::OnFocus(std::function<void()> focused) {
+    focused_ = std::move(focused);
+}
+
+void Preview::OnZoom(std::function<void()> zoomed) {
+    zoomed_ = std::move(zoomed);
 }
 
 int64_t Preview::TestFrames() {
@@ -735,6 +742,7 @@ void Preview::StopFind() {
 }
 
 void Preview::Close() {
+    *alive_ = false;
     StopFind();
     EndPreviews();
     if (controller_) {

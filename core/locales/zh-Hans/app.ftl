@@ -63,6 +63,14 @@ ui-find-in-message-hint = 在此邮件中查找
 ui-find-not-found = 此邮件中没有“{ $words }”
 cmd-expand-all-threads = 展开所有对话(&E)
 cmd-collapse-all-threads = 折叠所有对话(&O)
+# review: new
+cmd-next-in-conversation = 对话中的下一封邮件(&X)
+# review: new
+cmd-previous-in-conversation = 对话中的上一封邮件(&I)
+# review: new
+cmd-open-all-messages = 展开所有邮件(&A)
+# review: new
+cmd-fold-all-messages = 折叠所有邮件(&D)
 ui-group-by-conversation = 按对话分组邮件(&G)
 ui-show-whole-conversation = 在阅读窗格中显示整个对话(&W)
 ui-show-whole-conversation-note = 一起打开对话中的邮件，包括您的答复、草稿和其他文件夹中的邮件。已读邮件通常折叠为一行；单击该行可将其展开或折叠。
@@ -75,12 +83,25 @@ ui-thread-count = { $new ->
 }
 ui-conversation-to = 收件人：{ $people }
 ui-conversation-draft = 草稿
-ui-conversation-alone = 已签名或已加密：单独打开
 ui-conversation-downloading = 正在下载…
-ui-conversation-earlier = { $count ->
-    [1] 显示 1 封更早的邮件
-   *[other] 显示{ $count }封更早的邮件
-}
+# review: new
+ui-conversation-you = 我
+# review: new
+ui-conversation-messages = { $count }封邮件
+# review: new
+ui-conversation-unread = { $count }封未读
+# review: new
+ui-conversation-found-in = 在“{ $folder }”中找到
+# review: new
+ui-conversation-hidden = 另外{ $count }封邮件
+# review: new
+ui-conversation-open-message = 展开邮件
+# review: new
+ui-conversation-fold-message = 折叠邮件
+# review: new
+ui-conversation-more = 更多
+# review: new
+ui-conversation-edit = 编辑
 ui-conversation-elsewhere = { $count ->
     [1] 此对话在其他文件夹中还有 1 封邮件。
    *[other] 此对话在其他文件夹中还有{ $count }封邮件。

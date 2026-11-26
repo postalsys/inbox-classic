@@ -62,6 +62,14 @@ ui-find-in-message-hint = 在這封郵件中尋找
 ui-find-not-found = 這封郵件中沒有「{ $words }」
 cmd-expand-all-threads = 展開所有交談(&E)
 cmd-collapse-all-threads = 摺疊所有交談(&O)
+# review: new
+cmd-next-in-conversation = 交談中的下一封郵件(&X)
+# review: new
+cmd-previous-in-conversation = 交談中的上一封郵件(&I)
+# review: new
+cmd-open-all-messages = 展開所有郵件(&A)
+# review: new
+cmd-fold-all-messages = 收合所有郵件(&D)
 ui-group-by-conversation = 依交談將郵件分組(&G)
 ui-show-whole-conversation = 在讀取窗格中顯示整個交談(&W)
 ui-show-whole-conversation-note = 一起開啟交談中的郵件，包括您的回覆、草稿和其他資料夾中的郵件。已讀取的郵件通常會收合成一行；按一下該行即可展開或收合。
@@ -74,12 +82,25 @@ ui-thread-count = { $new ->
 }
 ui-conversation-to = 收件者：{ $people }
 ui-conversation-draft = 草稿
-ui-conversation-alone = 已簽署或已加密：單獨開啟
 ui-conversation-downloading = 正在下載...
-ui-conversation-earlier = { $count ->
-    [1] 顯示 1 封較早的郵件
-   *[other] 顯示{ $count }封較早的郵件
-}
+# review: new
+ui-conversation-you = 我
+# review: new
+ui-conversation-messages = { $count }封郵件
+# review: new
+ui-conversation-unread = { $count }封未讀取
+# review: new
+ui-conversation-found-in = 在「{ $folder }」中找到
+# review: new
+ui-conversation-hidden = 另外{ $count }封郵件
+# review: new
+ui-conversation-open-message = 展開郵件
+# review: new
+ui-conversation-fold-message = 收合郵件
+# review: new
+ui-conversation-more = 更多
+# review: new
+ui-conversation-edit = 編輯
 ui-conversation-elsewhere = { $count ->
     [1] 這個交談在其他資料夾中還有 1 封郵件。
    *[other] 這個交談在其他資料夾中還有{ $count }封郵件。

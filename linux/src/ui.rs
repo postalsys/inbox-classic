@@ -23,10 +23,14 @@ const STYLE: &str = "
 .message-rows > row { border-bottom: 1px solid alpha(@borders, 0.5); }
 .row-picture { border-radius: 16px; background-color: alpha(currentColor, 0.09); }
 .row-initials { font-size: 12px; font-weight: 600; color: alpha(currentColor, 0.6); }
+.stack-frame { border: 1px solid alpha(currentColor, 0.15); border-radius: 10px; background: @view_bg_color; }
+.stack-frame.selected { border-color: @accent_bg_color; box-shadow: inset 4px 0 @accent_bg_color; }
+.stack-frame.selected .frame-header { background: alpha(@accent_bg_color, 0.08); }
+.stack-chip { padding: 0 5px; border-radius: 4px; background: alpha(currentColor, 0.08); }
+.stack-middle { color: @accent_color; }
 .card-picture { border-radius: 32px; background-color: alpha(currentColor, 0.09); }
 .card-initials { font-size: 22px; font-weight: 600; color: alpha(currentColor, 0.6); }
 .card-picture.drop-target { box-shadow: inset 0 0 0 2px @accent_bg_color; }
-.reader-contact { border-radius: 24px; }
 .unread-dot { min-width: 8px; min-height: 8px; border-radius: 4px; background-color: @accent_bg_color; }
 .sort-button { margin: 2px 4px; }
 .sort-button label { font-weight: normal; }

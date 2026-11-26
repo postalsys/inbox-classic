@@ -567,7 +567,7 @@ impl Core {
 
     /// Show in Message chosen in the strip for attachment `attachment` of the view `token` (`show`: draw it in the
     /// message; false: take it out), for as long as a window shows the message, never kept. Whether that changes the
-    /// document: the window then builds the view again (keeping its scroll, [`pe_html::SCROLL_SCRIPT`]). False for
+    /// document: the window then builds the view again (its frame keeps its place in the stack). False for
     /// a file whose command is greyed or already as asked, or a view not shown
     pub fn preview_show(&self, token: &str, attachment: usize, show: bool) -> bool {
         let source = {

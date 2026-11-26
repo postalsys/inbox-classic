@@ -327,6 +327,17 @@ public static IntPtr MenuOwnerOf(IntPtr menu) {
     var info = new GUITHREADINFO { cbSize = Marshal.SizeOf(typeof(GUITHREADINFO)) };
     return GetGUIThreadInfo(GetWindowThreadProcessId(menu, out pid), ref info) ? info.menuOwner : IntPtr.Zero;
 }
+[DllImport("user32.dll")] public static extern int GetDlgCtrlID(IntPtr hwnd);
+// the control with the id `id` anywhere under `parent` (the reading pane's stack holds the selected message's paper
+// clip, strip and Reactions line), the first in the tree's order; IntPtr.Zero for none
+public static IntPtr FindById(IntPtr parent, int id) {
+    IntPtr found = IntPtr.Zero;
+    EnumChildWindows(parent, (hwnd, _) => {
+        if (GetDlgCtrlID(hwnd) == id) { found = hwnd; return false; }
+        return true;
+    }, IntPtr.Zero);
+    return found;
+}
 // the windows of class `cls` anywhere under `parent`
 public static System.Collections.Generic.List<IntPtr> FindDescendants(IntPtr parent, string cls) {
     var found = new System.Collections.Generic.List<IntPtr>();
@@ -958,7 +969,10 @@ function Pattern([string]$message, [hashtable]$values = @{}) {
 }
 # the English words of the app, which the checks of the run in English look for
 $en = Catalog 'en'
-function Visible([IntPtr]$window, [int]$id) { [Native.Win]::IsWindowVisible([Native.Win]::GetDlgItem($window, $id)) }
+# the message's own drawn picture (a brand's logo, a contact's picture) shown: in its frame of the stack, or beside the
+# header (IDC_LOGO, 213) when the stack is not shown
+function PictureShown { [Native.Win]::SendText($main, 0x5354434B, 'picture') -eq 1 -or (Visible $main 213) }
+function Visible([IntPtr]$window, [int]$id) { [Native.Win]::IsWindowVisible([Native.Win]::FindById($window, $id)) }
 
 # ---- ImapKit, with mail to read ----
 
@@ -2647,13 +2661,14 @@ public static class Dragger {
     $fills = @{ verified = 'e8f5e9'; good = 'e6eefa'; warning = 'fff4e0'; neutral = 'f2f2f2' }
     # the rows of the message pane, top down, where a colour is first found (within 6 of each part): a part's frame
     # border, say; -1 when it is not there
-    $securePane = [Native.Win]::FindDescendants($main, 'Chrome_RenderWidgetHostHWND') | Select-Object -First 1
+    # the message's WebView2, looked up each time: the reading pane's stack makes a body for each message it shows
+    function SecurePane { [Native.Win]::FindDescendants($main, 'Chrome_RenderWidgetHostHWND') | Where-Object { [Native.Win]::IsWindowVisible($_) } | Select-Object -First 1 }
     function PaneRow([int]$r, [int]$g, [int]$b) {
         [void][Native.Win]::SetWindowPos($main, [IntPtr](-1), 0, 0, 0, 0, 0x13)
         [void][Native.Win]::SetForegroundWindow($main)
         Start-Sleep -Milliseconds 400
         $box = New-Object Native.Win+RECT
-        [void][Native.Win]::GetWindowRect($securePane, [ref]$box)
+        [void][Native.Win]::GetWindowRect((SecurePane), [ref]$box)
         [void][Native.Win]::SetWindowPos($main, [IntPtr](-2), 0, 0, 0, 0, 0x13)
         $w = [Math]::Min(400, $box.Right - $box.Left); $h = [Math]::Min(400, $box.Bottom - $box.Top)
         if ($w -le 0 -or $h -le 0) { return -1 }
@@ -2793,7 +2808,7 @@ public static class Dragger {
     $labelTop = PaneRow 0x2e 0x7d 0x32
     if ($labelTop -ge 0) {
         $box = New-Object Native.Win+RECT
-        [void][Native.Win]::GetWindowRect($securePane, [ref]$box)
+        [void][Native.Win]::GetWindowRect((SecurePane), [ref]$box)
         [void][Native.Win]::SetForegroundWindow($main)
         [Native.Win]::MouseClick($box.Left + 60, $box.Top + $labelTop + 8)
     }
@@ -2813,7 +2828,7 @@ public static class Dragger {
     # and from the message, which has the keyboard after a click into its text
     if ($labelTop -ge 0) {
         $box = New-Object Native.Win+RECT
-        [void][Native.Win]::GetWindowRect($securePane, [ref]$box)
+        [void][Native.Win]::GetWindowRect((SecurePane), [ref]$box)
         [void][Native.Win]::SetForegroundWindow($main)
         [Native.Win]::MouseClick($box.Left + 300, $box.Top + $labelTop + 40)
         Start-Sleep -Milliseconds 500
@@ -3761,7 +3776,7 @@ public static class Dragger {
     Step 'opening an attachment'
     # the attachment strip under the header, in its frame (app.h), its items read as the list's rows are
     $IDC_ATTACHMENT_STRIP = 242; $IDC_ATTACHMENT_FRAME = 243; $WM_LBUTTONDOWN = 0x0201; $WM_LBUTTONUP = 0x0202; $WM_LBUTTONDBLCLK = 0x0203
-    function StripOf([IntPtr]$window) { [Native.Win]::GetDlgItem([Native.Win]::GetDlgItem($window, $IDC_ATTACHMENT_FRAME), $IDC_ATTACHMENT_STRIP) }
+    function StripOf([IntPtr]$window) { [Native.Win]::FindById($window, $IDC_ATTACHMENT_STRIP) }
     $strip = StripOf $main
     # where the core writes the files it opens: a folder of its own in the user's temporary folder
     $privateRoot = (Join-Path ([IO.Path]::GetFullPath([IO.Path]::GetTempPath())) 'InboxClassic').ToLowerInvariant()
@@ -4785,7 +4800,7 @@ public static class Dragger {
     [void](WaitFor { (Rows) -eq 1 } 20)
     $IDC_LOGO = 213
     # selected again while the search's last reload may still take the selection away
-    Check ([bool](WaitFor { if ([int][Native.Win]::SendMessage($list, 0x100C, [IntPtr](-1), [IntPtr]2) -ne 0) { SelectRow 0 }; Visible $main $IDC_LOGO } 15)) 'a sender whose logo the server passed has it beside the header'
+    Check ([bool](WaitFor { if ([int][Native.Win]::SendMessage($list, 0x100C, [IntPtr](-1), [IntPtr]2) -ne 0) { SelectRow 0 }; PictureShown } 15)) 'a sender whose logo the server passed has it beside the header'
     Shot $main 'read-11-logo'
     [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, '')
 
@@ -6018,17 +6033,31 @@ public static class Dragger {
         Check ($null -ne $labelled) "with the count of its messages and of the new ones ($($label): $([Native.Win]::SendText($main, $kTestRowField, "$topic`nthread_label`n$label")))"
         SelectRow $at
         Check ((SelectedRow) -eq $at) "its row can be selected ($(SelectedRow))"
-        # the whole conversation in the reading pane: all three unread, so all three open, each a frame sized to it
-        $kTestFrames = 0x46524D53
-        $framed = WaitFor { $v = [Native.Win]::SendText($main, $kTestFrames, ''); if (($v % 1000) -eq 103) { $v } } 20
-        Check ($null -ne $framed) "selecting it shows the whole conversation, its three unread messages open, each sized to its document ($([Native.Win]::SendText($main, $kTestFrames, '')))"
+        # the whole conversation in the reading pane's stack: all three unread, so all three open, each a frame of its own
+        # as tall as its message, the oldest unread one selected (kTestStack "shown": tall 1000 + frames * 100 + rows * 10
+        # + the selected frame's place)
+        $kTestStack = 0x5354434B
+        $stacked = WaitFor { $v = [Native.Win]::SendText($main, $kTestStack, 'shown'); if ($v -eq 1301) { $v } } 20
+        Check ($null -ne $stacked) "selecting it shows the whole conversation, its three unread messages open, each in a frame as tall as its document, the first selected ($([Native.Win]::SendText($main, $kTestStack, 'shown')))"
+        Check ([Native.Win]::SendText($main, $kTestStack, "text 2 sandwiches") -eq 1) 'each frame shows its own message'
         Check ([bool](WaitFor { (& $coastSeen) -eq 3 } 20)) "after a moment on screen, the messages it showed open are read on the server ($(& $coastSeen) of 3)"
         Shot $main 'threads-1-collapsed'
-        # a line clicked: that message folds, two frames left
-        $kTestLink = 0x4C494E4B
-        Check ([Native.Win]::SendText($main, $kTestLink, 'inboxclassic:conversation-0') -eq 1) 'a line of the conversation is its own link'
-        Check ([bool](WaitFor { $v = [Native.Win]::SendText($main, $kTestFrames, ''); ($v % 1000) -eq 102 } 20)) "a click on an open message's line folds it"
+        # the first frame's arrow: it folds to its row, the next open one selected
+        Check ([Native.Win]::SendText($main, $kTestStack, 'toggle 0') -eq 1) 'a frame has its arrow'
+        Check ([bool](WaitFor { [Native.Win]::SendText($main, $kTestStack, 'shown') -eq 1211 } 20)) "the arrow folds the message, the next open one selected ($([Native.Win]::SendText($main, $kTestStack, 'shown')))"
+        # its row clicked: it opens and is selected
+        Check ([Native.Win]::SendText($main, $kTestStack, 'select 0') -eq 1) 'a folded message is a row'
+        Check ([bool](WaitFor { [Native.Win]::SendText($main, $kTestStack, 'shown') -eq 1301 } 20)) "a click on a folded row opens it and selects it ($([Native.Win]::SendText($main, $kTestStack, 'shown')))"
         Shot $main 'threads-6-conversation-line'
+        # an open message clicked: only selected, every one stays open
+        Check ([Native.Win]::SendText($main, $kTestStack, 'select 2') -eq 1) 'an open message can be clicked'
+        Check ([bool](WaitFor { [Native.Win]::SendText($main, $kTestStack, 'shown') -eq 1303 } 20)) "a click on an open message selects it and folds nothing ($([Native.Win]::SendText($main, $kTestStack, 'shown')))"
+        # a frame's own Reply: its message selected, the reply to it
+        $before = @(ComposeWindows)
+        Check ([Native.Win]::SendText($main, $kTestStack, 'button 0 reply') -eq 1) 'a frame has its own Reply'
+        $reply = WaitCompose $null $before
+        Check ($null -ne $reply -and [Native.Win]::SendText($main, $kTestStack, 'shown') -eq 1301) "a frame's Reply selects its message and replies to it ($([Native.Win]::SendText($main, $kTestStack, 'shown')))"
+        if ($reply) { [void](CloseCompose $reply) }
         # Print Conversation: the three messages, one after another
         $kTestPrint = 0x50524E54
         Command $main $IDM_PRINT_CONVERSATION
@@ -6070,6 +6099,55 @@ public static class Dragger {
     Shot $main 'threads-3-options-off'
     Check (SetGrouping $true) 'and on again'
     Check ([bool](WaitFor { (Rows) -eq $grouped -and (SubjectRows $topic).Count -eq 1 -and (SubjectRows "Re: $topic").Count -eq 0 } 10)) "turned on again, the conversation is one row again ($(Rows))"
+    # ---- a long conversation ----
+
+    Step 'a long conversation'
+    $IDM_NEXT_IN_CONVERSATION = 180; $IDM_PREVIOUS_IN_CONVERSATION = 181; $IDM_OPEN_ALL_MESSAGES = 182; $IDM_FOLD_ALL_MESSAGES = 183
+    # twenty messages of one conversation, the last one unread, dated in 2025 so they list below the others
+    $budget = 'Budget review'
+    foreach ($n in 1..20) {
+        $answers = if ($n -eq 1) { '' } else { "In-Reply-To: <budget$($n - 1)@example.com>`r`nReferences: <budget1@example.com> <budget$($n - 1)@example.com>`r`n" }
+        $subject = if ($n -eq 1) { $budget } else { "Re: $budget" }
+        $flags = if ($n -eq 20) { @() } else { @('\Seen') }
+        AddMessage ("From: Person $($n % 4) <person$($n % 4)@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: $subject`r`n" +
+            "Date: Tue, 9 Sep 2025 $('{0:D2}' -f [int](8 + [math]::Floor($n / 6))):$('{0:D2}' -f (($n * 7) % 60)):00 +0000`r`n" +
+            "Message-ID: <budget$n@example.com>`r`n$answers`r`nNumber $n on the budget.`r`n") $flags
+    }
+    Command $main $IDM_SYNC
+    $longRow = WaitFor { $r = @(SubjectRows $budget); if ($r.Count -eq 1) { [int]$r[0] } } 30
+    if ($null -ne $longRow) {
+        SelectRow $longRow
+        # the first message, one row for the read middle, the last two read ones, the unread last one open
+        $kTestStack = 0x5354434B
+        $stackCount = { param($what) [Native.Win]::SendText($main, $kTestStack, $what) }
+        Check ([bool](WaitFor { (& $stackCount 'gaps') -eq 1 -and (& $stackCount 'rows') -eq 3 -and (& $stackCount 'frames') -eq 1 } 20)) "the read middle of a long conversation is folded into one row ($(& $stackCount 'rows') rows, $(& $stackCount 'gaps') folded)"
+        Check ((& $stackCount 'middle') -eq 1) 'a click on it'
+        Check ([bool](WaitFor { (& $stackCount 'rows') -eq 19 -and (& $stackCount 'gaps') -eq 0 } 20)) "lists them all ($(& $stackCount 'rows'))"
+        # every message open: shown at once, only the bodies near what is seen made
+        $asked = Get-Date
+        Command $main $IDM_OPEN_ALL_MESSAGES
+        Check ([bool](WaitFor { (& $stackCount 'frames') -eq 20 } 20)) "Open All Messages opens every message ($(& $stackCount 'frames'))"
+        $took = ((Get-Date) - $asked).TotalSeconds
+        Check ($took -lt 5) "at once ($([math]::Round($took, 1)) s)"
+        $live = & $stackCount 'live'
+        Check ($live -gt 0 -and $live -lt 20) "only the bodies near what is seen are made ($live of 20)"
+        Shot $main 'threads-7-long'
+        $selected = & $stackCount 'selected'
+        Command $main $IDM_PREVIOUS_IN_CONVERSATION
+        Check ([bool](WaitFor { (& $stackCount 'selected') -eq $selected - 1 } 15)) "Previous Message in Conversation selects the one before ($(& $stackCount 'selected'))"
+        Command $main $IDM_NEXT_IN_CONVERSATION
+        Check ([bool](WaitFor { (& $stackCount 'selected') -eq $selected } 15)) 'Next Message in Conversation the one after'
+        Command $main $IDM_FOLD_ALL_MESSAGES
+        Check ([bool](WaitFor { (& $stackCount 'frames') -eq 1 } 15)) "Fold All Messages folds every message but the selected one ($(& $stackCount 'frames'))"
+    } else {
+        Check $false 'the long conversation is listed'
+    }
+    # the step's messages taken away from the server and the list, so the steps after it find the Inbox as before
+    foreach ($m in @(Messages 'INBOX')) {
+        if ((RawText $m) -match 'Message-ID: <budget\d+@example\.com>') { [void](Invoke-RestMethod -Method Delete "$rest/INBOX/messages/$($m.uid)") }
+    }
+    Command $main $IDM_SYNC
+    [void](WaitFor { (@(SubjectRows $budget).Count + @(SubjectRows "Re: $budget").Count) -eq 0 } 20)
     # ---- watch and ignore conversation ----
 
     Step 'watch and ignore conversation'
@@ -6608,11 +6686,11 @@ public static class Dragger {
     Check ([bool](WaitFor { Seen 'Message-ID: <furniture-reaction@example\.com>' } 20)) 'and it is read on the server'
     Shot $main 'reactions-1-list'
     Check (SelectSubject $reacted) 'the reading pane shows the reacted message'
-    $line = WaitFor { if (Visible $main $IDC_REACTIONS) { GetText $main $IDC_REACTIONS } } 10
+    $line = WaitFor { if (Visible $main $IDC_REACTIONS) { WindowText ([Native.Win]::FindById($main, $IDC_REACTIONS)) } } 10
     Check ("$line" -like "*$thumb Kate Kalda*") "its header has a Reactions line with Kate's reaction ($line)"
     Shot $main 'reactions-2-header'
     # the line's menu from the keyboard (the menu key): one person, so their items at once
-    $reactionLine = [Native.Win]::GetDlgItem($main, $IDC_REACTIONS)
+    $reactionLine = [Native.Win]::FindById($main, $IDC_REACTIONS)
     $reactionMenu = {
         param([string]$choose, [string]$shot)
         [void][Native.Win]::PostMessage($reactionLine, 0x007B, $reactionLine, [IntPtr](-1))
@@ -7246,7 +7324,7 @@ public static class Dragger {
     Check ((& $rowPicture $forged) -eq 11) "the forged one shows initials ($(& $rowPicture $forged))"
     $maryRow = @(SubjectRows $confirmed)
     if ($maryRow.Count -eq 1) { SelectRow ([int]$maryRow[0]) }
-    Check ([bool](WaitFor { Visible $main $IDC_LOGO } 15)) 'the reading pane shows her picture beside the header'
+    Check ([bool](WaitFor { PictureShown } 15)) 'the reading pane shows her picture beside the header'
     Check ((& $listTop) -ge 1000 -and (& $listTop) -le 1003) "switched to Columns again, the rows still start at the top ($(& $listTop))"
     Shot $main 'pictures-5-contact'
     $opened = MaryProperties

@@ -162,6 +162,30 @@ void DrawMarlettGlyph(HDC dc, const RECT& box, wchar_t glyph, int height, COLORR
     DeleteObject(font);
 }
 
+void DrawSenderPicture(HDC dc, const RECT& box, HBITMAP picture, HDC& memory, const std::wstring& initials, HFONT font, COLORREF back,
+                       COLORREF ink) {
+    if (picture) {
+        if (!memory) {
+            memory = CreateCompatibleDC(dc);
+        }
+        DrawPremultiplied(dc, box.left, box.top, picture, box.right - box.left, memory);
+        // a hairline in the initials' grey, so a logo on white keeps its square's edge on a white row
+        FrameRect(dc, &box, GetSysColorBrush(COLOR_BTNFACE));
+        return;
+    }
+    SetDCBrushColor(dc, back);
+    FillRect(dc, &box, static_cast<HBRUSH>(GetStockObject(DC_BRUSH)));
+    if (initials.empty()) {
+        return;
+    }
+    HGDIOBJ old = SelectObject(dc, font);
+    SetBkMode(dc, TRANSPARENT);
+    SetTextColor(dc, ink);
+    RECT square = box;
+    DrawTextW(dc, initials.c_str(), static_cast<int>(initials.size()), &square, DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
+    SelectObject(dc, old);
+}
+
 HBITMAP CoreBitmap(uint8_t* pixels, size_t length, int size) {
     HBITMAP bitmap = PremultipliedBitmap(pixels, length, size);
     if (pixels) {

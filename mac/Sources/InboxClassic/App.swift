@@ -661,6 +661,10 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
             main.mailbox.chooseFolder()
         case .findInMessage: main.mailbox.reader.findCommand()
         case .expandAllThreads: main.mailbox.expandAll()
+        case .nextInConversation: main.mailbox.reader.conversationClick(PE_CONVERSATION_CLICK_NEXT)
+        case .previousInConversation: main.mailbox.reader.conversationClick(PE_CONVERSATION_CLICK_PREVIOUS)
+        case .openAllMessages: main.mailbox.reader.conversationClick(PE_CONVERSATION_CLICK_OPEN_ALL)
+        case .foldAllMessages: main.mailbox.reader.conversationClick(PE_CONVERSATION_CLICK_FOLD_ALL)
         case .collapseAllThreads: main.mailbox.collapseAll()
         case .addressBook: AddressBookWindow.show(core: core)
         case .addSenderToBook: main.mailbox.addSenderToBook()
@@ -804,6 +808,8 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         case .nextMessage, .previousMessage: return main.mailbox.list.numberOfRows > 0
         case .findInMessage: return main.mailbox.hasOne && main.mailbox.reader.messageView != nil
         case .expandAllThreads, .collapseAllThreads: return main.mailbox.grouped && main.mailbox.list.numberOfRows > 0
+        case .nextInConversation, .previousInConversation, .openAllMessages, .foldAllMessages:
+            return main.mailbox.reader.showsConversation
         default: return true
         }
     }

@@ -42,6 +42,7 @@ mod security;
 mod settings;
 mod setup;
 mod sign_in_apps;
+mod stack;
 mod sync;
 mod tray;
 mod ui;

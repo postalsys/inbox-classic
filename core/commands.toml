@@ -11,7 +11,7 @@
 #   (label)  not here: the catalog's cmd-<id> in core/locales/en/app.ftl, in every language, & marking the menu letter
 #   key      the shortcut: Mod is Ctrl on Windows and Linux and Command on the Mac; Shift, Alt (Option on the Mac),
 #            Ctrl (the Mac's Control, for a mac override);
-#            a letter, F1 to F12, Enter, Delete. mac and linux override it where those platforms differ.
+#            a letter, F1 to F12, Enter, Delete, Up, Down. mac and linux override it where those platforms differ.
 #   toggle   a menu item with a check mark
 #   one      acts on one message only: off while several are selected
 #   some     acts on one or several messages: off with none selected
@@ -459,6 +459,35 @@ id = "collapse_all_threads"
 windows = 146
 menu = "view"
 list = true
+
+# the conversation in the reading pane (docs/conversation-view-plan.md): its next or previous message opened and
+# selected (Alt+Down and Alt+Up, Option on the Mac), and every message of it open, or every one folded but the
+# selected one
+[[command]]
+id = "next_in_conversation"
+windows = 180
+menu = "view"
+key = "Alt+Down"
+one = true
+
+[[command]]
+id = "previous_in_conversation"
+windows = 181
+menu = "view"
+key = "Alt+Up"
+one = true
+
+[[command]]
+id = "open_all_messages"
+windows = 182
+menu = "view"
+one = true
+
+[[command]]
+id = "fold_all_messages"
+windows = 183
+menu = "view"
+one = true
 
 # the messages of ignored conversations left out of the list (pe_list_view_set_hide_ignored), a setting each app keeps
 [[command]]

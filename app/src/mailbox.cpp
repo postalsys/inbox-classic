@@ -278,6 +278,9 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     // Find Key of a signature: while it is looked up, and what was found, in the status bar
     reader_.onKeyLookup = [this](const std::wstring& said, bool) { Say(said); };
     reader_.onBouncedMessage = [this](int64_t folder, uint64_t uid) { ShowMessage(folder, uid); };
+    reader_.onFrameAction = [this](int64_t folder, uint64_t uid, PeAction action) { FrameAction(folder, uid, action); };
+    reader_.onOpenMessage = [this](int64_t folder, uint64_t uid) { OpenMessage(folder, uid); };
+    reader_.onEditDraft = [this](int64_t folder, uint64_t uid) { EditDraft(folder, uid); };
     // Open Reaction Email: the email in a message window of its own
     reader_.onOpenFile = [this](const std::wstring& path) { OpenMessageFileOrSay(parent_, parent_, core_, this, path); };
     // the keys for reading also while the message has the keyboard, sent as the accelerators send them
@@ -945,6 +948,35 @@ void Mailbox::OpenSelected() {
         // not fetched yet: MessageReady follows
         openWhenReady_ = true;
     }
+}
+
+void Mailbox::FrameAction(int64_t folder, uint64_t uid, PeAction action) {
+    core::Selection one(pe_selection_new());
+    pe_selection_add(one.get(), folder, uid);
+    // done in the store and handed to the server off the window thread: what was done said once it is (Acted)
+    uint64_t request = pe_selection_act_start(core_, one.get(), action, 0);
+    if (!request) {
+        Say(core::T(PE_TEXT_UI_MESSAGES_NOT_CHANGED));
+        return;
+    }
+    actions_[request] = -1;
+}
+
+void Mailbox::OpenMessage(int64_t folder, uint64_t uid) {
+    OpenMessageWindow(parent_, core_, this, ListOrder(), folder, uid, nullptr, false);
+}
+
+void Mailbox::EditDraft(int64_t folder, uint64_t uid) {
+    // read off the window thread, the compose window opened once it is (ReadDone)
+    draftMessage_ = {folder, uid};
+    draftAccount_ = CurrentAccount();
+    if (!draftRead_.Start(core_, pe_draft_open_start(core_, folder, uid))) {
+        openWhenReady_ = true;
+    }
+}
+
+void Mailbox::ConversationCommand(WORD id) {
+    reader_.ConversationCommand(id);
 }
 
 void Mailbox::OpenDraftRead(uint64_t request) {

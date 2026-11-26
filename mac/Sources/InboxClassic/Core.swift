@@ -1135,13 +1135,39 @@ struct Message {
 /// A message view of the core: the header, the sanitized document, the attachments; freed with it
 final class MessageView {
     let handle: OpaquePointer
+    /// the conversation's view this one belongs to (an open message of its stack): kept alive by it, never freed by
+    /// itself
+    private let owner: MessageView?
 
     init?(_ handle: OpaquePointer?) {
         guard let handle else { return nil }
         self.handle = handle
+        owner = nil
     }
 
-    deinit { pe_message_view_free(handle) }
+    private init(borrowed handle: OpaquePointer, owner: MessageView) {
+        self.handle = handle
+        self.owner = owner
+    }
+
+    deinit {
+        if owner == nil {
+            pe_message_view_free(handle)
+        }
+    }
+
+    /// the rows and frames of a conversation's stack, in order; a message shown alone has one, the core's, at 0, 0
+    var entries: [ConversationEntry] {
+        let count = info?.pointee.conversation_entry_count ?? 0
+        return (0..<count).compactMap { pe_conversation_entry(handle, $0).map { ConversationEntry($0.pointee) } }
+    }
+
+    /// the view entry `index`'s frame shows: this one for the selected message, its own for another open one; nil for
+    /// a folded message or one still downloading
+    func entryView(_ index: Int) -> MessageView? {
+        guard let own = pe_conversation_entry_view(handle, index) else { return nil }
+        return own == handle ? self : MessageView(borrowed: own, owner: self)
+    }
 
     var info: UnsafePointer<PeMessageInfo>? { pe_message_view_info(handle) }
 

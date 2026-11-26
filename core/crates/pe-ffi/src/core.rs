@@ -2409,10 +2409,62 @@ pub struct PeMessageInfo {
     /// link is checked against it (`pe_preview_link`, a part's link too), and the window ends them with
     /// `pe_previews_end` when it shows another document or closes
     pub preview_token: *const c_char,
-    /// The view is a conversation's (`pe_conversation_view_start`): `document` its page, each open message a part;
-    /// the header, attachments and bars are its focus message's, which Reply, Forward and Print act on. Its messages,
-    /// 0 for a message shown alone
+    /// The view is a conversation's (`pe_conversation_view_start`): the view is its selected message's (Reply,
+    /// Forward, Print, the bars and Find act on it), and the stack's rows and frames are its entries
+    /// (`pe_conversation_entry`, `conversation_entry_count` of them). Its messages, the folded middle's too; 0 for a
+    /// message shown alone, whose one entry (its key 0, 0) the core makes from this view.
     pub conversation_count: usize,
+    pub conversation_entry_count: usize,
+    /// The words over the stack: its subject, and "7 messages, 2 unread · Ann, Bob, You" (empty for a message alone)
+    pub conversation_subject: *const c_char,
+    pub conversation_line: *const c_char,
+}
+
+/// One message of a conversation's stack: a row when folded, a frame when open (`pe_conversation_entry`). Its words
+/// are the core's; the apps write `date` as their message list does.
+#[repr(C)]
+#[derive(Debug)]
+pub struct PeConversationEntry {
+    pub folder: i64,
+    pub uid: u64,
+    /// What `pe_conversation_click` takes for it
+    pub index: usize,
+    /// Who sent it: a name, an address, or "You" for the user's own (`own`)
+    pub from: *const c_char,
+    pub address: *const c_char,
+    pub own: bool,
+    /// Seconds since the Unix epoch, 0 for unknown
+    pub date: i64,
+    /// The date and time in full: an open frame's header, a row's tooltip
+    pub when: *const c_char,
+    /// Its first words, for a folded row
+    pub words: *const c_char,
+    /// "to Ann, Carol"
+    pub to: *const c_char,
+    /// A folded row's folder chip: the folder it is in when not the one the conversation was opened from; empty
+    pub in_folder: *const c_char,
+    /// An open frame's strip over its header: "Found in Sent Items"; empty
+    pub found_in: *const c_char,
+    /// "Draft", "Downloading…"; empty
+    pub note: *const c_char,
+    /// A draft: its frame offers Edit
+    pub draft: bool,
+    pub unread: bool,
+    pub open: bool,
+    /// Reply, Forward, Print and the bars act on it: its frame has the accent. Its view is the conversation's own.
+    pub selected: bool,
+    /// A folded row shows a paperclip
+    pub attachments: bool,
+    /// Its reactions' badge ("👍❤️ 3"), empty for none
+    pub reactions: *const c_char,
+    /// The sender's picture, drawn by `pe_picture_start` (0 for none: `initials`); `logo` a brand's, drawn square
+    pub picture: u64,
+    pub logo: bool,
+    pub initials: *const c_char,
+    /// Read messages of the folded middle right before this entry, one row ("14 more messages", `hidden_text`):
+    /// `PE_CONVERSATION_CLICK_SHOW_MIDDLE` lists them. 0 for none.
+    pub hidden_before: usize,
+    pub hidden_text: *const c_char,
 }
 
 /// The colour of the security bar: green, blue, amber, grey; none without one
@@ -2448,13 +2500,55 @@ pub struct PeMessageView {
     parts: Vec<*const c_char>,
     /// A conversation's open messages still downloading
     waiting: Vec<pe_store::MessageRef>,
+    /// A conversation's rows and frames, and the views of its open messages but the selected one
+    entries: Vec<PeConversationEntry>,
+    entry_views: Vec<Option<Box<PeMessageView>>>,
     _invitation: Option<Box<PeInvitation>>,
     _strings: Strings,
 }
 
 /// A view for C++: its strings and attachments owned by the handle
 fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
+    handed(view_of(view))
+}
+
+/// [`view_handle`]'s view, the views of a conversation's open messages within it
+fn view_of(mut view: pe_core::MessageView) -> PeMessageView {
     let mut strings = Strings::default();
+    let stack = pe_core::conversation::take_entries(&mut view);
+    let conversation = view.conversation.take();
+    let (entries, entry_views): (Vec<PeConversationEntry>, Vec<Option<Box<PeMessageView>>>) = stack
+        .into_iter()
+        .map(|entry| {
+            let row = PeConversationEntry {
+                folder: entry.at.folder,
+                uid: entry.at.uid,
+                index: entry.index,
+                from: strings.add(&entry.from),
+                address: strings.add(&entry.address),
+                own: entry.own,
+                date: entry.date,
+                when: strings.add(&entry.when),
+                words: strings.add(&entry.words),
+                to: strings.add(&entry.to),
+                in_folder: strings.add(&entry.folder),
+                found_in: strings.add(&entry.found_in),
+                note: strings.add(&entry.note),
+                draft: entry.draft,
+                unread: entry.unread,
+                open: entry.open,
+                selected: entry.selected,
+                attachments: entry.attachments,
+                reactions: strings.add(&entry.reactions),
+                picture: entry.picture,
+                logo: entry.logo,
+                initials: strings.add(&entry.initials),
+                hidden_before: entry.hidden_before,
+                hidden_text: strings.add(&entry.hidden_text),
+            };
+            (row, entry.view.map(|own| Box::new(view_of(*own))))
+        })
+        .unzip();
     let attachments: Vec<PeAttachment> = view
         .attachments
         .iter()
@@ -2546,22 +2640,58 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
         protection_details: strings.add(&view.protection.as_ref().map(|p| p.details()).unwrap_or_default()),
         part_count: view.part_documents.len(),
         preview_token: strings.add(view.preview_token.as_deref().unwrap_or_default()),
-        conversation_count: view.conversation.as_ref().map_or(0, |c| c.count),
+        conversation_count: conversation.as_ref().map_or(0, |c| c.count),
+        conversation_entry_count: entries.len(),
+        conversation_subject: strings.add(conversation.as_ref().map_or("", |c| c.subject.as_str())),
+        conversation_line: strings.add(conversation.as_ref().map_or("", |c| c.line.as_str())),
     };
-    let waiting = view.conversation.map(|c| c.waiting).unwrap_or_default();
+    let waiting = conversation.map(|c| c.waiting).unwrap_or_default();
     let parts = view
         .part_documents
         .iter()
         .map(|document| strings.add(document))
         .collect();
-    handed(PeMessageView {
+    PeMessageView {
         info,
         attachments,
         parts,
         waiting,
+        entries,
+        entry_views,
         _invitation: invitation,
         _strings: strings,
-    })
+    }
+}
+
+/// Entry `index` of a conversation's view (`conversation_entry_count` of its info), NULL past the end
+///
+/// # Safety
+/// `view` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_conversation_entry(view: *const PeMessageView, index: usize) -> *const PeConversationEntry {
+    // SAFETY: as the caller guarantees
+    unsafe { view.as_ref() }
+        .and_then(|view| view.entries.get(index))
+        .map_or(null(), |entry| entry as *const PeConversationEntry)
+}
+
+/// The view entry `index`'s frame shows: the conversation's own view for the selected entry, its own for any other
+/// open one; NULL for a folded entry, one still downloading, or past the end. Owned by `view`: never freed by itself,
+/// valid while `view` is.
+///
+/// # Safety
+/// `view` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_conversation_entry_view(view: *const PeMessageView, index: usize) -> *const PeMessageView {
+    // SAFETY: as the caller guarantees
+    let Some(view) = (unsafe { view.as_ref() }) else {
+        return null();
+    };
+    match (view.entries.get(index), view.entry_views.get(index)) {
+        (Some(entry), _) if entry.selected => view as *const PeMessageView,
+        (_, Some(Some(own))) => &**own as *const PeMessageView,
+        _ => null(),
+    }
 }
 
 /// Whether a new message's notification names its one-time code, when it has one the provider says its domain signed:
@@ -2618,11 +2748,6 @@ pub enum PeReaderLink {
     /// key id>`): `pe_pgp_find_handle` with the link, then on its `KeysFound` `pe_pgp_find_result` and the view built
     /// again
     FindKey = 6,
-    /// A message's line on a conversation's page (`inboxclassic:conversation-N`): `pe_conversation_click` with the
-    /// reader's message and N (`pe_conversation_link_index`), then the reader opens the message it gives
-    Conversation = 7,
-    /// "Show N earlier messages" on a conversation's page: `pe_conversation_show_earlier`, then the view built again
-    ConversationEarlier = 8,
 }
 
 /// Words an instant (seconds since the Unix epoch) for the event cards: its day in full (`time` false) or its time of
@@ -2710,10 +2835,6 @@ pub unsafe extern "C" fn pe_reader_link(uri: *const c_char) -> PeReaderLink {
             PeReaderLink::FindKey
         } else if pe_html::is_preview_link(uri) {
             PeReaderLink::Attachment
-        } else if pe_html::conversation_link(uri).is_some() {
-            PeReaderLink::Conversation
-        } else if pe_html::is_conversation_earlier_link(uri) {
-            PeReaderLink::ConversationEarlier
         } else {
             PeReaderLink::Other
         }
@@ -2729,6 +2850,18 @@ pub extern "C" fn pe_measure_script() -> *const c_char {
     static SCRIPT: std::sync::OnceLock<std::ffi::CString> = std::sync::OnceLock::new();
     SCRIPT
         .get_or_init(|| std::ffi::CString::new(pe_html::MEASURE_SCRIPT).unwrap_or_default())
+        .as_ptr()
+}
+
+/// The script the app runs in a message's document in a frame of the reading pane's stack: its parts' frames sized,
+/// then the document's height in CSS pixels, a number; the frame's web view is made that tall (times the text size's
+/// zoom) and never scrolls by itself. Run once it loaded, after its pictures loaded and when the width or the text
+/// size changed. A static string, not freed.
+#[unsafe(no_mangle)]
+pub extern "C" fn pe_height_script() -> *const c_char {
+    static SCRIPT: std::sync::OnceLock<std::ffi::CString> = std::sync::OnceLock::new();
+    SCRIPT
+        .get_or_init(|| std::ffi::CString::new(pe_html::HEIGHT_SCRIPT).unwrap_or_default())
         .as_ptr()
 }
 
@@ -2817,43 +2950,11 @@ pub unsafe extern "C" fn pe_message_view_waits_for(view: *const PeMessageView, f
     guard(|| view.waiting.contains(&pe_store::MessageRef { folder, uid })).unwrap_or(false)
 }
 
-/// The N of a conversation line's link (`inboxclassic:conversation-N`), -1 for any other link
+/// The message an operation on a conversation gives, into `out_folder` and `out_uid`; false for none
 ///
 /// # Safety
-/// `uri` must be NULL or a NUL-terminated UTF-8 string.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_conversation_link_index(uri: *const c_char) -> i64 {
-    // SAFETY: as the caller guarantees
-    let Some(uri) = (unsafe { arg(uri) }) else {
-        return -1;
-    };
-    guard(|| pe_html::conversation_link(uri).map_or(-1, |index| index as i64)).unwrap_or(-1)
-}
-
-/// A conversation line clicked in the view of the reader's message `folder`/`uid`: that message opens and takes the
-/// focus, or folds. The message the reader shows now in `out_folder` and `out_uid` (its conversation view built with
-/// `pe_conversation_view_start`); false when the line is not of a conversation shown.
-///
-/// # Safety
-/// `core` must be a live handle, `out_folder` and `out_uid` valid pointers.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_conversation_click(
-    core: *const PeCore,
-    folder: i64,
-    uid: u64,
-    index: i64,
-    out_folder: *mut i64,
-    out_uid: *mut u64,
-) -> bool {
-    let Ok(index) = usize::try_from(index) else {
-        return false;
-    };
-    // SAFETY: as the caller guarantees
-    let found = unsafe {
-        with(core, None, |core| {
-            core.conversation_click(pe_store::MessageRef { folder, uid }, index)
-        })
-    };
+/// `out_folder` and `out_uid` must be valid pointers or NULL.
+unsafe fn give_message(found: Option<pe_store::MessageRef>, out_folder: *mut i64, out_uid: *mut u64) -> bool {
     let Some(found) = found else {
         return false;
     };
@@ -2868,19 +2969,62 @@ pub unsafe extern "C" fn pe_conversation_click(
     false
 }
 
-/// "Show N earlier messages" clicked in the view of the reader's message `folder`/`uid`: every line shows once the
-/// view is built again
+/// What a click does in the conversation shown at the reader's message `folder`/`uid`
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeConversationClick {
+    /// A message's row or frame clicked (`index` its entry's `index`): a folded one opens; either way it is selected
+    Select = 0,
+    /// A message's arrow: a folded one opens and is selected, an open one folds (the selection moves to the nearest
+    /// open message when it was that one)
+    Toggle = 1,
+    /// Next Message in Conversation: the next one opened and selected (`index` unused)
+    Next = 2,
+    /// Previous Message in Conversation
+    Previous = 3,
+    /// Open All Messages: every one open, the selection stays
+    OpenAll = 4,
+    /// Fold All Messages: every one folded but the selected one
+    FoldAll = 5,
+    /// The folded middle's row: every message has its row from now on (the selection stays)
+    ShowMiddle = 6,
+}
+
+/// A click in the conversation shown at the reader's message `folder`/`uid`. The message the reader shows now in
+/// `out_folder` and `out_uid` (its conversation view built again with `pe_conversation_view_start`, its frames kept
+/// where they are the same messages); false when there is none (no such message, Next past the last one, not a
+/// conversation shown).
 ///
 /// # Safety
-/// `core` must be a live handle.
+/// `core` must be a live handle, `out_folder` and `out_uid` valid pointers.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_conversation_show_earlier(core: *const PeCore, folder: i64, uid: u64) {
+pub unsafe extern "C" fn pe_conversation_click(
+    core: *const PeCore,
+    folder: i64,
+    uid: u64,
+    click: PeConversationClick,
+    index: usize,
+    out_folder: *mut i64,
+    out_uid: *mut u64,
+) -> bool {
+    let focus = pe_store::MessageRef { folder, uid };
     // SAFETY: as the caller guarantees
-    unsafe {
-        with(core, (), |core| {
-            core.conversation_show_earlier(pe_store::MessageRef { folder, uid })
+    let found = unsafe {
+        with(core, None, |core| match click {
+            PeConversationClick::Select => core.conversation_select(focus, index),
+            PeConversationClick::Toggle => core.conversation_toggle(focus, index),
+            PeConversationClick::Next => core.conversation_step(focus, 1),
+            PeConversationClick::Previous => core.conversation_step(focus, -1),
+            PeConversationClick::OpenAll => core.conversation_open_all(focus, true),
+            PeConversationClick::FoldAll => core.conversation_open_all(focus, false),
+            PeConversationClick::ShowMiddle => {
+                core.conversation_show_middle(focus);
+                Some(focus)
+            }
         })
-    }
+    };
+    // SAFETY: as the caller guarantees
+    unsafe { give_message(found, out_folder, out_uid) }
 }
 
 /// The reader shows the conversation view of `folder`/`uid` (a moment after it came, as a message alone is marked
@@ -3111,7 +3255,7 @@ pub unsafe extern "C" fn pe_previews_end(core: *const PeCore, token: *const c_ch
 /// The strip menu's Show in Message chosen for attachment `attachment` of the view with this `preview_token` (`show`:
 /// draw it in the message, false: take it out), for as long as a window shows the message, never kept. True when that
 /// changes the document: the window then builds the view again (`pe_message_view_start`, or `pe_file_view` for a
-/// message file) and shows it where it was scrolled to (`pe_scroll_script`, `pe_scroll_to_script`). False for a file
+/// message file) into the frame it is in, which keeps its place in the stack. False for a file
 /// whose item is greyed or already so, or a view no longer shown.
 ///
 /// # Safety
@@ -3162,24 +3306,6 @@ pub unsafe extern "C" fn pe_print_result(core: *const PeCore, request: u64) -> *
             core.print_result(request).map_or(null_mut(), into_c_string)
         })
     }
-}
-
-/// The script the app runs in the reading pane before it shows the same message's document again (after Show in
-/// Message, and when the whole of a large message came after its text): how far it is scrolled, a number. A static
-/// string, not freed.
-#[unsafe(no_mangle)]
-pub extern "C" fn pe_scroll_script() -> *const c_char {
-    static SCRIPT: std::sync::OnceLock<std::ffi::CString> = std::sync::OnceLock::new();
-    SCRIPT
-        .get_or_init(|| std::ffi::CString::new(pe_html::SCROLL_SCRIPT).unwrap_or_default())
-        .as_ptr()
-}
-
-/// The script that scrolls the new document back to `y` (what `pe_scroll_script` answered), run once it has loaded.
-/// Free with `pe_string_free`.
-#[unsafe(no_mangle)]
-pub extern "C" fn pe_scroll_to_script(y: f64) -> *mut c_char {
-    guard(|| into_c_string(pe_html::scroll_to_script(y))).unwrap_or(null_mut())
 }
 
 /// Settings' "Show attachments in messages": pictures and PDF files after a message's text

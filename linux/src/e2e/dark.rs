@@ -84,7 +84,7 @@ async fn open_shown(inbox: i64, subject: &str) -> String {
     if !open_by_subject(inbox, subject).await {
         return String::new();
     }
-    shell().main().reader.preview.shown()
+    shell().main().reader.preview().shown()
 }
 
 /// Whether the background painted before a document is the dark one
@@ -127,7 +127,7 @@ pub(super) async fn dark_messages(d: &Driver) {
         "the windows are dark, as the system's dark style makes them",
     );
     d.check(
-        dark_background(&main.reader.preview.view),
+        dark_background(&main.reader.preview().view),
         "the reading pane paints a dark background before its document, nothing flashes white",
     );
     // a click on another list, dark: the list before dimmed under Loading..., then the new one
@@ -160,7 +160,7 @@ pub(super) async fn dark_messages(d: &Driver) {
 
     // the pictures in a message's text, drawn by the core, in their places in the dark too
     open_shown(inbox, super::NEWSLETTER).await;
-    let banner = super::inline_pictures::banner(&main.reader.preview.view).await;
+    let banner = super::inline_pictures::banner(&main.reader.preview().view).await;
     d.check(
         banner.first().is_some_and(|src| src.starts_with("/pv/")) && banner.get(1).is_some_and(|l| l == "true"),
         &format!("the banner drawn by the core shows in a dark window ({banner:?})"),
@@ -169,7 +169,7 @@ pub(super) async fn dark_messages(d: &Driver) {
 
     let code = open_shown(inbox, CODE).await;
     let card = wait_for(15, || {
-        let shown = main.reader.preview.shown();
+        let shown = main.reader.preview().shown();
         document_text(&shown).contains("582914").then_some(shown)
     })
     .await
@@ -191,7 +191,7 @@ pub(super) async fn dark_messages(d: &Driver) {
         "the setting and the style are as they were",
     );
     d.check(
-        !dark_background(&main.reader.preview.view),
+        !dark_background(&main.reader.preview().view),
         "and the reading pane paints white again",
     );
 }
@@ -264,14 +264,14 @@ async fn switch_off(d: &Driver, inbox: i64) {
         "turning it off is kept, and documents are light from then on",
     );
     let light = wait_until(15, || {
-        let shown = main.reader.preview.shown();
+        let shown = main.reader.preview().shown();
         main.reader.subject().as_deref() == Some(WRITTEN)
             && shown.contains("content=\"light\"")
             && !shown.contains("data-pe-dark")
     })
     .await;
     d.check(
-        light && !dark_background(&main.reader.preview.view),
+        light && !dark_background(&main.reader.preview().view),
         "the message shown is made again light in the dark window, its background white",
     );
     d.shot(main.window(), "dark-6-switch-off").await;

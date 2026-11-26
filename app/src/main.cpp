@@ -852,6 +852,9 @@ HACCEL BuildAccelerators() {
         {FVIRTKEY | FCONTROL, 'Z', IDM_UNDO},
         {FVIRTKEY | FCONTROL, VK_OEM_PERIOD, IDM_NEXT_MESSAGE},
         {FVIRTKEY | FCONTROL, VK_OEM_COMMA, IDM_PREVIOUS_MESSAGE},
+        // the conversation in the reading pane: its next and previous message
+        {FVIRTKEY | FALT, VK_DOWN, IDM_NEXT_IN_CONVERSATION},
+        {FVIRTKEY | FALT, VK_UP, IDM_PREVIOUS_IN_CONVERSATION},
         {FVIRTKEY | FCONTROL, 'Y', IDM_GO_TO_FOLDER},
         {FVIRTKEY, VK_F3, IDM_FIND_IN_MESSAGE},
         {FVIRTKEY | FCONTROL | FSHIFT, 'B', IDM_ADDRESS_BOOK},
@@ -1713,6 +1716,8 @@ constexpr ULONG_PTR kTestCrashCompose = 0x43524153;
 constexpr ULONG_PTR kTestTextZoom = 0x5A4F4F4D;
 // with --test-hooks only: the reading pane's look at the parts' frames of the message shown (Preview::TestFrames)
 constexpr ULONG_PTR kTestFrames = 0x46524D53;
+// with --test-hooks only: the reading pane's stack, what it shows and a click on it (ConversationStack::Test)
+constexpr ULONG_PTR kTestStack = 0x5354434B;
 // with --test-hooks only: the places the last Find in This Message of the reading pane found, plus 10 (9 before it
 // answered, 8 when it can not find)
 constexpr ULONG_PTR kTestFound = 0x464F554E;
@@ -2088,6 +2093,12 @@ void OnCommand(WORD id, WORD code) {
     case IDM_COLLAPSE_ALL_THREADS:
         g_mailbox.ExpandAll(id == IDM_EXPAND_ALL_THREADS);
         return;
+    case IDM_NEXT_IN_CONVERSATION:
+    case IDM_PREVIOUS_IN_CONVERSATION:
+    case IDM_OPEN_ALL_MESSAGES:
+    case IDM_FOLD_ALL_MESSAGES:
+        g_mailbox.ConversationCommand(id);
+        return;
     case IDM_WATCH_CONVERSATION:
         g_mailbox.MarkConversations(PE_ACTION_WATCH);
         return;
@@ -2240,6 +2251,10 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         if (g_arguments.testHooks && data->dwData == kTestFrames) {
             return static_cast<LRESULT>(g_mailbox.TestFrames());
+        }
+        if (g_arguments.testHooks && data->dwData == kTestStack && data->cbData % sizeof(wchar_t) == 0) {
+            std::wstring ask(static_cast<const wchar_t*>(data->lpData), data->cbData / sizeof(wchar_t));
+            return static_cast<LRESULT>(g_mailbox.TestStack(ask));
         }
         if (g_arguments.testHooks && data->dwData == kTestFound) {
             return static_cast<LRESULT>(g_mailbox.TestFound() + 10);
@@ -2405,9 +2420,6 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             SyncAll();
         } else if (wParam == TIMER_SEND_WAITING) {
             ShowOutbox();
-        } else if (wParam == TIMER_MEASURE) {
-            // the parts of a signed or encrypted message measured, often: no counts change
-            g_mailbox.OnTimer(wParam);
         } else {
             g_mailbox.OnTimer(wParam);
             // a reload or a search changes the counts

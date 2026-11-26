@@ -68,11 +68,12 @@ mod finding;
 mod attach;
 /// Step 4, continued: the pictures in a message's text drawn by the core
 mod inline_pictures;
+/// Emoji reactions, after the one-time codes
+mod long_conversation;
 /// Step 8b: the files not drawn, Show in Message and printing
 mod preview_tiles;
 /// Step 8b: pictures and PDF files in the message
 mod previews;
-/// Emoji reactions, after the one-time codes
 mod reactions;
 /// Step 45a: settings and accounts to another computer
 mod setup;
@@ -1204,7 +1205,10 @@ async fn scenario(d: Rc<Driver>) {
     // account is set up
     if let Ok(only) = std::env::var("PE_E2E_ONLY") {
         match only.as_str() {
-            "conversations" => steps::conversations(&d).await,
+            "conversations" => {
+                steps::conversations(&d).await;
+                long_conversation::long_conversation(&d).await;
+            }
             "sync" => sync::settings_sync(&d).await,
             "languages" => steps::languages(&d).await,
             "reactions" => reactions::reactions(&d).await,
@@ -1256,6 +1260,7 @@ async fn scenario(d: Rc<Driver>) {
     steps::message_window(&d).await;
     steps::keyboard_reading(&d).await;
     steps::conversations(&d).await;
+    long_conversation::long_conversation(&d).await;
     steps::bounces(&d).await;
     steps::one_time_codes(&d).await;
     reactions::reactions(&d).await;

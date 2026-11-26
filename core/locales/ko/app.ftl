@@ -63,6 +63,14 @@ ui-find-in-message-hint = 이 메시지에서 찾기
 ui-find-not-found = 이 메시지에 “{ $words }”이(가) 없습니다
 cmd-expand-all-threads = 모든 대화 펼치기(&E)
 cmd-collapse-all-threads = 모든 대화 접기(&O)
+# review: new
+cmd-next-in-conversation = 대화의 다음 메시지(&X)
+# review: new
+cmd-previous-in-conversation = 대화의 이전 메시지(&I)
+# review: new
+cmd-open-all-messages = 모든 메시지 열기(&A)
+# review: new
+cmd-fold-all-messages = 모든 메시지 접기(&D)
 ui-group-by-conversation = 대화별로 메시지 그룹화(&G)
 ui-show-whole-conversation = 읽기 창에 전체 대화 표시(&W)
 ui-show-whole-conversation-note = 회신, 초안, 다른 폴더의 메시지를 포함하여 대화의 메시지를 함께 엽니다. 읽은 메시지는 보통 한 줄로 접힙니다. 줄을 클릭하면 열거나 접을 수 있습니다.
@@ -75,12 +83,25 @@ ui-thread-count = { $new ->
 }
 ui-conversation-to = 받는 사람: { $people }
 ui-conversation-draft = 초안
-ui-conversation-alone = 서명 또는 암호화됨: 따로 열립니다
 ui-conversation-downloading = 다운로드 중…
-ui-conversation-earlier = { $count ->
-    [1] 이전 메시지 1개 표시
-   *[other] 이전 메시지 { $count }개 표시
-}
+# review: new
+ui-conversation-you = 나
+# review: new
+ui-conversation-messages = 메시지 { $count }개
+# review: new
+ui-conversation-unread = 읽지 않음 { $count }개
+# review: new
+ui-conversation-found-in = { $folder }에 있음
+# review: new
+ui-conversation-hidden = 메시지 { $count }개 더
+# review: new
+ui-conversation-open-message = 메시지 열기
+# review: new
+ui-conversation-fold-message = 메시지 접기
+# review: new
+ui-conversation-more = 더보기
+# review: new
+ui-conversation-edit = 편집
 ui-conversation-elsewhere = { $count ->
     [1] 이 대화에는 다른 폴더에도 메시지가 1개 있습니다.
    *[other] 이 대화에는 다른 폴더에도 메시지가 { $count }개 있습니다.

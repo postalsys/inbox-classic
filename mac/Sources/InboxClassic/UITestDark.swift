@@ -6,7 +6,7 @@ import WebKit
 
 extension UITest {
     /// the reading pane's web view
-    var readerWeb: WKWebView? { views(WKWebView.self, in: main.mailbox.reader.view).first }
+    var readerWeb: WKWebView? { Optional(main.mailbox.reader.shownPreview.view) }
 
     /// a script's answer in the reading pane's document, as a string
     func readerAsk(_ script: String) async -> String {
