@@ -1,5 +1,39 @@
 # Changelog
 
+## [0.22.0](https://github.com/postalsys/inbox-classic/compare/v0.21.0...v0.22.0) (2026-11-26)
+
+
+### Features
+
+* Account Properties on the folder list's rows named after an account ([d6d6ffe](https://github.com/postalsys/inbox-classic/commit/d6d6ffe14a2ad9619be94eac7038bf1e21dfe101))
+* Account Properties on the folder list's rows named after an account ([7648812](https://github.com/postalsys/inbox-classic/commit/764881240a3f1e27933b7a3e72972628cdd571a2))
+* emoji reactions from Gmail, Outlook and RFC 9078 ([69b9897](https://github.com/postalsys/inbox-classic/commit/69b9897538d8fb9e0acd37fc1f7958c4704454b3))
+* **linux:** Fedora packages and a signed dnf repository ([bfc9f1a](https://github.com/postalsys/inbox-classic/commit/bfc9f1ace8687015b6c67ab9955191ff11185846))
+* **linux:** Fedora packages and a signed dnf repository ([40ef17a](https://github.com/postalsys/inbox-classic/commit/40ef17a3da7e8e16bbdcb36687ea9b88c5802e12))
+* **reactions:** conversation lines show reactions, stored mail looked at in the background, agents read reactions (work in progress) ([681b37f](https://github.com/postalsys/inbox-classic/commit/681b37fda8d2e7ea948c519c759ebc7989fab351))
+* **reactions:** Linux shows the badge, the Reactions row and its menu, with its UI test step; CI has the emoji font ([2118abe](https://github.com/postalsys/inbox-classic/commit/2118abe36ea6d396e4b2fa97326e0b6d1a7608e5))
+* **reactions:** new mail that is a reaction is taken out, read on the server and announced as a reaction (work in progress) ([8b70751](https://github.com/postalsys/inbox-classic/commit/8b70751a449bafc3226e52eff7987cd666094013))
+* **reactions:** recognise Gmail, Outlook and RFC 9078 reactions in the core (work in progress) ([e81a8e2](https://github.com/postalsys/inbox-classic/commit/e81a8e23ad86307677981c143013a854d80f4b23))
+* **reactions:** rows carry their reactions, the reading pane's chips, Open Reaction Email and Show as Email in the core (work in progress) ([cdc9957](https://github.com/postalsys/inbox-classic/commit/cdc995704a3057a92b819cafd58855d702b88d7f))
+* **reactions:** the C API, the words and the help topic (work in progress) ([6ab05c6](https://github.com/postalsys/inbox-classic/commit/6ab05c653f12a9711dc51d4099d4f8eef0f43e57))
+* **reactions:** the store keeps reaction emails out of the lists, the sync knows them (work in progress) ([f905de4](https://github.com/postalsys/inbox-classic/commit/f905de43b34dbf9d724424b26f17ffd6ecba3730))
+* **reactions:** Windows and Mac show the badge, the Reactions line and its menu, with UI test steps ([9c4d535](https://github.com/postalsys/inbox-classic/commit/9c4d535c218b25cad94180df93583d27f9cac8d4))
+* settings sync through a folder or S3 storage the user owns ([b116fb2](https://github.com/postalsys/inbox-classic/commit/b116fb2e2de9fe9e0b75bcce1bc2c5708cd93c7b))
+* settings sync through a folder or S3 storage the user owns ([e6d9ef8](https://github.com/postalsys/inbox-classic/commit/e6d9ef8aa2ec7b4be157243f1f053b01674f00db))
+* the whole conversation in the reading pane ([0b19837](https://github.com/postalsys/inbox-classic/commit/0b198371abbc0ade15a953ef8ed3e17200159d5c))
+* the whole conversation in the reading pane ([125b0a8](https://github.com/postalsys/inbox-classic/commit/125b0a81acf5109f731271eb8b6eac07b0d8d4b4))
+
+
+### Bug Fixes
+
+* **compose:** an address typed stays as typed unless a suggestion begins with it ([57f378b](https://github.com/postalsys/inbox-classic/commit/57f378baa1fafe507ddfd4ae7a28b86ca73f25de))
+* **compose:** an address typed stays as typed unless a suggestion begins with it ([1dcfcec](https://github.com/postalsys/inbox-classic/commit/1dcfcec10e3ac7e6bf0fa1adaef4931c49ad3b08))
+* **conversations:** a search page's focus in one query; Options' new ids go last ([9f5be84](https://github.com/postalsys/inbox-classic/commit/9f5be84a11bcb97d666b6bee3b5e026759e2eb24))
+* **i18n:** review sync, conversations and reactions in all languages ([44bd9b2](https://github.com/postalsys/inbox-classic/commit/44bd9b2d33db99329a587683ad6061fbcfa7bee7))
+* **reactions:** Gmail's reaction part is no attachment ([4b90880](https://github.com/postalsys/inbox-classic/commit/4b9088060e7a4b15cc5143eec2a4a3e8109b4f45))
+* **reactions:** Show as Email wakes the background pass; tests wait on state where the event may come first ([f39012b](https://github.com/postalsys/inbox-classic/commit/f39012b102928602952f21b985d3c39f16ee0684))
+* **sync:** the settings tabs fit in every language; the tests know the Sync page's main group and the runner's short TEMP ([49947aa](https://github.com/postalsys/inbox-classic/commit/49947aa75ca6f14a5bffbebaeaf1523533f4d3af))
+
 ## [0.21.0](https://github.com/postalsys/inbox-classic/compare/v0.20.1...v0.21.0) (2026-11-23)
 
 
