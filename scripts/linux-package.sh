@@ -24,8 +24,14 @@ for LINUX_ARCH in "${architectures[@]}"; do
         dpkg-deb --info /src/dist/InboxClassic-$LINUX_ARCH.deb
         dpkg-deb --contents /src/dist/InboxClassic-$LINUX_ARCH.deb
     "
-    # installed where nothing else is, and started once
-    docker run --rm --platform "linux/$LINUX_ARCH" -v "$PWD/dist:/dist:ro" ubuntu:26.04 bash -euo pipefail -c "
+    # installed where nothing else is, and started once; UBUNTU_MIRROR (an Ubuntu archive URL) in place of
+    # archive.ubuntu.com, for a machine where that is slow (scripts/build-machine.sh reads it from the machine)
+    docker run --rm --platform "linux/$LINUX_ARCH" -v "$PWD/dist:/dist:ro" -e UBUNTU_MIRROR="${UBUNTU_MIRROR:-}" \
+        ubuntu:26.04 bash -euo pipefail -c "
+        if [ -n \"\$UBUNTU_MIRROR\" ]; then
+            sed -i \"s|http://archive.ubuntu.com/ubuntu|\$UBUNTU_MIRROR|; s|http://security.ubuntu.com/ubuntu|\$UBUNTU_MIRROR|\" \\
+                /etc/apt/sources.list.d/ubuntu.sources
+        fi
         apt-get update -qq >/dev/null
         DEBIAN_FRONTEND=noninteractive apt-get install -y -qq /dist/InboxClassic-$LINUX_ARCH.deb >/dev/null
         inbox-classic --version

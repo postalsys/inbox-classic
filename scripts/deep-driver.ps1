@@ -7,6 +7,8 @@
 param([Parameter(Mandatory = $true)][string]$Exe, [Parameter(ValueFromRemainingArguments = $true)][string[]]$Rest)
 $ErrorActionPreference = 'Stop'
 
+# Add-Type's helpers compiled where ESET leaves them alone (add-type-here.ps1)
+. (Join-Path $PSScriptRoot 'add-type-here.ps1')
 Add-Type -Namespace Deep -Name Win -MemberDefinition @'
 [StructLayout(LayoutKind.Sequential)]
 public struct COPYDATASTRUCT { public IntPtr dwData; public int cbData; public IntPtr lpData; }

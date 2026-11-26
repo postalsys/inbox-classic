@@ -4,6 +4,8 @@
 # message list, reached with the arrow keys as a user would.
 param([Parameter(Mandatory)][int]$Folder, [Parameter(Mandatory)][int]$Message)
 $ErrorActionPreference = 'Stop'
+# Add-Type's helpers compiled where ESET leaves them alone (add-type-here.ps1)
+. (Join-Path $PSScriptRoot 'add-type-here.ps1')
 Add-Type -Namespace Native -Name Win -MemberDefinition @'
 [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern IntPtr FindWindow(string cls, string title);
 [DllImport("user32.dll")] public static extern IntPtr GetDlgItem(IntPtr hwnd, int id);

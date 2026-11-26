@@ -15,6 +15,8 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+# Add-Type's helpers compiled where ESET leaves them alone (add-type-here.ps1)
+. (Join-Path $PSScriptRoot 'add-type-here.ps1')
 Add-Type -Namespace Native -Name Win -MemberDefinition @'
 [DllImport("user32.dll")] public static extern bool SetProcessDPIAware();
 [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern IntPtr FindWindow(string cls, string title);
