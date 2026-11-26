@@ -14,6 +14,7 @@ use pe_core::{DraftKind, Event, FailureKind, SignInWith};
 use crate::commands::Command;
 use crate::mailbox::Mailbox;
 use crate::settings::{self, Settings};
+use crate::stack::Click;
 use crate::ui::{self, TITLE};
 use crate::{Arguments, compose, notify, tray};
 
@@ -873,6 +874,10 @@ pub fn run_command(command: Command) {
         Command::GoToFolder => spawn(async move { main.go_to_folder().await }),
         Command::FindInMessage => main.reader.find_in_message(),
         Command::ExpandAllThreads => main.expand_all_threads(true),
+        Command::NextInConversation => main.reader.conversation_click(Click::Next, 0),
+        Command::PreviousInConversation => main.reader.conversation_click(Click::Previous, 0),
+        Command::OpenAllMessages => main.reader.conversation_click(Click::OpenAll, 0),
+        Command::FoldAllMessages => main.reader.conversation_click(Click::FoldAll, 0),
         Command::CollapseAllThreads => main.expand_all_threads(false),
         Command::AddressBook => crate::address_book::open(),
         Command::AddSenderToBook => spawn(async move { main.add_sender_to_book().await }),

@@ -60,6 +60,14 @@ ui-find-in-message-hint = Znajdź w tej wiadomości
 ui-find-not-found = W tej wiadomości nie ma „{ $words }”
 cmd-expand-all-threads = Rozwiń wszystkie &konwersacje
 cmd-collapse-all-threads = &Zwiń wszystkie konwersacje
+# review: new
+cmd-next-in-conversation = Następna wi&adomość w konwersacji
+# review: new
+cmd-previous-in-conversation = Poprzednia wiado&mość w konwersacji
+# review: new
+cmd-open-all-messages = Otwórz wszystkie wiadomoś&ci
+# review: new
+cmd-fold-all-messages = Zwiń wsz&ystkie wiadomości
 ui-group-by-conversation = &Grupuj wiadomości według konwersacji
 ui-show-whole-conversation = Pokaż &całą konwersację w okienku odczytu
 ui-show-whole-conversation-note = Otwórz razem wiadomości konwersacji, w tym swoje odpowiedzi, wersje robocze i wiadomości w innych folderach. Przeczytane wiadomości są zwykle zwinięte do jednego wiersza; kliknij wiersz, aby otworzyć lub zwinąć wiadomość.
@@ -75,14 +83,40 @@ ui-thread-count = { $new ->
 }
 ui-conversation-to = Odbiorcy: { $people }
 ui-conversation-draft = Wersja robocza
-ui-conversation-alone = Podpisana lub zaszyfrowana: otwiera się osobno
 ui-conversation-downloading = Pobieranie…
-ui-conversation-earlier = { $count ->
-    [one] Pokaż { $count } wcześniejszą wiadomość
-    [few] Pokaż { $count } wcześniejsze wiadomości
-    [many] Pokaż { $count } wcześniejszych wiadomości
-   *[other] Pokaż { $count } wcześniejszych wiadomości
+# review: new
+ui-conversation-you = Ja
+# review: new
+ui-conversation-messages = { $count ->
+    [one] { $count } wiadomość
+    [few] { $count } wiadomości
+    [many] { $count } wiadomości
+   *[other] { $count } wiadomości
 }
+# review: new
+ui-conversation-unread = { $count ->
+    [one] { $count } nieprzeczytana
+    [few] { $count } nieprzeczytane
+    [many] { $count } nieprzeczytanych
+   *[other] { $count } nieprzeczytanych
+}
+# review: new
+ui-conversation-found-in = Znaleziono w folderze { $folder }
+# review: new
+ui-conversation-hidden = { $count ->
+    [one] Jeszcze { $count } wiadomość
+    [few] Jeszcze { $count } wiadomości
+    [many] Jeszcze { $count } wiadomości
+   *[other] Jeszcze { $count } wiadomości
+}
+# review: new
+ui-conversation-open-message = Otwórz wiadomość
+# review: new
+ui-conversation-fold-message = Zwiń wiadomość
+# review: new
+ui-conversation-more = Więcej
+# review: new
+ui-conversation-edit = Edytuj
 ui-conversation-elsewhere = { $count ->
     [one] Ta konwersacja ma też { $count } wiadomość w innym folderze.
     [few] Ta konwersacja ma też { $count } wiadomości w innych folderach.

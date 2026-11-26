@@ -773,9 +773,12 @@ Screenshots: `threads-1-collapsed`, `threads-6-conversation-line`, `threads-2-ex
 - three messages of one conversation (replies naming the first in References) are put into the Inbox on the server, the first read
 - the Inbox lists the conversation once, with the count of its messages and of the new ones ("(3, 2 new)"), bold while one is unread
 - the row shows the sender of its oldest unread message
-- selecting it shows the whole conversation in the reading pane at that message: the unread ones open, the read one folded to its line, each message with its line
+- selecting it shows the whole conversation in the reading pane at that message, as a stack of the platform's own controls: over it the subject, how many messages and who wrote; the unread ones open, each a frame of its own as tall as its message with its sender, recipients and date, the read one folded to its row; the oldest unread one selected
+- each frame shows its own message
 - after a moment on screen, the unread messages it showed open are read on the server
-- a click on the read message's line opens it, and it takes the focus (`threads-6-conversation-line`)
+- a click on the read message's row opens it and selects it (`threads-6-conversation-line`)
+- a click on an open message selects it and folds nothing; its arrow folds a message, the selection staying (or moving to the nearest open one when it was the selected one)
+- a frame's own Reply selects its message and opens the reply to it
 - File > Print Conversation prints all three messages
 - with Show the whole conversation off (Options, Reading page), the row opens one message alone
 - expanding it shows its replies under it, indented
@@ -783,6 +786,18 @@ Screenshots: `threads-1-collapsed`, `threads-6-conversation-line`, `threads-2-ex
 - Mark Read on the collapsed row marks all three read on the server
 - with Group messages by conversation (Options, Reading page) turned off, the list has the three messages each on a row of its own
 - turned on again, the conversation is one row again
+
+## 34e2. A long conversation
+
+Screenshot: `threads-7-long`
+
+- twenty messages of one conversation (dated in 2025, the last one unread) are put into the Inbox on the server
+- selecting it shows the first message, one row for the sixteen read ones in the middle ("16 more messages"), the last two read ones and the unread last one open
+- a click on that row lists every message
+- View > Open All Messages opens every message at once (within five seconds), and only the bodies near what is seen are made
+- View > Previous Message in Conversation selects the one before, Next Message in Conversation the one after
+- View > Fold All Messages folds every message but the selected one
+- the messages are taken away from the server again
 
 ## 34f. A message that bounced
 

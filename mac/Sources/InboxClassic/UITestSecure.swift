@@ -111,7 +111,7 @@ extension UITest {
             let imported = core.pgpImport(read(name), passphrase: nil)
             check(imported.outcome == PE_IMPORT_OUTCOME_IMPORTED, "\(name) imported (\(imported.message))")
         }
-        let preferences = (views(WKWebView.self, in: main.mailbox.reader.view).first)?.configuration.defaultWebpagePreferences
+        let preferences = (Optional(main.mailbox.reader.shownPreview.view))?.configuration.defaultWebpagePreferences
         check(preferences?.allowsContentJavaScript == false, "the reading pane runs no script of a page")
         guard let alice = core.pgpKeys().first(where: { $0.addresses.contains("alice@example.org") }) else {
             throw Failed(description: "no key of Alice")

@@ -397,6 +397,14 @@ impl Mailbox {
                 this.enable(Command::Unsubscribe, on && this.list.selected_count() == 1);
             }
         });
+        // a frame of the reading pane's stack: its message marked unread or deleted (that one only, never the
+        // conversation's row in the list), its draft finished, its message in a window
+        let weak = Rc::downgrade(&mailbox);
+        mailbox.reader.on_frame_ask(move |asked| {
+            if let Some(this) = weak.upgrade() {
+                this.frame_asked(asked);
+            }
+        });
         mailbox.connect_layout(&panes);
         mailbox.update_undo();
         mailbox.reload();
@@ -1610,6 +1618,43 @@ impl Mailbox {
     #[cfg(feature = "e2e")]
     pub fn is_draft_folder(&self, folder: i64) -> bool {
         self.draft_folders.borrow().contains(&folder)
+    }
+
+    /// What a frame of a message window's stack asks, done here
+    pub fn frame_asks(self: &Rc<Self>, asked: crate::reader::FrameAsk) {
+        self.frame_asked(asked);
+    }
+
+    /// What a frame of the reading pane's stack asks, on its one message
+    fn frame_asked(self: &Rc<Self>, asked: crate::reader::FrameAsk) {
+        use crate::reader::FrameAsk;
+        match asked {
+            FrameAsk::MarkUnread(at) => self.act_on(Selected::Listed(vec![at]), Action::Read(false)),
+            FrameAsk::Delete(at) => self.act_on(Selected::Listed(vec![at]), Action::Delete),
+            FrameAsk::OpenWindow(at) => crate::message_window::open(at, self.list_view(), false),
+            FrameAsk::Edit(at) => self.open_draft(at),
+        }
+    }
+
+    /// The draft `at` in a compose window, to go on writing it, once it is fetched when it is not yet
+    fn open_draft(self: &Rc<Self>, at: MessageRef) {
+        self.open_when_ready.set(true);
+        let Ok(request) = shell().core.reopen_draft_start(at.folder, at.uid) else {
+            self.open_when_ready.set(false);
+            return;
+        };
+        self.draft_reading.set(request);
+        let this = self.clone();
+        spawn(async move {
+            if !ui::wait_read(&this.window, request).await || this.draft_reading.get() != request {
+                return;
+            }
+            if let Some(draft) = shell().core.draft_result(request) {
+                this.open_when_ready.set(false);
+                this.draft_reading.set(0);
+                crate::compose::open(this.current_account(), Some(draft));
+            }
+        });
     }
 
     /// The selected message in a window of its own (double-click or Enter), Previous and Next going through the

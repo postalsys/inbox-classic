@@ -154,6 +154,11 @@ HBITMAP CoreBitmap(uint8_t* pixels, size_t length, int size);
 // such a bitmap drawn at `x`, `y` with its own transparency, through `memory` when given (a DC kept for many
 // pictures), else one made for it
 void DrawPremultiplied(HDC dc, int x, int y, HBITMAP bitmap, int size, HDC memory = nullptr);
+// a sender's picture in the square `box`, as the list and the reading pane's stack draw it: `picture` with its own
+// transparency and a hairline around it (through `memory`, a DC kept for many pictures, made on first use), else the
+// initials in `font` and `ink` on a square of `back`
+void DrawSenderPicture(HDC dc, const RECT& box, HBITMAP picture, HDC& memory, const std::wstring& initials, HFONT font, COLORREF back,
+                       COLORREF ink);
 // a tooltip of `text` over the child `tool` of `owner`
 void AddTip(HWND owner, HWND tool, const std::wstring& text);
 // how big `text` is in `dc` in `font` (the dialog font when NULL), its & left out unless `flags` has DT_NOPREFIX: one
@@ -761,6 +766,14 @@ struct UiEvent {
     uint64_t count = 0;
 };
 
+// ---- columnrow.cpp ----
+
+// a colour `part` of the way from `from` to `to`, out of 255
+COLORREF MixColors(COLORREF from, COLORREF to, int part);
+// a date as the Columns list writes it now: today's time, the weekday this week, the day and month this year, the whole
+// date before
+std::wstring ListDate(int64_t seconds);
+
 // ---- listpictures.cpp ----
 
 // the senders' pictures of the Columns list, drawn by the core once for each key and size and kept for the run
@@ -813,6 +826,7 @@ public:
     bool TestLink(const std::wstring& uri) { return reader_.FollowLink(uri.c_str()); }
     // the UI test's look at the parts of a signed or encrypted message shown (Reader::TestFrames)
     int64_t TestFrames() { return reader_.TestFrames(); }
+    int64_t TestStack(const std::wstring& ask) { return reader_.TestStack(ask); }
     // the UI test's look at the last Find in This Message (Reader::TestFound), and at the message shown: 1 when it has
     // loaded with this subject, or with none given when it is the message of the selected row (Reader::TestShown)
     int TestFound() const { return reader_.TestFound(); }
@@ -1015,6 +1029,13 @@ public:
     void SetNewestFirst(bool on);
     // View > Expand All Conversations (`open`) and Collapse All Conversations
     void ExpandAll(bool open);
+    // a frame of a reading pane's stack (stack.h) on its one message, never the conversation's row in the list: Mark as
+    // Unread or Delete done off the window thread, the message in a window of its own, a draft opened to finish it
+    void FrameAction(int64_t folder, uint64_t uid, PeAction action);
+    void OpenMessage(int64_t folder, uint64_t uid);
+    void EditDraft(int64_t folder, uint64_t uid);
+    // Next and Previous Message in Conversation, Open All and Fold All Messages: the conversation in the reading pane
+    void ConversationCommand(WORD id);
     // Message > Watch Conversation (PE_ACTION_WATCH) and Ignore Conversation (PE_ACTION_IGNORE) on the selected
     // messages' conversations, or the mark taken away when all of them have it; the status bar says what was done
     void MarkConversations(PeAction action);
@@ -1592,8 +1613,6 @@ enum ControlId : WORD {
     IDC_BOUNCED_MESSAGE,
     // no control: a preview of an attachment after the message's text clicked, likewise
     IDC_OPEN_PREVIEW,
-    IDC_CONVERSATION_LINE,
-    IDC_CONVERSATION_EARLIER,
     // in the status bar: takes back the message that waits to be sent (Undo Send)
     IDC_UNDO_SEND = 225,
     // the toolbar of a message window, and its Previous and Next buttons
@@ -1997,9 +2016,6 @@ constexpr UINT_PTR TIMER_DOWNLOADING = 6;
 constexpr UINT_PTR TIMER_SELECTION = 7;
 // a moment after a find in a message started, how many places it found is told as it is then
 constexpr UINT_PTR TIMER_FIND_SETTLED = 8;
-// while a signed or encrypted message is shown: its parts' frames measured again (pictures loaded, "..." unfolded, the
-// width or the text size changed)
-constexpr UINT_PTR TIMER_MEASURE = 9;
 // a moment after a folder changed, the tree's counts follow (once for the changes of a whole sync)
 constexpr UINT_PTR TIMER_COUNTS = 10;
 // a folder clicked in the tree: its list read once the highlight is painted (WM_TIMER comes after WM_PAINT)

@@ -428,12 +428,26 @@ typedef enum PeReaderLink {
   // key id>`): `pe_pgp_find_handle` with the link, then on its `KeysFound` `pe_pgp_find_result` and the view built
   // again
   PE_READER_LINK_FIND_KEY = 6,
-  // A message's line on a conversation's page (`inboxclassic:conversation-N`): `pe_conversation_click` with the
-  // reader's message and N (`pe_conversation_link_index`), then the reader opens the message it gives
-  PE_READER_LINK_CONVERSATION = 7,
-  // "Show N earlier messages" on a conversation's page: `pe_conversation_show_earlier`, then the view built again
-  PE_READER_LINK_CONVERSATION_EARLIER = 8,
 } PeReaderLink;
+
+// What a click does in the conversation shown at the reader's message `folder`/`uid`
+typedef enum PeConversationClick {
+  // A message's row or frame clicked (`index` its entry's `index`): a folded one opens; either way it is selected
+  PE_CONVERSATION_CLICK_SELECT = 0,
+  // A message's arrow: a folded one opens and is selected, an open one folds (the selection moves to the nearest
+  // open message when it was that one)
+  PE_CONVERSATION_CLICK_TOGGLE = 1,
+  // Next Message in Conversation: the next one opened and selected (`index` unused)
+  PE_CONVERSATION_CLICK_NEXT = 2,
+  // Previous Message in Conversation
+  PE_CONVERSATION_CLICK_PREVIOUS = 3,
+  // Open All Messages: every one open, the selection stays
+  PE_CONVERSATION_CLICK_OPEN_ALL = 4,
+  // Fold All Messages: every one folded but the selected one
+  PE_CONVERSATION_CLICK_FOLD_ALL = 5,
+  // The folded middle's row: every message has its row from now on (the selection stays)
+  PE_CONVERSATION_CLICK_SHOW_MIDDLE = 6,
+} PeConversationClick;
 
 // How a message lets its reader leave its mailing list
 typedef enum PeUnsubscribe {
@@ -1427,6 +1441,51 @@ typedef struct PeMessage {
   const char *reactions;
 } PeMessage;
 
+// One message of a conversation's stack: a row when folded, a frame when open (`pe_conversation_entry`). Its words
+// are the core's; the apps write `date` as their message list does.
+typedef struct PeConversationEntry {
+  int64_t folder;
+  uint64_t uid;
+  // What `pe_conversation_click` takes for it
+  size_t index;
+  // Who sent it: a name, an address, or "You" for the user's own (`own`)
+  const char *from;
+  const char *address;
+  bool own;
+  // Seconds since the Unix epoch, 0 for unknown
+  int64_t date;
+  // The date and time in full: an open frame's header, a row's tooltip
+  const char *when;
+  // Its first words, for a folded row
+  const char *words;
+  // "to Ann, Carol"
+  const char *to;
+  // A folded row's folder chip: the folder it is in when not the one the conversation was opened from; empty
+  const char *in_folder;
+  // An open frame's strip over its header: "Found in Sent Items"; empty
+  const char *found_in;
+  // "Draft", "Downloading…"; empty
+  const char *note;
+  // A draft: its frame offers Edit
+  bool draft;
+  bool unread;
+  bool open;
+  // Reply, Forward, Print and the bars act on it: its frame has the accent. Its view is the conversation's own.
+  bool selected;
+  // A folded row shows a paperclip
+  bool attachments;
+  // Its reactions' badge ("👍❤️ 3"), empty for none
+  const char *reactions;
+  // The sender's picture, drawn by `pe_picture_start` (0 for none: `initials`); `logo` a brand's, drawn square
+  uint64_t picture;
+  bool logo;
+  const char *initials;
+  // Read messages of the folded middle right before this entry, one row ("14 more messages", `hidden_text`):
+  // `PE_CONVERSATION_CLICK_SHOW_MIDDLE` lists them. 0 for none.
+  size_t hidden_before;
+  const char *hidden_text;
+} PeConversationEntry;
+
 // Words an instant (seconds since the Unix epoch) for the event cards: its day in full (`time` false) or its time of
 // day, short (`time` true), in the reader's locale and time zone, or as written when `floating` (the seconds are
 // then the written time read as UTC). Writes UTF-8 into `out`, at most `capacity` bytes and no NUL needed, and
@@ -1537,10 +1596,15 @@ typedef struct PeMessageInfo {
   // link is checked against it (`pe_preview_link`, a part's link too), and the window ends them with
   // `pe_previews_end` when it shows another document or closes
   const char *preview_token;
-  // The view is a conversation's (`pe_conversation_view_start`): `document` its page, each open message a part;
-  // the header, attachments and bars are its focus message's, which Reply, Forward and Print act on. Its messages,
-  // 0 for a message shown alone
+  // The view is a conversation's (`pe_conversation_view_start`): the view is its selected message's (Reply,
+  // Forward, Print, the bars and Find act on it), and the stack's rows and frames are its entries
+  // (`pe_conversation_entry`, `conversation_entry_count` of them). Its messages, the folded middle's too; 0 for a
+  // message shown alone, whose one entry (its key 0, 0) the core makes from this view.
   size_t conversation_count;
+  size_t conversation_entry_count;
+  // The words over the stack: its subject, and "7 messages, 2 unread · Ann, Bob, You" (empty for a message alone)
+  const char *conversation_subject;
+  const char *conversation_line;
 } PeMessageInfo;
 
 typedef struct PeAttachment {
@@ -3294,6 +3358,22 @@ char *pe_folder_empty(const struct PeCore *core,
                       int64_t folder,
                       char **error);
 
+// Entry `index` of a conversation's view (`conversation_entry_count` of its info), NULL past the end
+//
+// # Safety
+// `view` must be NULL or live.
+const struct PeConversationEntry *pe_conversation_entry(const struct PeMessageView *view,
+                                                        size_t index);
+
+// The view entry `index`'s frame shows: the conversation's own view for the selected entry, its own for any other
+// open one; NULL for a folded entry, one still downloading, or past the end. Owned by `view`: never freed by itself,
+// valid while `view` is.
+//
+// # Safety
+// `view` must be NULL or live.
+const struct PeMessageView *pe_conversation_entry_view(const struct PeMessageView *view,
+                                                       size_t index);
+
 // Whether a new message's notification names its one-time code, when it has one the provider says its domain signed:
 // the app's setting (off unless the user turns it on), set as the app starts and when it changes
 void pe_set_codes_in_notifications(bool on);
@@ -3332,6 +3412,12 @@ enum PeReaderLink pe_reader_link(const char *uri);
 // pictures loaded, when "..." unfolded and when the width or text size changed: each part's frame as tall as its
 // document. A static string, not freed.
 const char *pe_measure_script(void);
+
+// The script the app runs in a message's document in a frame of the reading pane's stack: its parts' frames sized,
+// then the document's height in CSS pixels, a number; the frame's web view is made that tall (times the text size's
+// zoom) and never scrolls by itself. Run once it loaded, after its pictures loaded and when the width or the text
+// size changed. A static string, not freed.
+const char *pe_height_script(void);
 
 // The view of a message whose source is in the store (after `MessageReady`), NULL otherwise. Built on the
 // calling thread; the app's windows use `pe_message_view_start`, which builds it on a worker.
@@ -3378,33 +3464,20 @@ bool pe_message_view_waits_for(const struct PeMessageView *view,
                                int64_t folder,
                                uint64_t uid);
 
-// The N of a conversation line's link (`inboxclassic:conversation-N`), -1 for any other link
-//
-// # Safety
-// `uri` must be NULL or a NUL-terminated UTF-8 string.
-int64_t pe_conversation_link_index(const char *uri);
-
-// A conversation line clicked in the view of the reader's message `folder`/`uid`: that message opens and takes the
-// focus, or folds. The message the reader shows now in `out_folder` and `out_uid` (its conversation view built with
-// `pe_conversation_view_start`); false when the line is not of a conversation shown.
+// A click in the conversation shown at the reader's message `folder`/`uid`. The message the reader shows now in
+// `out_folder` and `out_uid` (its conversation view built again with `pe_conversation_view_start`, its frames kept
+// where they are the same messages); false when there is none (no such message, Next past the last one, not a
+// conversation shown).
 //
 // # Safety
 // `core` must be a live handle, `out_folder` and `out_uid` valid pointers.
 bool pe_conversation_click(const struct PeCore *core,
                            int64_t folder,
                            uint64_t uid,
-                           int64_t index,
+                           enum PeConversationClick click,
+                           size_t index,
                            int64_t *out_folder,
                            uint64_t *out_uid);
-
-// "Show N earlier messages" clicked in the view of the reader's message `folder`/`uid`: every line shows once the
-// view is built again
-//
-// # Safety
-// `core` must be a live handle.
-void pe_conversation_show_earlier(const struct PeCore *core,
-                                  int64_t folder,
-                                  uint64_t uid);
 
 // The reader shows the conversation view of `folder`/`uid` (a moment after it came, as a message alone is marked
 // read then): the unread messages it showed open are marked read. False on failure.
@@ -3519,7 +3592,7 @@ void pe_previews_end(const struct PeCore *core,
 // The strip menu's Show in Message chosen for attachment `attachment` of the view with this `preview_token` (`show`:
 // draw it in the message, false: take it out), for as long as a window shows the message, never kept. True when that
 // changes the document: the window then builds the view again (`pe_message_view_start`, or `pe_file_view` for a
-// message file) and shows it where it was scrolled to (`pe_scroll_script`, `pe_scroll_to_script`). False for a file
+// message file) into the frame it is in, which keeps its place in the stack. False for a file
 // whose item is greyed or already so, or a view no longer shown.
 //
 // # Safety
@@ -3547,15 +3620,6 @@ uint64_t pe_print_start(const struct PeCore *core,
 // `core` must be a live handle.
 char *pe_print_result(const struct PeCore *core,
                       uint64_t request);
-
-// The script the app runs in the reading pane before it shows the same message's document again (after Show in
-// Message, and when the whole of a large message came after its text): how far it is scrolled, a number. A static
-// string, not freed.
-const char *pe_scroll_script(void);
-
-// The script that scrolls the new document back to `y` (what `pe_scroll_script` answered), run once it has loaded.
-// Free with `pe_string_free`.
-char *pe_scroll_to_script(double y);
 
 // Settings' "Show attachments in messages": pictures and PDF files after a message's text
 //

@@ -248,6 +248,8 @@ enum TextSize {
         for view in views.allObjects {
             view.pageZoom = zoom
         }
+        // the stack's frames as tall as their documents in the new size
+        Preview.textSizeChanged()
     }
 }
 
@@ -260,13 +262,26 @@ final class Preview: NSObject {
     private var shown = 0
     private var pending: (document: String, pictures: Bool, parts: ((Int) -> String?)?)?
     private var ready = false
-    /// the document shown has parts in frames, which the core's script sizes (pe_measure_script)
+    /// a document is shown in a frame of the stack (`fitted`), measured as it changes
     private var measuring = false
-    /// while it does: measured again every 400 ms (pictures loading, "..." unfolded, the width or text size changed)
+    /// measured every 400 ms from the moment the document is asked for, the page loads, its width or the text size
+    /// changes or it is clicked ("..." unfolded), until its height stays the same `settled` times running
     private var measureTimer: Timer?
+    /// how many readings running found the height the one before found, and that height (in the page's points)
+    private var unchanged = 0
+    private var lastHeight = 0.0
+    private static let settled = 5
+    /// every preview, to measure their documents again when the text size changes
+    private static let all = NSHashTable<Preview>.weakObjects()
     /// Settings' dark messages: whether the blank page between two messages may be dark too. The web views follow the
     /// window's appearance (WebKit draws their background dark before a document loads); the documents carry both looks.
     static var dark = false
+    /// a frame of the reading pane's stack (ConversationStack): the document's height in points, measured as it loads
+    /// and while it is shown (pictures arriving, the width or the text size changing); the web view is made that tall
+    /// and passes the wheel to the stack, so it never scrolls by itself
+    var fitted: ((CGFloat) -> Void)? {
+        didSet { (view as? ReadingView)?.fitsContent = fitted != nil }
+    }
     /// asked of a link clicked in the document before the browser opens it: true when the reading pane took it
     var links: ((String) -> Bool)? {
         get { navigation.links }
@@ -280,10 +295,6 @@ final class Preview: NSObject {
     }
     /// the preview token of the document shown (`preview_token`), ended when another document replaces it
     private var previewToken = ""
-    /// how many documents were asked for: a scroll position read for one replaced meanwhile is dropped
-    private var loads = 0
-    /// where to scroll the document being loaded once it is there (`keepScroll`)
-    private var scrollTo: Double?
 
     override init() {
         view = ReadingView(frame: .zero, configuration: lockedConfiguration(server: server, scripts: false))
@@ -294,8 +305,11 @@ final class Preview: NSObject {
         TextSize.register(view)
         view.isInspectable = false
         view.setAccessibilityIdentifier("preview")
-        navigation.loaded = { [weak self] in self?.pageLoaded() }
-        navigation.committed = { [weak self] in self?.pageCommitted() }
+        // every picture is there (or failed): the height they make
+        navigation.loaded = { [weak self] in self?.remeasure() }
+        navigation.committed = { [weak self] in self?.remeasure() }
+        (view as? ReadingView)?.changed = { [weak self] in self?.remeasure() }
+        Self.all.add(self)
         ContentRules.whenReady { [weak self] in
             guard let self else { return }
             ready = true
@@ -323,78 +337,41 @@ final class Preview: NSObject {
     }
 
     /// a document of the core; with `pictures` its pictures from the internet are let through. A signed or encrypted
-    /// message's page has `parts`, the document of each of its frames: they are served beside it, and the frames are
-    /// sized to their documents every 400 ms from the moment it is asked for while it is shown, and once more as it is
-    /// shown and as it has loaded. `previews` is the view's
-    /// preview token (empty for none): the previews of the document before are ended.
-    /// `keepScroll`: the same message made again, shown where the document before was scrolled to.
-    func show(_ document: String, pictures: Bool = false, parts: ((Int) -> String?)? = nil, previews: String = "",
-              keepScroll: Bool = false) {
+    /// message's page has `parts`, the document of each of its frames, served beside it. `previews` is the view's
+    /// preview token (empty for none): the previews of the document before are ended. In a frame of the stack
+    /// (`fitted`) the document is measured from the moment it is asked for until its height settles.
+    func show(_ document: String, pictures: Bool = false, parts: ((Int) -> String?)? = nil, previews: String = "") {
         stopMeasuring()
         if previews != previewToken {
             endPreviews()
             previewToken = previews
         }
-        // a document asked for later wins over one still waiting for the scroll position
-        loads += 1
-        scrollTo = nil
         guard ready else {
             pending = (document, pictures, parts)
             return
         }
         pending = nil
-        guard keepScroll else {
-            load(document, pictures: pictures, parts: parts)
-            return
-        }
-        let asked = loads
-        view.evaluateJavaScript(Self.scrollScript, in: nil, in: .defaultClient) { [weak self] result in
-            guard let self, asked == loads else { return }
-            let y = ((try? result.get()) as? NSNumber)?.doubleValue ?? 0
-            self.load(document, pictures: pictures, parts: parts)
-            scrollTo = y > 0 ? y : nil
-        }
-    }
-
-    static let scrollScript = String(cString: pe_scroll_script())
-
-    private func load(_ document: String, pictures: Bool, parts: ((Int) -> String?)?) {
         ContentRules.apply(to: view.configuration.userContentController, pictures: pictures)
         // a new address for each document, so it is loaded again rather than taken from history
         shown += 1
         server.clear()
         view.load(URLRequest(url: server.serve(document, host: "preview", path: "\(shown)", parts: parts)))
-        if parts != nil {
-            startMeasuring()
+        if fitted != nil {
+            measuring = true
+            remeasure()
         }
     }
 
-    // ---- the frames of a message's parts ----
+    // ---- a frame of the stack, as tall as its document ----
 
-    /// the page is shown: its frames sized at once, as every picture's size is in the parts' markup, rather than
-    /// after the pictures arrived (a PDF page can take seconds)
-    private func pageCommitted() {
-        if measuring {
-            measure()
-        }
-    }
-
-    private func pageLoaded() {
-        // the message made again: its text where it was (every picture's size is in the markup, so the same offset
-        // shows the same text)
-        if let y = scrollTo {
-            scrollTo = nil
-            view.evaluateJavaScript(taken(pe_scroll_to_script(y)) ?? "", in: nil, in: .defaultClient) { _ in }
-        }
-        if measuring {
-            measure()
-        }
-    }
-
-    /// the frames measured every 400 ms from now (the page coming, pictures arriving, "..." unfolded, the width or
-    /// the text size changed) until another document is shown
-    private func startMeasuring() {
-        measuring = true
+    /// the document measured at once, and every 400 ms until its height stays the same `settled` times running: the
+    /// page shown (its frames sized at once, as every picture's size is in the parts' markup, rather than after the
+    /// pictures arrived), loaded, wider or narrower, in another text size, or clicked ("..." unfolded)
+    private func remeasure() {
+        guard measuring else { return }
+        unchanged = 0
+        measure()
+        guard measureTimer == nil else { return }
         let timer = Timer(timeInterval: 0.4, repeats: true) { [weak self] timer in
             MainActor.assumeIsolated {
                 guard let self else {
@@ -409,20 +386,56 @@ final class Preview: NSObject {
         measureTimer = timer
     }
 
-    private func stopMeasuring() {
-        measuring = false
+    /// the height settled: no more readings until something changes it
+    private func settle() {
         measureTimer?.invalidate()
         measureTimer = nil
     }
 
-    /// the core's script run in the page, in the app's own world: the page's scripts stay off
-    /// (allowsContentJavaScript), and the app's script sees the page and its frames but none of their globals
-    private func measure() {
-        guard view.window != nil else { return }
-        view.evaluateJavaScript(Self.measureScript, in: nil, in: .defaultClient) { _ in }
+    private func stopMeasuring() {
+        measuring = false
+        lastHeight = 0
+        settle()
     }
 
-    static let measureScript = String(cString: pe_measure_script())
+    /// one reading more of the same height (or none to take, out of a window), toward settling
+    private func sameReading() {
+        unchanged += 1
+        if unchanged >= Self.settled {
+            settle()
+        }
+    }
+
+    /// the core's script run in the page, in the app's own world: the page's scripts stay off
+    /// (allowsContentJavaScript), and the app's script sees the page and its frames but none of their globals. It
+    /// sizes the parts' frames, then says the document's height.
+    private func measure() {
+        guard view.window != nil else {
+            // measured again once it is in a window (ReadingView's `changed`)
+            sameReading()
+            return
+        }
+        view.evaluateJavaScript(Self.heightScript, in: nil, in: .defaultClient) { [weak self] result in
+            guard let self, measuring, let fitted, let height = ((try? result.get()) as? NSNumber)?.doubleValue,
+                  height > 0 else { return }
+            if height == lastHeight {
+                sameReading()
+            } else {
+                lastHeight = height
+                unchanged = 0
+            }
+            fitted(CGFloat(height) * view.pageZoom)
+        }
+    }
+
+    static let heightScript = String(cString: pe_height_script())
+
+    /// View > Text Size: the documents of the stack's frames measured again
+    static func textSizeChanged() {
+        for preview in all.allObjects {
+            preview.remeasure()
+        }
+    }
 
     /// what a script of the app's own (`script`, an expression) says of the page, as a string; for the UI test
     func pageAnswer(_ script: String) async -> String {
@@ -456,6 +469,43 @@ final class Preview: NSObject {
 /// download, which a message's web view never does. A preview's picture is the core's copy, not the file, so its
 /// Download Image or Open Image would not be the file either; its link opens the file, as Open Link does.
 final class ReadingView: WKWebView {
+    /// a frame of the reading pane's stack: as tall as its document, the wheel's vertical turns scroll the stack
+    var fitsContent = false
+    /// a click in the document: the stack selects the frame's message
+    var clicked: (() -> Void)?
+    /// its document may be another height now: the width changed (it wraps anew), it was put in a window, or it was
+    /// clicked ("..." unfolded)
+    var changed: (() -> Void)?
+
+    override func mouseDown(with event: NSEvent) {
+        clicked?()
+        super.mouseDown(with: event)
+        changed?()
+    }
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        if window != nil {
+            changed?()
+        }
+    }
+
+    override func scrollWheel(with event: NSEvent) {
+        if fitsContent, abs(event.scrollingDeltaY) >= abs(event.scrollingDeltaX), let outer = enclosingScrollView {
+            outer.scrollWheel(with: event)
+            return
+        }
+        super.scrollWheel(with: event)
+    }
+
+    override func setFrameSize(_ newSize: NSSize) {
+        let widthChanged = newSize.width != frame.width
+        super.setFrameSize(newSize)
+        if widthChanged {
+            changed?()
+        }
+    }
+
     /// WebKit's names of the items taken out
     static let notOffered = ["DownloadImage", "OpenImageInNewWindow", "OpenLinkInNewWindow", "DownloadLinkedFile",
                                "OpenFrameInNewWindow"]

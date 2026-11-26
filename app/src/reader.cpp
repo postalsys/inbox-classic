@@ -329,6 +329,75 @@ void Reader::Create(HWND parent, PeCore* core) {
     preview_.Create(previewHost_, [this](const std::wstring& error) { SetWindowTextW(previewHost_, error.c_str()); }, parent,
                     TIMER_FIND_SETTLED);
     preview_.SetLinks([this](const wchar_t* uri) { return FollowLink(uri); });
+    ConversationStack::Hooks hooks;
+    hooks.findTimer = TIMER_FIND_SETTLED;
+    hooks.click = [this](PeConversationClick click, size_t index) { ConversationClick(click, index); };
+    hooks.command = [this](WORD command, int64_t folder, uint64_t uid) {
+        SelectFrame(folder, uid);
+        PostMessageW(GetAncestor(parent_, GA_ROOT), WM_COMMAND, MAKEWPARAM(command, 0), 0);
+    };
+    hooks.more = [this](int64_t folder, uint64_t uid, POINT screen) {
+        SelectFrame(folder, uid);
+        FrameMenu(folder ? folder : folder_, uid ? uid : uid_, screen);
+    };
+    hooks.edit = [this](int64_t folder, uint64_t uid) {
+        if (onEditDraft) {
+            onEditDraft(folder ? folder : folder_, uid ? uid : uid_);
+        }
+    };
+    hooks.openWindow = [this](int64_t folder, uint64_t uid) {
+        if (onOpenMessage && (uid || uid_)) {
+            onOpenMessage(folder ? folder : folder_, uid ? uid : uid_);
+        }
+    };
+    hooks.links = [this](const wchar_t* uri) { return FollowLink(uri); };
+    hooks.keys = [this](UINT key) { return keys_ && keys_(key); };
+    // the selected frame's own: its Reactions line and its strip of files, moved into the stack
+    hooks.placeReactions = [this](int left, int top, int width) {
+        if (!reactionList_) {
+            ShowWindow(reactions_, SW_HIDE);
+            return 0;
+        }
+        if (GetParent(reactions_) != stack_.Hwnd()) {
+            SetParent(reactions_, stack_.Hwnd());
+        }
+        int line = HeaderLine(header_) + Scale(4);
+        MoveWindow(reactions_, left, top, width, line, TRUE);
+        ShowWindow(reactions_, SW_SHOW);
+        InvalidateRect(reactions_, nullptr, FALSE);
+        return line;
+    };
+    hooks.placeFiles = [this](int left, int top, int width) {
+        if (stripFiles_.empty()) {
+            ShowWindow(stripFrame_, SW_HIDE);
+            return 0;
+        }
+        if (GetParent(stripFrame_) != stack_.Hwnd()) {
+            SetParent(stripFrame_, stack_.Hwnd());
+        }
+        ShowWindow(stripFrame_, SW_SHOW);
+        return PlaceStrip(left, top, width);
+    };
+    hooks.placeClip = [this](int right, int middle) {
+        if (stripFiles_.empty()) {
+            ShowWindow(attachments_, SW_HIDE);
+            return 0;
+        }
+        if (GetParent(attachments_) != stack_.Hwnd()) {
+            SetParent(attachments_, stack_.Hwnd());
+            // as big as its button where the stack puts it, never as wide as the stack (a toolbar sizes itself to its
+            // parent otherwise, over the frame's buttons)
+            SetWindowLongPtrW(attachments_, GWL_STYLE, GetWindowLongPtrW(attachments_, GWL_STYLE) | CCS_NORESIZE | CCS_NOPARENTALIGN);
+        }
+        RECT button = {};
+        SendMessageW(attachments_, TB_AUTOSIZE, 0, 0);
+        SendMessageW(attachments_, TB_GETITEMRECT, 0, reinterpret_cast<LPARAM>(&button));
+        int width = button.right - button.left, height = button.bottom - button.top;
+        MoveWindow(attachments_, right - width, middle - height / 2, width, height, TRUE);
+        ShowWindow(attachments_, SW_SHOW);
+        return width;
+    };
+    stack_.Create(parent, core, std::move(hooks));
 
     LOGFONTW font = {};
     GetObjectW(UiFont(), sizeof(font), &font);
@@ -342,7 +411,6 @@ void Reader::Destroy() {
     if (std::exchange(rebuilding_, false)) {
         RebuildNext();
     }
-    KillTimer(parent_, TIMER_MEASURE);
     StopOpening();
     CancelReads();
     ForgetPrint();
@@ -354,6 +422,7 @@ void Reader::Destroy() {
         DeleteObject(logoBitmap_);
         logoBitmap_ = nullptr;
     }
+    stack_.Destroy();
     preview_.Close();
     view_.reset();
     DeleteObject(bold_);
@@ -392,14 +461,6 @@ bool Reader::FollowLink(const wchar_t* uri) {
     case PE_READER_LINK_FIND_KEY:
         FindSignerKey(uri);
         return true;
-    case PE_READER_LINK_CONVERSATION:
-        // a line of a conversation's page: the page shown again once the WebView2's event is over
-        conversationLine_ = pe_conversation_link_index(core::Narrow(uri).c_str());
-        PostMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_CONVERSATION_LINE, 0), 0);
-        return true;
-    case PE_READER_LINK_CONVERSATION_EARLIER:
-        PostMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_CONVERSATION_EARLIER, 0), 0);
-        return true;
     case PE_READER_LINK_COPY_CODE:
         if (const PeMessageInfo* info = Info(); info && info->otp_code && *info->otp_code &&
                                                 CopyText(parent_, core::Widen(info->otp_code)) && onFound) {
@@ -417,7 +478,7 @@ const PeMessageInfo* Reader::Info() const {
 
 int Reader::TestShown(const std::wstring& subject) const {
     const PeMessageInfo* info = Info();
-    if (!info || !preview_.Loaded()) {
+    if (!info || !const_cast<Reader*>(this)->Body().Loaded()) {
         return 0;
     }
     return subject.empty() || Text(info->subject) == subject ? 1 : 0;
@@ -451,9 +512,6 @@ void Reader::ShowBars(bool files, bool pictures) {
 
 void Reader::ShowSecurity(const PeMessageInfo* info) {
     bool shown = info && info->protection != PE_PROTECTION_TONE_NONE;
-    if (!shown) {
-        KillTimer(parent_, TIMER_MEASURE);
-    }
     securityTone_ = shown ? info->protection : PE_PROTECTION_TONE_NONE;
     securityLock_ = shown && info->protection_encrypted;
     std::wstring words = shown ? Text(info->protection_text) : L"";
@@ -527,6 +585,30 @@ void Reader::Layout() {
         return;
     }
     const RECT& reader = area_;
+    // the message, or its conversation, in the stack: the bars over it, the frames say who and when
+    if (stack_.Visible()) {
+        int width = reader.right - reader.left;
+        int top = reader.top;
+        if (int barHeight = SecurityHeight(width); barHeight > 0) {
+            MoveWindow(security_, reader.left, top, width, barHeight, TRUE);
+            int buttonWidth = ButtonWidth({GetWindowString(securityDetails_)});
+            MoveWindow(securityDetails_, width - buttonWidth - DetailsMargin(), (barHeight - DetailsHeight()) / 2, buttonWidth, DetailsHeight(),
+                       TRUE);
+            InvalidateRect(security_, nullptr, FALSE);
+            top += barHeight + Scale(2);
+        }
+        if (IsWindowVisible(retry_)) {
+            top += PlaceBar(retry_, {retryButton_}, reader.left, top, width) + Scale(2);
+        }
+        if (IsWindowVisible(pictures_)) {
+            top += PlaceBar(pictures_, {picturesMenu_, picturesButton_}, reader.left, top, width) + Scale(2);
+        }
+        if (IsWindowVisible(listBar_)) {
+            top += PlaceBar(listBar_, {listButton_}, reader.left, top, width) + Scale(2);
+        }
+        stack_.Move({reader.left, top, reader.right, std::max(top, static_cast<int>(reader.bottom))});
+        return;
+    }
     int headerHeight = kHeaderLines * Scale(15) + Scale(8);
     // a line more for the reactions, as tall as the header's own lines
     int line = HeaderLine(header_);
@@ -607,6 +689,10 @@ void Reader::Clear(bool loading) {
     account_ = 0;
     remoteImages_ = false;
     file_.clear();
+    // the stack keeps showing the message before until the next one is here: its view kept for it
+    if (loading && stack_.Visible()) {
+        stackView_ = std::move(view_);
+    }
     view_.reset();
     documentShown_ = false;
     ForgetPrint();
@@ -624,12 +710,101 @@ void Reader::Clear(bool loading) {
     unsubscribeKind_ = PE_UNSUBSCRIBE_NONE;
     ShowListBar(L"", L"");
     ShowLogo(false, 0);
-    // says so rather than a blank pane, unless a message is about to be shown
-    preview_.Clear(!loading);
+    // says so rather than a blank pane; a message about to be shown takes the place of the one before in the stack, its
+    // WebView2 kept for it
+    if (!loading || !stack_.Visible()) {
+        ShowStack(false);
+        stackView_.reset();
+        preview_.Clear(!loading);
+    }
+}
+
+void Reader::ShowStack(bool shown) {
+    if (stack_.Visible() == shown) {
+        return;
+    }
+    if (!shown) {
+        stack_.Clear();
+        stackView_.reset();
+        // the selected frame's controls back with the pane
+        for (HWND own : {reactions_, stripFrame_, attachments_}) {
+            if (GetParent(own) != parent_) {
+                SetParent(own, parent_);
+                ShowWindow(own, SW_HIDE);
+            }
+        }
+    }
+    stack_.SetVisible(shown);
+    ShowWindow(previewHost_, shown ? SW_HIDE : SW_SHOW);
+    ShowWindow(header_, shown ? SW_HIDE : SW_SHOW);
+    if (shown) {
+        ShowWindow(logo_, SW_HIDE);
+    }
+    Layout();
+}
+
+Preview& Reader::Body() {
+    if (stack_.Visible()) {
+        if (Preview* body = stack_.SelectedBody()) {
+            return *body;
+        }
+    }
+    return preview_;
+}
+
+void Reader::SelectFrame(int64_t folder, uint64_t uid) {
+    if (!uid || (folder == folder_ && uid == uid_) || !view_) {
+        return;
+    }
+    const PeMessageInfo* info = pe_message_view_info(view_.get());
+    for (size_t i = 0; info && i < info->conversation_entry_count; i++) {
+        const PeConversationEntry* entry = pe_conversation_entry(view_.get(), i);
+        if (entry && entry->folder == folder && entry->uid == uid) {
+            ConversationClick(PE_CONVERSATION_CLICK_SELECT, entry->index);
+            return;
+        }
+    }
+}
+
+void Reader::FrameMenu(int64_t folder, uint64_t uid, POINT screen) {
+    enum : UINT { Print = 1, MarkUnread, Delete, OpenWindow, Source };
+    HMENU menu = CreatePopupMenu();
+    AppendMenuW(menu, MF_STRING, Print, core::T(PE_TEXT_CMD_PRINT).c_str());
+    AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(menu, MF_STRING, MarkUnread, core::T(PE_TEXT_CMD_MARK_UNREAD).c_str());
+    AppendMenuW(menu, MF_STRING, Delete, core::T(PE_TEXT_UI_TB_DELETE).c_str());
+    AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(menu, MF_STRING, OpenWindow, core::T(PE_TEXT_UI_MENU_OPEN).c_str());
+    AppendMenuW(menu, MF_STRING, Source, core::T(PE_TEXT_UI_MENU_VIEW_SOURCE).c_str());
+    HWND root = GetAncestor(parent_, GA_ROOT);
+    UINT chosen = TrackPopupMenu(menu, TPM_RETURNCMD | TPM_RIGHTBUTTON, screen.x, screen.y, 0, root, nullptr);
+    DestroyMenu(menu);
+    switch (chosen) {
+    case Print:
+        PostMessageW(root, WM_COMMAND, MAKEWPARAM(IDM_PRINT, 0), 0);
+        break;
+    case Source:
+        PostMessageW(root, WM_COMMAND, MAKEWPARAM(IDM_VIEW_SOURCE, 0), 0);
+        break;
+    case MarkUnread:
+    case Delete:
+        if (onFrameAction) {
+            onFrameAction(folder, uid, chosen == MarkUnread ? PE_ACTION_UNREAD : PE_ACTION_DELETE);
+        }
+        break;
+    case OpenWindow:
+        if (onOpenMessage) {
+            onOpenMessage(folder, uid);
+        }
+        break;
+    default:
+        break;
+    }
 }
 
 void Reader::ShowPage(const std::wstring& html) {
     documentShown_ = false;
+    ShowStack(false);
     preview_.Show(html);
 }
 
@@ -651,6 +826,7 @@ void Reader::Open(int64_t folder, uint64_t uid, int64_t account, const PeMessage
 // the pane says the message is being downloaded, and how large it is
 void Reader::ShowDownloading() {
     documentShown_ = false;
+    ShowStack(false);
     preview_.ShowState(PE_READER_STATE_DOWNLOADING, PE_FAILURE_KIND_NONE, {}, size_);
 }
 
@@ -728,28 +904,23 @@ void Reader::ShowInfo() {
     unsubscribeTarget_ = Text(info->unsubscribe_target);
     ShowListBar(Text(info->list_bar), Text(info->list_button));
     ShowLogo(info->has_logo && !file, file ? 0 : info->picture);
-    // a signed or encrypted message is a page of parts, each in a frame sized to its document: once it loaded, and
-    // again while it is shown (pictures loading, "..." unfolded, another width or text size)
-    std::vector<std::string> parts;
-    // a conversation's open messages too, each a document in its frame
-    bool framed = info->protection != PE_PROTECTION_TONE_NONE || info->conversation_count > 0;
-    for (size_t i = 0; framed && i < info->part_count; i++) {
-        const char* part = pe_message_view_part(view_.get(), i);
-        parts.emplace_back(part ? part : "");
-    }
-    bool measured = !parts.empty();
-    // the same message's document again (Show in Message, the whole message after its text, its pictures allowed): its
-    // text stays where it was
+    // the message, or its conversation, in the stack: a frame for each open message, its body a WebView2 of its own
+    // sized to its document, the frames of the same messages kept (the same view again stays where it was)
     bool again = std::exchange(documentShown_, true);
-    preview_.Show(Text(info->document), info->pictures_loaded || remoteImages_, std::move(parts), info->preview_token, again);
-    if (measured) {
-        SetTimer(parent_, TIMER_MEASURE, 400, nullptr);
-    } else {
-        KillTimer(parent_, TIMER_MEASURE);
-    }
     FillStrip(info);
-    // offered only for a message with pictures on the internet, until they are shown (asked for, or by themselves)
-    ShowBars(info->attachment_count > 0, info->remote_images && !info->pictures_loaded && !remoteImages_);
+    ShowStack(true);
+    stack_.Show(view_.get(), info->pictures_loaded || remoteImages_, !again);
+    // the frames point into the new view now
+    stackView_.reset();
+    // offered while an open message has pictures on the internet not shown: the selected one, else another one that is
+    // neither signed nor encrypted (their pictures load on a click of their own), until they are shown
+    bool blocked = info->remote_images && !info->pictures_loaded && !remoteImages_;
+    for (size_t i = 0; !blocked && i < info->conversation_entry_count; i++) {
+        const PeConversationEntry* entry = pe_conversation_entry(view_.get(), i);
+        const PeMessageInfo* own = entry && entry->open && !entry->selected ? pe_message_view_info(pe_conversation_entry_view(view_.get(), i)) : nullptr;
+        blocked = own && own->remote_images && !own->pictures_loaded && own->protection == PE_PROTECTION_TONE_NONE;
+    }
+    ShowBars(info->attachment_count > 0, blocked);
     holdLayout_ = false;
     Layout();
     if (onShown) {
@@ -1446,7 +1617,7 @@ void Reader::FindInMessage(HWND owner, bool again) {
     if (!Info()) {
         return;
     }
-    if (again && preview_.Finding() && preview_.FindNext()) {
+    if (again && Body().Finding() && Body().FindNext()) {
         return;
     }
     // no answer yet, from the moment the words are asked for
@@ -1457,7 +1628,7 @@ void Reader::FindInMessage(HWND owner, bool again) {
         return;
     }
     findWords_ = fields[0].value;
-    preview_.Find(findWords_, [this, words = findWords_](int count) {
+    Body().Find(findWords_, [this, words = findWords_](int count) {
         testFound_ = count >= 0 ? count : -2;
         if (onFound && count >= 0) {
             onFound(count > 0 ? L"" : core::T(PE_TEXT_UI_FIND_NOT_FOUND, {{"words", words}}));
@@ -1595,10 +1766,10 @@ bool Reader::ShowsConversation() const {
     return info && info->conversation_count > 0;
 }
 
-void Reader::ConversationLine(int64_t index) {
+void Reader::ConversationClick(PeConversationClick click, size_t index) {
     int64_t folder = 0;
     uint64_t uid = 0;
-    if (!uid_ || !pe_conversation_click(core_, folder_, uid_, index, &folder, &uid)) {
+    if (!uid_ || !pe_conversation_click(core_, folder_, uid_, click, index, &folder, &uid)) {
         return;
     }
     // the same message: its conversation built again where it was; another: downloaded first when it is not yet,
@@ -1609,13 +1780,27 @@ void Reader::ConversationLine(int64_t index) {
     }
     folder_ = folder;
     uid_ = uid;
+    // the pictures asked for are another message's: never carried to this one (a signed or encrypted message loads its own only on a click of its own)
+    remoteImages_ = false;
     pe_message_open(core_, folder, uid);
 }
 
-void Reader::ConversationEarlier() {
-    if (uid_) {
-        pe_conversation_show_earlier(core_, folder_, uid_);
-        StartView();
+bool Reader::ConversationCommand(WORD id) {
+    switch (id) {
+    case IDM_NEXT_IN_CONVERSATION:
+        ConversationClick(PE_CONVERSATION_CLICK_NEXT);
+        return true;
+    case IDM_PREVIOUS_IN_CONVERSATION:
+        ConversationClick(PE_CONVERSATION_CLICK_PREVIOUS);
+        return true;
+    case IDM_OPEN_ALL_MESSAGES:
+        ConversationClick(PE_CONVERSATION_CLICK_OPEN_ALL);
+        return true;
+    case IDM_FOLD_ALL_MESSAGES:
+        ConversationClick(PE_CONVERSATION_CLICK_FOLD_ALL);
+        return true;
+    default:
+        return false;
     }
 }
 
@@ -1745,6 +1930,7 @@ std::wstring Reader::Unsubscribed(uint64_t request, const std::wstring& problem)
 // the logo is asked for when the message has one the server passed, and shown once it is drawn (LogoReady); without
 // one, the sender's picture of the Address Book in its place (PictureReady)
 void Reader::ShowLogo(bool logo, uint64_t picture) {
+    stack_.SetSelectedPicture(nullptr, 0);
     if (logoBitmap_) {
         DeleteObject(logoBitmap_);
         logoBitmap_ = nullptr;
@@ -1766,6 +1952,11 @@ void Reader::ShowLogo(bool logo, uint64_t picture) {
 // the logo's or the picture's pixels from the core, BGRA with the alpha multiplied in, beside the header
 void Reader::ShowDrawn(uint8_t* pixels, size_t length) {
     logoBitmap_ = CoreBitmap(pixels, length, logoSize_);
+    // the message shown in the stack: its frame's picture, not the header's
+    if (logoBitmap_ && stack_.Visible()) {
+        stack_.SetSelectedPicture(logoBitmap_, logoSize_);
+        return;
+    }
     if (logoBitmap_) {
         ShowWindow(logo_, SW_SHOW);
         Layout();
@@ -1884,12 +2075,6 @@ bool Reader::OnCommand(WORD id, WORD) {
     case IDC_OPEN_PREVIEW:
         OpenAttachment(StripItemOf(std::exchange(previewOpen_, -1)));
         return true;
-    case IDC_CONVERSATION_LINE:
-        ConversationLine(std::exchange(conversationLine_, -1));
-        return true;
-    case IDC_CONVERSATION_EARLIER:
-        ConversationEarlier();
-        return true;
     case IDC_BOUNCED_MESSAGE:
         if (const PeMessageInfo* info = Info(); info && info->has_bounced_message && onBouncedMessage) {
             onBouncedMessage(info->bounced_folder, info->bounced_uid);
@@ -1901,14 +2086,7 @@ bool Reader::OnCommand(WORD id, WORD) {
 
 bool Reader::OnTimer(UINT_PTR id) {
     if (id == TIMER_FIND_SETTLED) {
-        preview_.FindSettled();
-        return true;
-    }
-    if (id == TIMER_MEASURE) {
-        // not while the pane is hidden: it is measured once it shows again
-        if (IsWindowVisible(previewHost_)) {
-            preview_.Measure();
-        }
+        Body().FindSettled();
         return true;
     }
     if (id != TIMER_DOWNLOADING) {
@@ -1971,6 +2149,7 @@ void Reader::OnEvent(const UiEvent& event) {
             ShowBars(false, false);
             ShowRetry(true);
             documentShown_ = false;
+            ShowStack(false);
             preview_.ShowState(PE_READER_STATE_FAILED, event.failure, core::Narrow(event.message));
         }
         break;
@@ -2000,6 +2179,9 @@ void Reader::OnEvent(const UiEvent& event) {
         break;
     case PE_EVENT_KIND_LOGO_READY:
     case PE_EVENT_KIND_PICTURE_READY:
+        if (event.kind == PE_EVENT_KIND_PICTURE_READY) {
+            stack_.PictureReady(event.uid);
+        }
         // the request is the one asked for, of its kind (the list's pictures have requests of their own)
         if (logoRequest_ && event.uid == logoRequest_ && (event.kind == PE_EVENT_KIND_PICTURE_READY) == contactPicture_) {
             logoRequest_ = 0;

@@ -313,13 +313,13 @@ pub async fn invitation_and_logo(d: &Driver) {
     show_found("subject:\"Quarterly planning\"").await;
     let reader = &shell().main().reader;
     let card = wait_for(15, || {
-        let text = document_text(&reader.preview.shown());
+        let text = document_text(&reader.preview().shown());
         (text.contains("Invitation: Quarterly planning") && text.contains("Room 2")).then_some(text)
     })
     .await
     .unwrap_or_default();
     d.check(
-        card.contains("Open in Calendar") && reader.preview.shown().contains(pe_html::OPEN_CALENDAR_LINK),
+        card.contains("Open in Calendar") && reader.preview().shown().contains(pe_html::OPEN_CALENDAR_LINK),
         "a message with an invitation shows the event in a card above the text, with Open in Calendar",
     );
     d.shot(&main, "read-10-invitation").await;
@@ -1037,9 +1037,14 @@ pub async fn many_messages(d: &Driver) {
         }
     }
     run_command(Command::Sync);
-    main.folders.select(bulk, false);
-    let listed = wait_until(30, || main.list_view().own_folder() == Some(bulk) && rows() == 5).await;
+    // selected once the tree lists it (made just now); never acting on another folder's list
+    let chosen = wait_until(20, || main.folders.select(bulk, false)).await;
+    let listed = chosen && wait_until(30, || main.list_view().own_folder() == Some(bulk) && rows() == 5).await;
     d.check(listed, &format!("Bulk lists its five messages ({})", rows()));
+    if !listed {
+        // what follows deletes the whole list: never another folder's
+        return;
+    }
 
     // Reply: the draft made off the window thread, the compose window opening when it is
     main.list.select(0);
@@ -1742,7 +1747,7 @@ pub async fn junk(d: &Driver) {
 
 /// The row of the message with `subject` selected, by the list's own rows (grouped by conversation, a row is not a
 /// message's place in the folder); the first row when it is not listed
-async fn select_subject(subject: &str) {
+pub(super) async fn select_subject(subject: &str) {
     let row = wait_for(20, || {
         shell()
             .main()
@@ -2248,28 +2253,40 @@ pub async fn conversations(d: &Driver) {
         main.reader.shows(focus.folder, focus.uid) && main.reader.shows_conversation()
     })
     .await;
-    // each line's state: open (pe-o), the focus (pe-f), unread (pe-u); an unread line is always open, the focus open,
-    // the read first message folded (which unread ones open is the core's, tests/conversation.rs)
-    let shown = main.reader.preview.shown_with_parts();
-    let lines: Vec<Vec<&str>> = shown
-        .split("<section class=\"")
-        .skip(1)
-        .map(|s| s.split('"').next().unwrap_or_default().split(' ').collect())
-        .collect();
+    // the stack: a row for the read question, a frame for each unread reply, the oldest unread selected (which unread
+    // ones open is the core's, tests/conversation.rs)
+    let stack = main.reader.stack.clone();
+    let built = wait_until(15, || stack.shown().len() == 3 && stack.frames().len() == 2).await;
+    let shown = stack.shown();
+    let open: Vec<bool> = shown.iter().map(|s| s.1).collect();
+    let selected: Vec<bool> = shown.iter().map(|s| s.2).collect();
     d.check(
-        stacked
-            && lines.len() == 3
-            && lines.iter().all(|l| !l.contains(&"pe-u") || l.contains(&"pe-o"))
-            && lines.iter().any(|l| l.contains(&"pe-f") && l.contains(&"pe-o"))
-            && !lines[0].contains(&"pe-o"),
+        stacked && built && open == [false, true, true] && selected == [false, true, false],
         &format!(
-            "selecting it shows the whole conversation at its oldest unread message: the unread ones open, the read one folded ({lines:?})"
+            "selecting it shows the whole conversation at its oldest unread message: the unread ones open, the read one folded to its row ({shown:?})"
         ),
     );
+    let bodies = wait_until(15, || {
+        let frames = stack.frames();
+        frames.len() == 2
+            && frames[0]
+                .1
+                .as_ref()
+                .is_some_and(|b| b.shown_with_parts().contains("The early one, yes."))
+            && frames[1]
+                .1
+                .as_ref()
+                .is_some_and(|b| b.shown_with_parts().contains("Tickets bought."))
+    })
+    .await;
+    d.check(bodies, "each frame shows its own message");
+    let (title, summary) = stack.title();
     d.check(
-        (0..3).all(|n| shown.contains(&format!("inboxclassic:conversation-{n}"))),
-        "each message has its line",
+        title == "Plans for the trip" && summary.contains('3'),
+        &format!("over it the subject, how many messages and who wrote ({title}, {summary})"),
     );
+    let tall = wait_until(15, || stack.frames().iter().all(|f| f.2.height() > 60)).await;
+    d.check(tall, "each frame as tall as its message");
     d.shot(main.window(), "threads-1-collapsed").await;
     // a moment on screen: the unread messages it showed are read on the server
     let read = wait_until(20, || {
@@ -2282,23 +2299,56 @@ pub async fn conversations(d: &Driver) {
         read,
         "after a moment on screen, the unread messages it showed open are read on the server",
     );
-    // the read first message's line: it opens, and Reply now answers it
-    main.reader.click_conversation_line(0);
+    // the read first message's row: it opens and is selected
+    if let Some(row) = stack.rows().first() {
+        row.activate();
+    }
     let opened = wait_until(15, || {
-        main.reader.shows_conversation()
-            && main.reader.message().is_some_and(|m| m.uid == message.info.uid)
-            && main
-                .reader
-                .preview
-                .shown_with_parts()
-                .contains("Shall we take the early train?")
+        main.reader.message().is_some_and(|m| m.uid == message.info.uid)
+            && stack.shown().iter().map(|s| s.1).collect::<Vec<_>>() == [true, true, true]
+            && stack.shown().first().is_some_and(|s| s.2)
+            && stack
+                .frames()
+                .first()
+                .and_then(|f| f.1.clone())
+                .is_some_and(|b| b.shown_with_parts().contains("Shall we take the early train?"))
+    })
+    .await;
+    d.check(opened, "a click on a folded row opens its message and selects it");
+    d.shot(main.window(), "threads-6-conversation-line").await;
+    // an open message clicked: only selected, every one stays open
+    let carol = focus;
+    stack.select_frame(1);
+    let picked = wait_until(15, || {
+        main.reader.message() == Some(carol)
+            && stack.shown().iter().map(|s| s.1).collect::<Vec<_>>() == [true, true, true]
+    })
+    .await;
+    d.check(picked, "a click on an open message selects it and folds nothing");
+    // the arrow folds: the last one's, the selection stays
+    stack.press_arrow(2);
+    let folded = wait_until(15, || {
+        stack.shown().iter().map(|s| s.1).collect::<Vec<_>>() == [true, true, false]
+            && main.reader.message() == Some(carol)
     })
     .await;
     d.check(
-        opened,
-        "a click on a folded line opens its message, which takes the focus",
+        folded,
+        &format!("the arrow folds a message, the selection stays ({:?})", stack.shown()),
     );
-    d.shot(main.window(), "threads-6-conversation-line").await;
+    // a frame's own Reply: its message selected, the reply quoting it
+    stack.press_button(0, "frame-reply");
+    let compose = wait_compose(20).await;
+    d.check(
+        main.reader.message().is_some_and(|m| m.uid == message.info.uid)
+            && compose
+                .as_ref()
+                .is_some_and(|c| c.subject.text().contains("Plans for the trip")),
+        "a frame's Reply selects its message and replies to it",
+    );
+    if let Some(compose) = compose {
+        close_compose(&compose).await;
+    }
     // Print Conversation: every message, one after another
     let window = main.window().clone().upcast::<gtk::Window>();
     run_command(Command::PrintConversation);
@@ -2511,6 +2561,14 @@ pub(super) fn document_text(document: &str) -> String {
 }
 
 /// The row of the message of `folder` with `subject` selected in the list (the folder shown), and its view there
+/// The web view of the message the main window shows: in the reading pane's stack, the selected frame's body, once it
+/// is made (a message just opened: the one before's, or none yet, until then)
+pub(super) async fn shown_body() -> webkit::WebView {
+    let main = shell().main();
+    wait_until(20, || main.reader.has_view() && main.reader.body_made()).await;
+    main.reader.preview().view.clone()
+}
+
 pub(super) async fn open_by_subject(folder: i64, subject: &str) -> bool {
     let main = shell().main();
     let deadline = Instant::now() + Duration::from_secs(30);
@@ -2599,7 +2657,7 @@ pub async fn bounces(d: &Driver) {
         ),
     );
     let failed = wait_for(15, || {
-        let text = document_text(&main.reader.preview.shown());
+        let text = document_text(&main.reader.preview().shown());
         text.contains("Your message was not delivered").then_some(text)
     })
     .await
@@ -2631,7 +2689,7 @@ pub async fn bounces(d: &Driver) {
     d.shot(main.window(), "bounce-1-failed").await;
 
     // the link, as a click on it asks for it: the page's navigation to it
-    main.reader.preview.view.load_uri(pe_html::BOUNCED_MESSAGE_LINK);
+    main.reader.preview().view.load_uri(pe_html::BOUNCED_MESSAGE_LINK);
     let shown = wait_until(10, || {
         main.selected_name() == "Sent Items"
             && main
@@ -2646,7 +2704,7 @@ pub async fn bounces(d: &Driver) {
     wait_until(10, || main.selected_name() == "Inbox").await;
     open_by_subject(inbox, "Delayed Mail (still being retried)").await;
     let delayed = wait_for(15, || {
-        let text = document_text(&main.reader.preview.shown());
+        let text = document_text(&main.reader.preview().shown());
         text.contains("Your message has not been delivered yet").then_some(text)
     })
     .await
@@ -3156,10 +3214,13 @@ pub async fn not_downloaded(d: &Driver) {
         &format!("the header shows the message's sender and subject at once ({header})"),
     );
     d.check(
-        wait_until(10, || reader.preview.shown().contains("Downloading the message")).await,
+        wait_until(10, || reader.preview().shown().contains("Downloading the message")).await,
         "the pane says the message is being downloaded",
     );
-    d.check(reader.preview.shown().contains("The message is"), "and how large it is");
+    d.check(
+        reader.preview().shown().contains("The message is"),
+        "and how large it is",
+    );
     d.shot(&main, "read-13-downloading").await;
     // the server gone: why, and Try Again
     silent.stop();
@@ -3168,14 +3229,14 @@ pub async fn not_downloaded(d: &Driver) {
         "a message that can not be downloaded has Try Again",
     );
     d.check(
-        reader.preview.shown().contains("could not be downloaded"),
+        reader.preview().shown().contains("could not be downloaded"),
         "and the pane says why",
     );
     d.shot(&main, "read-12-not-downloaded").await;
     // the server back: the account syncs, and the message is tried again by itself
     set_port(d, "form-6", &d.ports.imap.to_string()).await;
     d.check(
-        wait_until(30, || reader.preview.shown().contains("Here at last")).await,
+        wait_until(30, || reader.preview().shown().contains("Here at last")).await,
         "once the account is back the message shows by itself",
     );
     d.check(!reader.shows_failure(), "and Try Again goes");
@@ -3228,7 +3289,7 @@ pub async fn large_message(d: &Driver) {
     let reader = &shell().main().reader;
     d.check(
         wait_until(15, || {
-            document_text(&reader.preview.shown()).contains("The figures are attached")
+            document_text(&reader.preview().shown()).contains("The figures are attached")
         })
         .await,
         "a large message shows its text before the rest of it is here",
@@ -3238,7 +3299,7 @@ pub async fn large_message(d: &Driver) {
         wait_until(10, || said().starts_with("Downloading")).await,
         &format!("the status bar says how far the rest is ({})", said()),
     );
-    let text = || document_text(&reader.preview.shown());
+    let text = || document_text(&reader.preview().shown());
     d.check(
         text().contains("Downloading"),
         "its PDF file is a tile that says it is on its way",
@@ -4348,7 +4409,7 @@ pub async fn between_accounts(d: &Driver) {
 // ---- 46. Options and the language ----
 
 /// The words a window shows: its labels (buttons' included) and the message list's column titles, but not the mail's
-/// own (the rows of the list and the tree, and the reading pane's header, which hold names and subjects)
+/// own (the rows of the list and the tree, and the reading pane's header and stack, which hold names and subjects)
 pub(super) fn shown_words(root: &gtk::Widget) -> Vec<(String, bool)> {
     let data: Vec<gtk::Widget> = [
         "folder-tree",
@@ -4358,9 +4419,19 @@ pub(super) fn shown_words(root: &gtk::Widget) -> Vec<(String, bool)> {
         "reader-to",
         "reader-date",
         "reader-attachments",
+        "stack-subject",
+        "stack-summary",
     ]
     .iter()
     .filter_map(|name| named_in(root, name))
+    // the reading pane's stack: each message's sender, recipients and date, where it is filed and its files, and
+    // the folded messages' rows
+    .chain(descendants::<gtk::Widget>(root).into_iter().filter(|w| {
+        matches!(
+            w.widget_name().as_str(),
+            "frame-name" | "frame-detail" | "frame-found-in" | "frame-files" | "frame-picture" | "stack-rows"
+        )
+    }))
     .collect();
     let titles: Vec<String> = named_in(root, "message-list")
         .and_downcast::<gtk::ColumnView>()
@@ -4766,7 +4837,7 @@ pub async fn one_time_codes(d: &Driver) {
     wait_until(10, || main.selected_name() == "Inbox").await;
     open_by_subject(inbox, signed).await;
     let card = wait_for(15, || {
-        let text = document_text(&main.reader.preview.shown());
+        let text = document_text(&main.reader.preview().shown());
         text.contains("Code from accounts.example.com").then_some(text)
     })
     .await
@@ -4781,9 +4852,9 @@ pub async fn one_time_codes(d: &Driver) {
     );
     d.shot(main.window(), "otp-1-card").await;
     // Copy, as a click on it asks for it: the page's navigation to it
-    main.reader.preview.view.clipboard().set_text("");
-    main.reader.preview.view.load_uri(pe_html::COPY_CODE_LINK);
-    let clipboard = main.reader.preview.view.clipboard();
+    main.reader.preview().view.clipboard().set_text("");
+    main.reader.preview().view.load_uri(pe_html::COPY_CODE_LINK);
+    let clipboard = main.reader.preview().view.clipboard();
     let mut copied = String::new();
     for _ in 0..20 {
         copied = clipboard
@@ -4821,7 +4892,7 @@ pub async fn one_time_codes(d: &Driver) {
     open_by_subject(inbox, by_header).await;
     d.check(
         wait_until(15, || {
-            let text = document_text(&main.reader.preview.shown());
+            let text = document_text(&main.reader.preview().shown());
             text.contains("Code from login.example.com") && text.contains("917355")
         })
         .await,
@@ -4829,7 +4900,7 @@ pub async fn one_time_codes(d: &Driver) {
     );
     open_by_subject(inbox, unsigned).await;
     let plain = wait_for(15, || {
-        let text = document_text(&main.reader.preview.shown());
+        let text = document_text(&main.reader.preview().shown());
         text.contains("771204").then_some(text)
     })
     .await
@@ -4937,7 +5008,7 @@ pub async fn opened_from_store(d: &Driver) {
     let reader = &shell().main().reader;
     d.check(
         wait_until(10, || {
-            document_text(&reader.preview.shown()).contains("Downloaded before it was opened")
+            document_text(&reader.preview().shown()).contains("Downloaded before it was opened")
         })
         .await
             && core.last_open_from_store(),

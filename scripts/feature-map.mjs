@@ -703,11 +703,12 @@ const sections = [
             {
                 shot: 'threads-1-collapsed',
                 name: 'Conversations',
-                what: "The list groups the messages that answer each other into conversations (by their Message-IDs, In-Reply-To and References; on Gmail by Gmail's own conversations), one row each with how many messages it has and how many are new, the sender and first words of the message it opens (its oldest unread, else its newest), bold while one is unread, placed by its newest message. Selecting the row shows the whole conversation in the reading pane: the unread messages open, the read ones folded to a line, with the user's replies, drafts and the messages filed in other folders. An action on a collapsed conversation acts on all of its messages; Delete, Move and Archive ask about the ones in other folders.",
+                what: "The list groups the messages that answer each other into conversations (by their Message-IDs, In-Reply-To and References; on Gmail by Gmail's own conversations), one row each with how many messages it has and how many are new, the sender and first words of the message it opens (its oldest unread, else its newest), bold while one is unread, placed by its newest message. Selecting the row shows the whole conversation in the reading pane as a stack of the platform's own controls: its subject, how many messages and who wrote over it, each open message a frame of its own (sender, recipients, date, its own Reply, Reply All, Forward and More buttons, its body as tall as the message), each folded one a row, with the user's replies (as You), drafts and the messages filed in other folders; the read middle of a long conversation folded into one row. An action on a collapsed conversation acts on all of its messages; Delete, Move and Archive ask about the ones in other folders.",
                 how: 'On by default; Group messages by conversation and Show the whole conversation on the Reading page of Tools > Options turn them off.',
                 checked: [
                     'The Inbox lists the conversation once, with its count and how many are new',
                     'Selecting it shows the whole conversation at its oldest unread message, the read one folded',
+                    'Each open message is a frame of its own, as tall as the message',
                     'The unread messages it showed are marked read on the server',
                     'Print Conversation prints every message',
                     'Mark Read on the collapsed row marks all three read on the server'
@@ -715,10 +716,27 @@ const sections = [
             },
             {
                 shot: 'threads-6-conversation-line',
-                name: 'A line of the conversation',
-                what: "In the conversation in the reading pane, a folded message's line opens it, and it takes the focus that Reply, Forward and Print act on; an open message's line folds it.",
-                how: 'Click a line in the reading pane.',
-                checked: ["A click on the read message's line opens it and gives it the focus"]
+                name: 'A message of the conversation',
+                what: "In the conversation in the reading pane, a click on a folded message's row opens it and selects it; a click on an open message selects it (Reply, Forward, Print and the bars act on the selected one) and folds nothing; the arrow of a row or frame opens or folds it. Each frame's own Reply, Reply All and Forward act on its message. View > Next and Previous Message in Conversation (Alt+Down and Alt+Up), Open All Messages and Fold All Messages move through it.",
+                how: 'Click a row, a frame or an arrow in the reading pane.',
+                checked: [
+                    "A click on a folded row opens it and selects it",
+                    'A click on an open message selects it and folds nothing',
+                    'The arrow folds a message',
+                    "A frame's own Reply replies to its message"
+                ]
+            },
+            {
+                shot: 'threads-7-long',
+                name: 'A long conversation',
+                what: 'In a long conversation the read messages in the middle (four or more in a row, between the first message and the last two read ones) are folded into one row that says how many it holds; a click lists them. View > Open All Messages opens every message, only the bodies near what is seen made so a long conversation stays light; Fold All Messages folds every one but the selected one; Next and Previous Message in Conversation move the selection.',
+                how: 'View > Open All Messages, Fold All Messages, Next Message in Conversation (Alt+Down), Previous Message in Conversation (Alt+Up).',
+                checked: [
+                    'The read middle is folded into one row, which a click lists',
+                    'Open All Messages opens every message at once, only the bodies near what is seen made',
+                    'Previous and Next Message in Conversation move the selection',
+                    'Fold All Messages folds every message but the selected one'
+                ]
             },
             {
                 shot: 'threads-2-expanded',

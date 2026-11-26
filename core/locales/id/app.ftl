@@ -63,6 +63,14 @@ ui-find-in-message-hint = Cari di pesan ini
 ui-find-not-found = “{ $words }” tidak ada di pesan ini
 cmd-expand-all-threads = Perluas &Semua Percakapan
 cmd-collapse-all-threads = &Ciutkan Semua Percakapan
+# review: new
+cmd-next-in-conversation = Pesan Berikutnya &dalam Percakapan
+# review: new
+cmd-previous-in-conversation = Pesan Sebelumnya dalam Pe&rcakapan
+# review: new
+cmd-open-all-messages = Buka Seluru&h Pesan
+# review: new
+cmd-fold-all-messages = Ciutkan Semua P&esan
 ui-group-by-conversation = &Kelompokkan pesan menurut percakapan
 ui-show-whole-conversation = T&ampilkan seluruh percakapan di panel baca
 ui-show-whole-conversation-note = Buka pesan-pesan dalam percakapan bersama-sama, termasuk balasan dan draf Anda serta pesan di folder lain. Pesan yang sudah dibaca biasanya diciutkan menjadi satu baris; klik baris untuk membuka atau menciutkannya.
@@ -75,12 +83,25 @@ ui-thread-count = { $new ->
 }
 ui-conversation-to = kepada { $people }
 ui-conversation-draft = Draf
-ui-conversation-alone = Ditandatangani atau dienkripsi: dibuka tersendiri
 ui-conversation-downloading = Mengunduh…
-ui-conversation-earlier = { $count ->
-    [1] Tampilkan 1 pesan sebelumnya
-   *[other] Tampilkan { $count } pesan sebelumnya
-}
+# review: new
+ui-conversation-you = Saya
+# review: new
+ui-conversation-messages = { $count } pesan
+# review: new
+ui-conversation-unread = { $count } belum dibaca
+# review: new
+ui-conversation-found-in = Ditemukan di { $folder }
+# review: new
+ui-conversation-hidden = { $count } pesan lainnya
+# review: new
+ui-conversation-open-message = Buka pesan
+# review: new
+ui-conversation-fold-message = Ciutkan pesan
+# review: new
+ui-conversation-more = Lainnya
+# review: new
+ui-conversation-edit = Edit
 ui-conversation-elsewhere = { $count ->
     [1] Percakapan ini juga memiliki 1 pesan di folder lain.
    *[other] Percakapan ini juga memiliki { $count } pesan di folder lain.

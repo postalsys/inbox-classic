@@ -1,5 +1,5 @@
-// The reading pane: the header of the message (From, Date, To, Cc, Subject) with the brand's logo at its left and the
-// attachments and Unsubscribe at its right; under it the strip of its files to open (Attachments.swift), the security bar of a signed or encrypted message
+// The reading pane: the header of the message (From, Date, To, Cc, Subject) while it loads, the attachments and
+// Unsubscribe at its right; under it the strip of its files to open (Attachments.swift), the security bar of a signed or encrypted message
 // (SecurityBar.swift) and the bar that offers the pictures from the internet; then the
 // message itself, with the cards of the core above it (a calendar event, a bounce, a one-time code). Every string shown is the core's, decoded and checked there.
 // It asks the core for the message it shows and hears its events, so the main window's pane and a message's own window
@@ -42,9 +42,8 @@ final class Reader: NSObject {
     /// the next message opened is shown in its conversation (Show the whole conversation), not alone
     var inConversation = false
     private var viewRequest: UInt64 = 0
+    /// the brand's logo of a message alone, drawn for its frame (a contact's picture is the stack's, by its key)
     private var logoRequest: UInt64 = 0
-    /// without a logo, the sender's picture from the Address Book drawn for the logo's place
-    private var pictureRequest: UInt64 = 0
     private var unsubscribeRequest: UInt64 = 0
     /// Find Key on the label of a part signed by a key not known here: its lookup, 0 for none
     private var findRequest: UInt64 = 0
@@ -55,7 +54,16 @@ final class Reader: NSObject {
     private var keepScroll = false
     /// the view shown is a large message's text, the rest still downloading
     private var textFirst = false
+    /// the pane's own page while no message is shown: none selected, several, downloading, why it is not there
     private let preview = Preview()
+    /// the message shown, or its whole conversation: a native stack of rows and frames (ConversationStack)
+    let stack = ConversationStack()
+    /// what a frame's buttons ask of the window around the reader: a command on its message (Reply, Reply All,
+    /// Forward), its More menu, a draft to finish, the message in a window of its own
+    var commandHandler: (Command) -> Void = { command in AppDelegate.shared?.perform(command) }
+    var moreMenu: (_ folder: Int64, _ uid: UInt64) -> NSMenu = { _, _ in NSMenu() }
+    var editDraft: (_ folder: Int64, _ uid: UInt64) -> Void = { _, _ in }
+    var openWindow: (_ folder: Int64, _ uid: UInt64) -> Void = { _, _ in }
     /// Find in This Message: a bar over the message, as Safari and Mail have
     private let findBar = FindBar()
     private let header = HeaderText(wrappingLabelWithString: "")
@@ -64,7 +72,6 @@ final class Reader: NSObject {
     private let reactionsLabel = NSTextField(labelWithString: "")
     /// the core's list the chips stand for, kept while they are shown (their menus act on it)
     private var reactions: OpaquePointer?
-    private let logo = NSImageView()
     /// the header and the line under it, shown only over a message
     private let headerBox = NSView()
     private let headerLine = NSBox()
@@ -89,8 +96,8 @@ final class Reader: NSObject {
     private(set) var picturesOffered = false
     /// over several messages: the numbers the core's page shows
     private var summary: PeSelectionSummary?
-    /// the logo's side in pixels, for the core to draw it at
-    var logoPixels: Int { Int(48 * (view.window?.backingScaleFactor ?? 2)) }
+    /// the logo's side in pixels, for the core to draw it at: as large as the frame's picture
+    private var logoPixels: Int { Int(SenderPicture.size * (view.window?.backingScaleFactor ?? 2)) }
 
     deinit {
         pe_reactions_free(reactions)
@@ -100,16 +107,13 @@ final class Reader: NSObject {
         self.core = core
         super.init()
         preview.core = core
+        preview.view.setAccessibilityIdentifier("reader.pane")
         header.isSelectable = true
         header.setAccessibilityIdentifier("reader.header")
         header.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         // below the stack's own 250, so it takes the free width and the files sit at the trailing edge
         header.setContentHuggingPriority(.init(249), for: .horizontal)
         header.maximumNumberOfLines = 6
-        logo.imageScaling = .scaleProportionallyUpOrDown
-        logo.isHidden = true
-        logo.widthAnchor.constraint(equalToConstant: 48).isActive = true
-        logo.heightAnchor.constraint(equalToConstant: 48).isActive = true
         attachments.bezelStyle = .push
         attachments.isBordered = true
         attachments.setAccessibilityIdentifier("reader.attachments")
@@ -131,7 +135,7 @@ final class Reader: NSObject {
         fields.setContentHuggingPriority(.init(249), for: .horizontal)
         header.widthAnchor.constraint(equalTo: fields.widthAnchor).isActive = true
         reactionsRow.widthAnchor.constraint(lessThanOrEqualTo: fields.widthAnchor).isActive = true
-        let top = NSStackView(views: [logo, fields, right])
+        let top = NSStackView(views: [fields, right])
         top.alignment = .top
         top.spacing = 10
         top.edgeInsets = NSEdgeInsets(top: 8, left: 10, bottom: 8, right: 10)
@@ -142,9 +146,7 @@ final class Reader: NSObject {
             top.trailingAnchor.constraint(equalTo: headerBox.trailingAnchor),
             top.topAnchor.constraint(equalTo: headerBox.topAnchor),
             top.bottomAnchor.constraint(equalTo: headerBox.bottomAnchor),
-            // the same 8pt under the text with a logo as without, and never shorter than the logo
             fields.bottomAnchor.constraint(lessThanOrEqualTo: headerBox.bottomAnchor, constant: -8),
-            logo.bottomAnchor.constraint(lessThanOrEqualTo: headerBox.bottomAnchor, constant: -8),
         ])
         headerLine.boxType = .separator
 
@@ -174,15 +176,17 @@ final class Reader: NSObject {
         findBar.find = { [weak self] words, backwards, done in self?.find(words, backwards: backwards, done: done) }
         findBar.closed = { [weak self] in
             guard let self else { return }
-            view.window?.makeFirstResponder(preview.view)
+            view.window?.makeFirstResponder(shownPreview.view)
         }
+        setUpStack()
         // the bars in one order: the download that failed, the pictures, the mailing list
-        for part in [headerBox, strip, headerLine, security, retry, pictures, listBar, findBar, preview.view] as [NSView] {
+        for part in [headerBox, headerLine, security, retry, pictures, listBar, findBar, preview.view, stack] as [NSView] {
             view.addArrangedSubview(part)
             part.widthAnchor.constraint(equalTo: view.widthAnchor).isActive = true
         }
         view.setHuggingPriority(.defaultLow, for: .vertical)
         preview.view.setContentHuggingPriority(.defaultLow, for: .vertical)
+        stack.setContentHuggingPriority(.defaultLow, for: .vertical)
         pictures.heightAnchor.constraint(equalToConstant: 28).isActive = true
         retry.heightAnchor.constraint(equalToConstant: 34).isActive = true
         listBar.heightAnchor.constraint(equalToConstant: 28).isActive = true
@@ -196,6 +200,7 @@ final class Reader: NSObject {
         if let summary, same(summary, numbers) { return }
         summary = numbers
         var numbers = numbers
+        showPane()
         preview.show(taken(pe_selection_page(&numbers)) ?? "")
     }
 
@@ -227,10 +232,19 @@ final class Reader: NSObject {
         }
         // never the bar of the message before over the next one
         security.hide()
-        logo.isHidden = true
-        logo.image = nil
-        // says so rather than a blank pane, unless a message is about to be shown
-        preview.clear(noMessage: !loading)
+        // says so rather than a blank pane; a message about to be shown takes the place of the one before in the stack,
+        // its web view kept for it
+        if !loading || stack.isHidden {
+            showPane()
+            preview.clear(noMessage: !loading)
+        }
+    }
+
+    /// the pane's own page in place of the stack, whose frames are let go
+    private func showPane() {
+        stack.clear()
+        stack.isHidden = true
+        preview.view.isHidden = false
     }
 
     private func showHeader(_ shown: Bool) {
@@ -261,6 +275,7 @@ final class Reader: NSObject {
         downloadingTimer?.invalidate()
         retry.isHidden = true
         // how large it is, too
+        showPane()
         preview.showState(PE_READER_STATE_DOWNLOADING, size: loadingSize)
     }
 
@@ -274,6 +289,8 @@ final class Reader: NSObject {
         listBar.isHidden = true
         security.hide()
         retry.isHidden = false
+        showHeader(true)
+        showPane()
         preview.showState(PE_READER_STATE_FAILED, failure: kind, reason: reason)
     }
 
@@ -294,7 +311,8 @@ final class Reader: NSObject {
     private func show(_ info: PeMessageInfo, view: MessageView) {
         downloadingTimer?.invalidate()
         retry.isHidden = true
-        showHeader(true)
+        // the frame says who and when: no header block over the stack
+        showHeader(false)
         header.attributedStringValue = headerText(info)
         let files = info.attachment_count
         attachments.isHidden = files == 0
@@ -310,20 +328,61 @@ final class Reader: NSObject {
         // asked for, or loaded by themselves (Settings, a trusted sender the provider confirmed): the core says
         let allowed = info.pictures_loaded || remoteImages
         security.show(info)
-        // the parts of a signed or encrypted message are documents of their own, in frames the app sizes to them
-        let parts = info.part_count > 0 ? { [view] (index: Int) in view.part(index) } : nil
-        preview.show(text(info.document), pictures: allowed, parts: parts, previews: text(info.preview_token),
-                     keepScroll: keepScroll)
+        // the message, or its conversation, in the stack: a frame for each open message, its body its own document
+        let entries = view.entries
+        preview.view.isHidden = true
+        stack.isHidden = false
+        stack.show(view, info: info, entries: entries, pictures: allowed, start: !keepScroll)
         keepScroll = false
         // a large message's text before the rest of it: made again when the rest is here
         textFirst = file == nil && pe_message_downloading(core.handle, folder, uid)
-        // offered only for a message with pictures on the internet, until they are shown
-        picturesOffered = info.remote_images && !allowed
+        // offered while an open message has pictures on the internet not shown: the selected one, else another one
+        // that is neither signed nor encrypted (their pictures load on a click of their own), until they are shown
+        let blocked = info.remote_images && !allowed ? info : entries.enumerated().compactMap { place, entry -> PeMessageInfo? in
+            guard entry.open, !entry.selected, let own = view.entryView(place)?.info?.pointee else { return nil }
+            return own.remote_images && !own.pictures_loaded && own.protection == PE_PROTECTION_TONE_NONE ? own : nil
+        }.first
+        picturesOffered = blocked != nil
         pictures.isHidden = !picturesOffered
-        if picturesOffered {
-            offerPictures(info)
+        if let blocked {
+            offerPictures(blocked)
         }
     }
+
+    // ---- the stack ----
+
+    private func setUpStack() {
+        stack.core = core
+        stack.pictures = ListPictures(core: core)
+        stack.selectedExtras = (reactionsRow, strip, attachments)
+        stack.keys = { [weak self] click in self?.conversationClick(click) }
+        stack.actions = StackActions(
+            click: { [weak self] click, entry in self?.conversationClick(click, index: entry.index) },
+            command: { [weak self] command, entry in
+                guard let self else { return }
+                select(entry)
+                commandHandler(command)
+            },
+            more: { [weak self] entry, button in
+                guard let self else { return }
+                select(entry)
+                let menu = moreMenu(entry.folder, entry.uid)
+                menu.popUp(positioning: nil, at: NSPoint(x: 0, y: button.bounds.height + 2), in: button)
+            },
+            edit: { [weak self] entry in self?.editDraft(entry.folder, entry.uid) },
+            openWindow: { [weak self] entry in self?.openWindow(entry.folder, entry.uid) },
+            link: { [weak self] link in self?.followLink(link) ?? false })
+    }
+
+    /// the frame's message made the selected one at once, as Reply or its menu acts on it, its accent following when
+    /// the view is made again
+    private func select(_ entry: ConversationEntry) {
+        guard !entry.selected, uid != 0 else { return }
+        conversationClick(PE_CONVERSATION_CLICK_SELECT, index: entry.index)
+    }
+
+    /// the web view of the message shown: the selected frame's, or the pane's own page
+    var shownPreview: Preview { stack.isHidden ? preview : (stack.selectedBody ?? preview) }
 
     // ---- the pictures bar ----
 
@@ -550,11 +609,10 @@ final class Reader: NSObject {
         return out
     }
 
-    /// the brand's logo as it is, or a person's picture `round` as the list shows it
-    func showLogo(_ pixels: Data?, round: Bool = false) {
-        guard let image = pixelImage(pixels, side: logoPixels, points: 48) else { return }
-        logo.image = round ? roundImage(image) : image
-        logo.isHidden = false
+    /// the brand's logo, drawn in the selected frame's header
+    private func showLogo(_ pixels: Data?) {
+        guard let image = pixelImage(pixels, side: logoPixels, points: SenderPicture.size) else { return }
+        stack.selectedPicture(image)
     }
 
     /// the mailing list's bar as the core words it; no words, no bar
@@ -595,7 +653,6 @@ final class Reader: NSObject {
         textFirst = false
         endPrint()
         logoRequest = 0
-        pictureRequest = 0
         clearView(loading: loading)
     }
 
@@ -708,8 +765,6 @@ final class Reader: NSObject {
         show(info.pointee, view: messageView)
         if info.pointee.has_logo {
             logoRequest = pe_logo_start(core.handle, folder, uid, UInt32(logoPixels))
-        } else if info.pointee.picture != 0 {
-            pictureRequest = pe_picture_start(core.handle, info.pointee.picture, UInt32(logoPixels))
         }
         shownHandler()
     }
@@ -754,11 +809,8 @@ final class Reader: NSObject {
                 showLogo(takenBytes(pe_logo_result(core.handle, event.uid, &length), length))
             }
         case PE_EVENT_KIND_PICTURE_READY:
-            if pictureRequest != 0 && event.uid == pictureRequest {
-                pictureRequest = 0
-                var length = 0
-                showLogo(takenBytes(pe_picture_result(core.handle, event.uid, &length), length), round: true)
-            }
+            // the senders' pictures of the stack (another list's request is not its)
+            stack.pictures?.ready(event.uid)
         case PE_EVENT_KIND_PREVIEWS_PREPARED:
             // the files of the view shown that were "Preparing..." are described: the view made again where it was
             // scrolled to; another window's view is not this one
@@ -822,17 +874,6 @@ final class Reader: NSObject {
                 status(Text.pgpRecipientLooking.text)
             }
             return true
-        case PE_READER_LINK_CONVERSATION:
-            let index = pe_conversation_link_index(link)
-            onMain { [weak self] in self?.conversationLine(index) }
-            return true
-        case PE_READER_LINK_CONVERSATION_EARLIER:
-            onMain { [weak self] in
-                guard let self, self.uid != 0 else { return }
-                pe_conversation_show_earlier(self.core.handle, self.folder, self.uid)
-                self.rebuild()
-            }
-            return true
         case PE_READER_LINK_ATTACHMENT:
             // a preview after the text: its file opened as a double-click in the strip opens it; only a link of the
             // message this reader shows (the core checks its view's token)
@@ -850,18 +891,21 @@ final class Reader: NSObject {
     /// the view shown is a conversation's
     var showsConversation: Bool { (messageView?.info?.pointee.conversation_count ?? 0) > 0 }
 
-    /// a line of the conversation shown clicked: its message opens or folds, and the conversation is shown again
-    /// where it was, at the message the core says has the focus (downloaded first when it is not yet)
-    func conversationLine(_ index: Int64) {
+    /// a click in the conversation shown (a message's row, frame or arrow, Next, Previous, Open All, Fold All, the
+    /// folded middle): the core says which message is selected now, and the conversation is shown again where it was,
+    /// the frames of the same messages kept (downloaded first when it is not here yet)
+    func conversationClick(_ click: PeConversationClick, index: Int = 0) {
         guard uid != 0 else { return }
         var to: (folder: Int64, uid: UInt64) = (0, 0)
-        guard pe_conversation_click(core.handle, folder, uid, index, &to.folder, &to.uid) else { return }
+        guard pe_conversation_click(core.handle, folder, uid, click, index, &to.folder, &to.uid) else { return }
         if to.folder == folder && to.uid == uid {
             rebuild()
             return
         }
         folder = to.folder
         uid = to.uid
+        // the pictures asked for are another message's: never carried to this one (a signed or encrypted message loads its own only on a click of its own)
+        remoteImages = false
         keepScroll = true
         waiting = true
         pe_message_open(core.handle, folder, uid)
@@ -888,7 +932,7 @@ final class Reader: NSObject {
 
     /// what the app's own script `script` says of the message's page, for the UI test
     func pageAnswer(_ script: String) async -> String {
-        await preview.pageAnswer(script)
+        await shownPreview.pageAnswer(script)
     }
 
     /// the code card's Copy: the code the core found, on the clipboard (nothing is read from the link)
@@ -983,7 +1027,7 @@ final class Reader: NSObject {
         let configuration = WKFindConfiguration()
         configuration.wraps = true
         configuration.backwards = backwards
-        preview.view.find(words, configuration: configuration) { result in done(result.matchFound) }
+        shownPreview.view.find(words, configuration: configuration) { result in done(result.matchFound) }
     }
 
     /// the subject of the message shown, empty before it is

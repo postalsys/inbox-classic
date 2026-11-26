@@ -16,6 +16,7 @@ use pe_core::{Action, DraftKind, Event, ListView, MessageRef, Scope, Summary};
 use crate::app::{shell, spawn};
 use crate::commands::Command;
 use crate::reader::Reader;
+use crate::stack::Click;
 use crate::ui::{self, TITLE};
 
 pub struct MessageWindow {
@@ -166,6 +167,9 @@ impl MessageWindow {
             }
         });
         this.enable(Command::Unsubscribe.name(), false);
+        // a frame of the stack: what it asks of its one message, done by the main window
+        this.reader
+            .on_frame_ask(|asked| crate::app::shell().main().frame_asks(asked));
         this.connect();
         this
     }
@@ -188,6 +192,18 @@ impl MessageWindow {
         add(Command::ReplyAll.name(), |this| this.reply(DraftKind::ReplyAll));
         add(Command::Forward.name(), |this| this.reply(DraftKind::Forward));
         add(Command::Print.name(), |this| this.reader.print(&this.window));
+        add(Command::NextInConversation.name(), |this| {
+            this.reader.conversation_click(Click::Next, 0)
+        });
+        add(Command::PreviousInConversation.name(), |this| {
+            this.reader.conversation_click(Click::Previous, 0)
+        });
+        add(Command::OpenAllMessages.name(), |this| {
+            this.reader.conversation_click(Click::OpenAll, 0)
+        });
+        add(Command::FoldAllMessages.name(), |this| {
+            this.reader.conversation_click(Click::FoldAll, 0)
+        });
         add(Command::Unsubscribe.name(), |this| {
             let reader = this.reader.clone();
             spawn(async move { reader.unsubscribe().await });
@@ -233,7 +249,7 @@ impl MessageWindow {
         self.window.connect_close_request(move |window| {
             if let Some(this) = weak.upgrade() {
                 this.reader.clear(false);
-                this.reader.preview.release();
+                this.reader.preview().release();
             }
             WINDOWS.with(|windows| windows.borrow_mut().retain(|w| &w.window != window));
             glib::Propagation::Proceed

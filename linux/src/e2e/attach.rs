@@ -184,12 +184,10 @@ pub(super) async fn opening_attachments(d: &Driver) {
         &format!("opened again, the same file ({again:?})"),
     );
 
-    // the keyboard: Tab from the paper clip reaches the strip, the arrows move, Enter opens
+    // the keyboard: Tab from the message's own buttons (the paper clip first among them) reaches the strip under its
+    // header, the arrows move, Enter opens
     let pane: gtk::Widget = main.reader.widget.clone().upcast();
-    d.check(
-        tab_moves(&pane, "reader-attachments", "reader-strip"),
-        "Tab reaches the strip",
-    );
+    d.check(tab_moves(&pane, "frame-more", "reader-strip"), "Tab reaches the strip");
     if let Some(first) = strip.flow.child_at_index(0) {
         first.grab_focus();
     }

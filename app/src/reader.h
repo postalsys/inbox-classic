@@ -18,6 +18,7 @@
 
 #include "core.h"
 #include "preview.h"
+#include "stack.h"
 
 struct UiEvent;
 struct StripOpened;
@@ -79,9 +80,24 @@ public:
     std::wstring Unsubscribed(uint64_t request, const std::wstring& problem);
     // the keys pressed while the message has the keyboard that its window handles (Esc, Delete, the shortcuts with
     // Ctrl): true when handled
-    void SetKeys(std::function<bool(UINT key)> keys) { preview_.SetKeys(std::move(keys)); }
-    // the keyboard to the message itself
-    void FocusBody() { SetFocus(previewHost_); }
+    void SetKeys(std::function<bool(UINT key)> keys) {
+        keys_ = keys;
+        preview_.SetKeys(std::move(keys));
+    }
+    // the keyboard to the message itself: the stack's, or the pane's page
+    void FocusBody() { SetFocus(stack_.Visible() ? stack_.Hwnd() : previewHost_); }
+    // a click in the conversation shown, or Next and Previous Message in Conversation, Open All and Fold All Messages:
+    // the core says which message is selected now, and the conversation is shown again where it was
+    void ConversationClick(PeConversationClick click, size_t index = 0);
+    // Next and Previous Message in Conversation, Open All and Fold All Messages as their clicks; false for another command
+    bool ConversationCommand(WORD id);
+    // a frame's More menu asks the window the reader is in to act on its one message (Mark as Unread, Delete), to open
+    // it in a window of its own, and a draft's Edit to finish it
+    std::function<void(int64_t folder, uint64_t uid, PeAction action)> onFrameAction;
+    std::function<void(int64_t folder, uint64_t uid)> onOpenMessage;
+    std::function<void(int64_t folder, uint64_t uid)> onEditDraft;
+    // the UI test's look at the stack (stack.h)
+    int64_t TestStack(const std::wstring& ask) { return stack_.Test(ask); }
     // Find in This Message: the words asked for over `owner` (the last ones filled in), then found and marked; with
     // `again` (F3) while a find of this message goes on, its next place
     void FindInMessage(HWND owner, bool again);
@@ -98,9 +114,11 @@ public:
     // called with the path of a message file to open in a message window (Open Reaction Email)
     std::function<void(const std::wstring& path)> onOpenFile;
     // the UI test's look at the parts' frames of the message shown and its requests to the internet (preview.h)
-    int64_t TestFrames() { return preview_.TestFrames(); }
-    int RemoteRequests() const { return preview_.RemoteRequests(); }
-    int64_t TestPreviews(const std::wstring& query) { return preview_.TestPreviews(query); }
+    int64_t TestFrames() { return Body().TestFrames(); }
+    int RemoteRequests() const { return const_cast<Reader*>(this)->Body().RemoteRequests(); }
+    int64_t TestPreviews(const std::wstring& query) {
+        return stack_.Visible() ? stack_.TestPreviews(query) : Body().TestPreviews(query);
+    }
     // the UI test's look at the last Find in This Message: how many places it found, -1 before it answered, -2 when
     // this WebView2 can not find
     int TestFound() const { return testFound_; }
@@ -277,6 +295,9 @@ private:
     // the message file shown in place of a folder's message
     std::wstring file_;
     core::MessageView view_;
+    // the view the stack still shows while the next message loads (its frames point into it), let go once the next
+    // view is shown
+    core::MessageView stackView_;
     // the view being built, 0 for none
     uint64_t viewRequest_ = 0;
     // its view is built again (Rebuild): the next reader's is started once it is shown
@@ -284,12 +305,21 @@ private:
     static void RebuildNext();
     // the file of the message whose preview was clicked, opened once the WebView2's event is over; -1 for none
     int64_t previewOpen_ = -1;
-    // opened in its conversation; the line of its page clicked, waiting for the WebView2's event to end
+    // opened in its conversation
     bool conversation_ = false;
-    int64_t conversationLine_ = -1;
-    // a line of the conversation shown, or its earlier lines, clicked: the message the core gives shown in place
-    void ConversationLine(int64_t index);
-    void ConversationEarlier();
+    // the message, or its conversation, as a native stack of rows and frames
+    ConversationStack stack_;
+    std::function<bool(UINT key)> keys_;
+    // the web view of the message shown: the selected frame's, or the pane's own page
+    Preview& Body();
+    // the message `folder`/`uid` of the conversation shown made the selected one at once, as a frame's button acts on
+    // the reader's message; its accent follows when the view is built again
+    void SelectFrame(int64_t folder, uint64_t uid);
+    // a frame's More menu at `screen`: what else can be done with that one message
+    void FrameMenu(int64_t folder, uint64_t uid, POINT screen);
+    // the stack in the pane's place, or the pane's own page in the stack's; the selected frame's controls (the
+    // Reactions line, the strip) back with the pane when it is not shown
+    void ShowStack(bool shown);
     // the preview shows a document of the message shown (not a page of the pane's own): one built again keeps its
     // scroll
     bool documentShown_ = false;

@@ -150,6 +150,12 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
         }
         reader.status = { [weak mailbox] in mailbox?.status($0) }
         reader.openDraft = { [weak mailbox] in mailbox?.openDraft($0, $1) }
+        reader.moreMenu = { [weak mailbox] folder, uid in mailbox?.frameMenu(folder: folder, uid: uid) ?? NSMenu() }
+        reader.editDraft = { [weak mailbox] folder, uid in mailbox?.editDraft(folder: folder, uid: uid) }
+        reader.openWindow = { [weak mailbox] folder, uid in
+            guard let mailbox else { return }
+            MessageWindow.open(core: mailbox.core, mailbox: mailbox, folder: folder, uid: uid)
+        }
         // the message that bounced, in the main window
         reader.bouncedHandler = { [weak mailbox] folder, uid in
             AppDelegate.shared?.main?.show()
@@ -252,7 +258,7 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
     private static let notForFiles: Set<Command> = [
         .delete, .archive, .junk, .notJunk, .markRead, .markUnread, .flag, .watchConversation, .ignoreConversation,
         .nextMessage, .previousMessage, .nextUnread, .properties, .viewSource, .addSenderToBook, .move, .copy, .selectAll,
-        .unsubscribe,
+        .unsubscribe, .nextInConversation, .previousInConversation, .openAllMessages, .foldAllMessages,
     ]
 
     /// what the menus do with this window in front; false for a command that is not about the message
@@ -284,6 +290,10 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
         case .viewSource: mailbox?.showSource(folder: folder, uid: uid)
         case .addSenderToBook: mailbox?.status(addSenderToAddressBook(core: core, folder: folder, uid: uid))
         case .unsubscribe: reader.unsubscribeList()
+        case .nextInConversation: reader.conversationClick(PE_CONVERSATION_CLICK_NEXT)
+        case .previousInConversation: reader.conversationClick(PE_CONVERSATION_CLICK_PREVIOUS)
+        case .openAllMessages: reader.conversationClick(PE_CONVERSATION_CLICK_OPEN_ALL)
+        case .foldAllMessages: reader.conversationClick(PE_CONVERSATION_CLICK_FOLD_ALL)
         default: return false
         }
         return true
@@ -326,6 +336,8 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
         case .notJunk: return summary.in_junk
         case .pictures: return reader.picturesBlocked
         case .unsubscribe: return reader.canUnsubscribe
+        case .nextInConversation, .previousInConversation, .openAllMessages, .foldAllMessages:
+            return reader.showsConversation
         case .nextMessage: return next != nil
         case .previousMessage: return previous != nil
         case .nextUnread: return true

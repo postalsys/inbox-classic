@@ -356,8 +356,7 @@ extension UITest {
             return cell?.picture.image == nil && cell?.picture.initials == "IL"
         }, "the forged row shows her initials only")
         await selectRow(confirmed())
-        let shown = views(NSImageView.self, in: main.mailbox.reader.view).first { $0.frame.width == 48 }
-        check(await waitUntil(15) { shown?.isHidden == false && shown?.image != nil },
+        check(await waitUntil(15) { main.mailbox.reader.stack.frameViews.first { $0.selected }?.pictureForTest != nil },
               "the reading pane shows her picture where a brand's logo goes")
         await shot(main.window, "pictures-5-contact")
 

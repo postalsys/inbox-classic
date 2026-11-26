@@ -325,10 +325,18 @@ extension UITest {
         await pause(1)
     }
 
+    /// the labels of the reading pane's stack that show mail: the subject, the people, the senders, the dates, first
+    /// words and files of its messages
+    private static let mailLabels: Set<String> = ["stack.subject", "stack.summary", "frame.name", "frame.detail", "frame.foundIn",
+                                                  "frame.files", "row.name", "row.chip", "row.words", "row.reactions", "row.date"]
+
     /// what a window shows of its own: the words of its labels, buttons, placeholders, column headers and toolbar, not
     /// the mail in its lists, fields and reading pane
     private func ownWords(in root: NSView?) -> [(String, NSView?)] {
         guard let root, !root.isHidden else { return [] }
+        if Self.mailLabels.contains(root.accessibilityIdentifier()) {
+            return []
+        }
         if root is NSTableView || root is NSOutlineView {
             let table = root as! NSTableView
             // the column headers, when the table shows them

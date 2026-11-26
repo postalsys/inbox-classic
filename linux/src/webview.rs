@@ -242,14 +242,6 @@ pub struct DocumentView {
     current: Rc<RefCell<String>>,
     /// The links clicked in the document that its owner follows itself, shared with the view's policy decisions
     links: Links,
-    /// Whether the document shown has frames to size ([`DocumentView::measure_frames`]), and the timer that sizes them
-    measuring: Rc<Cell<bool>>,
-    measure_timer: Rc<RefCell<Option<glib::SourceId>>>,
-    /// Counts the documents asked for: a document shown in place ([`DocumentView::show_in_place`]) waits for the
-    /// scroll of the one before and is dropped when another was asked for meanwhile
-    asked: Rc<Cell<u64>>,
-    /// The app's script that scrolls the document being loaded to where the one before was, until it has loaded
-    scroll_back: Rc<RefCell<Option<(String, webkit::UserScript)>>>,
     /// The URI of the document that loaded last, for the UI test to wait on
     #[cfg(feature = "e2e")]
     finished: Rc<RefCell<String>>,
@@ -330,44 +322,23 @@ impl DocumentView {
             keep_useful(menu, hit);
             false
         });
-        let measuring: Rc<Cell<bool>> = Rc::default();
-        let measure = measuring.clone();
-        let scroll_back: Rc<RefCell<Option<(String, webkit::UserScript)>>> = Rc::default();
-        let scrolled = scroll_back.clone();
-        let scripts = manager.clone();
         #[cfg(feature = "e2e")]
         let finished: Rc<RefCell<String>> = Rc::default();
         #[cfg(feature = "e2e")]
-        let loaded = finished.clone();
-        view.connect_load_changed(move |view, event| {
-            if event != webkit::LoadEvent::Finished {
-                return;
-            }
-            #[cfg(feature = "e2e")]
-            loaded.replace(view.uri().map(String::from).unwrap_or_default());
-            if measure.get() {
-                size_frames(view);
-            }
-            // the document is where the one before was: the script is not for the next one (a document before it that
-            // stopped loading finishes too)
-            let done = scrolled
-                .borrow()
-                .as_ref()
-                .is_some_and(|(uri, _)| view.uri().is_some_and(|shown| shown == *uri));
-            if done && let Some((_, script)) = scrolled.borrow_mut().take() {
-                scripts.remove_script(&script);
-            }
-        });
+        {
+            let loaded = finished.clone();
+            view.connect_load_changed(move |view, event| {
+                if event == webkit::LoadEvent::Finished {
+                    loaded.replace(view.uri().map(String::from).unwrap_or_default());
+                }
+            });
+        }
         DocumentView {
             view,
             manager,
             kind,
             current,
             links,
-            measuring,
-            measure_timer: Rc::default(),
-            asked: Rc::default(),
-            scroll_back,
             #[cfg(feature = "e2e")]
             finished,
         }
@@ -378,32 +349,6 @@ impl DocumentView {
     pub fn loaded(&self) -> bool {
         let current = self.current.borrow();
         !current.is_empty() && *self.finished.borrow() == *current && !self.view.is_loading()
-    }
-
-    /// The frames of the document shown (a signed or encrypted message's parts) sized to their documents with the
-    /// core's script: once the page has loaded, then every 400 ms (pictures loading, "..." unfolded, the width or the
-    /// text size changed) until another document is shown or the view goes; `on` false stops it
-    pub fn measure_frames(&self, on: bool) {
-        if let Some(timer) = self.measure_timer.borrow_mut().take() {
-            timer.remove();
-        }
-        self.measuring.set(on);
-        if !on {
-            return;
-        }
-        if !self.view.is_loading() {
-            size_frames(&self.view);
-        }
-        let view = self.view.downgrade();
-        let measuring = self.measuring.clone();
-        let timer = glib::timeout_add_local(std::time::Duration::from_millis(400), move || match view.upgrade() {
-            Some(view) if measuring.get() => {
-                size_frames(&view);
-                glib::ControlFlow::Continue
-            }
-            _ => glib::ControlFlow::Break,
-        });
-        self.measure_timer.replace(Some(timer));
     }
 
     /// `links` is asked of a link clicked in the document before the browser opens it: true when it took the link
@@ -424,44 +369,6 @@ impl DocumentView {
     /// Shows `document` whose frames show `parts` (a signed or encrypted message's) and whose previews are under the
     /// token `previews` (the view's), with the message's pictures from the internet only when `remote_images`
     pub fn show_parts(&self, document: &str, parts: &[String], previews: Option<&str>, remote_images: bool) {
-        self.ask();
-        self.load(document, parts, previews, remote_images, 0.0);
-    }
-
-    /// Another document asked for: the one waiting for its scroll dropped, the frames of the one before no longer
-    /// measured (the owner turns it on for the new one right after)
-    fn ask(&self) -> u64 {
-        let asked = self.asked.get() + 1;
-        self.asked.set(asked);
-        self.measure_frames(false);
-        asked
-    }
-
-    /// Shows `document` (the same message's again: Show in Message, its whole source after its text, its pictures
-    /// allowed) scrolled to where the one shown was, so its text does not move: the core's script reads how far down
-    /// it is, and the new one is scrolled there as it loads, before it is drawn
-    pub fn show_in_place(&self, document: &str, parts: &[String], previews: Option<&str>, remote_images: bool) {
-        let asked = self.ask();
-        let (document, parts, previews) = (document.to_string(), parts.to_vec(), previews.map(str::to_string));
-        let this = self.clone();
-        self.view.evaluate_javascript(
-            pe_html::SCROLL_SCRIPT,
-            None,
-            None,
-            gio::Cancellable::NONE,
-            move |value| {
-                // another document was asked for meanwhile
-                if this.asked.get() != asked {
-                    return;
-                }
-                let y = value.ok().and_then(|v| v.to_str().parse::<f64>().ok()).unwrap_or(0.0);
-                this.load(&document, &parts, previews.as_deref(), remote_images, y);
-            },
-        );
-    }
-
-    /// The document served and loaded once the rules are there, scrolled down `y` CSS pixels as it loads
-    fn load(&self, document: &str, parts: &[String], previews: Option<&str>, remote_images: bool, y: f64) {
         let web = web();
         let previous = self.current.borrow().clone();
         let uri = web.serve(
@@ -482,21 +389,6 @@ impl DocumentView {
             if let Some((blocked, allowing)) = &*rules.filters.borrow() {
                 this.manager.remove_all_filters();
                 this.manager.add_filter(if remote_images { allowing } else { blocked });
-            }
-            if let Some((_, script)) = this.scroll_back.borrow_mut().take() {
-                this.manager.remove_script(&script);
-            }
-            if y > 0.0 {
-                // when the document is parsed, before it is drawn; its pictures' sizes are in its markup
-                let script = webkit::UserScript::new(
-                    &pe_html::scroll_to_script(y),
-                    webkit::UserContentInjectedFrames::TopFrame,
-                    webkit::UserScriptInjectionTime::End,
-                    &[],
-                    &[],
-                );
-                this.manager.add_script(&script);
-                this.scroll_back.replace(Some((uri.clone(), script)));
             }
             this.view.load_uri(&uri);
         });
@@ -527,15 +419,8 @@ impl DocumentView {
 
     /// The document dropped (the view is going away)
     pub fn release(&self) {
-        self.measure_frames(false);
         web().forget(&self.current.borrow());
     }
-}
-
-/// The core's script that makes each frame of the page as tall as its document, run as the app's (the page's own
-/// scripts stay off)
-fn size_frames(view: &webkit::WebView) {
-    view.evaluate_javascript(pe_html::MEASURE_SCRIPT, None, None, gio::Cancellable::NONE, |_| {});
 }
 
 /// What a document may do: show itself (and its own anchors), nothing else; a link the user follows opens in the

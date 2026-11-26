@@ -1,5 +1,6 @@
-//! A conversation in the reading pane: its messages in every folder of the account, the read ones folded to a line,
-//! the unread ones and the focus open, each open message a document of its own, and what a click on a line does.
+//! A conversation in the reading pane: its messages in every folder of the account, the read ones folded to a row,
+//! the unread ones and the selected one open, each open message a view of its own, and what a click on a message, its
+//! arrow, Next and Previous, Open All and Fold All do.
 
 use pe_core::{Action, Core, Options, PasswordStore, Selected};
 use pe_store::{AccountSettings, Auth, FolderInfo, MessageInfo, MessageRef, Security, Store};
@@ -85,7 +86,7 @@ fn world(name: &str) -> World {
             internal_date: Some(at),
             subject: "Plans for the trip".into(),
             from_name: from.split(" <").next().unwrap().into(),
-            from_address: from.into(),
+            from_address: from.split(" <").nth(1).map_or(from, |a| a.trim_end_matches('>')).into(),
             message_id: Some(message_id.into()),
             references: if answers.is_empty() {
                 Vec::new()
@@ -166,6 +167,20 @@ fn at(folder: i64, uid: u64) -> MessageRef {
     MessageRef { folder, uid }
 }
 
+/// The document each entry's frame shows: the selected one's is the view's own, the others' their own views'; None
+/// for a folded message or one still downloading
+fn documents(view: &pe_core::MessageView) -> Vec<Option<String>> {
+    let info = view.conversation.as_ref().expect("a conversation's view");
+    info.entries
+        .iter()
+        .map(|entry| match (entry.selected, &entry.view) {
+            (true, _) => Some(view.document.clone()),
+            (false, Some(own)) => Some(own.document.clone()),
+            (false, None) => None,
+        })
+        .collect()
+}
+
 #[test]
 fn the_conversation_stacks_its_messages_at_the_first_unread() {
     pe_core::i18n::set_language("en");
@@ -182,66 +197,101 @@ fn the_conversation_stacks_its_messages_at_the_first_unread() {
         [at(w.inbox, 3)],
         "Bob's answer is not downloaded yet: asked for"
     );
-    // Dave's read question folded, Carol's unread answer open with its document, the rest folded
-    let parts: Vec<bool> = view.part_documents.iter().map(|d| !d.is_empty()).collect();
-    assert_eq!(parts, [false, true, false, false, false]);
-    assert!(view.part_documents[1].contains("The lake."));
-    for index in 0..5 {
-        assert!(
-            view.document.contains(&format!("inboxclassic:conversation-{index}")),
-            "line {index}"
-        );
-    }
-    assert!(view.document.contains("Sent Items") && view.document.contains("Drafts"));
-    assert!(view.document.contains(">Draft<"), "the draft says so");
-    assert!(
-        view.document.contains("Downloading"),
-        "Bob's answer says it is on its way"
+    assert_eq!(info.subject, "Plans for the trip");
+    assert_eq!(info.summary, "5 messages, 2 unread");
+    assert_eq!(info.people, "Dave, Carol, You, Bob");
+    assert_eq!(
+        info.line, "5 messages, 2 unread \u{00B7} Dave, Carol, You, Bob",
+        "the line under the subject"
     );
-    // nothing of any message in the page itself
-    assert!(!view.document.contains("The lake."));
-    // the window around it is Carol's message's, and Print prints it alone
-    assert!(view.from.contains("Carol"));
-    assert!(
-        view.print_document
-            .as_deref()
-            .is_some_and(|d| d.contains("The lake.") && !d.contains("Where do we go?"))
+    // Dave's read question folded, Carol's unread answer open and selected, Bob's open but on its way
+    let open: Vec<bool> = documents(&view).iter().map(Option::is_some).collect();
+    assert_eq!(open, [false, true, false, false, false]);
+    assert!(view.document.contains("The lake.") && view.from.contains("Carol"));
+    let rows: Vec<(&str, &str, &str)> = info
+        .entries
+        .iter()
+        .map(|e| (e.from.as_str(), e.folder.as_str(), e.note.as_str()))
+        .collect();
+    assert_eq!(
+        rows,
+        [
+            ("Dave", "", ""),
+            ("Carol", "", ""),
+            ("You", "Sent Items", ""),
+            ("You", "Drafts", "Draft"),
+            ("Bob", "", "Downloading…"),
+        ]
     );
+    assert!(info.entries[1].selected && info.entries[4].open && info.entries[4].unread);
+    assert_eq!(info.entries[2].found_in, "Found in Sent Items");
+    assert!(info.entries[3].draft);
+    // Print prints the selected message alone
+    let printed = view.print_document.as_deref().unwrap_or(&view.document);
+    assert!(printed.contains("The lake.") && !printed.contains("Where do we go?"));
 }
 
 #[test]
-fn a_click_opens_or_folds_a_line_and_the_shown_ones_are_marked_read() {
+fn a_click_selects_the_arrow_folds_and_the_shown_ones_are_marked_read() {
     pe_core::i18n::set_language("en");
     let w = world("conversation-click");
     let focus = at(w.inbox, 2);
     w.core.conversation_view(focus, false, false).unwrap();
-    // Dave's line: his message opens and takes the focus
-    assert_eq!(w.core.conversation_click(focus, 0), Some(at(w.inbox, 1)));
+    // Dave's row: his message opens and is selected
+    assert_eq!(w.core.conversation_select(focus, 0), Some(at(w.inbox, 1)));
     let view = w.core.conversation_view(at(w.inbox, 1), false, false).unwrap();
-    assert!(view.part_documents[0].contains("Where do we go?") && view.part_documents[1].contains("The lake."));
+    let docs = documents(&view);
+    assert!(docs[0].as_deref().is_some_and(|d| d.contains("Where do we go?")));
+    assert!(docs[1].as_deref().is_some_and(|d| d.contains("The lake.")));
     assert!(view.from.contains("Dave"));
-    // the reply in Sent Items opens too, labelled with its folder
-    assert_eq!(w.core.conversation_click(at(w.inbox, 1), 2), Some(at(w.sent, 1)));
+    // Carol's open message clicked: only selected, Dave's stays open
+    assert_eq!(w.core.conversation_select(at(w.inbox, 1), 1), Some(focus));
+    let view = w.core.conversation_view(focus, false, false).unwrap();
+    assert!(documents(&view)[0].is_some() && view.from.contains("Carol"));
+    // the reply in Sent Items opens with its arrow and is selected
+    assert_eq!(w.core.conversation_toggle(focus, 2), Some(at(w.sent, 1)));
     let view = w.core.conversation_view(at(w.sent, 1), false, false).unwrap();
-    assert!(view.part_documents[2].contains("The lake works for me."));
-    // Carol's line again: it folds, the focus stays
-    assert_eq!(w.core.conversation_click(at(w.sent, 1), 1), Some(at(w.sent, 1)));
+    assert!(view.document.contains("The lake works for me."));
+    // Carol's arrow: hers folds, the selection stays
+    assert_eq!(w.core.conversation_toggle(at(w.sent, 1), 1), Some(at(w.sent, 1)));
     let view = w.core.conversation_view(at(w.sent, 1), false, false).unwrap();
-    assert!(view.part_documents[1].is_empty());
+    assert!(documents(&view)[1].is_none());
     // shown: the unread messages it showed open are marked read (Carol's was folded by then: it stays unread)
     let _ = w.core.conversation_shown(at(w.sent, 1));
     let store = Store::open(w.dir.path().join("store.db")).unwrap();
     assert!(!store.message(w.inbox, 2).unwrap().unwrap().info.seen());
     // opened again at Carol's, then shown: hers is marked read
-    let carol = at(w.inbox, 2);
-    w.core.conversation_click(at(w.sent, 1), 1);
-    w.core.conversation_view(carol, false, false).unwrap();
-    let _ = w.core.conversation_shown(carol);
+    w.core.conversation_select(at(w.sent, 1), 1);
+    w.core.conversation_view(focus, false, false).unwrap();
+    let _ = w.core.conversation_shown(focus);
     assert!(store.message(w.inbox, 2).unwrap().unwrap().info.seen());
 }
 
 #[test]
-fn a_message_with_signed_parts_inside_stays_folded() {
+fn next_previous_open_all_and_fold_all() {
+    pe_core::i18n::set_language("en");
+    let w = world("conversation-keys");
+    let focus = at(w.inbox, 2);
+    w.core.conversation_view(focus, false, false).unwrap();
+    assert_eq!(w.core.conversation_step(focus, -1), Some(at(w.inbox, 1)));
+    assert_eq!(w.core.conversation_step(at(w.inbox, 1), -1), None, "the first message");
+    assert_eq!(w.core.conversation_step(at(w.inbox, 1), 1), Some(focus));
+    assert_eq!(w.core.conversation_open_all(focus, true), Some(focus));
+    let view = w.core.conversation_view(focus, false, false).unwrap();
+    let open: Vec<bool> = view.conversation.unwrap().entries.iter().map(|e| e.open).collect();
+    assert_eq!(open, [true; 5]);
+    assert_eq!(w.core.conversation_open_all(focus, false), Some(focus));
+    let view = w.core.conversation_view(focus, false, false).unwrap();
+    let open: Vec<bool> = view.conversation.unwrap().entries.iter().map(|e| e.open).collect();
+    assert_eq!(
+        open,
+        [false, true, false, false, false],
+        "every one folded but the selected"
+    );
+}
+
+#[test]
+fn a_signed_message_shows_in_the_stack_with_its_labels() {
     pe_core::i18n::set_language("en");
     let w = world("conversation-sealed");
     let store = Store::open(w.dir.path().join("store.db")).unwrap();
@@ -269,23 +319,23 @@ fn a_message_with_signed_parts_inside_stays_folded() {
             raw("<p@x>", "<a@x>", "Pat <pat@example.com>", signed).as_bytes(),
         )
         .unwrap();
-    let view = w.core.conversation_view(at(w.inbox, 2), false, false).unwrap();
-    let info = view.conversation.clone().expect("a conversation's view");
-    let place = 5;
+    // opened by Open All: its own view, the page of its labelled parts, with pictures asked for the conversation
+    let focus = at(w.inbox, 2);
+    w.core.conversation_view(focus, false, false).unwrap();
+    w.core.conversation_open_all(focus, true);
+    let view = w.core.conversation_view(focus, true, false).unwrap();
+    let info = view.conversation.clone().unwrap();
     assert_eq!(info.count, 6);
+    let pat = info.entries.iter().find(|e| e.at == at(w.inbox, 11)).unwrap();
+    let own = pat.view.as_deref().expect("its own view in the stack");
+    assert!(own.protection.is_some(), "with its labels");
     assert!(
-        view.part_documents[place].is_empty(),
-        "its labelled parts never enter the stack"
+        !own.document.contains("img-src data: http"),
+        "never the conversation's pictures: its own page lets none load"
     );
-    assert!(view.document.contains("opens by itself"), "its line says so");
-    let _ = w.core.conversation_shown(at(w.inbox, 2));
-    assert!(
-        !store.message(w.inbox, 11).unwrap().unwrap().info.seen(),
-        "and it is not marked read"
-    );
-    // opened at it, it is shown alone, with its labels
-    let alone = w.core.conversation_view(at(w.inbox, 11), false, false).unwrap();
-    assert!(alone.conversation.is_none() && alone.protection.is_some());
+    // opened at it, it is the selected message of the conversation, its labels on it
+    let view = w.core.conversation_view(at(w.inbox, 11), false, false).unwrap();
+    assert!(view.conversation.is_some() && view.protection.is_some());
 }
 
 #[test]
@@ -293,9 +343,14 @@ fn newest_first_and_the_printout() {
     pe_core::i18n::set_language("en");
     let w = world("conversation-order");
     let view = w.core.conversation_view(at(w.inbox, 2), false, true).unwrap();
-    let first = view.document.find("Bob").unwrap();
-    let last = view.document.find("Dave").unwrap();
-    assert!(first < last, "newest first: Bob's line before Dave's");
+    let senders: Vec<String> = view
+        .conversation
+        .unwrap()
+        .entries
+        .iter()
+        .map(|e| e.from.clone())
+        .collect();
+    assert_eq!(senders, ["Bob", "You", "You", "Carol", "Dave"], "newest first");
     let printout = w.core.conversation_printout(at(w.inbox, 2), false).unwrap();
     assert!(!printout.is_empty());
     let (dave, carol) = (
@@ -307,7 +362,7 @@ fn newest_first_and_the_printout() {
 }
 
 #[test]
-fn a_message_alone_or_encrypted_is_shown_by_itself() {
+fn a_message_alone_is_shown_by_itself() {
     pe_core::i18n::set_language("en");
     let w = world("conversation-alone");
     let store = Store::open(w.dir.path().join("store.db")).unwrap();
@@ -328,30 +383,6 @@ fn a_message_alone_or_encrypted_is_shown_by_itself() {
         .unwrap();
     let view = w.core.conversation_view(at(w.inbox, 9), false, false).unwrap();
     assert!(view.conversation.is_none() && view.document.contains("Just me."));
-    // a signed message, in a conversation or not, is shown by itself (the store's lock let go before its view is built)
-    store
-        .add_messages(
-            w.inbox,
-            &[MessageInfo {
-                uid: 10,
-                date: Some(600),
-                subject: "Signed".into(),
-                message_id: Some("<s@x>".into()),
-                references: vec!["<a@x>".into()],
-                protection: pe_store::Protection::Signed,
-                ..Default::default()
-            }],
-        )
-        .unwrap();
-    store
-        .set_source(
-            w.inbox,
-            10,
-            raw("<s@x>", "<a@x>", "Sid <sid@example.com>", "Signed words.").as_bytes(),
-        )
-        .unwrap();
-    let view = w.core.conversation_view(at(w.inbox, 10), false, false).unwrap();
-    assert!(view.conversation.is_none() && view.document.contains("Signed words."));
 }
 
 #[test]
@@ -391,14 +422,18 @@ fn a_message_unread_since_the_conversation_was_shown_opens() {
     let w = world("conversation-unread-since");
     let focus = at(w.inbox, 2);
     let view = w.core.conversation_view(focus, false, false).unwrap();
-    assert!(view.part_documents[0].is_empty(), "Dave's read question folded");
+    assert!(documents(&view)[0].is_none(), "Dave's read question folded");
     // marked unread elsewhere (or a reply that came): open the next time it is shown
     let store = Store::open(w.dir.path().join("store.db")).unwrap();
     store.set_flag(w.inbox, 1, "\\Seen", false).unwrap();
     let view = w.core.conversation_view(focus, false, false).unwrap();
-    assert!(view.part_documents[0].contains("Where do we go?"));
+    assert!(
+        documents(&view)[0]
+            .as_deref()
+            .is_some_and(|d| d.contains("Where do we go?"))
+    );
     // an unread message the user folds stays folded
-    w.core.conversation_click(focus, 0);
+    w.core.conversation_toggle(focus, 0);
     let view = w.core.conversation_view(focus, false, false).unwrap();
-    assert!(view.part_documents[0].is_empty());
+    assert!(documents(&view)[0].is_none());
 }

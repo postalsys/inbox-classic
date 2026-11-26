@@ -109,10 +109,17 @@ impl RowPicture {
         self.parts.refresh();
     }
 
+    /// A picture drawn for it elsewhere (a message's own logo, drawn for its view): shown in place of the initials
+    pub fn show_texture(&self, texture: &gdk::Texture) {
+        self.parts.initials.set_visible(false);
+        self.parts.picture.set_paintable(Some(texture));
+        self.parts.picture.set_visible(true);
+    }
+
     /// Whether it shows a drawn picture, not the initials
     #[cfg(feature = "e2e")]
     pub fn has_picture(&self) -> bool {
-        self.parts.texture().is_some()
+        self.parts.texture().is_some() || self.parts.picture.paintable().is_some()
     }
 }
 

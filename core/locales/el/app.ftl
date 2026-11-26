@@ -62,6 +62,14 @@ ui-find-in-message-hint = Εύρεση σε αυτό το μήνυμα
 ui-find-not-found = Το «{ $words }» δεν υπάρχει σε αυτό το μήνυμα
 cmd-expand-all-threads = Ανάπτυ&ξη όλων των συζητήσεων
 cmd-collapse-all-threads = Σύμπτυξη όλων των συ&ζητήσεων
+# review: new
+cmd-next-in-conversation = Επόμενο μήνυμα &στη συζήτηση
+# review: new
+cmd-previous-in-conversation = Π&ροηγούμενο μήνυμα στη συζήτηση
+# review: new
+cmd-open-all-messages = Άν&οιγμα όλων των μηνυμάτων
+# review: new
+cmd-fold-all-messages = Σύμπτ&υξη όλων των μηνυμάτων
 ui-group-by-conversation = &Ομαδοποίηση μηνυμάτων ανά συζήτηση
 ui-show-whole-conversation = Εμφάνιση ολόκληρης της συ&ζήτησης στο παράθυρο ανάγνωσης
 ui-show-whole-conversation-note = Ανοίγει μαζί τα μηνύματα μιας συζήτησης, μαζί με τις απαντήσεις σας, τα πρόχειρα και τα μηνύματα σε άλλους φακέλους. Τα αναγνωσμένα μηνύματα συνήθως συμπτύσσονται σε μία γραμμή· κάντε κλικ στη γραμμή για να ανοίξετε ή να συμπτύξετε το μήνυμα.
@@ -75,12 +83,34 @@ ui-thread-count = { $new ->
 }
 ui-conversation-to = προς { $people }
 ui-conversation-draft = Πρόχειρο
-ui-conversation-alone = Υπογεγραμμένο ή κρυπτογραφημένο: ανοίγει μόνο του
 ui-conversation-downloading = Γίνεται λήψη…
-ui-conversation-earlier = { $count ->
-    [one] Εμφάνιση 1 παλαιότερου μηνύματος
-   *[other] Εμφάνιση { $count } παλαιότερων μηνυμάτων
+# review: new
+ui-conversation-you = Εγώ
+# review: new
+ui-conversation-messages = { $count ->
+    [one] 1 μήνυμα
+   *[other] { $count } μηνύματα
 }
+# review: new
+ui-conversation-unread = { $count ->
+    [one] 1 αδιάβαστο
+   *[other] { $count } αδιάβαστα
+}
+# review: new
+ui-conversation-found-in = Βρέθηκε στον φάκελο { $folder }
+# review: new
+ui-conversation-hidden = { $count ->
+    [one] 1 ακόμη μήνυμα
+   *[other] { $count } ακόμη μηνύματα
+}
+# review: new
+ui-conversation-open-message = Άνοιγμα μηνύματος
+# review: new
+ui-conversation-fold-message = Σύμπτυξη μηνύματος
+# review: new
+ui-conversation-more = Περισσότερα
+# review: new
+ui-conversation-edit = Επεξεργασία
 ui-conversation-elsewhere = { $count ->
     [one] Αυτή η συζήτηση έχει επίσης ένα μήνυμα σε άλλον φάκελο.
    *[other] Αυτή η συζήτηση έχει επίσης { $count } μηνύματα σε άλλους φακέλους.

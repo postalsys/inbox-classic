@@ -1,5 +1,4 @@
-//! The reading pane: the header of the message (the brand's logo beside it, Unsubscribe and the paper clip with the
-//! files at its right), the strip of its files under it (`attachments.rs`), the security bar of a signed or encrypted message, the bar that says pictures from the
+//! The reading pane: the header of the message while it is coming (the paper clip with the files at its right), the strip of its files under it (`attachments.rs`), the security bar of a signed or encrypted message, the bar that says pictures from the
 //! internet are blocked, and the message itself (with the
 //! cards of the core above it: a calendar event, a bounce, a one-time code), the sanitized document of the core in a locked down web view. The main window has one
 //! under its list, and each message window one of its own: the reader keeps the message it shows, asks the core for
@@ -17,11 +16,23 @@ use webkit::prelude::*;
 use crate::app::{shell, spawn};
 use crate::attachments::Strip;
 use crate::security::SecurityBar;
+use crate::stack::{Ask, Click, Stack};
 use crate::ui::{self, TITLE};
 use crate::webview::{DocumentView, no_message};
 
-/// The size the logo of a brand is drawn at
+/// The size the logo of a brand, or a contact's picture, is drawn at
 const LOGO_SIZE: i32 = 48;
+
+/// Who is told what a frame asks ([`Reader::on_frame_ask`])
+type FrameAsks = RefCell<Option<Rc<dyn Fn(FrameAsk)>>>;
+
+/// What a frame of the stack asks of the window the reader is in, on one message
+pub enum FrameAsk {
+    MarkUnread(MessageRef),
+    Delete(MessageRef),
+    Edit(MessageRef),
+    OpenWindow(MessageRef),
+}
 
 /// What a core's event did to the message shown, for the window to follow
 pub enum Loaded {
@@ -34,7 +45,6 @@ pub enum Loaded {
 pub struct Reader {
     pub widget: gtk::Box,
     header: gtk::Box,
-    logo: gtk::Image,
     subject: gtk::Label,
     /// The fields (From, To, Date) and the Reactions row under them
     fields: gtk::Box,
@@ -70,7 +80,13 @@ pub struct Reader {
     pub list_button: gtk::Button,
     /// Told whether the bar offers its button, for the window's Unsubscribe from List
     list_offered: RefCell<Option<Offered>>,
-    pub preview: DocumentView,
+    /// The pane's own page while no message is shown: none selected, several, downloading, why it is not there
+    pub pane: DocumentView,
+    /// The message shown, or its whole conversation: a native stack of rows and frames ([`Stack`])
+    pub stack: Rc<Stack>,
+    /// What a frame asks of the window around the reader: Mark as Unread or Delete of its message, a draft to finish,
+    /// the message in a window of its own, set by the main window and a message window
+    frame_asks: FrameAsks,
     /// Find in This Message: the bar over the message and its box
     find_bar: gtk::SearchBar,
     pub find_entry: gtk::SearchEntry,
@@ -91,8 +107,9 @@ pub struct Reader {
     file: RefCell<Option<std::path::PathBuf>>,
     /// A file of the strip is being opened: one at a time
     opening: Cell<bool>,
-    /// Its view once the core built it, with its pictures from the internet when `remote_images`
-    view: RefCell<Option<MessageView>>,
+    /// Its view once the core built it, with its pictures from the internet when `remote_images` (its stack's entries
+    /// handed to the stack)
+    view: RefCell<Option<Rc<MessageView>>>,
     /// The view shown was made of the message's text while the rest of it was still coming: the message's arrival
     /// makes it again
     text_first: Cell<bool>,
@@ -101,6 +118,8 @@ pub struct Reader {
     /// A line of the conversation shown took the focus: its message, once downloaded, is shown in place
     refocus: Cell<bool>,
     remote_images: Cell<bool>,
+    /// The sender of the message whose pictures the bar offers: the selected one's, or another open message's
+    pictures_sender: RefCell<Option<pe_core::pictures::Sender>>,
     /// The view and the logo being made for it, and the one-click unsubscribe on the way; 0 for none
     view_request: Cell<u64>,
     logo_request: Cell<u64>,
@@ -302,21 +321,6 @@ impl Reader {
         text.append(&top);
         text.append(&fields);
         text.append(&note);
-        // always 48 points, the drawn pixels scaled into them
-        let logo = gtk::Image::builder().pixel_size(48).build();
-        logo.set_widget_name("reader-logo");
-        logo.set_visible(false);
-        // round for a contact's picture (reader-contact), as the list draws senders; a brand's logo square
-        let logo_frame = gtk::Box::builder()
-            .width_request(48)
-            .height_request(48)
-            .halign(gtk::Align::Start)
-            .valign(gtk::Align::Center)
-            .hexpand(false)
-            .overflow(gtk::Overflow::Hidden)
-            .visible(false)
-            .build();
-        logo_frame.append(&logo);
         let attachments_label = gtk::Label::new(Some("1 file"));
         let clip = gtk::Box::new(gtk::Orientation::Horizontal, 6);
         clip.append(&crate::icons::image("ic-attach-symbolic"));
@@ -329,7 +333,6 @@ impl Reader {
         attachments.set_visible(false);
         let header = gtk::Box::new(gtk::Orientation::Horizontal, 12);
         header.add_css_class("reader-header");
-        header.append(&logo_frame);
         header.append(&text);
         header.append(&attachments);
 
@@ -372,7 +375,9 @@ impl Reader {
         list_bar.set_visible(false);
 
         let preview = DocumentView::new("preview", false);
-        preview.view.set_widget_name("reader-preview");
+        preview.view.set_widget_name("reader-pane");
+        let stack = Stack::new();
+        stack.widget.set_visible(false);
         let (find_bar, find_entry) = find_bar();
         let widget = gtk::Box::new(gtk::Orientation::Vertical, 0);
         widget.append(&header);
@@ -384,10 +389,10 @@ impl Reader {
         widget.append(&list_bar);
         widget.append(&find_bar);
         widget.append(&preview.view);
+        widget.append(&stack.widget);
         let reader = Reader {
             widget,
             header,
-            logo,
             subject,
             fields,
             from,
@@ -410,7 +415,9 @@ impl Reader {
             list_text,
             list_button,
             list_offered: RefCell::default(),
-            preview,
+            pane: preview,
+            stack,
+            frame_asks: RefCell::default(),
             find_bar,
             find_entry,
             #[cfg(feature = "e2e")]
@@ -428,6 +435,7 @@ impl Reader {
             conversation: Cell::new(false),
             refocus: Cell::new(false),
             remote_images: Cell::new(false),
+            pictures_sender: RefCell::default(),
             view_request: Cell::new(0),
             logo_request: Cell::new(0),
             picture_request: Cell::new(0),
@@ -503,19 +511,6 @@ impl Reader {
             };
             spawn(async move { this.open_attachment(index).await });
         };
-        // a line of a conversation's page, or its "Show N earlier messages": after the view's signal, as the page is
-        // shown again in this view
-        let this = Rc::downgrade(self);
-        let conversation = move |index: Option<usize>| {
-            let this = this.clone();
-            glib::idle_add_local_once(move || {
-                let Some(this) = this.upgrade() else { return };
-                match index {
-                    Some(index) => this.conversation_line(index),
-                    None => this.conversation_earlier(),
-                }
-            });
-        };
         // Find Key beside the label of a part signed by a key not known here: the core reads the fingerprint from the
         // link and looks it up; nothing is opened
         let this = Rc::downgrade(self);
@@ -524,7 +519,7 @@ impl Reader {
                 this.find_key(link);
             }
         };
-        self.preview.set_links(move |uri| {
+        let links = Rc::new(move |uri: &str| {
             if pe_html::find_key_link(uri).is_some() {
                 find_key(uri);
                 return true;
@@ -545,14 +540,6 @@ impl Reader {
                 calendar();
                 return true;
             }
-            if let Some(index) = pe_html::conversation_link(uri) {
-                conversation(Some(index));
-                return true;
-            }
-            if pe_html::is_conversation_earlier_link(uri) {
-                conversation(None);
-                return true;
-            }
             if !pe_html::is_bounced_message_link(uri) {
                 return false;
             }
@@ -560,6 +547,10 @@ impl Reader {
             glib::idle_add_local_once(bounced.clone());
             true
         });
+        let pane = links.clone();
+        self.pane.set_links(move |uri| pane(uri));
+        self.stack.set_links(move |uri| links(uri));
+        self.connect_stack();
         let group = gio::SimpleActionGroup::new();
         let save = gio::SimpleAction::new("save-attachment", Some(glib::VariantTy::UINT32));
         let this = Rc::downgrade(self);
@@ -627,8 +618,56 @@ impl Reader {
     /// The find bar searches the message as the words are typed, Enter (and F3) goes to the next place they are,
     /// Shift+Enter to the one before; the box turns red when they are not in the message. WebKit finds them in the
     /// page it shows, with no script in it
-    fn connect_find(&self) {
-        let Some(controller) = self.preview.view.find_controller() else {
+    fn connect_find(self: &Rc<Self>) {
+        self.connect_found(&self.pane.view);
+        let this = Rc::downgrade(self);
+        let finder = move || this.upgrade().and_then(|this| this.shown_view().find_controller());
+        #[cfg(feature = "e2e")]
+        let found = self.found.clone();
+        let find = finder.clone();
+        self.find_entry.connect_search_changed(move |entry| {
+            #[cfg(feature = "e2e")]
+            found.set(None);
+            let Some(finder) = find() else { return };
+            let text = entry.text();
+            if text.is_empty() {
+                entry.remove_css_class("error");
+                finder.search_finish();
+                return;
+            }
+            let options = webkit::FindOptions::CASE_INSENSITIVE | webkit::FindOptions::WRAP_AROUND;
+            finder.search(&text, options.bits(), u32::MAX);
+        });
+        let find = finder.clone();
+        self.find_entry.connect_activate(move |_| {
+            if let Some(finder) = find() {
+                finder.search_next();
+            }
+        });
+        let find = finder.clone();
+        self.find_entry.connect_next_match(move |_| {
+            if let Some(finder) = find() {
+                finder.search_next();
+            }
+        });
+        let find = finder.clone();
+        self.find_entry.connect_previous_match(move |_| {
+            if let Some(finder) = find() {
+                finder.search_previous();
+            }
+        });
+        self.find_bar.connect_search_mode_enabled_notify(move |bar| {
+            if !bar.is_search_mode()
+                && let Some(finder) = finder()
+            {
+                finder.search_finish();
+            }
+        });
+    }
+
+    /// The find box says whether the words are in the message shown in `view`
+    fn connect_found(&self, view: &webkit::WebView) {
+        let Some(controller) = view.find_controller() else {
             return;
         };
         let entry = self.find_entry.clone();
@@ -647,33 +686,152 @@ impl Reader {
             found.set(Some(false));
             entry.add_css_class("error");
         });
-        #[cfg(feature = "e2e")]
-        let found = self.found.clone();
-        let finder = controller.clone();
-        self.find_entry.connect_search_changed(move |entry| {
-            #[cfg(feature = "e2e")]
-            found.set(None);
-            let text = entry.text();
-            if text.is_empty() {
-                entry.remove_css_class("error");
-                finder.search_finish();
-                return;
-            }
-            let options = webkit::FindOptions::CASE_INSENSITIVE | webkit::FindOptions::WRAP_AROUND;
-            finder.search(&text, options.bits(), u32::MAX);
+    }
+
+    /// The document view of the message shown: the selected frame's body, or the pane's own page
+    pub fn preview(&self) -> DocumentView {
+        if self.stack.widget.is_visible()
+            && let Some(body) = self.stack.selected_body()
+        {
+            return body;
+        }
+        self.pane.clone()
+    }
+
+    /// Whether the message shown has its body made: the selected frame's in the stack (or the pane's own page)
+    #[cfg(feature = "e2e")]
+    pub fn body_made(&self) -> bool {
+        !self.stack.widget.is_visible() || self.stack.selected_body().is_some()
+    }
+
+    /// The web view of the message shown: the selected frame's, or the pane's own page
+    pub fn shown_view(&self) -> webkit::WebView {
+        self.preview().view
+    }
+
+    /// The pane's own page in place of the stack, whose frames are let go
+    fn show_pane(&self) {
+        self.stack.clear();
+        self.stack.widget.set_visible(false);
+        self.pane.view.set_visible(true);
+    }
+
+    /// The window around the reader is told what a frame asks of it ([`FrameAsk`])
+    pub fn on_frame_ask(&self, asks: impl Fn(FrameAsk) + 'static) {
+        *self.frame_asks.borrow_mut() = Some(Rc::new(asks));
+    }
+
+    /// What a click in the stack asks: the core's choice of the message selected, a command on a frame's message, its
+    /// More menu
+    fn connect_stack(self: &Rc<Self>) {
+        let this = Rc::downgrade(self);
+        self.stack.connect(move |asked| {
+            let Some(this) = this.upgrade() else { return };
+            // after the click's own signal: the stack is built again
+            glib::idle_add_local_once(move || this.stack_asked(asked));
         });
-        let finder = controller.clone();
-        self.find_entry.connect_activate(move |_| finder.search_next());
-        let finder = controller.clone();
-        self.find_entry.connect_next_match(move |_| finder.search_next());
-        let finder = controller.clone();
-        self.find_entry
-            .connect_previous_match(move |_| finder.search_previous());
-        self.find_bar.connect_search_mode_enabled_notify(move |bar| {
-            if !bar.is_search_mode() {
-                controller.search_finish();
+        let this = Rc::downgrade(self);
+        self.stack.on_body(move |view| {
+            if let Some(this) = this.upgrade() {
+                this.connect_found(view);
             }
         });
+    }
+
+    /// The window around the reader told what a frame asks
+    fn tell(&self, what: FrameAsk) {
+        let asks = self.frame_asks.borrow().clone();
+        if let Some(asks) = asks {
+            asks(what);
+        }
+    }
+
+    fn stack_asked(self: &Rc<Self>, asked: Ask) {
+        // a message alone is the reader's own message
+        let own = |at: MessageRef| if at.uid == 0 { self.message() } else { Some(at) };
+        match asked {
+            Ask::Click(click, index) => self.conversation_click(click, index),
+            Ask::Command(command, at) => {
+                self.select(at);
+                let _ = self.widget.activate_action(&format!("win.{}", command.name()), None);
+            }
+            Ask::More(at, button) => {
+                let Some(at) = own(at) else { return };
+                self.select(at);
+                self.more_menu(at, &button);
+            }
+            Ask::Edit(at) => {
+                if let Some(at) = own(at) {
+                    self.tell(FrameAsk::Edit(at));
+                }
+            }
+            Ask::OpenWindow(at) => {
+                if let Some(at) = own(at) {
+                    self.tell(FrameAsk::OpenWindow(at));
+                }
+            }
+        }
+    }
+
+    /// The message `at` of the conversation shown made the selected one at once, as Reply or a frame's menu acts on
+    /// the reader's message; its accent follows when the view is built again
+    fn select(&self, at: MessageRef) {
+        let Some(current) = self.message() else { return };
+        if at == current || at.uid == 0 {
+            return;
+        }
+        if let Some(index) = self.stack.index_of(at) {
+            self.conversation_click(Click::Select, index);
+        }
+    }
+
+    /// A frame's More menu: what else can be done with that one message, never with the conversation's row in the
+    /// list
+    fn more_menu(self: &Rc<Self>, at: MessageRef, button: &gtk::Widget) {
+        let menu = gtk::gio::Menu::new();
+        let section = gtk::gio::Menu::new();
+        section.append(
+            Some(&crate::words::plain(crate::words::Text::CmdPrint)),
+            Some("win.print"),
+        );
+        menu.append_section(None, &section);
+        let section = gtk::gio::Menu::new();
+        section.append(
+            Some(&crate::words::plain(crate::words::Text::CmdMarkUnread)),
+            Some("frame.mark-unread"),
+        );
+        section.append(Some(&t!(UiTbDelete)), Some("frame.delete"));
+        menu.append_section(None, &section);
+        let section = gtk::gio::Menu::new();
+        section.append(Some(&t!(UiMenuOpen)), Some("frame.open-window"));
+        section.append(
+            Some(&crate::words::plain(crate::words::Text::UiMenuViewSource)),
+            Some("win.view-source"),
+        );
+        menu.append_section(None, &section);
+        let actions = gio::SimpleActionGroup::new();
+        for (name, what) in [
+            ("mark-unread", FrameAsk::MarkUnread as fn(MessageRef) -> FrameAsk),
+            ("delete", FrameAsk::Delete),
+            ("open-window", FrameAsk::OpenWindow),
+        ] {
+            let action = gio::SimpleAction::new(name, None);
+            let this = Rc::downgrade(self);
+            action.connect_activate(move |_, _| {
+                if let Some(this) = this.upgrade() {
+                    this.tell(what(at));
+                }
+            });
+            actions.add_action(&action);
+        }
+        let popover = gtk::PopoverMenu::from_model(Some(&menu));
+        popover.insert_action_group("frame", Some(&actions));
+        popover.set_parent(button);
+        popover.connect_closed(|popover| {
+            let popover = popover.clone();
+            glib::idle_add_local_once(move || popover.unparent());
+        });
+        popover.popup();
     }
 
     /// Find in This Message (F3): the find bar opened with its words selected to type over; F3 again, with words in
@@ -733,7 +891,7 @@ impl Reader {
             && self.uid.get() == uid
             && self.view_request.get() == 0
             && (self.has_view() || self.shows_failure() || self.note.is_visible())
-            && self.preview.loaded()
+            && self.pane.loaded()
     }
 
     /// Whether the message is on screen, not only asked for
@@ -761,7 +919,7 @@ impl Reader {
     /// The code card's Copy: the code on the clipboard, said in the status bar
     pub fn copy_code(&self) {
         let Some(code) = self.otp_code() else { return };
-        self.preview.view.clipboard().set_text(&code);
+        self.pane.view.clipboard().set_text(&code);
         shell().main().set_status(&t!(UiCodeCopied));
     }
 
@@ -840,7 +998,7 @@ impl Reader {
             }
             Event::LogoReady { request } if self.logo_request.get() != 0 && *request == self.logo_request.get() => {
                 self.logo_request.set(0);
-                self.show_logo(shell().core.logo_result(*request), LOGO_SIZE);
+                self.show_picture(shell().core.logo_result(*request));
                 None
             }
             Event::PrintReady { request } if self.print_request.get() != 0 && *request == self.print_request.get() => {
@@ -855,8 +1013,7 @@ impl Reader {
                 if self.picture_request.get() != 0 && *request == self.picture_request.get() =>
             {
                 self.picture_request.set(0);
-                self.show_logo(shell().core.picture_result(*request), LOGO_SIZE);
-                self.set_round(true);
+                self.show_picture(shell().core.picture_result(*request));
                 None
             }
             _ => None,
@@ -878,11 +1035,31 @@ impl Reader {
             .is_some_and(|c| c.waiting.contains(&at))
     }
 
-    /// A line of the conversation shown clicked: its message opens or folds; the conversation is shown again where it
-    /// was, at the message the core says has the focus (downloaded first when it is not yet)
-    fn conversation_line(&self, index: usize) {
+    /// A click in the conversation shown (a row, a frame, an arrow, the folded middle, of the message at `index`) or
+    /// Next, Previous, Open All and Fold All (`index` not used): the core says which message is selected now, and the
+    /// conversation is shown again where it was, the frames of the same messages kept (downloaded first when it is
+    /// not here yet)
+    pub fn conversation_click(&self, click: Click, index: usize) {
         let Some(current) = self.message() else { return };
-        let Some(at) = shell().core.conversation_click(current, index) else {
+        let core = &shell().core;
+        let at = match click {
+            Click::Select => core.conversation_select(current, index),
+            Click::Toggle => core.conversation_toggle(current, index),
+            Click::ShowMiddle => {
+                core.conversation_show_middle(current);
+                Some(current)
+            }
+            Click::FoldAll => core.conversation_open_all(current, false),
+            Click::OpenAll => core.conversation_open_all(current, true),
+            Click::Next => core.conversation_step(current, 1),
+            Click::Previous => core.conversation_step(current, -1),
+        };
+        self.go_to(current, at);
+    }
+
+    /// The conversation shown at `at`, the message the core says is selected now
+    fn go_to(&self, current: MessageRef, at: Option<MessageRef>) {
+        let Some(at) = at else {
             return;
         };
         if at == current {
@@ -891,22 +1068,10 @@ impl Reader {
         }
         self.folder.set(at.folder);
         self.uid.set(at.uid);
+        // the pictures asked for are another message's: never carried to this one (a signed or encrypted message loads its own only on a click of its own)
+        self.remote_images.set(false);
         self.refocus.set(true);
         let _ = shell().core.open_message(at.folder, at.uid);
-    }
-
-    /// "Show N earlier messages" clicked: every line of the conversation shown
-    fn conversation_earlier(&self) {
-        if let Some(current) = self.message() {
-            shell().core.conversation_show_earlier(current);
-            self.view_again();
-        }
-    }
-
-    /// A line of the conversation shown clicked, as its link does (the UI test)
-    #[cfg(feature = "e2e")]
-    pub fn click_conversation_line(&self, index: usize) {
-        self.conversation_line(index);
     }
 
     /// Whether the view shown is a conversation's
@@ -947,21 +1112,20 @@ impl Reader {
             self.failed();
             return false;
         };
-        self.show(&view, self.remote_images.get());
+        let (has_logo, picture) = (view.has_logo, view.picture);
+        self.show(view, self.remote_images.get());
         self.text_first
             .set(core.message_downloading(self.folder.get(), self.uid.get()));
-        self.hide_logo();
-        if view.has_logo {
+        if has_logo {
             let request = core
                 .logo_start(self.folder.get(), self.uid.get(), LOGO_SIZE as u32)
                 .unwrap_or(0);
             self.logo_request.set(request);
-        } else if view.picture != 0 {
+        } else if picture != 0 {
             // the sender's picture from the Address Book, where a brand's logo would be
-            let request = core.picture_start(view.picture, LOGO_SIZE as u32).unwrap_or(0);
+            let request = core.picture_start(picture, LOGO_SIZE as u32).unwrap_or(0);
             self.picture_request.set(request);
         }
-        *self.view.borrow_mut() = Some(view);
         true
     }
 
@@ -981,7 +1145,7 @@ impl Reader {
                 self.view_again();
             }
         } else if self.summary.borrow().is_none() {
-            self.preview.show(&no_message(!self.header.is_visible()), false);
+            self.pane.show(&no_message(!self.header.is_visible()), false);
         }
     }
 
@@ -1011,14 +1175,13 @@ impl Reader {
 
     /// A file's view on screen, its paper clip saving the file's attachments as a folder's message saves its own
     fn show_file_view(&self, view: MessageView) {
-        self.show(&view, self.remote_images.get());
-        *self.view.borrow_mut() = Some(view);
+        self.show(view, self.remote_images.get());
     }
 
     /// The pictures bar's Always: the sender's address, or with `domain` everyone at their domain, trusted; the
     /// message again, its pictures now loading by themselves
     async fn trust_sender(&self, domain: bool) {
-        let sender = self.view.borrow().as_ref().and_then(|v| v.sender.clone());
+        let sender = self.pictures_sender.borrow().clone();
         let Some(sender) = sender.filter(|s| s.verified) else {
             return;
         };
@@ -1060,7 +1223,7 @@ impl Reader {
         }
         let printed = self.view.borrow().as_ref().and_then(|v| v.print_document.clone());
         let Some(document) = printed else {
-            print_dialog(&self.preview.view, window.as_ref());
+            print_dialog(&self.shown_view(), window.as_ref());
             return;
         };
         print_document(&document, self.pictures_shown(), window.as_ref().clone());
@@ -1146,13 +1309,16 @@ impl Reader {
         }
         self.retry.set_visible(false);
         self.stop_downloading_note();
-        self.set_logo_shown(false);
         self.subject.set_text("");
         self.fields.set_visible(false);
         self.show_reactions();
         self.note.set_visible(false);
         self.header.set_visible(loading);
-        self.preview.show(&no_message(!loading), false);
+        // a message about to be shown takes the place of the one before in the stack, its web view kept for it
+        if !loading || !self.stack.widget.is_visible() {
+            self.show_pane();
+            self.pane.show(&no_message(!loading), false);
+        }
     }
 
     /// Several messages selected: how many, and how many of them are unread or flagged, as the page of no message
@@ -1163,7 +1329,8 @@ impl Reader {
             return;
         }
         self.header.set_visible(false);
-        self.preview.show(&summary.page(), false);
+        self.show_pane();
+        self.pane.show(&summary.page(), false);
         *self.summary.borrow_mut() = Some(words);
     }
 
@@ -1192,7 +1359,7 @@ impl Reader {
         self.to.set_text(&message.recipients);
         self.show_reactions();
         self.stop_downloading_note();
-        let (preview, retry, timer) = (self.preview.clone(), self.retry.clone(), self.downloading.clone());
+        let (preview, retry, timer) = (self.pane.clone(), self.retry.clone(), self.downloading.clone());
         let size = message.size.unwrap_or(0);
         self.size.set(size);
         let id = glib::timeout_add_local_once(std::time::Duration::from_millis(250), move || {
@@ -1212,7 +1379,8 @@ impl Reader {
     /// The message is being downloaded
     pub fn downloading(&self) {
         self.stop_downloading_note();
-        show_downloading(&self.preview, &self.retry, self.size.get());
+        self.show_pane();
+        show_downloading(&self.pane, &self.retry, self.size.get());
     }
 
     /// The message could not be downloaded: why, in the pane, and Try Again over it
@@ -1222,7 +1390,9 @@ impl Reader {
         self.security.hide();
         self.pictures.set_visible(false);
         self.retry.set_visible(true);
-        self.preview.show(
+        self.header.set_visible(true);
+        self.show_pane();
+        self.pane.show(
             &pe_core::reader_page(pe_core::ReaderState::Failed { kind, reason }),
             false,
         );
@@ -1251,9 +1421,11 @@ impl Reader {
     }
 
     /// The message: its header, the bars it needs, its document (with its pictures from the internet when
-    /// `remote_images`)
-    pub fn show(&self, view: &MessageView, remote_images: bool) {
-        self.header.set_visible(true);
+    /// `remote_images`); kept as the view on screen, its stack's entries handed to the stack
+    fn show(&self, mut view: MessageView, remote_images: bool) {
+        let entries = pe_core::conversation::take_entries(&mut view);
+        // the frame says who and when: no header block over the stack
+        self.header.set_visible(false);
         self.note.set_visible(false);
         self.retry.set_visible(false);
         self.stop_downloading_note();
@@ -1270,27 +1442,26 @@ impl Reader {
         self.to.set_text(&to);
         self.show_reactions();
         self.set_list_bar(view.list_bar.as_ref());
-        self.show_attachments(view);
-        // the same message again (Show in Message, its whole source after its text, its pictures): where it was
-        let again = self.view.borrow().is_some();
-        let show = if again {
-            DocumentView::show_in_place
-        } else {
-            DocumentView::show_parts
-        };
+        self.show_attachments(&view);
+        self.security.show(&view);
+        self.show_pictures_bar(&view, &entries);
+        // the same message or conversation again (a click in it, Show in Message, its pictures): where it was
+        let view = Rc::new(view);
+        let again = self.view.replace(Some(view.clone())).is_some();
+        self.pane.view.set_visible(false);
+        self.stack.widget.set_visible(true);
         // pictures from the internet shown when asked for, or by themselves (a trusted sender, or every message's)
-        show(
-            &self.preview,
-            &view.document,
-            &view.part_documents,
-            view.preview_token.as_deref(),
+        self.stack.show(
+            &view,
+            entries,
             remote_images || view.pictures_loaded,
+            (
+                self.reactions_row.upcast_ref(),
+                self.strip.widget.upcast_ref(),
+                self.attachments.upcast_ref(),
+            ),
+            !again,
         );
-        // a signed or encrypted message's parts are frames, each sized to its document, as a conversation's messages
-        self.preview
-            .measure_frames(view.protection.is_some() || view.conversation.is_some());
-        self.security.show(view);
-        self.show_pictures_bar(view);
     }
 
     /// The Reactions row of the message shown (of a folder, not a file): a chip a person, the row hidden when there
@@ -1376,11 +1547,19 @@ impl Reader {
     /// The pictures bar, offered only for a message with pictures on the internet, until they are shown. With a
     /// sender, Download Pictures has its menu: Always for a sender the provider confirmed, otherwise a dimmed item
     /// that says why not (the core's words), as the Windows app does
-    fn show_pictures_bar(&self, view: &MessageView) {
-        self.pictures.set_visible(view.remote_images && !view.pictures_loaded);
-        let words = view
-            .sender
-            .as_ref()
+    fn show_pictures_bar(&self, view: &MessageView, entries: &[pe_core::conversation::Entry]) {
+        // the selected message's pictures, else another open one's that is neither signed nor encrypted (theirs load
+        // on a click of their own)
+        let blocked = |v: &MessageView| v.remote_images && !v.pictures_loaded;
+        let others = entries.iter().filter_map(|e| e.view.as_deref());
+        let offered = std::iter::once(view)
+            .filter(|v| blocked(v))
+            .chain(others.filter(|v| blocked(v) && v.protection.is_none()))
+            .next();
+        self.pictures.set_visible(offered.is_some());
+        *self.pictures_sender.borrow_mut() = offered.and_then(|v| v.sender.clone());
+        let words = offered
+            .and_then(|v| v.sender.as_ref())
             .map(pe_core::pictures::bar_words)
             .unwrap_or_default();
         let menu = gio::Menu::new();
@@ -1438,21 +1617,18 @@ impl Reader {
         self.attachments.set_menu_model(Some(&menu));
     }
 
-    /// The brand's logo beside the header, once the core drew it: `size` pixels square, BGRA with the alpha
-    /// multiplied in
-    pub fn show_logo(&self, pixels: Option<Vec<u8>>, size: i32) {
-        match pixels.and_then(|pixels| crate::ui::bgra_texture(pixels, size)) {
-            Some(texture) => {
-                self.logo.set_paintable(Some(&texture));
-                self.set_logo_shown(true);
-            }
-            None => self.set_logo_shown(false),
+    /// The selected frame's picture (the brand's logo, the contact's picture), once the core drew it: [`LOGO_SIZE`]
+    /// pixels square, BGRA with the alpha multiplied in
+    fn show_picture(&self, pixels: Option<Vec<u8>>) {
+        if let Some(texture) = pixels.and_then(|pixels| crate::ui::bgra_texture(pixels, LOGO_SIZE)) {
+            self.stack.set_selected_picture(texture.upcast_ref());
         }
     }
 
+    /// Whether the selected frame shows the picture drawn for its message
     #[cfg(feature = "e2e")]
     pub fn logo_shown(&self) -> bool {
-        self.logo.is_visible()
+        self.stack.widget.is_visible() && self.stack.selected_picture_drawn()
     }
 
     /// Whether the bar of blocked pictures is shown
@@ -1502,30 +1678,6 @@ impl Reader {
             self.pictures_always.popup();
         } else {
             self.pictures_always.popdown();
-        }
-    }
-
-    pub fn hide_logo(&self) {
-        self.set_logo_shown(false);
-        self.set_round(false);
-    }
-
-    /// The picture beside the header shown or not, with the frame that sizes and rounds it
-    fn set_logo_shown(&self, shown: bool) {
-        self.logo.set_visible(shown);
-        if let Some(frame) = self.logo.parent() {
-            frame.set_visible(shown);
-        }
-    }
-
-    /// The picture beside the header round (a contact's) or square (a brand's logo)
-    fn set_round(&self, round: bool) {
-        if let Some(frame) = self.logo.parent() {
-            if round {
-                frame.add_css_class("reader-contact");
-            } else {
-                frame.remove_css_class("reader-contact");
-            }
         }
     }
 

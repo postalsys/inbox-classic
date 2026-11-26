@@ -59,6 +59,14 @@ ui-find-in-message-hint = Rechercher dans ce message
 ui-find-not-found = Aucune occurrence de « { $words } » dans ce message
 cmd-expand-all-threads = &Développer toutes les conversations
 cmd-collapse-all-threads = Réd&uire toutes les conversations
+# review: new
+cmd-next-in-conversation = Message suivant dans la &conversation
+# review: new
+cmd-previous-in-conversation = Message pr&écédent dans la conversation
+# review: new
+cmd-open-all-messages = Ou&vrir tous les messages
+# review: new
+cmd-fold-all-messages = Réduire tous l&es messages
 ui-group-by-conversation = &Regrouper les messages par conversation
 ui-show-whole-conversation = Affic&her toute la conversation dans le volet de lecture
 ui-show-whole-conversation-note = Affichez les messages d’une conversation ensemble, y compris vos réponses, vos brouillons et les messages d’autres dossiers. Les messages lus sont généralement réduits à une ligne ; cliquez sur une ligne pour l’ouvrir ou la réduire.
@@ -72,12 +80,34 @@ ui-thread-count = { $new ->
 }
 ui-conversation-to = à { $people }
 ui-conversation-draft = Brouillon
-ui-conversation-alone = Signé ou chiffré : s'ouvre seul
 ui-conversation-downloading = Téléchargement…
-ui-conversation-earlier = { $count ->
-    [one] Afficher 1 message plus ancien
-   *[other] Afficher { $count } messages plus anciens
+# review: new
+ui-conversation-you = Moi
+# review: new
+ui-conversation-messages = { $count ->
+    [one] { $count } message
+   *[other] { $count } messages
 }
+# review: new
+ui-conversation-unread = { $count ->
+    [one] { $count } non lu
+   *[other] { $count } non lus
+}
+# review: new
+ui-conversation-found-in = Trouvé dans { $folder }
+# review: new
+ui-conversation-hidden = { $count ->
+    [one] { $count } autre message
+   *[other] { $count } autres messages
+}
+# review: new
+ui-conversation-open-message = Ouvrir le message
+# review: new
+ui-conversation-fold-message = Réduire le message
+# review: new
+ui-conversation-more = Plus
+# review: new
+ui-conversation-edit = Modifier
 ui-conversation-elsewhere = { $count ->
     [one] Cette conversation a aussi un message dans un autre dossier.
    *[other] Cette conversation a aussi { $count } messages dans d'autres dossiers.

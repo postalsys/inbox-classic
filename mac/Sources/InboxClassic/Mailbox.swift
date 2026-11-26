@@ -318,6 +318,13 @@ public final class Mailbox: NSObject {
         reader.arrivedHandler = { [weak self] in self?.messageArrived() }
         reader.shownHandler = { [weak self] in self?.messageShown() }
         reader.bouncedHandler = { [weak self] in self?.showMessage(folder: $0, uid: $1) }
+        // a frame of the reading pane's stack: its More menu, its draft finished, its message in a window
+        reader.moreMenu = { [weak self] folder, uid in self?.frameMenu(folder: folder, uid: uid) ?? NSMenu() }
+        reader.editDraft = { [weak self] folder, uid in self?.editDraft(folder: folder, uid: uid) }
+        reader.openWindow = { [weak self] folder, uid in
+            guard let self else { return }
+            MessageWindow.open(core: core, mailbox: self, folder: folder, uid: uid)
+        }
         readerHeightMin = reader.view.heightAnchor.constraint(greaterThanOrEqualToConstant: 120)
         readerHeightMin.isActive = true
         rightSplit.addArrangedSubview(listArea)
@@ -1834,6 +1841,50 @@ public final class Mailbox: NSObject {
         guard let copy = listView.copy() else { return nil }
         copy.setGrouped(false)
         return copy
+    }
+
+    /// A frame's More menu in the reading pane's stack: what else can be done with that one message (selected by
+    /// then, so Print prints it), never with the conversation's row in the list
+    func frameMenu(folder: Int64, uid message: UInt64) -> NSMenu {
+        let menu = NSMenu()
+        let item = { (title: String, run: @escaping () -> Void) in
+            let made = ClosureMenuItem(title: title, run: run)
+            menu.addItem(made)
+        }
+        item(Command.print.label.replacingOccurrences(of: "&", with: "")) { [weak self] in self?.reader.print() }
+        menu.addItem(.separator())
+        item(Command.markUnread.label.replacingOccurrences(of: "&", with: "")) { [weak self] in
+            let one = newSelection([(folder, message)])
+            defer { pe_selection_free(one) }
+            self?.act(PE_ACTION_UNREAD, on: one)
+        }
+        item(Text.uiTbDelete.text) { [weak self] in
+            let one = newSelection([(folder, message)])
+            defer { pe_selection_free(one) }
+            self?.act(PE_ACTION_DELETE, on: one)
+        }
+        menu.addItem(.separator())
+        item(Text.uiMenuOpen.text) { [weak self] in
+            guard let self else { return }
+            MessageWindow.open(core: core, mailbox: self, folder: folder, uid: message)
+        }
+        item(Text.uiMenuViewSource.text) { [weak self] in self?.showSource(folder: folder, uid: message) }
+        return menu
+    }
+
+    /// a draft's Edit in the stack: the compose window to finish it
+    func editDraft(folder: Int64, uid message: UInt64) {
+        let account = currentAccount
+        let request = pe_draft_open_start(core.handle, folder, message)
+        let idle = Pending.busy(status)
+        let waits = Pending.read(request, by: self) { [weak self] in
+            idle()
+            guard let self, let draft = Draft(pe_draft_result(core.handle, request)) else { return }
+            ComposeWindow.open(core: core, account: account, draft: draft)
+        }
+        if !waits {
+            idle()
+        }
     }
 
     /// Enter or a double-click: the message in a window of its own, a draft in the compose window to be finished

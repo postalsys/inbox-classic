@@ -1,18 +1,19 @@
 //! A conversation in the reading pane: a collapsed conversation's row opens all of its messages, one under another,
-//! the read ones folded to a line, at its focus message (its oldest unread one, else its newest).
+//! each folded to a row or open in a frame of its own, at its focus message (its oldest unread one, else its newest).
 //!
-//! The view is the focus message's own [`MessageView`] (its header, attachments and bars are what the window shows
-//! around the page; Reply, Forward and Print act on it), with its `document` replaced by the conversation's page
-//! ([`pe_html::conversation_page`]) and `part_documents` holding the document of each open message, served at `part-N`
-//! as a signed message's parts are. The messages are the conversation's in every folder of its account but Junk
-//! E-mail and Deleted Items ([`pe_store::Store::conversation_messages`]): the user's own replies, drafts and filed
-//! messages, each labelled with its folder. A signed or encrypted message is never opened in the stack: its line says
-//! it opens by itself, and a click shows it alone, as every such message is shown (docs/pgp-plan.md).
+//! The apps draw the stack with their own controls (docs/conversation-view-plan.md): a row for each folded message, a
+//! frame for each open one, its body a web view of the message's own document. The view the core gives is the focus
+//! message's own [`MessageView`] (the selected message: Reply, Forward, Print, the bars and Find act on it), with
+//! [`MessageView::conversation`] listing the conversation's [`Entry`]s in the stack's order, each open one other than
+//! the focus with its own view. The messages are the conversation's in every folder of its account but Junk E-mail
+//! and Deleted Items ([`pe_store::Store::conversation_messages`]): the user's own replies, drafts and filed messages,
+//! each marked with its folder. A signed or encrypted message is shown in the stack as it is shown alone: its view is
+//! the page of its labelled parts ([`pe_html::secure_page`]), its pictures never loaded with the others'.
 //!
-//! What is open and which message has the focus is kept here for each conversation shown lately, so a line clicked
-//! ([`Core::conversation_click`]) and the view built again agree.
+//! What is open and which message is selected is kept here for each conversation shown lately, so a click
+//! ([`crate::Core::conversation_select`] and the others) and the view built again agree.
 
-use std::collections::{BTreeSet, HashMap};
+use std::collections::{BTreeSet, HashMap, HashSet};
 use std::sync::Mutex;
 
 use pe_i18n::{Text, tr, tr_args};
@@ -20,20 +21,85 @@ use pe_store::{FolderId, Message, MessageRef, Protection, Store};
 
 use crate::view::MessageView;
 
-/// How many lines a long conversation shows before "Show N earlier messages"
-pub(crate) const SHOWN_AT_FIRST: usize = 20;
+/// A run of at least this many read messages between the first message and the last two read ones is folded into
+/// one row ("14 more messages")
+pub(crate) const MIDDLE_AT_LEAST: usize = 4;
 
 /// The conversations kept: the reading pane's and those of a few message windows
 const KEPT: usize = 8;
 
-/// What the reading pane shows of a conversation besides its focus message's view
+/// A conversation shown in the reading pane, besides its selected message's view
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct ConversationInfo {
-    /// Its messages in the reading pane
+    /// Its messages in the stack (every one, the folded middle's too)
     pub count: usize,
+    /// Its subject, as its first message has it
+    pub subject: String,
+    /// "7 messages, 2 unread"
+    pub summary: String,
+    /// Who wrote in it, in the order they first did, the user as "You": "Ann Example, Bob Harris, You"
+    pub people: String,
+    /// The line under the subject: the summary and the people, "7 messages, 2 unread · Ann Example, You"
+    pub line: String,
+    /// The rows and frames of the stack, in its order; the middle's folded messages are not among them
+    /// ([`Entry::hidden_before`])
+    pub entries: Vec<Entry>,
     /// Open messages whose source is still downloading: when one is ready ([`crate::Event::MessageReady`]), the app
     /// builds the view again
     pub waiting: Vec<MessageRef>,
+}
+
+/// One message of the stack: a row when folded, a frame when open
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Entry {
+    pub at: MessageRef,
+    /// Its place in the conversation, what the operations on it take ([`crate::Core::conversation_select`])
+    pub index: usize,
+    /// Who sent it: their name, else their address; "You" for the user's own
+    pub from: String,
+    pub address: String,
+    /// The user sent it (an address of the account)
+    pub own: bool,
+    /// When, seconds since the Unix epoch (the Date header, the received date without one); 0 for unknown. The apps
+    /// write it as their message list does.
+    pub date: i64,
+    /// When, in full ("Thursday, November 26, 2026, 1:10 PM"): an open frame's header and a row's tooltip
+    pub when: String,
+    /// Its first words
+    pub words: String,
+    /// Who it went to: "to Ann, Carol"
+    pub to: String,
+    /// The folder it is filed in, when not the one the conversation was opened from: a folded row's chip; empty
+    /// otherwise
+    pub folder: String,
+    /// The same as an open frame says it: "Found in Sent Items"; empty in the folder it was opened from
+    pub found_in: String,
+    /// Words on its state: "Draft", "Downloading…"; empty for none
+    pub note: String,
+    /// It is a draft: its frame offers Edit
+    pub draft: bool,
+    pub unread: bool,
+    pub open: bool,
+    /// Reply, Forward, Print and the bars act on it; its frame has the accent
+    pub selected: bool,
+    /// It has attachments: a folded row shows a paperclip
+    pub attachments: bool,
+    /// Its emoji reactions' badge ("👍❤️ 3"), empty for none
+    pub reactions: String,
+    /// The sender's picture ([`crate::senders::picture_key`]), drawn by [`crate::Core::picture_start`]; 0 for none
+    pub picture: u64,
+    /// The picture is the brand's logo, not a person's: drawn square
+    pub logo: bool,
+    /// The sender's initials, where there is no picture
+    pub initials: String,
+    /// Read messages of the folded middle right before this one, shown as one row ("14 more messages",
+    /// [`crate::Core::conversation_show_middle`]); 0 for none
+    pub hidden_before: usize,
+    /// The words of the folded middle's row before it ([`hidden_words`]), empty for none
+    pub hidden_text: String,
+    /// Open and not the selected one: its own view, whose document its frame shows (the selected one's is the
+    /// conversation's view itself); None when folded or still downloading
+    pub view: Option<Box<MessageView>>,
 }
 
 /// One conversation as it was shown last
@@ -41,9 +107,9 @@ pub struct ConversationInfo {
 struct Shown {
     focus: Option<MessageRef>,
     open: BTreeSet<MessageRef>,
-    /// "Show N earlier messages" was clicked
+    /// The folded middle was clicked open: every message has its row
     all: bool,
-    /// Its messages in the order of the page's lines: a line's N is its place here
+    /// Its messages in the stack's order: an entry's index is its place here
     order: Vec<MessageRef>,
     /// The unread messages it shows open, marked read once the window says the view was shown
     marks: Vec<MessageRef>,
@@ -74,109 +140,106 @@ impl Conversations {
         entry.used = used;
         run(entry)
     }
+
+    /// `run` on a conversation shown, None when it is not one or has no focus
+    fn with_shown<T>(&self, thread: i64, run: impl FnOnce(&mut Shown, MessageRef) -> Option<T>) -> Option<T> {
+        let mut shown = self.shown.lock().unwrap_or_else(|e| e.into_inner());
+        let entry = shown.get_mut(&thread)?;
+        let focus = entry.focus?;
+        run(entry, focus)
+    }
 }
 
-/// A message's line, as the page writes it
-pub(crate) struct Line {
-    pub at: MessageRef,
-    /// Its place in the conversation: the N of its link and of its document's `part-N`
-    pub index: usize,
-    pub from: String,
-    pub when: String,
-    pub words: String,
-    pub folder: String,
-    pub note: String,
-    pub unread: bool,
-    pub open: bool,
-    pub focus: bool,
-    /// Its reactions' badge ("👍❤️ 3"), empty for none
-    pub reactions: String,
-}
-
-/// The order and the choices of a conversation shown: which message is open, which has the focus, which lines show
+/// The order and the choices of a conversation shown: which message is open, which is selected, which are folded into
+/// the middle's row
 pub(crate) struct Plan {
-    /// The messages in the page's order, each with whether it is open
+    /// The messages in the stack's order, each with whether it is open
     pub messages: Vec<(Message, bool)>,
     pub focus: MessageRef,
-    /// The place of the first line shown (the earlier ones wait behind a link)
-    pub first: usize,
+    /// The places of the messages folded into the middle's row
+    pub hidden: BTreeSet<usize>,
 }
 
-/// Whether a message is never opened in the stack, as the store knows it: signed or encrypted as a whole. One with a
-/// signed or encrypted part inside is found when its view is built ([`crate::Core::conversation_view`]).
-pub(crate) fn alone(message: &Message) -> bool {
+/// Whether a message is signed or encrypted as a whole, as the store knows it: left out of the printout, and its
+/// pictures never loaded with the conversation's
+pub(crate) fn protected(message: &Message) -> bool {
     message.info.protection != Protection::None
 }
 
 impl Conversations {
     /// The plan of the conversation `thread` of `messages` (as they arrived) opened at `focus`: what was open when it
-    /// was shown last, its unread messages that were not unread then (all of them the first time), and the focus open; `newest_first` turns the order
+    /// was shown last, its unread messages that were not unread then (all of them the first time), and the focus open;
+    /// the read middle folded; `newest_first` turns the order
     pub(crate) fn plan(&self, thread: i64, messages: Vec<Message>, focus: MessageRef, newest_first: bool) -> Plan {
-        let mut messages = messages;
-        if newest_first {
-            messages.reverse();
-        }
         self.with(thread, |shown| {
             let present: BTreeSet<MessageRef> = messages.iter().map(Message::at).collect();
             // what is unread opens: the first time all of it, then what became unread since (a reply that came, one
             // marked unread); an unread one the user folded stays folded
-            let unread: BTreeSet<MessageRef> = messages
-                .iter()
-                .filter(|m| !m.info.seen() && !alone(m))
-                .map(Message::at)
-                .collect();
+            let unread: BTreeSet<MessageRef> = messages.iter().filter(|m| !m.info.seen()).map(Message::at).collect();
             shown.open.extend(unread.difference(&shown.unread).copied());
             shown.unread = unread;
             shown.open.retain(|at| present.contains(at));
             shown.focus = Some(focus);
             shown.open.insert(focus);
-            shown.order = messages.iter().map(Message::at).collect();
-            let at = shown.order.iter().position(|m| *m == focus).unwrap_or(0);
-            // a long conversation starts with its later lines (newest first: its first ones), the focus among them
-            let first = match (shown.all, newest_first) {
-                (true, _) | (_, true) => 0,
-                (false, false) => messages.len().saturating_sub(SHOWN_AT_FIRST).min(at),
+            let hidden_in_time = if shown.all {
+                BTreeSet::new()
+            } else {
+                middle(&messages, &shown.open)
             };
-            let last = match (shown.all, newest_first) {
-                (false, true) => messages.len().min(SHOWN_AT_FIRST.max(at + 1)),
-                _ => messages.len(),
-            };
-            let messages: Vec<(Message, bool)> = messages
+            let count = messages.len();
+            let mut messages: Vec<(Message, bool)> = messages
                 .into_iter()
-                .take(last)
                 .map(|m| {
-                    let open = shown.open.contains(&m.at()) && !alone(&m);
+                    let open = shown.open.contains(&m.at());
                     (m, open)
                 })
                 .collect();
+            let hidden: BTreeSet<usize> = if newest_first {
+                messages.reverse();
+                hidden_in_time.into_iter().map(|i| count - 1 - i).collect()
+            } else {
+                hidden_in_time
+            };
+            shown.order = messages.iter().map(|(m, _)| m.at()).collect();
             shown.marks = messages
                 .iter()
-                .skip(first)
                 .filter(|(m, open)| *open && !m.info.seen())
                 .map(|(m, _)| m.at())
                 .collect();
-            Plan { messages, focus, first }
+            Plan {
+                messages,
+                focus,
+                hidden,
+            }
         })
     }
 
-    /// A line clicked: a folded message opens and takes the focus; an open one folds (the focus stays where it is,
-    /// unless it was that one: then the nearest open message has it). The message to show now, None when the line is
-    /// not of a conversation shown.
-    pub(crate) fn click(&self, thread: i64, index: usize) -> Option<MessageRef> {
-        self.with(thread, |shown| {
+    /// A message clicked (its row or its frame) in the conversation `thread`: a folded one opens; either way it is
+    /// selected. The message to show now; None when there is no such message.
+    pub(crate) fn select(&self, thread: i64, index: usize) -> Option<MessageRef> {
+        self.with_shown(thread, |shown, _| {
             let at = *shown.order.get(index)?;
-            let focus = shown.focus?;
+            shown.open.insert(at);
+            shown.focus = Some(at);
+            Some(at)
+        })
+    }
+
+    /// A message's arrow clicked: a folded one opens and is selected; an open one folds (the selection stays, unless
+    /// it was that one: then the nearest open message has it, or it stays, folded, when none is open). The message to
+    /// show now.
+    pub(crate) fn toggle(&self, thread: i64, index: usize) -> Option<MessageRef> {
+        self.with_shown(thread, |shown, focus| {
+            let at = *shown.order.get(index)?;
             if !shown.open.contains(&at) {
                 shown.open.insert(at);
                 shown.focus = Some(at);
                 return Some(at);
             }
+            shown.open.remove(&at);
             if at != focus {
-                shown.open.remove(&at);
                 return Some(focus);
             }
-            // the focus folded: the open message nearest to it has it, or it stays, folded, when none is open
-            shown.open.remove(&at);
             let nearest = shown
                 .order
                 .iter()
@@ -189,8 +252,34 @@ impl Conversations {
         })
     }
 
-    /// "Show N earlier messages" clicked: every line shows from now on
-    pub(crate) fn show_all(&self, thread: i64) {
+    /// The message `step` places from the selected one in the stack's order (Next and Previous Message in
+    /// Conversation): opened and selected. None at either end.
+    pub(crate) fn step(&self, thread: i64, step: isize) -> Option<MessageRef> {
+        self.with_shown(thread, |shown, focus| {
+            let here = shown.order.iter().position(|m| *m == focus)?;
+            let at = *shown.order.get(here.checked_add_signed(step)?)?;
+            shown.open.insert(at);
+            shown.focus = Some(at);
+            Some(at)
+        })
+    }
+
+    /// Open All Messages (`open`) or Fold All Messages: every message open, or every one folded but the selected one.
+    /// The selected message, which stays.
+    pub(crate) fn open_all(&self, thread: i64, open: bool) -> Option<MessageRef> {
+        self.with_shown(thread, |shown, focus| {
+            shown.open = if open {
+                shown.order.iter().copied().collect()
+            } else {
+                BTreeSet::from([focus])
+            };
+            shown.all |= open;
+            Some(focus)
+        })
+    }
+
+    /// The folded middle's row clicked: every message has its row from now on
+    pub(crate) fn show_middle(&self, thread: i64) {
         self.with(thread, |shown| shown.all = true);
     }
 
@@ -198,21 +287,31 @@ impl Conversations {
     pub(crate) fn marks(&self, thread: i64) -> Vec<MessageRef> {
         self.with(thread, |shown| std::mem::take(&mut shown.marks))
     }
-
-    /// Messages found to be signed or encrypted when their views were built: never in the stack, so neither open nor
-    /// marked read by it
-    pub(crate) fn alone_found(&self, thread: i64, found: &BTreeSet<MessageRef>) {
-        if found.is_empty() {
-            return;
-        }
-        self.with(thread, |shown| {
-            shown.marks.retain(|at| !found.contains(at));
-            shown.open.retain(|at| !found.contains(at) || shown.focus == Some(*at));
-        });
-    }
 }
 
-/// A message's sender as its line names it: the name, else the address
+/// The places (in time) of the read messages folded into the middle's row: each run of at least [`MIDDLE_AT_LEAST`]
+/// folded messages that are neither the first one nor among the last two read ones
+fn middle(messages: &[Message], open: &BTreeSet<MessageRef>) -> BTreeSet<usize> {
+    let read: Vec<usize> = (0..messages.len()).filter(|&i| messages[i].info.seen()).collect();
+    let last_read: BTreeSet<usize> = read.iter().rev().take(2).copied().collect();
+    let foldable =
+        |i: usize| i > 0 && messages[i].info.seen() && !open.contains(&messages[i].at()) && !last_read.contains(&i);
+    let mut hidden = BTreeSet::new();
+    let mut run: Vec<usize> = Vec::new();
+    for i in 0..=messages.len() {
+        if i < messages.len() && foldable(i) {
+            run.push(i);
+            continue;
+        }
+        if run.len() >= MIDDLE_AT_LEAST {
+            hidden.extend(run.iter().copied());
+        }
+        run.clear();
+    }
+    hidden
+}
+
+/// A message's sender as its row names it: the name, else the address
 fn sender(message: &Message) -> String {
     let info = &message.info;
     if info.from_name.trim().is_empty() {
@@ -222,118 +321,149 @@ fn sender(message: &Message) -> String {
     }
 }
 
-/// The lines of a plan: who, when, the first words or (open) who it went to, its folder when not `home`, and its state;
-/// `protected`: messages found signed or encrypted when their views were built, shown folded as opening by themselves
-pub(crate) fn lines(
+/// What the core knows of the conversation's place besides its messages: the folder it was opened from, the folders
+/// of its account and the user's own addresses (lowercase)
+pub(crate) struct Place<'a> {
+    pub home: FolderId,
+    pub folders: &'a HashMap<FolderId, pe_store::FolderInfo>,
+    pub own: &'a HashSet<String>,
+}
+
+/// The entries of a plan: each shown message's row and frame words, the views of the open ones but the selected one
+/// (`views`, by message; taken), the middle's folded messages counted on the entry after them
+pub(crate) fn entries(
     plan: &Plan,
-    home: FolderId,
-    folders: &HashMap<FolderId, pe_store::FolderInfo>,
+    place: &Place,
     waiting: &[MessageRef],
-    protected: &BTreeSet<MessageRef>,
-) -> Vec<Line> {
-    plan.messages
-        .iter()
-        .enumerate()
-        .skip(plan.first)
-        .map(|(index, (message, open))| {
-            let at = message.at();
-            let sealed = alone(message) || protected.contains(&at);
-            let open = &(*open && !sealed);
-            let info = &message.info;
-            let place = folders.get(&message.folder_id);
-            let folder = match place {
-                Some(place) if message.folder_id != home => crate::text::folder_name(place),
-                _ => String::new(),
-            };
-            let draft = place.is_some_and(|f| f.special_use.as_deref() == Some("\\Drafts"));
-            let note = if sealed {
-                tr(Text::UiConversationAlone)
-            } else if waiting.contains(&at) {
-                tr(Text::UiConversationDownloading)
-            } else if draft {
-                tr(Text::UiConversationDraft)
+    views: &mut HashMap<MessageRef, MessageView>,
+) -> Vec<Entry> {
+    let mut entries = Vec::new();
+    let mut hidden_before = 0;
+    for (index, (message, open)) in plan.messages.iter().enumerate() {
+        if plan.hidden.contains(&index) {
+            hidden_before += 1;
+            continue;
+        }
+        let at = message.at();
+        let info = &message.info;
+        let own = place.own.contains(&info.from_address.to_lowercase());
+        let folder_info = place.folders.get(&message.folder_id);
+        let folder = match folder_info {
+            Some(folder) if message.folder_id != place.home => crate::text::folder_name(folder),
+            _ => String::new(),
+        };
+        let draft = folder_info.is_some_and(|f| f.special_use.as_deref() == Some("\\Drafts"));
+        let note = if *open && waiting.contains(&at) {
+            tr(Text::UiConversationDownloading)
+        } else if draft {
+            tr(Text::UiConversationDraft)
+        } else {
+            String::new()
+        };
+        let people = if info.recipient_people.is_empty() {
+            &info.recipients
+        } else {
+            &info.recipient_people
+        };
+        let date = info.date.or(info.internal_date);
+        let (kind, picture) = crate::senders::picture(message);
+        entries.push(Entry {
+            at,
+            index,
+            from: if own {
+                tr(Text::UiConversationYou)
+            } else {
+                sender(message)
+            },
+            address: info.from_address.clone(),
+            own,
+            date: date.unwrap_or(0),
+            when: date.map(crate::calendar::local_date_time).unwrap_or_default(),
+            words: message.snippet.clone().unwrap_or_default(),
+            to: if people.is_empty() {
+                String::new()
+            } else {
+                tr_args(Text::UiConversationTo, &[("people", people.as_str().into())])
+            },
+            found_in: if folder.is_empty() {
+                String::new()
+            } else {
+                tr_args(Text::UiConversationFoundIn, &[("folder", folder.as_str().into())])
+            },
+            folder,
+            note,
+            draft,
+            unread: !info.seen(),
+            open: *open,
+            selected: at == plan.focus,
+            attachments: info.has_attachments,
+            reactions: crate::reactions::badge(&message.reactions),
+            picture,
+            logo: kind == crate::senders::PictureKind::Logo,
+            initials: crate::text::initials(&info.from_name, &info.from_address),
+            hidden_text: if hidden_before > 0 {
+                hidden_words(hidden_before)
             } else {
                 String::new()
-            };
-            let people = if info.recipient_people.is_empty() {
-                &info.recipients
+            },
+            hidden_before: std::mem::take(&mut hidden_before),
+            view: if *open && at != plan.focus {
+                views.remove(&at).map(Box::new)
             } else {
-                &info.recipient_people
-            };
-            let words = match open {
-                true if !people.is_empty() => tr_args(Text::UiConversationTo, &[("people", people.as_str().into())]),
-                _ => message.snippet.clone().unwrap_or_default(),
-            };
-            let when = info
-                .date
-                .or(info.internal_date)
-                .map(crate::calendar::local_date_time)
-                .unwrap_or_default();
-            Line {
-                at,
-                index,
-                from: sender(message),
-                when,
-                words,
-                folder,
-                note,
-                unread: !info.seen(),
-                open: *open,
-                focus: at == plan.focus,
-                reactions: crate::reactions::badge(&message.reactions),
-            }
-        })
-        .collect()
+                None
+            },
+        });
+    }
+    entries
 }
 
-/// The words of the link to a long conversation's earlier lines, None when every line shows
-pub(crate) fn earlier_words(plan: &Plan) -> Option<String> {
-    (plan.first > 0).then(|| tr_args(Text::UiConversationEarlier, &[("count", plan.first.into())]))
+/// The conversation's words over the stack: its subject, how many messages and unread ones, who wrote in it
+pub(crate) fn summary(plan: &Plan, own: &HashSet<String>) -> (String, String, String) {
+    let mut in_time: Vec<&Message> = plan.messages.iter().map(|(m, _)| m).collect();
+    in_time.sort_by_key(|m| m.info.date.or(m.info.internal_date).unwrap_or(0));
+    let subject = in_time.first().map(|m| m.info.subject.clone()).unwrap_or_default();
+    let unread = plan.messages.iter().filter(|(m, _)| !m.info.seen()).count();
+    let mut counts = tr_args(Text::UiConversationMessages, &[("count", plan.messages.len().into())]);
+    if unread > 0 {
+        counts.push_str(", ");
+        counts.push_str(&tr_args(Text::UiConversationUnread, &[("count", unread.into())]));
+    }
+    let mut people: Vec<String> = Vec::new();
+    for message in in_time {
+        let name = if own.contains(&message.info.from_address.to_lowercase()) {
+            tr(Text::UiConversationYou)
+        } else {
+            sender(message)
+        };
+        if !name.is_empty() && !people.contains(&name) {
+            people.push(name);
+        }
+    }
+    (subject, counts, crate::text::word_list(&people))
 }
 
-/// The page of `lines` with the focus message's view: its document goes to the focus's place among the parts, each
-/// other open message's document (`documents`, by place) to its own, the page in its place; what is printed stays the
-/// focus message's own
+/// The selected message's view with the conversation's entries: `views` the open messages' own views
 pub(crate) fn into_view(
     mut view: MessageView,
     plan: &Plan,
-    lines: &[Line],
-    mut documents: HashMap<MessageRef, String>,
-    pictures: bool,
+    place: &Place,
+    mut views: HashMap<MessageRef, MessageView>,
     waiting: Vec<MessageRef>,
 ) -> MessageView {
-    let focus_document = std::mem::take(&mut view.document);
-    view.print_document = Some(view.print_document.take().unwrap_or_else(|| focus_document.clone()));
-    documents.insert(plan.focus, focus_document);
-    let mut parts = vec![String::new(); plan.messages.len()];
-    for line in lines {
-        if line.open
-            && let Some(document) = documents.remove(&line.at)
-        {
-            parts[line.index] = document;
-        }
-    }
-    let shown: Vec<pe_html::ConversationLine> = lines
-        .iter()
-        .map(|line| pe_html::ConversationLine {
-            from: &line.from,
-            when: &line.when,
-            words: &line.words,
-            folder: &line.folder,
-            note: &line.note,
-            unread: line.unread,
-            // a message still downloading has no document yet: its line only
-            open: line.open && !parts[line.index].is_empty(),
-            focus: line.focus,
-            reactions: &line.reactions,
-        })
-        .collect();
-    let earlier = earlier_words(plan);
-    view.document =
-        pe_html::conversation_page(&shown, plan.first, earlier.as_deref(), pictures || view.pictures_loaded);
-    view.part_documents = parts;
+    let (subject, summary, people) = summary(plan, place.own);
+    let entries = entries(plan, place, &waiting, &mut views);
+    let line = [summary.as_str(), people.as_str()]
+        .into_iter()
+        .filter(|words| !words.is_empty())
+        .collect::<Vec<_>>()
+        .join(" \u{00B7} ");
     view.conversation = Some(ConversationInfo {
         count: plan.messages.len(),
+        subject,
+        summary,
+        people,
+        line,
+        entries,
         waiting,
     });
     view
@@ -347,7 +477,7 @@ pub(crate) fn printout(store: &Store, messages: &[Message]) -> String {
         let Ok(Some(source)) = store.source(message.folder_id, message.info.uid) else {
             continue;
         };
-        if alone(message) {
+        if protected(message) {
             continue;
         }
         if let Some(body) = crate::view::print_body(&source) {
@@ -421,6 +551,60 @@ impl crate::Core {
     }
 }
 
+/// A message shown alone, as a stack of one (its key 0, 0: the next message alone takes its frame and web view): its
+/// view's own words, as a conversation's entry has them
+pub fn alone(view: &MessageView) -> Entry {
+    let people: Vec<String> = [&view.to, &view.cc]
+        .into_iter()
+        .filter(|p| !p.is_empty())
+        .cloned()
+        .collect();
+    Entry {
+        at: MessageRef { folder: 0, uid: 0 },
+        index: 0,
+        from: view.from.clone(),
+        address: String::new(),
+        own: false,
+        date: view.date.unwrap_or(0),
+        when: view.date.map(crate::calendar::local_date_time).unwrap_or_default(),
+        words: String::new(),
+        to: if people.is_empty() {
+            String::new()
+        } else {
+            let people = crate::text::word_list(&people);
+            tr_args(Text::UiConversationTo, &[("people", people.as_str().into())])
+        },
+        folder: String::new(),
+        found_in: String::new(),
+        note: String::new(),
+        draft: false,
+        unread: false,
+        open: true,
+        selected: true,
+        attachments: !view.attachments.is_empty(),
+        reactions: String::new(),
+        picture: view.picture,
+        logo: view.has_logo,
+        initials: view.initials.clone(),
+        hidden_before: 0,
+        hidden_text: String::new(),
+        view: None,
+    }
+}
+
+/// The stack's entries of `view`, taken out of it: its conversation's, or the one of a message alone ([`alone`])
+pub fn take_entries(view: &mut MessageView) -> Vec<Entry> {
+    match view.conversation.as_mut() {
+        Some(conversation) => std::mem::take(&mut conversation.entries),
+        None => vec![alone(view)],
+    }
+}
+
+/// The words of the folded middle's row: "14 more messages"
+pub fn hidden_words(count: usize) -> String {
+    tr_args(Text::UiConversationHidden, &[("count", count.into())])
+}
+
 /// What to ask before Delete, Archive or Move of a conversation with `count` messages elsewhere
 /// ([`crate::Core::conversation_elsewhere`]): "This conversation also has 2 messages in other folders."
 pub fn elsewhere_question(count: usize) -> String {
@@ -440,6 +624,8 @@ mod tests {
                 uid,
                 date: Some(uid as i64 * 100),
                 from_name: format!("Sender {uid}"),
+                from_address: format!("s{uid}@example.com"),
+                subject: format!("Subject {uid}"),
                 flags: if seen { vec!["\\Seen".into()] } else { Vec::new() },
                 ..Default::default()
             },
@@ -467,27 +653,55 @@ mod tests {
             .collect()
     }
 
+    fn hidden(plan: &Plan) -> Vec<u64> {
+        plan.hidden.iter().map(|&i| plan.messages[i].0.info.uid).collect()
+    }
+
     #[test]
-    fn opens_the_unread_ones_and_the_focus_and_keeps_what_was_clicked() {
+    fn a_click_selects_and_only_the_arrow_folds() {
         let shown = Conversations::default();
         let all = || vec![message(1, true), message(2, false), message(3, true), message(4, false)];
         let plan = shown.plan(7, all(), at(2), false);
         assert_eq!(open(&plan), [2, 4], "the unread messages open, the focus among them");
         assert_eq!(shown.marks(7), [at(2), at(4)]);
-        // a folded line opens and takes the focus; an open one folds
-        assert_eq!(shown.click(7, 0), Some(at(1)));
+        // a folded message clicked opens and is selected
+        assert_eq!(shown.select(7, 0), Some(at(1)));
         assert_eq!(open(&shown.plan(7, all(), at(1), false)), [1, 2, 4]);
-        assert_eq!(shown.click(7, 3), Some(at(1)), "folding another keeps the focus");
-        assert_eq!(open(&shown.plan(7, all(), at(1), false)), [1, 2]);
-        // the focus folded: the nearest open message has it
-        assert_eq!(shown.click(7, 0), Some(at(2)));
+        // an open one clicked is only selected: it stays open, and so do the others
+        assert_eq!(shown.select(7, 3), Some(at(4)));
+        assert_eq!(open(&shown.plan(7, all(), at(4), false)), [1, 2, 4]);
+        // the arrow folds another one: the selection stays
+        assert_eq!(shown.toggle(7, 0), Some(at(4)));
+        assert_eq!(open(&shown.plan(7, all(), at(4), false)), [2, 4]);
+        // the arrow folds the selected one: the nearest open message is selected
+        assert_eq!(shown.toggle(7, 3), Some(at(2)));
         assert_eq!(open(&shown.plan(7, all(), at(2), false)), [2]);
-        assert_eq!(shown.click(7, 9), None, "a line that is not there");
-        assert_eq!(shown.click(8, 0), None, "a conversation not shown");
-        // marks are taken once
-        shown.plan(9, all(), at(4), false);
-        assert_eq!(shown.marks(9), [at(2), at(4)]);
-        assert!(shown.marks(9).is_empty());
+        // the arrow on a folded one opens and selects it
+        assert_eq!(shown.toggle(7, 2), Some(at(3)));
+        assert_eq!(open(&shown.plan(7, all(), at(3), false)), [2, 3]);
+        assert_eq!(shown.select(7, 9), None, "a message that is not there");
+        assert_eq!(shown.select(8, 0), None, "a conversation not shown");
+        assert_eq!(shown.toggle(8, 0), None);
+    }
+
+    #[test]
+    fn steps_and_open_or_fold_all() {
+        let shown = Conversations::default();
+        let all = || (1..=5).map(|uid| message(uid, true)).collect::<Vec<_>>();
+        shown.plan(1, all(), at(5), false);
+        assert_eq!(shown.step(1, -1), Some(at(4)), "the previous one opens and is selected");
+        assert_eq!(open(&shown.plan(1, all(), at(4), false)), [4, 5]);
+        assert_eq!(shown.step(1, 1), Some(at(5)));
+        assert_eq!(shown.step(1, 1), None, "past the last one");
+        assert_eq!(shown.open_all(1, true), Some(at(5)));
+        assert_eq!(open(&shown.plan(1, all(), at(5), false)), [1, 2, 3, 4, 5]);
+        assert_eq!(shown.open_all(1, false), Some(at(5)));
+        assert_eq!(
+            open(&shown.plan(1, all(), at(5), false)),
+            [5],
+            "Fold All leaves the selected one open"
+        );
+        assert_eq!(shown.step(2, 1), None, "a conversation not shown");
     }
 
     #[test]
@@ -501,49 +715,91 @@ mod tests {
         );
         let order: Vec<u64> = plan.messages.iter().map(|(m, _)| m.info.uid).collect();
         assert_eq!(order, [3, 2, 1]);
-        assert_eq!(shown.click(1, 0), Some(at(3)), "the newest is the first line");
+        assert_eq!(shown.select(1, 0), Some(at(3)), "the newest is the first row");
     }
 
     #[test]
-    fn signed_or_encrypted_messages_never_open_in_the_stack() {
+    fn signed_or_encrypted_messages_open_in_the_stack() {
         let shown = Conversations::default();
         let mut sealed = message(2, false);
         sealed.info.protection = Protection::Encrypted;
         let plan = shown.plan(1, vec![message(1, false), sealed], at(1), false);
-        assert_eq!(open(&plan), [1]);
-        assert_eq!(
-            shown.marks(1),
-            [at(1)],
-            "an encrypted message stays unread until it is opened by itself"
-        );
+        assert_eq!(open(&plan), [1, 2]);
+        assert_eq!(shown.marks(1), [at(1), at(2)]);
     }
 
     #[test]
-    fn a_long_conversation_shows_its_later_lines_first() {
+    fn the_read_middle_of_a_long_conversation_folds_into_one_row() {
         let shown = Conversations::default();
-        let many = || (1..=30).map(|uid| message(uid, uid != 30)).collect::<Vec<_>>();
-        let plan = shown.plan(1, many(), at(30), false);
-        assert_eq!(plan.first, 10, "20 lines, the newest among them");
-        pe_i18n::set_language("en");
-        assert_eq!(earlier_words(&plan).as_deref(), Some("Show 10 earlier messages"));
-        // the focus is always shown
-        assert_eq!(shown.plan(1, many(), at(3), false).first, 2);
-        shown.show_all(1);
-        assert_eq!(shown.plan(1, many(), at(30), false).first, 0);
-        assert!(earlier_words(&shown.plan(1, many(), at(30), false)).is_none());
-        // newest first: its first 20 lines
+        // 1 to 9 read, 10 unread
+        let many = || (1..=10).map(|uid| message(uid, uid != 10)).collect::<Vec<_>>();
+        let plan = shown.plan(1, many(), at(10), false);
+        assert_eq!(
+            hidden(&plan),
+            [2, 3, 4, 5, 6, 7],
+            "the first and the last two read ones stay"
+        );
+        // the selected message is never folded away, and a run shorter than four stays
+        let plan = shown.plan(1, many(), at(5), false);
+        assert!(plan.hidden.is_empty(), "runs of three (2 to 4) and two (6, 7) stay");
+        // a short conversation folds nothing
         let fresh = Conversations::default();
-        let plan = fresh.plan(1, many(), at(30), true);
-        assert_eq!((plan.first, plan.messages.len()), (0, 20));
+        let few = || (1..=6).map(|uid| message(uid, uid != 6)).collect::<Vec<_>>();
+        assert!(fresh.plan(2, few(), at(6), false).hidden.is_empty());
+        // the row clicked: every message has its row
+        shown.show_middle(1);
+        assert!(shown.plan(1, many(), at(10), false).hidden.is_empty());
+        // newest first: the same messages, at their places in that order
+        let turned = Conversations::default();
+        let plan = turned.plan(1, many(), at(10), true);
+        assert_eq!(hidden(&plan), [7, 6, 5, 4, 3, 2]);
     }
 
     #[test]
-    fn lines_say_where_each_message_is() {
+    fn a_message_alone_is_a_stack_of_one() {
+        pe_i18n::set_language("en");
+        let mut view = MessageView {
+            from: "Ann Lee <ann@example.com>".into(),
+            initials: "AL".into(),
+            to: "Bob <bob@example.com>".into(),
+            cc: "Carol <carol@example.com>".into(),
+            date: Some(1_700_000_000),
+            picture: 7,
+            ..MessageView::default()
+        };
+        let entries = take_entries(&mut view);
+        assert_eq!(entries.len(), 1, "its one entry");
+        let entry = &entries[0];
+        assert_eq!(
+            entry.at,
+            MessageRef { folder: 0, uid: 0 },
+            "the key the next message alone takes again"
+        );
+        assert!(entry.open && entry.selected, "open and selected");
+        assert_eq!(entry.from, "Ann Lee <ann@example.com>");
+        assert_eq!(entry.initials, "AL");
+        assert_eq!(entry.picture, 7);
+        assert_eq!(
+            entry.to, "to Bob <bob@example.com>, Carol <carol@example.com>",
+            "as a conversation's entry says it"
+        );
+        assert_eq!(
+            entry.when,
+            crate::calendar::local_date_time(1_700_000_000),
+            "the date as the stack says it"
+        );
+        assert!(entry.hidden_text.is_empty());
+    }
+
+    #[test]
+    fn entries_say_who_where_and_what() {
         pe_i18n::set_language("en");
         let shown = Conversations::default();
         let mut sent = message(2, true);
         sent.folder_id = 2;
+        sent.info.from_address = "Me@Example.com".into();
         sent.info.recipient_people = "Ann".into();
+        sent.info.has_attachments = true;
         let mut draft = message(3, true);
         draft.folder_id = 3;
         let plan = shown.plan(1, vec![message(1, false), sent, draft], at(1), false);
@@ -558,14 +814,52 @@ mod tests {
             (2, folder("Sent", Some("\\Sent"))),
             (3, folder("Drafts", Some("\\Drafts"))),
         ]);
-        let lines = lines(&plan, 1, &folders, &[], &BTreeSet::new());
-        assert_eq!(lines[0].folder, "", "the folder it was opened from is not named");
-        assert_eq!(lines[0].words, "words 1", "open with no recipients: its first words");
+        let own = HashSet::from(["me@example.com".to_string()]);
+        let place = Place {
+            home: 1,
+            folders: &folders,
+            own: &own,
+        };
+        let entries = entries(&plan, &place, &[], &mut HashMap::new());
+        assert_eq!(entries[0].folder, "", "the folder it was opened from is not named");
+        assert!(entries[0].selected && entries[0].open && entries[0].unread && !entries[1].open);
         assert_eq!(
-            (lines[1].folder.as_str(), lines[1].words.as_str()),
-            ("Sent Items", "words 2")
+            (
+                entries[1].from.as_str(),
+                entries[1].own,
+                entries[1].folder.as_str(),
+                entries[1].found_in.as_str()
+            ),
+            ("You", true, "Sent Items", "Found in Sent Items")
         );
-        assert_eq!((lines[2].folder.as_str(), lines[2].note.as_str()), ("Drafts", "Draft"));
-        assert!(lines[0].focus && lines[0].open && lines[0].unread && !lines[1].open);
+        assert_eq!((entries[1].to.as_str(), entries[1].attachments), ("to Ann", true));
+        assert_eq!((entries[2].note.as_str(), entries[2].draft), ("Draft", true));
+        assert_eq!(entries[0].initials, "S", "the initials as the list draws them");
+        let (subject, counts, people) = summary(&plan, &own);
+        assert_eq!(subject, "Subject 1");
+        assert_eq!(counts, "3 messages, 1 unread");
+        assert_eq!(people, "Sender 1, You, Sender 3");
+    }
+
+    #[test]
+    fn the_middle_is_counted_on_the_entry_after_it() {
+        pe_i18n::set_language("en");
+        let shown = Conversations::default();
+        let many = (1..=10).map(|uid| message(uid, uid != 10)).collect::<Vec<_>>();
+        let plan = shown.plan(1, many, at(10), false);
+        let folders = HashMap::new();
+        let own = HashSet::new();
+        let place = Place {
+            home: 1,
+            folders: &folders,
+            own: &own,
+        };
+        let entries = entries(&plan, &place, &[], &mut HashMap::new());
+        let rows: Vec<(u64, usize)> = entries.iter().map(|e| (e.at.uid, e.hidden_before)).collect();
+        assert_eq!(rows, [(1, 0), (8, 6), (9, 0), (10, 0)]);
+        assert_eq!(
+            entries[1].index, 7,
+            "an entry's index is its place among all the messages"
+        );
     }
 }

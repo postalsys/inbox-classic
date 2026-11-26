@@ -171,6 +171,14 @@ constexpr std::pair<WORD, PeSortField> kSortItems[] = {
 
 }  // namespace
 
+COLORREF MixColors(COLORREF from, COLORREF to, int part) {
+    return Mix(from, to, part);
+}
+
+std::wstring ListDate(int64_t seconds) {
+    return ShortDate(seconds, static_cast<int64_t>(time(nullptr)), LocalOffset());
+}
+
 PeSortField SortFieldOfItem(WORD id) {
     for (const auto& [item, field] : kSortItems) {
         if (item == id) {
@@ -451,31 +459,12 @@ void Mailbox::DrawSortButton(const DRAWITEMSTRUCT& item) const {
 // ---- the senders' pictures ----
 
 void Mailbox::DrawRowPicture(HDC dc, const RECT& box, const PeMessage& row, bool selected) {
-    int size = box.right - box.left;
-    if (HBITMAP bitmap = pictures_.Get(row.picture, size)) {
-        // the logo's own transparency kept, over the row, through the one memory DC of the list's pictures
-        if (!pictureDc_) {
-            pictureDc_ = CreateCompatibleDC(dc);
-        }
-        DrawPremultiplied(dc, box.left, box.top, bitmap, size, pictureDc_);
-        // a hairline in the initials' grey, so a logo on white keeps its square's edge on a white row
-        FrameRect(dc, &box, GetSysColorBrush(COLOR_BTNFACE));
-        return;
-    }
-    // the initials, quiet: one grey for everyone, on a square a shade off the row's background
+    // the logo's own transparency kept, over the row, through the one memory DC of the list's pictures; else the
+    // initials, quiet: one grey for everyone, on a square a shade off the row's background
     COLORREF back = GetSysColor(selected ? SelectionColor() : COLOR_WINDOW);
     COLORREF ink = GetSysColor(!selected ? COLOR_GRAYTEXT : GetFocus() == list_ ? COLOR_HIGHLIGHTTEXT : COLOR_BTNTEXT);
-    SetDCBrushColor(dc, Mix(back, selected ? ink : GetSysColor(COLOR_BTNFACE), selected ? 40 : 255));
-    RECT square = box;
-    FillRect(dc, &square, static_cast<HBRUSH>(GetStockObject(DC_BRUSH)));
-    std::wstring initials = Text(row.initials);
-    if (initials.empty()) {
-        return;
-    }
-    HGDIOBJ old = SelectObject(dc, bold_);
-    SetTextColor(dc, ink);
-    DrawTextW(dc, initials.c_str(), static_cast<int>(initials.size()), &square, DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
-    SelectObject(dc, old);
+    DrawSenderPicture(dc, box, pictures_.Get(row.picture, box.right - box.left), pictureDc_, Text(row.initials), bold_,
+                      Mix(back, selected ? ink : GetSysColor(COLOR_BTNFACE), selected ? 40 : 255), ink);
 }
 
 void Mailbox::PictureReady(uint64_t request) {

@@ -96,6 +96,15 @@ pub const MEASURE_SCRIPT: &str = "for(const f of document.querySelectorAll('ifra
 const r=d&&d.documentElement;if(!r)continue;const h=Math.max(48,Math.ceil(r.getBoundingClientRect().height))+'px';\
 if(f.style.height!==h)f.style.height=h}";
 
+/// The script the apps run in a message's document in a frame of a conversation's stack (docs/conversation-view-plan.md),
+/// whose web view is as tall as its document and never scrolls by itself: its parts' frames sized
+/// ([`MEASURE_SCRIPT`]), then the document's height in CSS pixels, by the same rule (the root's own height, never under
+/// 48). A number; 0 before there is a document.
+pub const HEIGHT_SCRIPT: &str = "(()=>{for(const f of document.querySelectorAll('iframe.pe-d')){const d=f.contentDocument;\
+const r=d&&d.documentElement;if(!r)continue;const h=Math.max(48,Math.ceil(r.getBoundingClientRect().height))+'px';\
+if(f.style.height!==h)f.style.height=h}const r=document.documentElement;\
+return r?Math.max(48,Math.ceil(r.getBoundingClientRect().height)):0})()";
+
 /// The frame of the document at `part-N` (N `index`) on a page of documents in frames, titled `title`: sandboxed with no
 /// scripts, forms or popups, the page around it navigated by a click only; the same for every such page
 pub(crate) fn part_frame(index: usize, title: &str) -> String {
@@ -182,6 +191,22 @@ pub fn secure_page(parts: &[SecurePart], remote_images: bool) -> String {
          .pe-n{{--c:#777;--b:#2a2a2a;--t:#ccc}}}}\
          </style></head><body>{body}</body></html>"
     )
+}
+
+#[cfg(test)]
+mod height_tests {
+    #[test]
+    fn the_height_script_measures_the_parts_first() {
+        let measure = super::MEASURE_SCRIPT;
+        assert!(
+            super::HEIGHT_SCRIPT.contains(measure),
+            "the parts' frames sized by the same rule"
+        );
+        assert!(
+            super::HEIGHT_SCRIPT.ends_with("})()"),
+            "an expression the apps evaluate"
+        );
+    }
 }
 
 #[cfg(test)]

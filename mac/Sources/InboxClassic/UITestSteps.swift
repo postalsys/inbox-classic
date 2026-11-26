@@ -37,22 +37,31 @@ extension UITest {
 
     /// the text the reading pane shows now (its own document's, which the test can read with scripts off for the page)
     func readerText() async -> String {
-        guard let web = views(WKWebView.self, in: main.mailbox.reader.view).first else { return "" }
+        let web = main.mailbox.reader.shownPreview.view
         return (try? await web.evaluateJavaScript("document.body ? document.body.innerText : ''")) as? String ?? ""
     }
 
-    /// the reading pane's page and the documents of its frames (a conversation's open messages), as text
+    /// the text of every open message the reading pane shows, the documents of their parts' frames too (a signed or
+    /// encrypted message's)
     func readerTextWithFrames() async -> String {
-        guard let web = views(WKWebView.self, in: main.mailbox.reader.view).first else { return "" }
         let script = "[document.body ? document.body.innerText : ''].concat(Array.from(document.querySelectorAll('iframe'))"
             + ".map(f => f.contentDocument && f.contentDocument.body ? f.contentDocument.body.innerText : '')).join('\\n')"
-        return (try? await web.evaluateJavaScript(script)) as? String ?? ""
+        let reader = main.mailbox.reader
+        var webs = reader.stack.frameViews.compactMap { $0.body?.view }
+        if webs.isEmpty {
+            webs = [reader.shownPreview.view]
+        }
+        var all: [String] = []
+        for web in webs {
+            all.append((try? await web.evaluateJavaScript(script)) as? String ?? "")
+        }
+        return all.joined(separator: "\n")
     }
 
-    /// the reading pane's page source: a conversation's lines and links
-    func readerPage() async -> String {
-        guard let web = views(WKWebView.self, in: main.mailbox.reader.view).first else { return "" }
-        return (try? await web.evaluateJavaScript("document.documentElement.outerHTML")) as? String ?? ""
+    /// the text of an open message's frame in the reading pane's stack
+    func frameText(_ frame: StackFrame) async -> String {
+        guard let web = frame.body?.view else { return "" }
+        return (try? await web.evaluateJavaScript("document.body ? document.body.innerText : ''")) as? String ?? ""
     }
 
     /// a message the server does not give yet, and then can not: the pane says it is downloading, then why it is not
@@ -991,7 +1000,7 @@ extension UITest {
             let text = await readerText()
             return text.contains("Invitation: Quarterly planning") && text.contains(Text.uiOpenInCalendar.text) && text.contains("Room 2")
         }, "a message with an invitation shows the event in a card above the text, with Open in Calendar")
-        let preview = views(WKWebView.self, in: main.mailbox.reader.view).first
+        let preview = Optional(main.mailbox.reader.shownPreview.view)
         let link = try? await preview?.evaluateJavaScript("document.querySelector('a[href=\"inboxclassic:open-calendar\"]') !== null")
         check(link as? Bool == true, "its Open in Calendar is the card's own link")
         await shot(main.window, "read-10-invitation")
@@ -1007,8 +1016,8 @@ extension UITest {
         await search("subject:\"News from the brand\"")
         _ = await waitUntil(20) { list.numberOfRows == 1 }
         await selectRow(0)
-        let logo = views(NSImageView.self, in: main.mailbox.reader.view).first { $0.frame.width == 48 }
-        check(await waitUntil(15) { logo?.isHidden == false && logo?.image != nil }, "a sender whose logo the server passed has it beside the header")
+        check(await waitUntil(15) { main.mailbox.reader.stack.frameViews.first { $0.selected }?.pictureForTest != nil },
+              "a sender whose logo the server passed has it beside the header")
         await shot(main.window, "read-11-logo")
         await search("")
         try await oneAccountTree()
@@ -1081,6 +1090,7 @@ extension UITest {
         try await messageWindow()
         try await keyboardReading()
         try await conversations()
+        try await longConversation()
         try await bounces()
         try await reactions()
         try await oneTimeCodes()
@@ -1091,7 +1101,7 @@ extension UITest {
 
     /// the selection of the reading pane's document: what Find in This Message found
     func readerSelection() async -> String {
-        guard let web = views(WKWebView.self, in: main.mailbox.reader.view).first else { return "" }
+        guard let web = Optional(main.mailbox.reader.shownPreview.view) else { return "" }
         return (try? await web.evaluateJavaScript("String(window.getSelection())")) as? String ?? ""
     }
 
@@ -1281,33 +1291,61 @@ extension UITest {
         check(await waitUntil(15) {
             main.mailbox.reader.showsConversation && main.mailbox.reader.folder == focus.0 && main.mailbox.reader.uid == focus.1
         }, "selecting it shows the whole conversation at its oldest unread message")
-        var stacked = ""
-        _ = await waitUntil(15) {
-            stacked = await readerTextWithFrames()
-            return stacked.contains("The lake.") && stacked.contains("The lake it is.")
-        }
-        // each line's state: open (pe-o), the focus (pe-f), unread (pe-u); an unread line is always open, the focus
-        // open, Dave's read question folded (which unread ones open is the core's, tests/conversation.rs)
-        let page = await readerPage()
-        let lines = page.components(separatedBy: "<section class=\"").dropFirst()
-            .map { $0.prefix(while: { $0 != "\"" }).split(separator: " ").map(String.init) }
-        check(lines.count == 3 && lines.allSatisfy { !$0.contains("pe-u") || $0.contains("pe-o") }
-              && lines.contains { $0.contains("pe-f") && $0.contains("pe-o") } && !lines[0].contains("pe-o"),
-              "the unread messages open, the read one folded to its line (\(lines))")
-        check((0..<3).allSatisfy { page.contains("inboxclassic:conversation-\($0)") }, "each message has its line")
+        let stack = main.mailbox.reader.stack
+        // a row for the read question, a frame for each unread reply, Carol's (the oldest unread) selected; which
+        // unread ones open is the core's (tests/conversation.rs)
+        check(await waitUntil(15) { stack.shown.count == 3 && stack.frameViews.count == 2 },
+              "the conversation in the stack: a row and two frames (\(stack.shown))")
+        let shown = stack.shown
+        check(shown.map(\.from) == ["Dave", "Carol", "Bob Harris"] && shown.map(\.open) == [false, true, true]
+              && shown.map(\.selected) == [false, true, false],
+              "the unread messages open, the oldest unread selected, the read one folded to its row (\(shown))")
+        check(await waitUntil(15) {
+            let texts = [await frameText(stack.frameViews[0]), await frameText(stack.frameViews[1])]
+            return texts[0].contains("The lake.") && texts[1].contains("The lake it is.")
+        }, "each frame shows its own message")
+        let title: NSTextField? = find("stack.subject", in: main.window)
+        let summary: NSTextField? = find("stack.summary", in: main.window)
+        check(title?.stringValue == "Plans for the trip" && summary?.stringValue.contains("3") == true
+              && summary?.stringValue.contains("Bob Harris") == true,
+              "over it the subject, how many messages and who wrote (\(summary?.stringValue ?? ""))")
+        check(stack.frameViews.allSatisfy { $0.frame.height > 60 }, "each frame as tall as its message")
         await shot(main.window, "threads-1-collapsed")
         check(await waitUntil(20) {
             let all = await messages("INBOX").filter { raw($0).contains("trip2@") || raw($0).contains("trip3@") }
             return all.count == 2 && all.allSatisfy { ($0["flags"] as? [String])?.contains("\\Seen") == true }
         }, "after a moment on screen, the unread messages it showed open are read on the server")
-        // the read first message's line: it opens and takes the focus
-        main.mailbox.reader.conversationLine(0)
-        let lineOpened = await waitUntil(15) {
-            guard main.mailbox.reader.uid == tripHead.message.uid else { return false }
-            return await readerTextWithFrames().contains("Where do we go?")
-        }
-        check(lineOpened, "a click on a folded line opens its message, which takes the focus")
+        // the read first message's row: it opens and is selected
+        _ = stack.rowViews.first?.accessibilityPerformPress()
+        check(await waitUntil(15) {
+            main.mailbox.reader.uid == tripHead.message.uid && stack.shown.map(\.open) == [true, true, true]
+                && stack.frameViews.first?.selected == true
+        }, "a click on a folded row opens its message and selects it")
+        check(await waitUntil(15) {
+            guard let first = stack.frameViews.first else { return false }
+            return await frameText(first).contains("Where do we go?")
+        }, "its frame shows it")
         await shot(main.window, "threads-6-conversation-line")
+        // an open message clicked: only selected, every one stays open
+        stack.frameViews[1].selectForTest()
+        check(await waitUntil(15) {
+            main.mailbox.reader.uid == focus.1 && stack.shown.map(\.open) == [true, true, true]
+                && stack.frameViews[1].selected
+        }, "a click on an open message selects it and folds nothing")
+        // the arrow folds: Bob's, the selection stays on Carol's
+        press(stack.frameViews[2].arrowForTest)
+        check(await waitUntil(15) {
+            stack.shown.map(\.open) == [true, true, false] && main.mailbox.reader.uid == focus.1
+        }, "the arrow folds a message, the selection stays (\(stack.shown))")
+        // a frame's own Reply: its message selected, the reply quoting it
+        let windowsBefore = NSApp.windows.count
+        press(stack.frameViews[0].buttonForTest("frame.reply"))
+        check(await waitUntil(15) { main.mailbox.reader.uid == tripHead.message.uid && NSApp.windows.count > windowsBefore },
+              "a frame's Reply selects its message and replies to it")
+        if let compose = ComposeWindow.open.last?.window {
+            check(compose.title.contains("Plans for the trip"), "to that message (\(compose.title))")
+            await closeCompose(compose)
+        }
         // Print Conversation: every message, one after another
         let pdf = out.appendingPathComponent("conversation-print.pdf")
         try? FileManager.default.removeItem(at: pdf)
@@ -1664,7 +1702,7 @@ extension UITest {
         check(card.contains(Text.otpOld.text), "a message older than an hour says the code has probably expired")
         await shot(main.window, "otp-1-card")
         NSPasteboard.general.clearContents()
-        let preview = views(WKWebView.self, in: main.mailbox.reader.view).first
+        let preview = Optional(main.mailbox.reader.shownPreview.view)
         _ = try? await preview?.evaluateJavaScript("document.querySelector('a[href=\"inboxclassic:copy-code\"]').click()")
         let status: NSTextField? = find("status.text", in: main.window)
         check(await waitUntil(5) { NSPasteboard.general.string(forType: .string) == "482913" },
@@ -1753,7 +1791,7 @@ extension UITest {
         check(failedCard.contains("robin.nobody@example.org") && failedCard.contains(Text.bounceUserUnknown.text)
               && failedCard.contains(Text.bounceWhatToDo.text),
               "the card names the recipient, why and what to do")
-        let preview = views(WKWebView.self, in: main.mailbox.reader.view).first
+        let preview = Optional(main.mailbox.reader.shownPreview.view)
         _ = try? await preview?.evaluateJavaScript("document.querySelector('details').open = true")
         check(await waitUntil(5) { (await readerText()).contains("550 5.1.1 The email account that you tried to reach does not exist") },
               "the card's Details show the server's own words")

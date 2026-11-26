@@ -7,7 +7,7 @@
 //! look. The messages are taken away at the end.
 
 use super::preview_tiles::{TILES, TILES_ID};
-use super::steps::{document_text, folder_id, open_by_subject};
+use super::steps::{document_text, folder_id, open_by_subject, shown_body};
 use super::*;
 use crate::attachments::take_opened;
 
@@ -211,8 +211,8 @@ pub(super) async fn previews(d: &Driver) {
         "previews of pictures and PDF files are on out of the box",
     );
 
-    let view = main.reader.preview.view.clone();
     open_by_subject(inbox, PHOTO).await;
+    let view = shown_body().await;
     // as soon as the page is there, before its pictures have all come: where the captions are
     let mut first = None;
     for _ in 0..100 {
@@ -238,7 +238,7 @@ pub(super) async fn previews(d: &Driver) {
             come.as_ref().map(|l| l.captions.as_str()).unwrap_or_default()
         ),
     );
-    let text = document_text(&main.reader.preview.shown());
+    let text = document_text(&main.reader.preview().shown());
     d.check(
         text.contains("lake.jpg") && text.contains("invoice-2026-118.pdf") && text.contains("3 pages, "),
         "each file's name and size are above it, the invoice's with its 3 pages",
@@ -314,10 +314,10 @@ async fn keyboard(d: &Driver, view: &webkit::WebView) {
 /// The manual: its first five pages, then the link that opens it
 async fn long_pdf(d: &Driver, inbox: i64) {
     let main = shell().main();
-    let view = main.reader.preview.view.clone();
     open_by_subject(inbox, LONG).await;
+    let view = shown_body().await;
     let come = all_come(&view, 5, 20).await;
-    let text = document_text(&main.reader.preview.shown());
+    let text = document_text(&main.reader.preview().shown());
     d.check(
         come.as_ref().is_some_and(|l| l.pictures == 5 && l.come == 5) && text.contains("Open to see all 12 pages"),
         &format!("the manual shows its first five pages and \"Open to see all 12 pages\" ({come:?})"),
@@ -351,7 +351,7 @@ async fn in_window(d: &Driver, inbox: i64) {
         return;
     };
     wait_until(15, || window.reader.has_view()).await;
-    let come = all_come(&window.reader.preview.view, 4, 20).await;
+    let come = all_come(&window.reader.preview().view, 4, 20).await;
     d.check(
         come.is_some_and(|l| l.pictures == 4 && l.come == 4),
         "a message window shows the previews too",
@@ -403,8 +403,8 @@ async fn notice(view: &webkit::WebView) -> String {
 /// PDF files off (the photo still shown, nothing said) and on
 async fn switches(d: &Driver, inbox: i64) {
     let main = shell().main();
-    let view = main.reader.preview.view.clone();
     open_by_subject(inbox, PHOTO).await;
+    let view = shown_body().await;
     let Some(dialog) = reading_page().await else {
         d.check(false, "Preferences opens");
         return;
@@ -474,7 +474,6 @@ async fn switches(d: &Driver, inbox: i64) {
 /// and names the switch; turned on again, the notice is gone and the pages are back
 async fn pdf_off(d: &Driver, inbox: i64) {
     let main = shell().main();
-    let view = main.reader.preview.view.clone();
     let Some(dialog) = reading_page().await else {
         d.check(false, "Preferences opens");
         return;
@@ -491,6 +490,7 @@ async fn pdf_off(d: &Driver, inbox: i64) {
     close(dialog).await;
     open_by_subject(inbox, LONG).await;
     open_by_subject(inbox, PHOTO).await;
+    let view = shown_body().await;
     let mut said = String::new();
     for _ in 0..40 {
         said = notice(&view).await;
@@ -530,8 +530,8 @@ async fn pdf_off(d: &Driver, inbox: i64) {
 /// narrow window nothing wider than the pane
 async fn many(d: &Driver, inbox: i64) {
     let main = shell().main();
-    let view = main.reader.preview.view.clone();
     open_by_subject(inbox, MANY).await;
+    let view = shown_body().await;
     let come = all_come(&view, 20, 30).await;
     d.check(
         come.as_ref().is_some_and(|l| l.pictures == 20 && l.come == 20) && main.reader.strip.shown().len() == PICTURES,
@@ -556,7 +556,7 @@ async fn many(d: &Driver, inbox: i64) {
     };
     window.window.set_default_size(420, 760);
     wait_until(10, || window.window.width() <= 460 && window.reader.has_view()).await;
-    let narrow = &window.reader.preview.view;
+    let narrow = &window.reader.preview().view;
     all_come(narrow, 20, 30).await;
     let widths = run_script(
         narrow,
@@ -607,12 +607,12 @@ async fn point_of(view: &webkit::WebView, n: usize, fx: f64, fy: f64) -> Option<
 /// The dark look: the photo as it is (its sky still blue), the PDF pages on white, the captions light
 async fn dark(d: &Driver, inbox: i64) {
     let main = shell().main();
-    let view = main.reader.preview.view.clone();
     let styles = adw::StyleManager::default();
     styles.set_color_scheme(adw::ColorScheme::ForceDark);
     wait_until(10, || styles.is_dark()).await;
     open_by_subject(inbox, LONG).await;
     open_by_subject(inbox, PHOTO).await;
+    let view = shown_body().await;
     all_come(&view, 4, 20).await;
     pause(500).await;
     let sky = match point_of(&view, 0, 0.3, 0.04).await {
@@ -671,11 +671,11 @@ async fn dark(d: &Driver, inbox: i64) {
 async fn german(d: &Driver, inbox: i64) {
     steps::in_language("de").await;
     let main = shell().main();
-    let view = main.reader.preview.view.clone();
     select_folder(&pe_core::i18n::tr(pe_core::i18n::Text::FolderInbox));
     open_by_subject(inbox, PHOTO).await;
+    let view = shown_body().await;
     all_come(&view, 4, 20).await;
-    let text = document_text(&main.reader.preview.shown());
+    let text = document_text(&main.reader.preview().shown());
     d.check(
         text.contains("3 Seiten"),
         &format!("in German the invoice says its pages in German ({})", text.len()),

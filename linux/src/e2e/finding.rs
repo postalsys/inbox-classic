@@ -340,12 +340,12 @@ async fn find_signer(d: &Driver, inbox: i64) {
     let link = format!("{}{dave}", pe_html::FIND_KEY_LINK);
     let (text, tone, _) = wait_for(10, || main.reader.security.shown()).await.unwrap_or_default();
     d.check(
-        text.contains(&tr(Text::PgpPartUnknownKey)) && tone == "neutral" && main.reader.preview.shown().contains(&link),
+        text.contains(&tr(Text::PgpPartUnknownKey)) && tone == "neutral" && main.reader.preview().shown().contains(&link),
         &format!("the bar is grey, \"Signed, but the key is not known\", and the label has Find Key for {dave} ({tone}: {text})"),
     );
     d.shot(main.window(), "keys-14a-find-key-button").await;
     let before = harness_list(d, "/pgp/lookups").len();
-    let view = main.reader.preview.view.clone();
+    let view = main.reader.preview().view.clone();
     let clicked = super::previews::run_script(
         &view,
         "(function(){var a=document.querySelector('a.pe-f');if(!a)return 'no';a.click();return 'yes'})()",
@@ -354,7 +354,7 @@ async fn find_signer(d: &Driver, inbox: i64) {
         == "yes";
     let signed = tr_args(Text::PgpPartSigned, &[("signer", "dave@example.com".into())]);
     let shown_again = wait_until(20, || {
-        bar().0.contains(&signed) && main.reader.has_view() && !main.reader.preview.shown().contains(&link)
+        bar().0.contains(&signed) && main.reader.has_view() && !main.reader.preview().shown().contains(&link)
     })
     .await;
     let (text, tone, pictures) = bar();
@@ -362,7 +362,7 @@ async fn find_signer(d: &Driver, inbox: i64) {
         clicked && shown_again && tone == "good" && pictures == ["ic-ribbon-symbolic"],
         &format!("Find Key clicked, the message is shown again: blue with the ribbon, \"{signed}\", no Find Key ({tone}, {pictures:?}: {text})"),
     );
-    let page = super::steps::document_text(&main.reader.preview.shown_with_parts());
+    let page = super::steps::document_text(&main.reader.preview().shown_with_parts());
     d.check(page.contains(&signed), "the part's label says the same");
     let asked = lookups_after(d, before);
     d.check(

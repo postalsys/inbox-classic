@@ -308,7 +308,9 @@ extension UITest {
                                      context: nil, characters: "\r", charactersIgnoringModifiers: "\r", isARepeat: false, keyCode: 36)
         onMain { if let enter { self.list.keyDown(with: enter) } }
         if let window = await waitWindow("message", 10), let own = MessageWindow.open.last {
-            let ownWeb = views(WKWebView.self, in: own.reader.view).first
+            // its body made in its stack first
+            _ = await waitUntil(10) { own.reader.stack.selectedBody != nil }
+            let ownWeb = Optional(own.reader.shownPreview.view)
             let there = await previewsLoaded(ownWeb, 5)
             check(there.loaded && there.pictures.count == 5, "in a message's own window the previews are there too")
             await inPage(ownWeb, "document.querySelector('section[class^=pe-att] a').click()")
@@ -464,12 +466,23 @@ extension UITest {
     }
 
     /// how far the reading pane is scrolled, and where the first picture's top is in the view
+    /// how far the reading pane is scrolled (its stack, which scrolls the message: its frame is as tall as it) and
+    /// where the photo is in the message
     func scrolled(_ web: WKWebView?) async -> (y: Int, photo: Int) {
-        let answer = (try? await web?.evaluateJavaScript("JSON.stringify([Math.round(scrollY),"
+        let stack = main.mailbox.reader.stack
+        let y = Int(stack.contentView.bounds.origin.y.rounded())
+        let answer = (try? await web?.evaluateJavaScript("JSON.stringify([0,"
             + "Math.round((document.querySelector('section[class^=pe-att] img')||document.body).getBoundingClientRect().top)])"))
             as? String ?? ""
         let numbers = (try? JSONSerialization.jsonObject(with: Data(answer.utf8)) as? [Int]) ?? []
-        return numbers.count == 2 ? (numbers[0], numbers[1]) : (-1, -1)
+        return numbers.count == 2 ? (y, numbers[1]) : (-1, -1)
+    }
+
+    /// the reading pane's stack scrolled down `y` points
+    func scrollStack(_ y: Int) {
+        let stack = main.mailbox.reader.stack
+        stack.contentView.scroll(to: NSPoint(x: 0, y: y))
+        stack.reflectScrolledClipView(stack.contentView)
     }
 
     /// 8b: the files the core does not draw as tiles, Show in Message from the strip menu, and Print with the pictures
@@ -540,7 +553,7 @@ extension UITest {
               "the invoice's menu has \"\(Text.uiAttachmentShowInMessage.text)\", checked")
         await menuShot(reader.strip, "read-32b-previews-menu", file: 1)
         let into = max(1, (all.captionTops.first ?? 120) / 2)
-        await inPage(web, "window.scrollTo(0,\(into))")
+        scrollStack(into)
         await pause(0.3)
         let before = await scrolled(web)
         check(before.y > 0, "the message is scrolled a little (\(before.y))")

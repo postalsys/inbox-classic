@@ -60,6 +60,14 @@ ui-find-in-message-hint = Buscar en este mensaje
 ui-find-not-found = No se encontró «{ $words }» en este mensaje
 cmd-expand-all-threads = &Expandir todas las conversaciones
 cmd-collapse-all-threads = &Contraer todas las conversaciones
+# review: new
+cmd-next-in-conversation = Mensaje si&guiente de la conversación
+# review: new
+cmd-previous-in-conversation = Mensaje anterior de la con&versación
+# review: new
+cmd-open-all-messages = A&brir todos los mensajes
+# review: new
+cmd-fold-all-messages = Contraer todos los &mensajes
 ui-group-by-conversation = Agrupar lo&s mensajes por conversación
 ui-show-whole-conversation = Mostrar &toda la conversación en el panel de lectura
 ui-show-whole-conversation-note = Abra juntos los mensajes de una conversación, incluidas sus respuestas, sus borradores y los mensajes guardados en otras carpetas. Los mensajes leídos suelen estar contraídos en una línea: haga clic en una línea para abrirla o contraerla.
@@ -73,12 +81,34 @@ ui-thread-count = { $new ->
 }
 ui-conversation-to = para { $people }
 ui-conversation-draft = Borrador
-ui-conversation-alone = Firmado o cifrado: se abre por separado
 ui-conversation-downloading = Descargando…
-ui-conversation-earlier = { $count ->
-    [one] Mostrar 1 mensaje anterior
-   *[other] Mostrar { $count } mensajes anteriores
+# review: new
+ui-conversation-you = Yo
+# review: new
+ui-conversation-messages = { $count ->
+    [one] 1 mensaje
+   *[other] { $count } mensajes
 }
+# review: new
+ui-conversation-unread = { $count ->
+    [one] 1 sin leer
+   *[other] { $count } sin leer
+}
+# review: new
+ui-conversation-found-in = Encontrado en { $folder }
+# review: new
+ui-conversation-hidden = { $count ->
+    [one] 1 mensaje más
+   *[other] { $count } mensajes más
+}
+# review: new
+ui-conversation-open-message = Abrir mensaje
+# review: new
+ui-conversation-fold-message = Contraer mensaje
+# review: new
+ui-conversation-more = Más
+# review: new
+ui-conversation-edit = Editar
 ui-conversation-elsewhere = { $count ->
     [one] Esta conversación también tiene un mensaje en otra carpeta.
    *[other] Esta conversación también tiene { $count } mensajes en otras carpetas.

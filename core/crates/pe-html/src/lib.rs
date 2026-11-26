@@ -14,7 +14,6 @@ use base64::engine::general_purpose::STANDARD;
 
 mod bounce;
 mod card;
-mod conversation;
 mod css;
 mod dark;
 mod editor;
@@ -29,10 +28,6 @@ mod secure;
 mod visible;
 pub use bounce::{
     BOUNCED_MESSAGE_LINK, BounceCard, CardDetail, CardPicture, CardReason, bounce_card, is_bounced_message_link,
-};
-pub use conversation::{
-    CONVERSATION_EARLIER_LINK, CONVERSATION_LINK, ConversationLine, conversation_link, conversation_page,
-    is_conversation_earlier_link,
 };
 pub use dark::{dark, set_dark};
 pub use editor::{
@@ -49,13 +44,12 @@ pub use markdown::markdown_html;
 pub use otp::{COPY_CODE_LINK, OtpCard, is_copy_code_link, otp_card};
 pub use platform::{DOCUMENT_SCHEME, Platform, status_page, webkit_content_rules};
 pub use previews::{
-    PREVIEW_LINK, PREVIEW_PATH, PreviewFile, PreviewPage, PreviewSection, PreviewTile, PrintItem, SCROLL_SCRIPT,
-    is_preview_link, parse_preview_address, parse_preview_link, preview_address, preview_origin, preview_token,
-    scroll_to_script,
+    PREVIEW_LINK, PREVIEW_PATH, PreviewFile, PreviewPage, PreviewSection, PreviewTile, PrintItem, is_preview_link,
+    parse_preview_address, parse_preview_link, preview_address, preview_origin, preview_token,
 };
 pub use secure::{
-    FIND_KEY_LINK, MEASURE_SCRIPT, PART_DOCUMENT, PART_LINK, PartTone, SecurePart, find_key_link, key_handle,
-    part_document, part_link, secure_page,
+    FIND_KEY_LINK, HEIGHT_SCRIPT, MEASURE_SCRIPT, PART_DOCUMENT, PART_LINK, PartTone, SecurePart, find_key_link,
+    key_handle, part_document, part_link, secure_page,
 };
 pub use visible::visible_html;
 

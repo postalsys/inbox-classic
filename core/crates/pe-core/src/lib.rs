@@ -1887,19 +1887,18 @@ impl Core {
         events: &dyn Fn(Event),
     ) -> Option<MessageView> {
         let (folder, uid) = (focus.folder, focus.uid);
-        let build = |at: pe_store::MessageRef, pictures: bool, previews: bool| {
+        // a message's view with its attachments' previews; `timed` for the one the window waits for
+        let build = |at: pe_store::MessageRef, pictures: bool, timed: bool| {
             let found = self.view_source(at.folder, at.uid).ok().flatten()?;
-            let plan = previews.then(|| {
-                self.preview_plan(&previews::PreviewSource::Stored {
-                    folder: at.folder,
-                    uid: at.uid,
-                })
+            let plan = self.preview_plan(&previews::PreviewSource::Stored {
+                folder: at.folder,
+                uid: at.uid,
             });
-            let view = finish_view(&found, pictures, dropped, || Some(self.store()), events, plan)?;
-            if previews {
+            let view = finish_view(&found, pictures, dropped, || Some(self.store()), events, Some(plan))?;
+            if timed {
                 self.timings.view_built(at.folder, at.uid, std::time::Instant::now());
-                self.remember_attachments(at.folder, at.uid, &view);
             }
+            self.remember_attachments(at.folder, at.uid, &view);
             Some(view)
         };
         let alone = || build(focus, allow_remote_images, true);
@@ -1908,12 +1907,8 @@ impl Core {
             let store = self.store();
             store.message(folder, uid).ok().flatten().and_then(|message| {
                 let thread = message.info.thread_id.filter(|thread| *thread > 0)?;
-                // a signed or encrypted message is shown by itself
-                if conversation::alone(&message) {
-                    return None;
-                }
                 let mut messages = store.conversation_messages(thread, folder).ok()?;
-                // each line's reactions
+                // each row's reactions
                 let _ = store.add_reactions(&mut messages);
                 let account = store.folder_info(folder).map(|(account, _)| account).ok()?;
                 let folders: HashMap<FolderId, pe_store::FolderInfo> = store
@@ -1922,26 +1917,25 @@ impl Core {
                     .into_iter()
                     .map(|f| (f.id, f.info))
                     .collect();
-                Some((messages, folders, thread))
+                let own: std::collections::HashSet<String> = own_addresses(&store, account)
+                    .unwrap_or_default()
+                    .into_iter()
+                    .map(|address| address.to_lowercase())
+                    .collect();
+                Some((messages, folders, own, thread))
             })
         };
-        let Some((messages, folders, thread)) = found else {
+        let Some((messages, folders, own, thread)) = found else {
             return alone();
         };
         if messages.len() < 2 || !messages.iter().any(|m| m.at() == focus) {
             return alone();
         }
         let view = alone()?;
-        // signed or encrypted parts inside, found as the view was built: shown by itself, its labels on its own parts
-        if view.protection.is_some() {
-            return Some(view);
-        }
         let plan = self.conversations.plan(thread, messages, focus, newest_first);
-        let mut documents = HashMap::new();
+        let mut views = HashMap::new();
         let mut waiting = Vec::new();
-        let mut protected = std::collections::BTreeSet::new();
-        let mut pictures = false;
-        for (message, open) in plan.messages.iter().skip(plan.first) {
+        for (message, open) in &plan.messages {
             let at = message.at();
             if !open || at == focus {
                 continue;
@@ -1949,15 +1943,16 @@ impl Core {
             if dropped() {
                 return None;
             }
-            match build(at, false, false) {
-                // a page of labelled parts never goes into the stack, where its frames would show the
-                // conversation's documents: its line says it opens by itself
-                Some(shown) if shown.protection.is_some() => {
-                    protected.insert(at);
-                }
+            // pictures with the conversation's ("Show pictures" is the conversation's), never a signed or
+            // encrypted message's, whose pictures load on a click of its own
+            let pictures = allow_remote_images && !conversation::protected(message);
+            let shown = match build(at, pictures, false) {
+                Some(shown) if pictures && shown.protection.is_some() => build(at, false, false),
+                shown => shown,
+            };
+            match shown {
                 Some(shown) => {
-                    pictures |= shown.pictures_loaded;
-                    documents.insert(at, shown.document);
+                    views.insert(at, shown);
                 }
                 None => {
                     // asked for now; the window builds the view again once it is here
@@ -1966,30 +1961,43 @@ impl Core {
                 }
             }
         }
-        self.conversations.alone_found(thread, &protected);
-        let lines = conversation::lines(&plan, folder, &folders, &waiting, &protected);
-        Some(conversation::into_view(
-            view,
-            &plan,
-            &lines,
-            documents,
-            pictures || allow_remote_images,
-            waiting,
-        ))
+        let place = conversation::Place {
+            home: folder,
+            folders: &folders,
+            own: &own,
+        };
+        Some(conversation::into_view(view, &plan, &place, views, waiting))
     }
 
-    /// A line of a conversation's page clicked (`inboxclassic:conversation-N`) in the view of `focus`: that message
-    /// opens and takes the focus, or folds. The message to show now, whose conversation view the window builds with
-    /// [`Core::conversation_view_start`]; None when the line is not of a conversation shown.
-    pub fn conversation_click(&self, focus: pe_store::MessageRef, index: usize) -> Option<pe_store::MessageRef> {
-        let thread = self.thread_of(focus)?;
-        self.conversations.click(thread, index)
+    /// A message of the conversation shown at `focus` clicked, its row or its frame (`index` its
+    /// [`conversation::Entry::index`]): a folded one opens; either way it is selected. The message to show now, whose
+    /// conversation view the window builds with [`Core::conversation_view_start`]; None when there is no such message.
+    pub fn conversation_select(&self, focus: pe_store::MessageRef, index: usize) -> Option<pe_store::MessageRef> {
+        self.conversations.select(self.thread_of(focus)?, index)
     }
 
-    /// "Show N earlier messages" clicked in the view of `focus`: every line shows when the view is built again
-    pub fn conversation_show_earlier(&self, focus: pe_store::MessageRef) {
+    /// A message's arrow clicked: a folded one opens and is selected, an open one folds (the selection moves to the
+    /// nearest open message when it was that one). The message to show now.
+    pub fn conversation_toggle(&self, focus: pe_store::MessageRef, index: usize) -> Option<pe_store::MessageRef> {
+        self.conversations.toggle(self.thread_of(focus)?, index)
+    }
+
+    /// Next (`step` 1) or Previous (-1) Message in Conversation: that message opened and selected. None at either end
+    /// or outside a conversation.
+    pub fn conversation_step(&self, focus: pe_store::MessageRef, step: isize) -> Option<pe_store::MessageRef> {
+        self.conversations.step(self.thread_of(focus)?, step)
+    }
+
+    /// Open All Messages (`open`) or Fold All Messages (every one but the selected) in the conversation shown at
+    /// `focus`. The message to show now, the same one.
+    pub fn conversation_open_all(&self, focus: pe_store::MessageRef, open: bool) -> Option<pe_store::MessageRef> {
+        self.conversations.open_all(self.thread_of(focus)?, open)
+    }
+
+    /// The folded middle's row clicked in the view of `focus`: every message has its row when the view is built again
+    pub fn conversation_show_middle(&self, focus: pe_store::MessageRef) {
         if let Some(thread) = self.thread_of(focus) {
-            self.conversations.show_all(thread);
+            self.conversations.show_middle(thread);
         }
     }
 

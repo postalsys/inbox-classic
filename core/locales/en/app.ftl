@@ -62,6 +62,11 @@ ui-find-in-message-hint = Find in this message
 ui-find-not-found = “{ $words }” is not in this message
 cmd-expand-all-threads = &Expand All Conversations
 cmd-collapse-all-threads = C&ollapse All Conversations
+# The conversation shown in the reading pane: its next or previous message, and all of its messages open or folded
+cmd-next-in-conversation = Ne&xt Message in Conversation
+cmd-previous-in-conversation = Previous Message &in Conversation
+cmd-open-all-messages = Open &All Messages
+cmd-fold-all-messages = Fol&d All Messages
 ui-group-by-conversation = &Group messages by conversation
 ui-show-whole-conversation = Show the &whole conversation in the reading pane
 ui-show-whole-conversation-note = Open a conversation’s messages together, including your replies, drafts and messages in other folders. Read messages are usually folded to a line; click a line to open or fold it.
@@ -74,12 +79,32 @@ ui-thread-count = { $new ->
 }
 ui-conversation-to = to { $people }
 ui-conversation-draft = Draft
-ui-conversation-alone = Signed or encrypted: opens by itself
 ui-conversation-downloading = Downloading…
-ui-conversation-earlier = { $count ->
-    [one] Show 1 earlier message
-   *[other] Show { $count } earlier messages
+# Your own messages in a conversation shown in the reading pane, in place of your name
+ui-conversation-you = You
+# The line over a conversation in the reading pane: how many messages it has, then how many of them are unread
+ui-conversation-messages = { $count ->
+    [one] 1 message
+   *[other] { $count } messages
 }
+ui-conversation-unread = { $count ->
+    [one] 1 unread
+   *[other] { $count } unread
+}
+# Over an open message of a conversation that is filed in another folder than the one it was opened from
+ui-conversation-found-in = Found in { $folder }
+# A row standing for read messages in the middle of a long conversation, folded away; a click lists them
+ui-conversation-hidden = { $count ->
+    [one] 1 more message
+   *[other] { $count } more messages
+}
+# The arrow at the start of a message's row in a conversation, for screen readers
+ui-conversation-open-message = Open message
+ui-conversation-fold-message = Fold message
+# A message's own button in a conversation: a menu of what else can be done with that message
+ui-conversation-more = More
+# A draft's own button in a conversation: opens it to go on writing
+ui-conversation-edit = Edit
 ui-conversation-elsewhere = { $count ->
     [one] This conversation also has a message in another folder.
    *[other] This conversation also has { $count } messages in other folders.
