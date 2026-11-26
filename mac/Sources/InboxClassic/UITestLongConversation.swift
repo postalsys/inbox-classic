@@ -11,11 +11,13 @@ extension UITest {
         step("a long conversation")
         let subject = "Budget review"
         let count = 20
+        // thirty lines each: the conversation open is many screens tall, whatever the screen
+        let figures = (1...30).map { "Line \($0) of the figures.\r\n" }.joined()
         for n in 1...count {
             let answers = n == 1 ? "" : "In-Reply-To: <budget\(n - 1)@example.com>\r\nReferences: <budget1@example.com> <budget\(n - 1)@example.com>\r\n"
             try await addMessage("From: Person \(n % 4) <person\(n % 4)@example.com>\r\nTo: testuser@inboxclassic.test\r\n"
                 + "Subject: \(n == 1 ? "" : "Re: ")\(subject)\r\nDate: Tue, 9 Sep 2025 \(String(format: "%02d", 8 + n / 6)):\(String(format: "%02d", (n * 7) % 60)):00 +0000\r\n"
-                + "Message-ID: <budget\(n)@example.com>\r\n\(answers)\r\nNumber \(n) on the budget.\r\n",
+                + "Message-ID: <budget\(n)@example.com>\r\n\(answers)\r\nNumber \(n) on the budget.\r\n\(figures)",
                 flags: n == count ? [] : ["\\Seen"])
         }
         selectFolder(named: "Inbox")

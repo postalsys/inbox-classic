@@ -21,12 +21,14 @@ fn message(n: usize) -> String {
     format!(
         "From: Person {} <person{}@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: {}{SUBJECT}\r\n\
          Date: Tue, 9 Sep 2025 {:02}:{:02}:00 +0000\r\nMessage-ID: <budget{n}@example.com>\r\n{answers}\r\n\
-         Number {n} on the budget.\r\n",
+         Number {n} on the budget.\r\n{figures}",
         n % 4,
         n % 4,
         if n == 1 { "" } else { "Re: " },
         8 + n / 6,
-        (n * 7) % 60
+        (n * 7) % 60,
+        // thirty lines each: the conversation open is many screens tall, whatever the screen
+        figures = (1..=30).map(|k| format!("Line {k} of the figures.\r\n")).collect::<String>()
     )
 }
 

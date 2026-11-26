@@ -6105,13 +6105,15 @@ public static class Dragger {
     $IDM_NEXT_IN_CONVERSATION = 180; $IDM_PREVIOUS_IN_CONVERSATION = 181; $IDM_OPEN_ALL_MESSAGES = 182; $IDM_FOLD_ALL_MESSAGES = 183
     # twenty messages of one conversation, the last one unread, dated in 2025 so they list below the others
     $budget = 'Budget review'
+    # thirty lines each: the conversation open is many screens tall, whatever the screen
+    $figures = (1..30 | ForEach-Object { "Line $_ of the figures.`r`n" }) -join ''
     foreach ($n in 1..20) {
         $answers = if ($n -eq 1) { '' } else { "In-Reply-To: <budget$($n - 1)@example.com>`r`nReferences: <budget1@example.com> <budget$($n - 1)@example.com>`r`n" }
         $subject = if ($n -eq 1) { $budget } else { "Re: $budget" }
         $flags = if ($n -eq 20) { @() } else { @('\Seen') }
         AddMessage ("From: Person $($n % 4) <person$($n % 4)@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: $subject`r`n" +
             "Date: Tue, 9 Sep 2025 $('{0:D2}' -f [int](8 + [math]::Floor($n / 6))):$('{0:D2}' -f (($n * 7) % 60)):00 +0000`r`n" +
-            "Message-ID: <budget$n@example.com>`r`n$answers`r`nNumber $n on the budget.`r`n") $flags
+            "Message-ID: <budget$n@example.com>`r`n$answers`r`nNumber $n on the budget.`r`n$figures") $flags
     }
     Command $main $IDM_SYNC
     $longRow = WaitFor { $r = @(SubjectRows $budget); if ($r.Count -eq 1) { [int]$r[0] } } 30
