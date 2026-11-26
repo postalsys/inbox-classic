@@ -1,6 +1,6 @@
 {
   "round": 8,
-  "status": "reviewed_awaiting_baseline_commit",
+  "status": "complete",
   "starting_commit": "69b9897538d8fb9e0acd37fc1f7958c4704454b3",
   "starting_review_baseline": "af31d1c03fc18cd3df8ed7e7ce708dfb148a2be8",
   "previous_round": 7,
@@ -7575,11 +7575,14 @@
   },
   "validation_policy": "No tests, builds, CI queries or manually triggered workflows. Translation static checks and caller inspection only.",
   "evidence_checkpoint": "/Users/andris/Projects/PostalExpress/build/i18n-round8-monitor-20261125",
-  "next_batch": "Commit reviewed content; point REVIEWED to that commit; confirm zero pending; archive completion; push master.",
+  "next_batch": "None. Start a new round only for later source or translation changes.",
   "publication": {
     "authorized": true,
     "instruction": "Commit to master and push to origin after review",
-    "pushed": false
+    "target": "origin/master",
+    "reviewed_content_commit": "44bd9b2d33db99329a587683ad6061fbcfa7bee7",
+    "sequence": "Push the content and completion commits after creating this record; verify origin/master equals local master.",
+    "verification_evidence": "/Users/andris/Projects/PostalExpress/build/i18n-round8-monitor-20261125/publication.json"
   },
   "parallel_review": true,
   "created_at": "2026-11-25T20:31:30.559978+00:00",
@@ -7975,5 +7978,18 @@
     "all_accounted_for_by_exact_completed_scope": true,
     "unknown": [],
     "log_sha256": "8a22e199887c131c7a6c57bd7473792b27671f738a103a11f01ff142b5886b2e"
+  },
+  "completed_at": "2026-11-26T00:39:08.136730+00:00",
+  "reviewed_content_commit": "44bd9b2d33db99329a587683ad6061fbcfa7bee7",
+  "reviewed_baseline": "44bd9b2d33db99329a587683ad6061fbcfa7bee7",
+  "final_baseline_check": {
+    "command": "node scripts/i18n-review.mjs --check",
+    "exit_code": 0,
+    "summary": "0 messages and 0 help passages wait for a review; 0 new or changed without a mark",
+    "log_sha256": "b1c34ba0bdb98083b3495bd5142c475b9a57f7e00a57bfe38fadbde7c1539398"
+  },
+  "archive": {
+    "state": "docs/translation-review-round8-state.json",
+    "progress": "docs/translation-review-round8-progress.md"
   }
 }

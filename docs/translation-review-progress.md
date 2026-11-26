@@ -3,9 +3,9 @@
 ## Resume here
 
 - Authoritative checkout: `/Users/andris/Projects/PostalExpress`, branch `master`.
-- Review complete; content and baseline commits, final zero-pending check and publication remain.
+- Round complete. Reviewed content commit and current baseline: `44bd9b2d33db99329a587683ad6061fbcfa7bee7`. No pending entries or topics.
 - Starting local and fetched origin/master: `69b9897538d8fb9e0acd37fc1f7958c4704454b3`. The READY handoff confirmed all strings were merged.
-- Previous reviewed baseline: `af31d1c03fc18cd3df8ed7e7ce708dfb148a2be8`. Keep it until the reviewed content commit exists.
+- Previous reviewed baseline: `af31d1c03fc18cd3df8ed7e7ce708dfb148a2be8`; advanced only after all languages and late changes were covered.
 - User authorized current repository glossary/help-writing guidance in place of the missing Downloads guide, parallel language work, and committing/pushing master.
 - No tests, builds, native GUI checks or CI queries. Static translation checks and caller inspection only.
 
@@ -40,3 +40,10 @@ State: `docs/translation-review-state.json`. Detailed snapshots, canonical per-l
 review, final static report, HTML review and late-arrival evidence are under
 `build/i18n-round8-monitor-20261125`. Build artifacts are not committed. The tracked state records exact reviewed IDs,
 full topics, final file hashes, evidence hashes and the source baseline for resuming or auditing this round.
+
+## Completion
+
+The reviewed content is committed on master and REVIEWED points to that concrete commit. The final baseline check
+reports zero pending catalog entries, zero pending help passages and zero unmarked changes. No tests or builds were
+run. This record is archived as round 8. The authorized final publication step pushes the content and completion
+commits to origin/master, then records the matching local/remote commit in the local publication evidence.
