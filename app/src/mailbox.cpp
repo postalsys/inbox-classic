@@ -1707,6 +1707,7 @@ void Mailbox::ClearReader(bool loading) {
     reader_.Clear(loading);
     openWhenReady_ = false;
     KillTimer(parent_, TIMER_MARK_READ);
+    markReadPending_ = false;
     summaryPage_.clear();
 }
 
@@ -1731,6 +1732,7 @@ int Mailbox::TestShown(const std::wstring& subject) {
 void Mailbox::OnMessageShown() {
     // read after a moment on screen, not while the user moves through the list
     SetTimer(parent_, TIMER_MARK_READ, 1000, nullptr);
+    markReadPending_ = true;
 }
 
 void Mailbox::OnSelectionChanged(bool rebuild) {
@@ -3944,6 +3946,7 @@ void Mailbox::OnTimer(UINT_PTR id) {
         return;
     }
     KillTimer(parent_, TIMER_MARK_READ);
+    markReadPending_ = false;
     const PeMessage* row = SelectedRow();
     if (!row || readerRow_ != std::make_pair(row->folder, row->uid) || !reader_.Uid()) {
         return;
@@ -4197,9 +4200,10 @@ LRESULT Mailbox::TestDeep(const std::wstring& request) {
         return 11;
     }
     if (verb == L"quiet") {
-        // the core quiet, no load of the list under way (it selects again) and no search waiting for its moment after
-        // the last key (the list it gives would take the place of what is selected meanwhile)
-        return pe_quiet(core_) && !loadRequest_ && FindBoxWords() == find_ ? 11 : 10;
+        // the core quiet, no load of the list under way (it selects again), no search waiting for its moment after
+        // the last key (the list it gives would take the place of what is selected meanwhile) and no read mark to
+        // come (a conversation's marks messages of other folders read)
+        return pe_quiet(core_) && !loadRequest_ && FindBoxWords() == find_ && !markReadPending_ ? 11 : 10;
     }
     if (verb == L"current") {
         // the rows drawn the list as the store has it now: whatever is still on its way to the window (an event, a

@@ -276,7 +276,8 @@ async fn act_on(act: &Act) -> Result<(), String> {
 /// (it finishes after the commands queued before it), then the list neither waiting nor being read
 async fn settle(seconds: u64) -> Result<(), String> {
     let core = &shell().core;
-    let quiet = || core.quiet() && !list_settling();
+    // and no read mark to come: a conversation's marks messages of other folders read
+    let quiet = || core.quiet() && !list_settling() && !shell().try_main().is_some_and(|main| main.mark_read_pending());
     if !wait_until(seconds, quiet).await {
         return Err(format!("still busy after {seconds} s"));
     }

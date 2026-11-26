@@ -2085,6 +2085,12 @@ impl Mailbox {
             || !self.actions.borrow().is_empty()
     }
 
+    /// The read mark of the message shown still to come (a moment after it is shown)
+    #[cfg(feature = "e2e")]
+    pub fn mark_read_pending(&self) -> bool {
+        self.mark_read.borrow().is_some()
+    }
+
     /// Whether the list drawn is the one before, dimmed while the list chosen is read
     #[cfg(feature = "e2e")]
     pub fn list_dimmed(&self) -> bool {

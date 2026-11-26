@@ -323,7 +323,8 @@ final class DeepDriver {
     /// nothing under way: the core quiet (no sync, no action), then a sync of every account as a barrier (it finishes
     /// after the commands queued before it), then the list not being read
     func settle(_ seconds: Double) async throws {
-        func quiet() -> Bool { pe_quiet(core.handle) && !mailbox.listLoading }
+        // and no read mark to come: a conversation's marks messages of other folders read
+        func quiet() -> Bool { pe_quiet(core.handle) && !mailbox.listLoading && !mailbox.markReadPending }
         func wait() async -> Bool {
             let until = Date().addingTimeInterval(seconds)
             while Date() < until {
