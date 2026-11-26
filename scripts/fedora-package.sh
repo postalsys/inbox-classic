@@ -53,8 +53,8 @@ if [ "$RELEASE" = "yes" ]; then
         "https://github.com/postalsys/inbox-classic/archive/refs/tags/v$VERSION.tar.gz"
 else
     # the working tree as the release's tarball would have it, so rpmbuild finds the source and downloads nothing
-    git ls-files -z --cached --others --exclude-standard |
-        COPYFILE_DISABLE=1 tar --null --no-xattrs --no-mac-metadata -T - -czf "$work/src/inbox-classic-$VERSION.tar.gz" -s "|^|inbox-classic-$VERSION/|"
+    . scripts/tree-tarball.sh
+    tree_tarball "$work/src/inbox-classic-$VERSION.tar.gz" "inbox-classic-$VERSION"
 fi
 
 for arch in "${architectures[@]}"; do

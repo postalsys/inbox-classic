@@ -15,7 +15,9 @@
 #            uninstaller and the installer signed with Azure Artifact Signing, the exe started with --version there
 #   Mac      dist/InboxClassic.dmg here (scripts/mac-package.sh): Developer ID, notarized and stapled, the app in the
 #            image started with --version
-#   Linux    dist/InboxClassic-amd64.deb and dist/InboxClassic-arm64.deb in Docker here (scripts/linux-package.sh),
+#   Linux    the x86_64 packages on the Windows build machine, in Docker in its WSL (scripts/build-machine.sh), while
+#            the rest builds; the arm64 ones in Docker here, natively (on the build machine they would be emulated):
+#            dist/InboxClassic-amd64.deb and dist/InboxClassic-arm64.deb (scripts/linux-package.sh),
 #            each installed into a clean Ubuntu container and started with --version, and after the release
 #            published to the apt repository https://apt.inboxclassic.com (scripts/apt-repo.sh), and
 #            dist/InboxClassic-x86_64.pkg.tar.zst and -aarch64 for Arch Linux and Omarchy (scripts/arch-package.sh),
@@ -126,6 +128,9 @@ if building mac; then
 fi
 if building linux; then
     docker info >/dev/null 2>&1 || fail "Docker is not running"
+    . scripts/win-env.sh
+    ssh -o ConnectTimeout=10 "$WIN_HOST" "wsl -d Ubuntu-24.04 -u root -e docker info" >/dev/null 2>&1 ||
+        fail "Docker in the build machine's WSL (${WIN_HOST}) does not answer, for the x86_64 Linux packages"
     command -v rpmsign >/dev/null || fail "rpmsign is missing, for the Fedora packages: brew install rpm"
     [ "$BUILD_ONLY" = "yes" ] || ssh -o ConnectTimeout=10 andris@srv-04.emailengine.dev true || fail "srv-04, the apt and dnf repositories' server, does not answer"
 fi
@@ -151,6 +156,21 @@ fi
 gpg --clearsign --default-key "$GPG_KEY" --output /dev/null core/Cargo.toml
 mkdir -p dist
 
+# the x86_64 Linux packages on the build machine meanwhile, from the release's tarball as Omarchy and Fedora build
+# them; their log in dist/linux-x86_64.log
+linux_x86=""
+if building linux; then
+    (
+        set -e
+        ./scripts/build-machine.sh --fetch dist/InboxClassic-amd64.deb scripts/linux-package.sh amd64
+        ./scripts/build-machine.sh --fetch dist/InboxClassic-x86_64.pkg.tar.zst --fetch dist/arch \
+            scripts/arch-package.sh --release x86_64
+        ./scripts/build-machine.sh --fetch dist/InboxClassic-x86_64.rpm scripts/fedora-package.sh --release x86_64
+    ) >dist/linux-x86_64.log 2>&1 &
+    linux_x86=$!
+    echo "Building the x86_64 Linux packages on ${WIN_HOST}, log in dist/linux-x86_64.log"
+fi
+
 # Windows first: it takes longest, on another machine
 if building windows; then
     ./scripts/build-installer.sh
@@ -161,12 +181,16 @@ if building mac; then
     ./scripts/mac-package.sh
 fi
 if building linux; then
-    ./scripts/linux-package.sh
+    ./scripts/linux-package.sh arm64
     # the Arch packages, from the release's tarball as Omarchy builds it; `curl -LO` then `sudo pacman -U` installs them
-    ./scripts/arch-package.sh --release
+    ./scripts/arch-package.sh --release aarch64
     # the Fedora packages, from the release's tarball, signed before hashes.txt so GitHub and the repository have the
     # same files; `sudo dnf install ./<file>` installs one and adds the repository
-    ./scripts/fedora-package.sh --release
+    ./scripts/fedora-package.sh --release aarch64
+    wait "$linux_x86" || {
+        tail -30 dist/linux-x86_64.log >&2
+        fail "The x86_64 Linux packages failed on ${WIN_HOST}, the whole log in dist/linux-x86_64.log"
+    }
     ./scripts/rpm-sign.sh
 fi
 

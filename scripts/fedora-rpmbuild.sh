@@ -21,6 +21,14 @@ if [ "${TAR:-}" = bsdtar ]; then
     dnf -y -q install bsdtar >/dev/null
     ln -sf /usr/bin/bsdtar /usr/bin/tar
 fi
+# the changelog's newest entry is this version's (release-please bumps Version, not the changelog): added to the copy
+# being built, dated today, when the spec has none for it
+release=$(sed -n 's/^Release: *\([0-9]*\).*/\1/p' "$spec")
+if ! grep -q -- "- $version-$release\$" "$spec"; then
+    entry="* $(LC_ALL=C date -u '+%a %b %d %Y') Postal Systems OÜ <info@postalsys.com> - $version-$release"
+    note="- Inbox Classic $version: https://github.com/postalsys/inbox-classic/releases/tag/v$version"
+    sed -i "/^%changelog/a $entry\\n$note\\n" "$spec"
+fi
 rpmbuild -bb "$spec" \
     --define "_topdir $dir" --define "_sourcedir $dir" --define "_builddir $dir/BUILD" --define "_rpmdir $dir/RPMS"
 rpmlint -r "$dir/rpmlint.toml" "$spec" "$dir"/RPMS/*/inbox-classic-*.rpm

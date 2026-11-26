@@ -61,8 +61,8 @@ if [ "$RELEASE" = "yes" ]; then
 else
     cp linux/arch/PKGBUILD "$work/src/"
     # the working tree as the release's tarball would have it, so makepkg finds the source and downloads nothing
-    git ls-files -z --cached --others --exclude-standard |
-        COPYFILE_DISABLE=1 tar --null -T - -czf "$work/src/inbox-classic-$VERSION.tar.gz" -s "|^|inbox-classic-$VERSION/|"
+    . scripts/tree-tarball.sh
+    tree_tarball "$work/src/inbox-classic-$VERSION.tar.gz" "inbox-classic-$VERSION"
 fi
 
 for arch in "${architectures[@]}"; do
