@@ -28,7 +28,9 @@ fn message(n: usize) -> String {
         8 + n / 6,
         (n * 7) % 60,
         // thirty lines each: the conversation open is many screens tall, whatever the screen
-        figures = (1..=30).map(|k| format!("Line {k} of the figures.\r\n")).collect::<String>()
+        figures = (1..=30)
+            .map(|k| format!("Line {k} of the figures.\r\n"))
+            .collect::<String>()
     )
 }
 
