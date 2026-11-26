@@ -42,7 +42,6 @@ cmd-accounts = &Conturi...
 cmd-find = Căutare me&saj
 cmd-save-as = &Salvare ca...
 cmd-print = Im&primare...
-# review: new
 cmd-print-conversation = Imprimare con&versație...
 cmd-import = Import &mesaje...
 cmd-outbox = Mesaje de t&rimis...
@@ -64,45 +63,31 @@ ui-find-not-found = „{ $words }” nu apare în acest mesaj
 cmd-expand-all-threads = &Extindere toate conversațiile
 cmd-collapse-all-threads = &Restrângere toate conversațiile
 ui-group-by-conversation = Grupare mesa&je după conversație
-# review: new
 ui-show-whole-conversation = Afișare conversație întrea&gă în panoul de citire
-# review: new
-ui-show-whole-conversation-note = Rândul unei conversații deschide toate mesajele ei, inclusiv răspunsurile, schițele și mesajele mutate în alte foldere. Mesajele citite sunt restrânse la un rând: faceți clic pe un rând pentru a-l deschide sau a-l restrânge.
-# review: new
+ui-show-whole-conversation-note = Deschideți împreună mesajele conversației, inclusiv răspunsurile dvs., schițele și mesajele din alte foldere. Mesajele citite sunt de obicei restrânse la un rând; faceți clic pe un rând pentru a deschide sau a restrânge mesajul.
 ui-conversation-order = &Ordine în conversație:
-# review: new
 ui-conversation-oldest-first = Cele mai vechi primele
-# review: new
 ui-conversation-newest-first = Cele mai noi primele
-# review: new
 ui-thread-count = { $new ->
     [0] ({ $count })
     [one] ({ $count }, { $new } nou)
    *[other] ({ $count }, { $new } noi)
 }
-# review: new
 ui-conversation-to = către { $people }
-# review: new
 ui-conversation-draft = Schiță
-# review: new
 ui-conversation-alone = Semnat sau criptat: se deschide separat
-# review: new
 ui-conversation-downloading = Se descarcă…
-# review: new
 ui-conversation-earlier = { $count ->
     [one] Afișați 1 mesaj anterior
     [few] Afișați { $count } mesaje anterioare
    *[other] Afișați { $count } de mesaje anterioare
 }
-# review: new
 ui-conversation-elsewhere = { $count ->
     [one] Această conversație are și un mesaj în alt folder.
     [few] Această conversație are și { $count } mesaje în alte foldere.
    *[other] Această conversație are și { $count } de mesaje în alte foldere.
 }
-# review: new
 ui-conversation-this-folder = &Doar acest folder
-# review: new
 ui-conversation-whole = &Toată conversația
 cmd-folder-list = Listă de &foldere
 cmd-layout-automatic = &Automat
@@ -451,141 +436,74 @@ ui-settings-encryption = Criptare
 ui-settings-language = Limbă
 ui-settings-label = { $label }:
 ui-apply = &Aplicare
-# review: new
 ui-settings-sync = Sincronizare
-# review: new
 ui-sync-note = Păstrați conturile, cheile, agenda, regulile și setările la fel pe fiecare computer, printr-un folder sau un spațiu de stocare care vă aparține. Totul este criptat cu fraza-parolă de sincronizare înainte să părăsească acest computer.
-# review: new
 ui-sync-place = Sincronizat prin:
-# review: new
 ui-sync-status = Stare:
-# review: new
 ui-sync-set-up = Configurare &sincronizare…
-# review: new
 ui-sync-now = Sincronizare a&cum
-# review: new
 ui-sync-computers = Co&mputere…
-# review: new
 ui-sync-history = &Istoric…
-# review: new
 ui-sync-turn-off = &Dezactivare sincronizare…
-# review: new
 ui-sync-what = Ce se sincronizează
-# review: new
 ui-sync-what-note = Parolele, conectările și cheile private circulă numai criptate. Excludeți ce trebuie să rămână pe acest computer.
-# review: new
 ui-sync-accounts = C&onturi
-# review: new
 ui-sync-passwords = &Parole
-# review: new
 ui-sync-sign-ins = Co&nectări cu Google, Microsoft și aplicații de conectare
-# review: new
 ui-sync-sign-in-apps = Ap&licații de conectare
-# review: new
 ui-sync-app-secrets = S&ecretele aplicațiilor de conectare
-# review: new
 ui-sync-contacts = A&gendă
-# review: new
 ui-sync-keys = C&hei
-# review: new
 ui-sync-private-keys = Cheile dvs. p&rivate
-# review: new
 ui-sync-rules = Reg&uli
-# review: new
 ui-sync-trusted = E&xpeditori de încredere
-# review: new
 ui-sync-settings = Se&tări
-# review: new
 ui-sync-preferences = Aspect și &vizualizare
-# review: new
 ui-sync-everything = Totul
-# review: new
 ui-sync-some-left-out = Unele elemente sunt excluse
-# review: new
 ui-sync-where = Unde se păstrează
-# review: new
 ui-sync-folder = Un folder
-# review: new
 ui-sync-folder-note = Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud sau Syncthing îl copiază pe celelalte computere ale dvs.
-# review: new
 ui-sync-bucket = Stocare compatibilă S3
-# review: new
 ui-sync-bucket-note = Amazon S3, Cloudflare R2, Backblaze B2, MinIO sau alt spațiu de stocare care funcționează ca S3.
-# review: new
 ui-sync-folder-label = &Folder:
-# review: new
 ui-sync-folder-none = Niciunul ales încă
-# review: new
 ui-sync-choose-folder = Ale&gere…
-# review: new
 ui-sync-choose-folder-title = Alegerea folderului de sincronizare
-# review: new
 ui-sync-endpoint = &Endpoint:
-# review: new
 ui-sync-region = &Regiune:
-# review: new
 ui-sync-bucket-name = &Bucket:
-# review: new
-ui-sync-prefix = Folder în b&ucket:
-# review: new
+ui-sync-prefix = &Folder în bucket:
 ui-sync-access-key = ID cheie de &acces:
-# review: new
 ui-sync-secret-key = Cheie de acces &secretă:
-# review: new
 ui-sync-next = Urmă&torul
-# review: new
 ui-sync-join-title = Alăturare la sincronizare
-# review: new
-ui-sync-join-note = Aici se află sincronizarea celorlalte computere ale dvs. Introduceți fraza-parolă de sincronizare pe care ați ales-o pe primul.
-# review: new
+ui-sync-join-note = Această locație conține deja date sincronizate. Introduceți fraza-parolă de sincronizare aleasă pe primul computer.
 ui-sync-start-title = Pornirea sincronizării
-# review: new
 ui-sync-start-note = Alegeți o frază-parolă de sincronizare. O introduceți o singură dată pe fiecare computer pe care îl adăugați. Păstrați-o într-un loc sigur: fără ea, niciun alt computer nu se poate alătura.
-# review: new
-ui-sync-name = &Numele acestui computer:
-# review: new
-ui-sync-merge-note = Ce are acest computer și ce conține sincronizarea se combină: un cont sau un contact existent în ambele devine unul singur.
-# review: new
+ui-sync-name = Nu&mele acestui computer:
+ui-sync-merge-note = Datele acestui computer sunt îmbinate cu datele sincronizate. Conturile și contactele care corespund sunt reunite în câte o singură înregistrare.
 ui-sync-turn-on = Activare sin&cronizare
-# review: new
 ui-sync-on = Sincronizarea este activată.
-# review: new
 ui-sync-turn-off-ask = Dezactivați sincronizarea pe acest computer? Totul rămâne cum este, aici și pe celelalte computere ale dvs. Doar acest computer nu se mai sincronizează.
-# review: new
 ui-sync-turn-off-button = Dezactivare
-# review: new
 ui-sync-computers-title = Computere
-# review: new
-ui-sync-computers-note = Computerele care se sincronizează prin acest loc. Eliminați unul pe care nu îl mai folosiți: nu se mai sincronizează, iar ce a sincronizat rămâne.
-# review: new
+ui-sync-computers-note = Aceste computere se sincronizează prin aceeași locație. Eliminați un computer pe care nu îl mai folosiți pentru a-i opri sincronizarea. Datele sale sincronizate sunt păstrate.
 ui-sync-this-computer = Acest computer
-# review: new
 ui-sync-seen = Ultima sincronizare: { $when }
-# review: new
 ui-sync-remove-ask = Eliminați „{ $name }” din sincronizare? Se oprește data viitoare când încearcă să se sincronizeze. Pentru a-l sincroniza din nou, configurați încă o dată sincronizarea pe el.
-# review: new
 ui-sync-loading = Se citește…
-# review: new
 ui-sync-history-title = Istoric
-# review: new
-ui-sync-history-note = Când același element a fost modificat pe două computere în același timp, s-a păstrat ultima modificare făcută, iar cealaltă se află aici. Restaurați una pentru a o folosi în locul celei actuale.
-# review: new
+ui-sync-history-note = Când modificările de pe computere diferite intră în conflict, sincronizarea păstrează o versiune. Valorile înlocuite apar aici; restaurați o valoare pentru a o folosi din nou. Parolele, datele de conectare și cheile private nu sunt păstrate aici.
 ui-sync-history-empty = Nicio modificare nu a fost înlocuită.
-# review: new
 ui-sync-history-row = Sursa: { $source }, { $when }
-# review: new
 ui-sync-restore = &Restaurare
-# review: new
 ui-sync-restore-points = Puncte de restaurare
-# review: new
-ui-sync-restore-points-note = Înainte ca sincronizarea să elimine ceva de aici, starea anterioară este salvată. Deschideți un punct pentru a recupera ce alegeți din el.
-# review: new
+ui-sync-restore-points-note = Punctele de restaurare salvează configurația înainte ca sincronizarea să elimine elemente de pe acest computer. Deschideți un punct pentru a alege ce restaurați.
 ui-sync-restore-points-empty = Niciunul încă.
-# review: new
 ui-sync-open-point = &Deschidere…
 # Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
-# review: new
-win-sync-back = < Îna&poi
+win-sync-back = < Înapo&i
 ui-language-label = &Limbă:
 ui-restart-note = Reporniți Inbox Classic pentru a schimba limba.
 ui-restart-ask = După repornire, limba aplicației Inbox Classic va fi „{ $language }”. Reporniți acum?
@@ -596,7 +514,6 @@ ui-delete-folder-question = Ștergeți folderul „{ $folder }”, inclusiv mesa
 ui-properties = P&roprietăți
 ui-account-sync = Trimitere și pri&mire
 ui-account-properties = P&roprietăți...
-# review: new
 ui-account-properties-of = &Proprietățile contului...
 ui-account-move-up = Mutare în &sus
 ui-account-move-down = Mutare în &jos
@@ -932,11 +849,8 @@ ui-setup-from = Salvat de Inbox Classic { $version } pe { $date }.
 ui-setup-import-button = &Import
 ui-setup-done = Gata
 ui-setup-first-run = Import setări și conturi de pe alt computer...
-# review: new
 ui-first-run-other = Folosiți deja Inbox Classic pe alt computer? Aduceți aici conturile și setările de pe acesta.
-# review: new
-ui-first-run-sync = Alăturare la sincronizarea acestuia…
-# review: new
+ui-first-run-sync = Alăturare la sincronizare…
 ui-first-run-import = Import dintr-un fișier…
 
 ui-field-verifiers = Surse de încredere pentru verificarea expeditorului:
@@ -949,11 +863,7 @@ ui-keys-publish-now = Publicare
 ui-keys-paste = Import din clip&board
 ui-keys-paste-none = Clipboardul nu conține nicio cheie OpenPGP.
 ui-contact-find-key = &Găsire cheie
-# review: new
 ui-reactions-label = Reacții:
-# review: new
 ui-reaction-open-email = Deschidere e-mail cu reacția
-# review: new
 ui-reaction-show-as-email = Afișare ca e-mail
-# review: new
 ui-reaction-when = Reacție: { $when }

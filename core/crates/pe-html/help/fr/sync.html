@@ -1,20 +1,20 @@
-<!--review--><h1>Synchroniser vos ordinateurs</h1>
+<h1>Synchroniser vos ordinateurs</h1>
 <p class="summary">Gardez vos comptes, clés, contacts, règles et paramètres identiques sur chaque ordinateur, grâce à un dossier ou un stockage qui vous appartient.</p>
-<p>La synchronisation conserve un coffre de votre configuration à l’emplacement de votre choix : un dossier que Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud ou Syncthing copie entre vos ordinateurs, ou un stockage compatible S3. Tout son contenu est chiffré avec votre phrase secrète de synchronisation avant de quitter l’ordinateur. Vos messages n’y figurent pas ; ils restent sur vos serveurs de messagerie.</p>
+<p>La synchronisation enregistre votre configuration à l’emplacement de votre choix : un dossier que Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud ou Syncthing copie entre vos ordinateurs, ou un stockage compatible S3. Les données synchronisées sont chiffrées avec votre phrase secrète de synchronisation avant de quitter l’ordinateur. La synchronisation ne transfère aucun message, pas même les brouillons enregistrés uniquement sur cet ordinateur.</p>
 <h2>Configurer la synchronisation sur votre premier ordinateur</h2>
+<aside class="warning">Conservez la phrase secrète de synchronisation en lieu sûr. Sans elle, aucun autre ordinateur ne peut rejoindre la synchronisation.</aside>
 <ol>
     <li>Ouvrez <b data-settings="sync"></b> et cliquez sur <b data-text="ui-sync-set-up"></b>.</li>
     <li>Choisissez <b data-text="ui-sync-folder"></b> et cliquez sur <b data-text="ui-sync-choose-folder"></b>, ou choisissez <b data-text="ui-sync-bucket"></b> et renseignez ses informations. Cliquez sur <b data-text="ui-sync-next"></b>.</li>
     <li>Saisissez deux fois une phrase secrète de synchronisation, puis un nom pour cet ordinateur. Choisissez les éléments à synchroniser, puis cliquez sur <b data-text="ui-sync-turn-on"></b>.</li>
 </ol>
-<aside class="warning">Conservez la phrase secrète de synchronisation en lieu sûr. Sans elle, aucun autre ordinateur ne peut rejoindre la synchronisation.</aside>
 <h2>Ajouter un autre ordinateur</h2>
 <ol>
-    <li>Sur l’autre ordinateur, ouvrez <b data-settings="sync"></b>, cliquez sur <b data-text="ui-sync-set-up"></b> et choisissez le même dossier ou le même stockage.</li>
-    <li>Saisissez la phrase secrète de synchronisation choisie sur le premier ordinateur, puis cliquez sur <b data-text="ui-sync-turn-on"></b>.</li>
+    <li>Sur l’autre ordinateur, ouvrez <b data-settings="sync"></b>, cliquez sur <b data-text="ui-sync-set-up"></b> et choisissez le même dossier ou le même stockage. Cliquez sur <b data-text="ui-sync-next"></b>.</li>
+    <li>Saisissez la phrase secrète de synchronisation et un nom pour cet ordinateur. Choisissez les éléments à synchroniser, puis cliquez sur <b data-text="ui-sync-turn-on"></b>.</li>
 </ol>
-<p>Les données déjà présentes sur l’ordinateur et celles de la synchronisation sont réunies : un compte ou un contact présent des deux côtés n’en forme plus qu’un. Vos messages sont à nouveau téléchargés depuis les serveurs.</p>
+<p>Les données existantes sont fusionnées avec les données synchronisées. Les comptes et contacts qui correspondent sont fusionnés. Les comptes ajoutés téléchargent les messages disponibles sur leurs serveurs de messagerie.</p>
 <h2>Pendant la synchronisation</h2>
-<p>Chaque ordinateur se synchronise toutes les quelques minutes et lorsque vous cliquez sur <b data-text="ui-sync-now"></b>. Lorsqu’un même élément a été modifié en même temps sur deux ordinateurs, la dernière modification effectuée est conservée et l’autre est placée dans <b data-text="ui-sync-history"></b>, où vous pouvez la restaurer. Lorsqu’un autre ordinateur supprime un compte, la fenêtre principale vous en informe.</p>
+<p>Chaque ordinateur se synchronise toutes les quelques minutes et lorsque vous cliquez sur <b data-text="ui-sync-now"></b>. Lorsque des modifications sont en conflit, la synchronisation conserve une version et enregistre les valeurs remplacées dans <b data-text="ui-sync-history"></b> pour vous permettre de les restaurer. Les mots de passe, les données de connexion et les clés privées sont exclus de cet historique. Lorsqu’un autre ordinateur supprime un compte, la fenêtre principale vous en informe.</p>
 <p>Pour arrêter de synchroniser un ordinateur que vous n’utilisez plus, cliquez sur <b data-text="ui-sync-computers"></b> et retirez-le. Pour arrêter de synchroniser cet ordinateur, cliquez sur <b data-text="ui-sync-turn-off"></b> : tout reste en l’état.</p>
-<nav class="related"><a href="topic:move-computer"></a> <a href="topic:manage-accounts"></a> <a href="topic:encryption-keys"></a></nav><!--/review-->
+<nav class="related"><a href="topic:move-computer"></a> <a href="topic:manage-accounts"></a> <a href="topic:encryption-keys"></a></nav>

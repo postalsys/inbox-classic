@@ -43,7 +43,6 @@ cmd-accounts = 계정(&A)...
 cmd-find = 메시지 찾기(&F)
 cmd-save-as = 다른 이름으로 저장(&S)...
 cmd-print = 인쇄(&P)...
-# review: new
 cmd-print-conversation = 대화 인쇄(&V)...
 cmd-import = 메시지 가져오기(&I)...
 cmd-outbox = 보낼 편지함(&O)...
@@ -65,42 +64,28 @@ ui-find-not-found = 이 메시지에 “{ $words }”이(가) 없습니다
 cmd-expand-all-threads = 모든 대화 펼치기(&E)
 cmd-collapse-all-threads = 모든 대화 접기(&O)
 ui-group-by-conversation = 대화별로 메시지 그룹화(&G)
-# review: new
 ui-show-whole-conversation = 읽기 창에 전체 대화 표시(&W)
-# review: new
-ui-show-whole-conversation-note = 대화의 행을 선택하면 회신, 임시 보관 메시지, 다른 폴더로 옮긴 메시지를 포함하여 그 대화의 모든 메시지가 열립니다. 읽은 메시지는 한 줄로 접힙니다. 줄을 클릭하면 열거나 접을 수 있습니다.
-# review: new
+ui-show-whole-conversation-note = 회신, 초안, 다른 폴더의 메시지를 포함하여 대화의 메시지를 함께 엽니다. 읽은 메시지는 보통 한 줄로 접힙니다. 줄을 클릭하면 열거나 접을 수 있습니다.
 ui-conversation-order = 대화 순서(&O):
-# review: new
 ui-conversation-oldest-first = 오래된 메시지부터
-# review: new
 ui-conversation-newest-first = 최신 메시지부터
-# review: new
 ui-thread-count = { $new ->
     [0] ({ $count })
    *[other] ({ $count }, 새 메시지 { $new }개)
 }
-# review: new
 ui-conversation-to = 받는 사람: { $people }
-# review: new
-ui-conversation-draft = 임시 보관
-# review: new
+ui-conversation-draft = 초안
 ui-conversation-alone = 서명 또는 암호화됨: 따로 열립니다
-# review: new
 ui-conversation-downloading = 다운로드 중…
-# review: new
 ui-conversation-earlier = { $count ->
     [1] 이전 메시지 1개 표시
    *[other] 이전 메시지 { $count }개 표시
 }
-# review: new
 ui-conversation-elsewhere = { $count ->
     [1] 이 대화에는 다른 폴더에도 메시지가 1개 있습니다.
    *[other] 이 대화에는 다른 폴더에도 메시지가 { $count }개 있습니다.
 }
-# review: new
 ui-conversation-this-folder = 이 폴더만(&T)
-# review: new
 ui-conversation-whole = 전체 대화(&W)
 cmd-folder-list = 폴더 목록(&F)
 cmd-layout-automatic = 자동(&A)
@@ -448,140 +433,73 @@ ui-settings-language = 언어
 # a group's title as the label before its first control, in the Mac's panes: the colon as the language writes it
 ui-settings-label = { $label }:
 ui-apply = 적용(&A)
-# review: new
 ui-settings-sync = 동기화
-# review: new
 ui-sync-note = 직접 관리하는 폴더나 스토리지를 통해 모든 컴퓨터에서 계정, 키, 주소록, 규칙, 설정을 똑같이 유지합니다. 모든 데이터는 이 컴퓨터를 떠나기 전에 동기화 암호 문구로 암호화됩니다.
-# review: new
 ui-sync-place = 동기화 위치:
-# review: new
 ui-sync-status = 상태:
-# review: new
 ui-sync-set-up = 동기화 설정(&S)…
-# review: new
 ui-sync-now = 지금 동기화(&N)
-# review: new
 ui-sync-computers = 컴퓨터(&M)…
-# review: new
 ui-sync-history = 기록(&H)…
-# review: new
 ui-sync-turn-off = 동기화 끄기(&T)…
-# review: new
 ui-sync-what = 동기화할 항목
-# review: new
 ui-sync-what-note = 암호, 로그인 정보, 개인 키는 암호화된 상태로만 전송됩니다. 이 컴퓨터에만 두어야 하는 항목은 선택 취소하십시오.
-# review: new
 ui-sync-accounts = 계정(&O)
-# review: new
 ui-sync-passwords = 암호(&W)
-# review: new
 ui-sync-sign-ins = Google, Microsoft 및 로그인 앱으로 로그인한 정보(&I)
-# review: new
 ui-sync-sign-in-apps = 로그인 앱(&P)
-# review: new
 ui-sync-app-secrets = 로그인 앱의 클라이언트 암호(&C)
-# review: new
 ui-sync-contacts = 주소록(&D)
-# review: new
 ui-sync-keys = 키(&K)
-# review: new
 ui-sync-private-keys = 내 개인 키(&R)
-# review: new
 ui-sync-rules = 규칙(&U)
-# review: new
 ui-sync-trusted = 신뢰할 수 있는 보낸 사람(&E)
-# review: new
 ui-sync-settings = 설정(&G)
-# review: new
 ui-sync-preferences = 레이아웃 및 보기(&V)
-# review: new
 ui-sync-everything = 모든 항목
-# review: new
 ui-sync-some-left-out = 일부 항목 제외
-# review: new
 ui-sync-where = 보관 위치
-# review: new
 ui-sync-folder = 폴더
-# review: new
 ui-sync-folder-note = Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud 또는 Syncthing이 다른 컴퓨터로 복사합니다.
-# review: new
 ui-sync-bucket = S3 호환 스토리지
-# review: new
 ui-sync-bucket-note = Amazon S3, Cloudflare R2, Backblaze B2, MinIO 등 S3처럼 작동하는 스토리지입니다.
-# review: new
 ui-sync-folder-label = 폴더(&F):
-# review: new
 ui-sync-folder-none = 아직 선택하지 않음
-# review: new
 ui-sync-choose-folder = 선택(&C)…
-# review: new
 ui-sync-choose-folder-title = 동기화에 사용할 폴더 선택
-# review: new
 ui-sync-endpoint = 엔드포인트(&E):
-# review: new
 ui-sync-region = 리전(&R):
-# review: new
 ui-sync-bucket-name = 버킷(&B):
-# review: new
 ui-sync-prefix = 버킷 내 폴더(&U):
-# review: new
 ui-sync-access-key = 액세스 키 ID(&A):
-# review: new
 ui-sync-secret-key = 비밀 액세스 키(&S):
-# review: new
 ui-sync-next = 다음(&N)
-# review: new
 ui-sync-join-title = 동기화 참여
-# review: new
-ui-sync-join-note = 이 위치에는 다른 컴퓨터의 동기화 데이터가 있습니다. 첫 번째 컴퓨터에서 정한 동기화 암호 문구를 입력하십시오.
-# review: new
+ui-sync-join-note = 이 위치에는 이미 동기화 데이터가 있습니다. 첫 번째 컴퓨터에서 정한 동기화 암호 문구를 입력하십시오.
 ui-sync-start-title = 동기화 시작
-# review: new
 ui-sync-start-note = 동기화 암호 문구를 정하십시오. 추가하는 컴퓨터마다 한 번씩 입력합니다. 안전한 곳에 보관하십시오. 암호 문구가 없으면 다른 컴퓨터가 참여할 수 없습니다.
-# review: new
 ui-sync-name = 이 컴퓨터의 이름(&N):
-# review: new
-ui-sync-merge-note = 이 컴퓨터에 있는 항목과 동기화에 있는 항목이 합쳐집니다. 양쪽에 모두 있는 계정이나 연락처는 하나가 됩니다.
-# review: new
+ui-sync-merge-note = 이 컴퓨터의 데이터와 동기화 데이터가 합쳐집니다. 일치하는 계정과 연락처는 하나가 됩니다.
 ui-sync-turn-on = 동기화 켜기(&T)
-# review: new
 ui-sync-on = 동기화가 켜져 있습니다.
-# review: new
 ui-sync-turn-off-ask = 이 컴퓨터에서 동기화를 끄시겠습니까? 이 컴퓨터와 다른 컴퓨터의 모든 항목은 그대로 유지됩니다. 이 컴퓨터만 동기화를 중지합니다.
-# review: new
 ui-sync-turn-off-button = 끄기
-# review: new
 ui-sync-computers-title = 컴퓨터
-# review: new
 ui-sync-computers-note = 이 위치를 통해 동기화하는 컴퓨터입니다. 더 이상 사용하지 않는 컴퓨터는 제거하십시오. 제거한 컴퓨터는 동기화를 중지하며, 이미 동기화된 항목은 그대로 남습니다.
-# review: new
 ui-sync-this-computer = 이 컴퓨터
-# review: new
 ui-sync-seen = 마지막 동기화: { $when }
-# review: new
 ui-sync-remove-ask = “{ $name }” 컴퓨터를 동기화에서 제거하시겠습니까? 다음에 동기화를 시도할 때 동기화가 중지됩니다. 다시 동기화하려면 그 컴퓨터에서 동기화를 다시 설정하십시오.
-# review: new
 ui-sync-loading = 읽는 중…
-# review: new
 ui-sync-history-title = 기록
-# review: new
-ui-sync-history-note = 같은 항목이 두 컴퓨터에서 동시에 변경되면 마지막으로 이루어진 변경 내용이 유지되고 다른 변경 내용은 여기에 보관됩니다. 다른 변경 내용을 대신 사용하려면 복원하십시오.
-# review: new
+ui-sync-history-note = 서로 다른 컴퓨터의 변경 내용이 충돌하면 동기화는 한 버전을 유지합니다. 대체된 값은 여기에 표시되며, 복원하면 다시 사용할 수 있습니다. 암호, 로그인 자격 증명, 개인 키는 여기에 보관되지 않습니다.
 ui-sync-history-empty = 대체된 변경 내용이 없습니다.
-# review: new
 ui-sync-history-row = { $source }에서, { $when }
-# review: new
 ui-sync-restore = 복원(&R)
-# review: new
 ui-sync-restore-points = 복원 지점
-# review: new
 ui-sync-restore-points-note = 동기화로 이 컴퓨터에서 항목이 제거되기 전에 그때의 상태가 저장됩니다. 복원 지점을 열어 원하는 항목을 되돌릴 수 있습니다.
-# review: new
 ui-sync-restore-points-empty = 아직 없습니다.
-# review: new
 ui-sync-open-point = 열기(&O)…
 # Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
-# review: new
 win-sync-back = < 뒤로(&B)
 ui-language-label = 언어(&L):
 ui-restart-note = 언어를 바꾸려면 Inbox Classic을 다시 시작하십시오.
@@ -593,7 +511,6 @@ ui-delete-folder-question = “{ $folder }” 폴더를 그 안의 메시지 및
 ui-properties = 속성(&S)
 ui-account-sync = 보내기/받기(&V)
 ui-account-properties = 속성(&R)...
-# review: new
 ui-account-properties-of = 계정 속성(&C)...
 ui-account-move-up = 위로 이동(&U)
 ui-account-move-down = 아래로 이동(&W)
@@ -903,11 +820,8 @@ ui-setup-from = Inbox Classic { $version }에서 { $date }에 저장함.
 ui-setup-import-button = 가져오기(&I)
 ui-setup-done = 완료
 ui-setup-first-run = 다른 컴퓨터에서 설정 및 계정 가져오기...
-# review: new
 ui-first-run-other = 다른 컴퓨터에서 이미 Inbox Classic을 사용하고 계십니까? 그 컴퓨터의 계정과 설정을 여기로 가져오십시오.
-# review: new
-ui-first-run-sync = 그 컴퓨터의 동기화에 참여…
-# review: new
+ui-first-run-sync = 동기화 참여…
 ui-first-run-import = 파일에서 가져오기…
 
 ui-field-verifiers = 보낸 사람 확인 결과를 신뢰할 서버:
@@ -920,11 +834,7 @@ ui-keys-publish-now = 게시
 ui-keys-paste = 클립보드에서 가져오기(&L)
 ui-keys-paste-none = 클립보드에 OpenPGP 키가 없습니다.
 ui-contact-find-key = 키 찾기(&F)
-# review: new
 ui-reactions-label = 반응:
-# review: new
 ui-reaction-open-email = 반응 메일 열기
-# review: new
 ui-reaction-show-as-email = 메일로 표시
-# review: new
 ui-reaction-when = 반응한 시간: { $when }

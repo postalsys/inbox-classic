@@ -789,53 +789,32 @@ setup-error-newer = Pengaturan ini disimpan oleh Inbox Classic yang lebih baru (
 setup-error-needs-passphrase = Pengaturan ini dilindungi dengan frasa sandi. Ketik frasa sandi yang digunakan saat menyimpannya.
 setup-error-wrong-passphrase = Itu bukan frasa sandi yang digunakan saat menyimpan pengaturan ini.
 setup-error-changed = File pengaturan gagal dalam pemeriksaan integritas. File mungkin telah diubah atau rusak dan tidak dapat diimpor.
-# review: new
-sync-wrong-passphrase = Itu bukan frasa sandi sinkronisasi brankas ini. Ketik frasa sandi yang Anda pilih saat menyiapkan sinkronisasi di komputer pertama Anda.
-# review: new
+sync-wrong-passphrase = Frasa sandi sinkronisasi itu salah. Masukkan frasa sandi yang Anda pilih saat menyiapkan sinkronisasi di komputer pertama.
 sync-place = { $place }, sebagai “{ $name }”
-# review: new
 sync-news-removed = { $count ->
    *[other] Sinkronisasi menghapus akun { $accounts } karena akun tersebut dihapus di komputer lain.
 }
-# review: new
 sync-news-lost = { $count ->
     [1] Perubahan yang dibuat pada waktu yang sama di komputer lain digantikan oleh perubahan yang dibuat di sini. Riwayat sinkronisasi menyimpannya.
    *[other] { $count } perubahan yang dibuat pada waktu yang sama di komputer lain digantikan oleh perubahan yang dibuat di sini. Riwayat sinkronisasi menyimpannya.
 }
-# review: new
 sync-status-busy = Menyinkronkan…
-# review: new
 sync-status-never = Belum pernah disinkronkan.
-# review: new
 sync-status-last = Terakhir disinkronkan { $when }.
-# review: new
 sync-status-today = Terakhir disinkronkan hari ini pukul { $time }.
-# review: new
 sync-when-today = hari ini pukul { $time }
-# review: new
 sync-status-problem = Tidak dapat menyinkronkan: { $problem }
-# review: new
 sync-removed-here = Komputer ini telah dihapus dari sinkronisasi di komputer lain. Matikan sinkronisasi, lalu siapkan lagi untuk bergabung.
-# review: new
 sync-item-account = Akun { $name }
-# review: new
 sync-item-contact = Kontak { $name }
-# review: new
 sync-item-group = Grup { $name }
-# review: new
 sync-item-key = Kunci { $name }
-# review: new
 sync-item-rule = Aturan { $name }
-# review: new
 sync-item-trusted = Pengirim tepercaya { $name }
-# review: new
 sync-item-sign-in-app = Aplikasi masuk { $name }
-# review: new
 sync-item-settings = Pengaturan
-# review: new
 sync-another-computer = komputer lain
-# review: new
-sync-no-key = Komputer ini tidak lagi memiliki kunci brankas sinkronisasi. Matikan sinkronisasi, lalu aktifkan lagi dengan frasa sandi sinkronisasi.
+sync-no-key = Kunci enkripsi untuk sinkronisasi tidak ada di komputer ini. Matikan sinkronisasi, lalu siapkan lagi dengan frasa sandi sinkronisasi Anda.
 setup-error-read = File pengaturan tidak dapat dibaca: { $error }
 setup-error-write = Pengaturan tidak dapat disimpan: { $error }
 setup-error-no-parts = Pilih setidaknya satu bagian.
@@ -931,10 +910,8 @@ preview-not-printed = { $name } ({ $details }) tidak dicetak. Buka file untuk me
 
 pgp-error-attached-private = Lampiran ini berisi kunci privat. Hanya kunci publik yang dapat diimpor langsung dari email. Untuk memulihkan kunci privat Anda sendiri, simpan lampiran lalu impor file tersebut di Kunci Enkripsi.
 pgp-part-find-key = Cari Kunci
-# review: new
-reaction-notification-title = { $name } bereaksi { $emoji }
-# review: new
+reaction-notification-title = { $name } memberi reaksi { $emoji }
 reaction-notification-text = { $count ->
     [1] pada { $subject }
-   *[other] pada { $subject }, dan total { $count } reaksi
+   *[other] pada { $subject } (total { $count } reaksi baru)
 }

@@ -875,54 +875,33 @@ setup-error-newer = Fail on salvestatud Inbox Classicu uuema versiooniga ({ $ver
 setup-error-needs-passphrase = See seadete ja kontode fail on parooliga kaitstud. Sisestage faili salvestamisel määratud parool.
 setup-error-wrong-passphrase = Sisestatud parool ei sobi selle seadete ja kontode faili avamiseks.
 setup-error-changed = Ekspordifaili tervikluse kontroll ebaõnnestus. Faili ei saa importida.
-# review: new
-sync-wrong-passphrase = See pole selle hoidla sünkroonimisparool. Sisestage parool, mille valisite sünkroonimise seadistamisel esimeses arvutis.
-# review: new
+sync-wrong-passphrase = Sünkroonimisparool on vale. Sisestage parool, mille valisite sünkroonimise seadistamisel esimeses arvutis.
 sync-place = { $place }, nimega „{ $name }“
-# review: new
 sync-news-removed = { $count ->
     [one] Sünkroonimine eemaldas konto, mis eemaldati teises arvutis: { $accounts }
    *[other] Sünkroonimine eemaldas kontod, mis eemaldati teises arvutis: { $accounts }
 }
-# review: new
 sync-news-lost = { $count ->
     [one] Teises arvutis samal ajal tehtud muudatus asendati siin tehtud muudatusega. Sünkroonimise ajalugu säilitab selle.
    *[other] { $count } teistes arvutites samal ajal tehtud muudatust asendati siin tehtud muudatustega. Sünkroonimise ajalugu säilitab need.
 }
-# review: new
 sync-status-busy = Sünkroonimine…
-# review: new
 sync-status-never = Pole veel sünkroonitud.
-# review: new
 sync-status-last = Viimati sünkroonitud { $when }.
-# review: new
 sync-status-today = Viimati sünkroonitud täna kell { $time }.
-# review: new
 sync-when-today = täna kell { $time }
-# review: new
 sync-status-problem = Sünkroonimine ebaõnnestus: { $problem }
-# review: new
 sync-removed-here = See arvuti eemaldati sünkroonimisest teises arvutis. Uuesti liitumiseks lülitage sünkroonimine välja ja seadistage see uuesti.
-# review: new
 sync-item-account = Konto { $name }
-# review: new
 sync-item-contact = Kontakt { $name }
-# review: new
 sync-item-group = Grupp { $name }
-# review: new
 sync-item-key = Võti { $name }
-# review: new
 sync-item-rule = Reegel { $name }
-# review: new
 sync-item-trusted = Usaldusväärne saatja { $name }
-# review: new
 sync-item-sign-in-app = Sisselogimisrakendus { $name }
-# review: new
 sync-item-settings = Seaded
-# review: new
 sync-another-computer = teine arvuti
-# review: new
-sync-no-key = Selles arvutis pole enam sünkroonimishoidla võtit. Lülitage sünkroonimine välja ja sünkroonimisparooliga uuesti sisse.
+sync-no-key = Selles arvutis puudub sünkroonimise krüpteerimisvõti. Lülitage sünkroonimine välja ja seadistage see oma sünkroonimisparooliga uuesti.
 setup-error-read = Seadete ja kontode faili ei saanud lugeda: { $error }
 setup-error-write = Seadeid ja kontosid ei saanud faili salvestada: { $error }
 setup-error-no-parts = Valige vähemalt üks andmerühm.
@@ -1051,10 +1030,8 @@ preview-not-printed = Faili { $name } ({ $details }) ei prindita. Printimiseks a
 
 pgp-error-attached-private = See manus sisaldab privaatvõtit. Otse kirjast saab importida ainult avalikke võtmeid. Oma privaatvõtme taastamiseks salvestage manus ja importige see fail aknas Krüpteerimisvõtmed.
 pgp-part-find-key = Otsi võtit
-# review: new
 reaction-notification-title = { $name } reageeris: { $emoji }
-# review: new
 reaction-notification-text = { $count ->
     [one] kirjale { $subject }
-   *[other] kirjale { $subject }, kokku reaktsioone: { $count }
+   *[other] kirjale { $subject } (kokku { $count } uut reaktsiooni)
 }

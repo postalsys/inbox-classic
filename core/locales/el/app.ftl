@@ -42,7 +42,6 @@ cmd-accounts = &Λογαριασμοί...
 cmd-find = &Εύρεση μηνύματος
 cmd-save-as = &Αποθήκευση ως...
 cmd-print = Ε&κτύπωση...
-# review: new
 cmd-print-conversation = Εκτύπωση συ&ζήτησης...
 cmd-import = &Εισαγωγή μηνυμάτων...
 cmd-outbox = Ε&ξερχόμενα...
@@ -64,43 +63,29 @@ ui-find-not-found = Το «{ $words }» δεν υπάρχει σε αυτό το
 cmd-expand-all-threads = Ανάπτυ&ξη όλων των συζητήσεων
 cmd-collapse-all-threads = Σύμπτυξη όλων των συ&ζητήσεων
 ui-group-by-conversation = &Ομαδοποίηση μηνυμάτων ανά συζήτηση
-# review: new
 ui-show-whole-conversation = Εμφάνιση ολόκληρης της συ&ζήτησης στο παράθυρο ανάγνωσης
-# review: new
-ui-show-whole-conversation-note = Η γραμμή μιας συζήτησης ανοίγει όλα τα μηνύματά της, μαζί με τις απαντήσεις σας, τα πρόχειρα και τα μηνύματα που έχετε τοποθετήσει σε άλλους φακέλους. Τα αναγνωσμένα μηνύματα συμπτύσσονται σε μία γραμμή: κάντε κλικ σε μια γραμμή για να την ανοίξετε ή να τη συμπτύξετε.
-# review: new
+ui-show-whole-conversation-note = Ανοίγει μαζί τα μηνύματα μιας συζήτησης, μαζί με τις απαντήσεις σας, τα πρόχειρα και τα μηνύματα σε άλλους φακέλους. Τα αναγνωσμένα μηνύματα συνήθως συμπτύσσονται σε μία γραμμή· κάντε κλικ στη γραμμή για να ανοίξετε ή να συμπτύξετε το μήνυμα.
 ui-conversation-order = Σει&ρά συζήτησης:
-# review: new
 ui-conversation-oldest-first = Παλαιότερα πρώτα
-# review: new
 ui-conversation-newest-first = Νεότερα πρώτα
-# review: new
 ui-thread-count = { $new ->
     [0] ({ $count })
     [one] ({ $count }, { $new } νέο)
    *[other] ({ $count }, { $new } νέα)
 }
-# review: new
 ui-conversation-to = προς { $people }
-# review: new
 ui-conversation-draft = Πρόχειρο
-# review: new
 ui-conversation-alone = Υπογεγραμμένο ή κρυπτογραφημένο: ανοίγει μόνο του
-# review: new
 ui-conversation-downloading = Γίνεται λήψη…
-# review: new
 ui-conversation-earlier = { $count ->
     [one] Εμφάνιση 1 παλαιότερου μηνύματος
    *[other] Εμφάνιση { $count } παλαιότερων μηνυμάτων
 }
-# review: new
 ui-conversation-elsewhere = { $count ->
     [one] Αυτή η συζήτηση έχει επίσης ένα μήνυμα σε άλλον φάκελο.
    *[other] Αυτή η συζήτηση έχει επίσης { $count } μηνύματα σε άλλους φακέλους.
 }
-# review: new
 ui-conversation-this-folder = &Μόνο αυτός ο φάκελος
-# review: new
 ui-conversation-whole = &Ολόκληρη η συζήτηση
 cmd-folder-list = &Λίστα φακέλων
 cmd-layout-automatic = &Αυτόματη
@@ -447,141 +432,74 @@ ui-settings-encryption = Κρυπτογράφηση
 ui-settings-language = Γλώσσα
 ui-settings-label = { $label }:
 ui-apply = Ε&φαρμογή
-# review: new
 ui-settings-sync = Συγχρονισμός
-# review: new
 ui-sync-note = Διατηρήστε ίδιους σε κάθε υπολογιστή τους λογαριασμούς, τα κλειδιά, το Βιβλίο διευθύνσεων, τους κανόνες και τις ρυθμίσεις σας, μέσω ενός φακέλου ή αποθηκευτικού χώρου που σας ανήκει. Όλα κρυπτογραφούνται με τη φράση πρόσβασης συγχρονισμού πριν φύγουν από αυτόν τον υπολογιστή.
-# review: new
 ui-sync-place = Συγχρονισμός μέσω:
-# review: new
 ui-sync-status = Κατάσταση:
-# review: new
 ui-sync-set-up = &Ρύθμιση συγχρονισμού…
-# review: new
 ui-sync-now = Συγχρονισμός &τώρα
-# review: new
 ui-sync-computers = &Υπολογιστές…
-# review: new
 ui-sync-history = &Ιστορικό…
-# review: new
 ui-sync-turn-off = &Απενεργοποίηση συγχρονισμού…
-# review: new
 ui-sync-what = Τι θα συγχρονίζεται
-# review: new
 ui-sync-what-note = Οι κωδικοί πρόσβασης, τα στοιχεία σύνδεσης και τα ιδιωτικά κλειδιά μεταφέρονται μόνο κρυπτογραφημένα. Αφήστε εκτός ό,τι πρέπει να μείνει μόνο σε αυτόν τον υπολογιστή.
-# review: new
 ui-sync-accounts = &Λογαριασμοί
-# review: new
 ui-sync-passwords = Κωδικοί &πρόσβασης
-# review: new
 ui-sync-sign-ins = Στοιχεία σύ&νδεσης μέσω Google, Microsoft και εφαρμογών σύνδεσης
-# review: new
 ui-sync-sign-in-apps = &Εφαρμογές σύνδεσης
-# review: new
 ui-sync-app-secrets = &Μυστικά εφαρμογών σύνδεσης
-# review: new
 ui-sync-contacts = &Βιβλίο διευθύνσεων
-# review: new
 ui-sync-keys = Κλει&διά
-# review: new
 ui-sync-private-keys = Τα ιδιωτικά κλειδιά &σας
-# review: new
 ui-sync-rules = &Κανόνες
-# review: new
 ui-sync-trusted = Α&ξιόπιστοι αποστολείς
-# review: new
 ui-sync-settings = Ρυ&θμίσεις
-# review: new
 ui-sync-preferences = Διάταξη και πρ&οβολή
-# review: new
 ui-sync-everything = Όλα
-# review: new
 ui-sync-some-left-out = Ορισμένα στοιχεία εξαιρούνται
-# review: new
 ui-sync-where = Πού θα φυλάσσεται
-# review: new
 ui-sync-folder = Ένας φάκελος
-# review: new
 ui-sync-folder-note = Το Dropbox, το OneDrive, το iCloud Drive, το Google Drive, το Nextcloud ή το Syncthing τον αντιγράφει στους άλλους υπολογιστές σας.
-# review: new
 ui-sync-bucket = Αποθηκευτικός χώρος συμβατός με S3
-# review: new
 ui-sync-bucket-note = Amazon S3, Cloudflare R2, Backblaze B2, MinIO ή άλλος αποθηκευτικός χώρος που λειτουργεί όπως το S3.
-# review: new
 ui-sync-folder-label = &Φάκελος:
-# review: new
 ui-sync-folder-none = Δεν έχει επιλεγεί ακόμη
-# review: new
 ui-sync-choose-folder = Επι&λογή…
-# review: new
 ui-sync-choose-folder-title = Επιλογή φακέλου συγχρονισμού
-# review: new
 ui-sync-endpoint = &Τελικό σημείο:
-# review: new
 ui-sync-region = Πε&ριοχή:
-# review: new
 ui-sync-bucket-name = &Κάδος:
-# review: new
 ui-sync-prefix = Φάκελος στον κά&δο:
-# review: new
 ui-sync-access-key = &Αναγνωριστικό κλειδιού πρόσβασης:
-# review: new
 ui-sync-secret-key = &Μυστικό κλειδί πρόσβασης:
-# review: new
 ui-sync-next = Επόμε&νο
-# review: new
 ui-sync-join-title = Συμμετοχή στον συγχρονισμό
-# review: new
-ui-sync-join-note = Αυτή η θέση περιέχει ήδη τον συγχρονισμό των άλλων υπολογιστών σας. Πληκτρολογήστε τη φράση πρόσβασης συγχρονισμού που επιλέξατε στον πρώτο.
-# review: new
+ui-sync-join-note = Αυτή η θέση περιέχει ήδη συγχρονισμένα δεδομένα. Πληκτρολογήστε τη φράση πρόσβασης συγχρονισμού που επιλέξατε στον πρώτο υπολογιστή.
 ui-sync-start-title = Έναρξη συγχρονισμού
-# review: new
 ui-sync-start-note = Επιλέξτε μια φράση πρόσβασης συγχρονισμού. Θα την πληκτρολογήσετε μία φορά σε κάθε υπολογιστή που προσθέτετε. Φυλάξτε την σε ασφαλές μέρος: χωρίς αυτήν, κανένας άλλος υπολογιστής δεν μπορεί να συμμετάσχει.
-# review: new
 ui-sync-name = Όνομα αυτού του &υπολογιστή:
-# review: new
-ui-sync-merge-note = Όσα έχει αυτός ο υπολογιστής και όσα περιέχει ο συγχρονισμός συνενώνονται: ένας λογαριασμός ή μια επαφή που υπάρχει και στα δύο γίνεται ένα.
-# review: new
-ui-sync-turn-on = &Ενεργοποίηση συγχρονισμού
-# review: new
+ui-sync-merge-note = Τα δεδομένα αυτού του υπολογιστή συγχωνεύονται με τα συγχρονισμένα δεδομένα. Οι λογαριασμοί και οι επαφές που αντιστοιχούν μεταξύ τους γίνονται μία εγγραφή.
+ui-sync-turn-on = Ενε&ργοποίηση συγχρονισμού
 ui-sync-on = Ο συγχρονισμός είναι ενεργός.
-# review: new
 ui-sync-turn-off-ask = Απενεργοποίηση του συγχρονισμού σε αυτόν τον υπολογιστή; Όλα μένουν ως έχουν, εδώ και στους άλλους υπολογιστές σας. Αυτός ο υπολογιστής απλώς σταματά να συγχρονίζεται.
-# review: new
 ui-sync-turn-off-button = Απενεργοποίηση
-# review: new
 ui-sync-computers-title = Υπολογιστές
-# review: new
 ui-sync-computers-note = Οι υπολογιστές που συγχρονίζονται μέσω αυτής της θέσης. Καταργήστε όποιον δεν χρησιμοποιείτε πια: σταματά να συγχρονίζεται και όσα συγχρόνισε παραμένουν.
-# review: new
 ui-sync-this-computer = Αυτός ο υπολογιστής
-# review: new
 ui-sync-seen = Τελευταίος συγχρονισμός: { $when }
-# review: new
 ui-sync-remove-ask = Κατάργηση του υπολογιστή «{ $name }» από τον συγχρονισμό; Θα σταματήσει να συγχρονίζεται την επόμενη φορά που θα προσπαθήσει. Για να τον συγχρονίσετε ξανά, ρυθμίστε πάλι τον συγχρονισμό σε αυτόν.
-# review: new
 ui-sync-loading = Ανάγνωση…
-# review: new
 ui-sync-history-title = Ιστορικό
-# review: new
-ui-sync-history-note = Όταν το ίδιο στοιχείο άλλαξε σε δύο υπολογιστές ταυτόχρονα, διατηρήθηκε η αλλαγή που έγινε τελευταία και η άλλη βρίσκεται εδώ. Επαναφέρετε μία για να χρησιμοποιηθεί αντί της τρέχουσας.
-# review: new
+ui-sync-history-note = Όταν συγκρούονται αλλαγές από διαφορετικούς υπολογιστές, ο συγχρονισμός διατηρεί μία εκδοχή. Οι τιμές που αντικαταστάθηκαν εμφανίζονται εδώ· επαναφέρετε μία για να τη χρησιμοποιήσετε ξανά. Οι κωδικοί πρόσβασης, τα στοιχεία σύνδεσης και τα ιδιωτικά κλειδιά δεν διατηρούνται εδώ.
 ui-sync-history-empty = Δεν αντικαταστάθηκε καμία αλλαγή.
-# review: new
 ui-sync-history-row = Προέλευση: { $source }, { $when }
-# review: new
 ui-sync-restore = Ε&παναφορά
-# review: new
 ui-sync-restore-points = Σημεία επαναφοράς
-# review: new
 ui-sync-restore-points-note = Πριν ο συγχρονισμός αφαιρέσει κάτι εδώ, αποθηκεύεται η προηγούμενη κατάσταση. Ανοίξτε ένα σημείο επαναφοράς για να ανακτήσετε όσα επιλέξετε από αυτό.
-# review: new
 ui-sync-restore-points-empty = Κανένα ακόμη.
-# review: new
 ui-sync-open-point = Ά&νοιγμα…
 # Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
-# review: new
-win-sync-back = < &Πίσω
+win-sync-back = < Πίσ&ω
 ui-language-label = &Γλώσσα:
 ui-restart-note = Επανεκκινήστε το Inbox Classic για να αλλάξει η γλώσσα.
 ui-restart-ask = Η επιλεγμένη γλώσσα ({ $language }) θα χρησιμοποιηθεί μετά την επανεκκίνηση του Inbox Classic. Να γίνει επανεκκίνηση τώρα;
@@ -592,7 +510,6 @@ ui-delete-folder-question = Να διαγραφεί ο φάκελος «{ $folde
 ui-properties = Ιδιό&τητες
 ui-account-sync = Αποστολή και λή&ψη
 ui-account-properties = Ιδιό&τητες...
-# review: new
 ui-account-properties-of = Ιδιότητες &λογαριασμού...
 ui-account-move-up = Μετακίνηση &πάνω
 ui-account-move-down = Μετακίνηση &κάτω
@@ -919,11 +836,8 @@ ui-setup-from = Αποθηκεύτηκε από το Inbox Classic { $version } 
 ui-setup-import-button = &Εισαγωγή
 ui-setup-done = Ολοκληρώθηκε
 ui-setup-first-run = Εισαγωγή ρυθμίσεων και λογαριασμών από άλλον υπολογιστή...
-# review: new
 ui-first-run-other = Χρησιμοποιείτε ήδη το Inbox Classic σε άλλον υπολογιστή; Φέρτε εδώ τους λογαριασμούς και τις ρυθμίσεις του.
-# review: new
-ui-first-run-sync = Συμμετοχή στον συγχρονισμό του…
-# review: new
+ui-first-run-sync = Συμμετοχή στον συγχρονισμό…
 ui-first-run-import = Εισαγωγή από αρχείο…
 
 ui-field-verifiers = Αξιόπιστοι έλεγχοι αποστολέα από:
@@ -936,11 +850,7 @@ ui-keys-publish-now = Δημοσίευση
 ui-keys-paste = Εισαγωγή από το πρό&χειρο
 ui-keys-paste-none = Το πρόχειρο δεν περιέχει κλειδί OpenPGP.
 ui-contact-find-key = Ανα&ζήτηση κλειδιού
-# review: new
 ui-reactions-label = Αντιδράσεις:
-# review: new
 ui-reaction-open-email = Άνοιγμα του email της αντίδρασης
-# review: new
 ui-reaction-show-as-email = Εμφάνιση ως email
-# review: new
 ui-reaction-when = Αντίδραση: { $when }

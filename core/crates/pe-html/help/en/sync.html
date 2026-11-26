@@ -1,20 +1,20 @@
 <h1>Sync your computers</h1>
 <p class="summary">Keep your accounts, keys, contacts, rules and settings the same on every computer, through a folder or storage you own.</p>
-<p>Sync keeps a vault of your setup in a place you choose: a folder that Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud or Syncthing copies between your computers, or S3-compatible storage. Everything in it is encrypted with your sync passphrase before it leaves the computer. Your messages are not in it; they stay on your mail servers.</p>
+<p>Sync stores your setup in a location you choose: a folder that Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud or Syncthing copies between your computers, or S3-compatible storage. The synced data is encrypted with your sync passphrase before it leaves the computer. Sync does not transfer messages, including drafts saved only on this computer.</p>
 <h2>Set up sync on your first computer</h2>
+<aside class="warning">Keep the sync passphrase somewhere safe. Without it, no other computer can join.</aside>
 <ol>
     <li>Open <b data-settings="sync"></b> and click <b data-text="ui-sync-set-up"></b>.</li>
     <li>Choose <b data-text="ui-sync-folder"></b> and click <b data-text="ui-sync-choose-folder"></b>, or choose <b data-text="ui-sync-bucket"></b> and fill in its details. Click <b data-text="ui-sync-next"></b>.</li>
     <li>Type a sync passphrase twice and a name for this computer. Choose what to sync, then click <b data-text="ui-sync-turn-on"></b>.</li>
 </ol>
-<aside class="warning">Keep the sync passphrase somewhere safe. Without it, no other computer can join.</aside>
 <h2>Add another computer</h2>
 <ol>
-    <li>On the other computer, open <b data-settings="sync"></b>, click <b data-text="ui-sync-set-up"></b> and choose the same folder or storage.</li>
-    <li>Type the sync passphrase you chose on the first computer, and click <b data-text="ui-sync-turn-on"></b>.</li>
+    <li>On the other computer, open <b data-settings="sync"></b>, click <b data-text="ui-sync-set-up"></b> and choose the same folder or storage. Click <b data-text="ui-sync-next"></b>.</li>
+    <li>Enter the sync passphrase and a name for this computer. Choose what to sync, then click <b data-text="ui-sync-turn-on"></b>.</li>
 </ol>
-<p>What the computer has already and what the sync holds come together: an account or contact on both becomes one. Your messages download again from the servers.</p>
+<p>Existing data is merged with the synced data. Matching accounts and contacts become one. Added accounts download the messages available on their mail servers.</p>
 <h2>While it syncs</h2>
-<p>Each computer syncs every few minutes and when you click <b data-text="ui-sync-now"></b>. When the same thing was changed on two computers at the same time, the change made last is kept and the other one goes to <b data-text="ui-sync-history"></b>, where you can restore it. When another computer removes an account, the main window says so.</p>
+<p>Each computer syncs every few minutes and when you click <b data-text="ui-sync-now"></b>. When changes conflict, sync keeps one version and saves replaced values in <b data-text="ui-sync-history"></b> for you to restore. Passwords, sign-in credentials and private keys are excluded from this history. When another computer removes an account, the main window says so.</p>
 <p>To stop syncing a computer you no longer use, click <b data-text="ui-sync-computers"></b> and remove it. To stop syncing this computer, click <b data-text="ui-sync-turn-off"></b>: everything stays as it is.</p>
 <nav class="related"><a href="topic:move-computer"></a> <a href="topic:manage-accounts"></a> <a href="topic:encryption-keys"></a></nav>

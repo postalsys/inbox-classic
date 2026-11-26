@@ -901,54 +901,33 @@ setup-error-newer = Bu dosya daha yeni bir Inbox Classic sürümüyle kaydedilmi
 setup-error-needs-passphrase = Bu dosya bir anahtar parolasıyla korunuyor. Dosya kaydedilirken kullanılan parolayı girin.
 setup-error-wrong-passphrase = Girilen anahtar parolası bu dosyanın parolasıyla eşleşmiyor.
 setup-error-changed = Ayar ve hesap dosyasının bütünlüğü doğrulanamadı. Dosya içe aktarılamıyor.
-# review: new
-sync-wrong-passphrase = Bu, bu kasanın eşitleme anahtar parolası değil. Eşitlemeyi ilk bilgisayarınızda kurarken seçtiğiniz parolayı yazın.
-# review: new
+sync-wrong-passphrase = Eşitleme anahtar parolası yanlış. Eşitlemeyi ilk bilgisayarınızda kurarken seçtiğiniz parolayı yazın.
 sync-place = { $place }, ad: “{ $name }”
-# review: new
 sync-news-removed = { $count ->
     [one] Başka bir bilgisayarda kaldırıldığı için eşitleme bu hesabı da kaldırdı: { $accounts }.
    *[other] Başka bir bilgisayarda kaldırıldıkları için eşitleme bu hesapları da kaldırdı: { $accounts }.
 }
-# review: new
 sync-news-lost = { $count ->
     [one] Başka bir bilgisayarda aynı anda yapılan bir değişikliğin yerine burada yapılan kullanıldı. Eşitleme geçmişi onu saklar.
    *[other] Başka bilgisayarlarda aynı anda yapılan { $count } değişikliğin yerine burada yapılanlar kullanıldı. Eşitleme geçmişi onları saklar.
 }
-# review: new
 sync-status-busy = Eşitleniyor…
-# review: new
 sync-status-never = Henüz eşitlenmedi.
-# review: new
 sync-status-last = Son eşitleme: { $when }.
-# review: new
 sync-status-today = Son eşitleme: bugün { $time }.
-# review: new
 sync-when-today = bugün { $time }
-# review: new
 sync-status-problem = Eşitlenemedi: { $problem }
-# review: new
 sync-removed-here = Bu bilgisayar, başka bir bilgisayardan eşitlemeden kaldırıldı. Yeniden katılmak için eşitlemeyi kapatın ve sonra yeniden kurun.
-# review: new
 sync-item-account = Hesap { $name }
-# review: new
 sync-item-contact = Kişi { $name }
-# review: new
 sync-item-group = Grup { $name }
-# review: new
 sync-item-key = Anahtar { $name }
-# review: new
 sync-item-rule = Kural { $name }
-# review: new
 sync-item-trusted = Güvenilen gönderen { $name }
-# review: new
 sync-item-sign-in-app = Oturum açma uygulaması { $name }
-# review: new
 sync-item-settings = Ayarlar
-# review: new
 sync-another-computer = başka bir bilgisayar
-# review: new
-sync-no-key = Bu bilgisayarda artık eşitleme kasasının anahtarı yok. Eşitlemeyi kapatıp eşitleme anahtar parolasıyla yeniden açın.
+sync-no-key = Bu bilgisayarda eşitleme için gereken şifreleme anahtarı yok. Eşitlemeyi kapatın, ardından eşitleme anahtar parolanızla yeniden kurun.
 setup-error-read = Ayar ve hesap dosyası okunamadı: { $error }
 setup-error-write = Ayar ve hesap dosyası kaydedilemedi: { $error }
 setup-error-no-parts = En az bir bölüm seçin.
@@ -1078,10 +1057,8 @@ preview-not-printed = { $name } ({ $details }) yazdırılmaz. Yazdırmak için a
 
 pgp-error-attached-private = Bu ekte gizli anahtar var. Postadan doğrudan yalnızca ortak anahtarlar içe aktarılabilir. Kendi gizli anahtarınızı geri yüklemek için eki kaydedin ve dosyayı Şifreleme Anahtarları penceresinden içe aktarın.
 pgp-part-find-key = Anahtar Bul
-# review: new
 reaction-notification-title = { $name }, { $emoji } ile tepki verdi
-# review: new
 reaction-notification-text = { $count ->
     [one] Konu: { $subject }
-   *[other] Konu: { $subject }, toplam { $count } tepki
+   *[other] Konu: { $subject } (toplam { $count } yeni tepki)
 }

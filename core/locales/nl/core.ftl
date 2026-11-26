@@ -905,54 +905,33 @@ setup-error-newer = Dit bestand is opgeslagen met een nieuwere versie van Inbox 
 setup-error-needs-passphrase = Dit bestand is beveiligd met een wachtwoordzin. Typ de wachtwoordzin waarmee het is opgeslagen.
 setup-error-wrong-passphrase = Dat is niet de wachtwoordzin waarmee dit bestand is opgeslagen.
 setup-error-changed = De integriteit van het instellingenbestand kon niet worden bevestigd. Het bestand kan niet worden geïmporteerd.
-# review: new
-sync-wrong-passphrase = Dat is niet de synchronisatiewachtwoordzin van deze kluis. Typ de wachtwoordzin die je hebt gekozen toen je de synchronisatie op je eerste computer instelde.
-# review: new
+sync-wrong-passphrase = Deze synchronisatiewachtwoordzin klopt niet. Typ de wachtwoordzin die je hebt gekozen toen je de synchronisatie op je eerste computer instelde.
 sync-place = { $place }, als “{ $name }”
-# review: new
 sync-news-removed = { $count ->
     [one] De synchronisatie heeft het account { $accounts } verwijderd, omdat het op een andere computer is verwijderd.
    *[other] De synchronisatie heeft de accounts { $accounts } verwijderd, omdat ze op een andere computer zijn verwijderd.
 }
-# review: new
 sync-news-lost = { $count ->
-    [one] Een wijziging die tegelijk op een andere computer is gemaakt, is vervangen door de wijziging van deze computer. De synchronisatiegeschiedenis bewaart deze wijziging.
-   *[other] { $count } wijzigingen die tegelijk op andere computers zijn gemaakt, zijn vervangen door de wijzigingen van deze computer. De synchronisatiegeschiedenis bewaart ze.
+    [one] Een wijziging die tegelijk op een andere computer is gemaakt, is vervangen door de wijziging van deze computer. De vervangen wijziging blijft bewaard in de synchronisatiegeschiedenis.
+   *[other] { $count } wijzigingen die tegelijk op andere computers zijn gemaakt, zijn vervangen door de wijzigingen van deze computer. De vervangen wijzigingen blijven bewaard in de synchronisatiegeschiedenis.
 }
-# review: new
 sync-status-busy = Synchroniseren…
-# review: new
 sync-status-never = Nog niet gesynchroniseerd.
-# review: new
 sync-status-last = Laatst gesynchroniseerd: { $when }.
-# review: new
 sync-status-today = Laatst gesynchroniseerd: vandaag om { $time }.
-# review: new
 sync-when-today = vandaag om { $time }
-# review: new
 sync-status-problem = Synchroniseren mislukt: { $problem }
-# review: new
 sync-removed-here = Deze computer is op een andere computer uit de synchronisatie verwijderd. Zet de synchronisatie uit en stel de synchronisatie daarna opnieuw in om weer deel te nemen.
-# review: new
 sync-item-account = Account { $name }
-# review: new
 sync-item-contact = Contactpersoon { $name }
-# review: new
 sync-item-group = Groep { $name }
-# review: new
 sync-item-key = Sleutel { $name }
-# review: new
 sync-item-rule = Regel { $name }
-# review: new
 sync-item-trusted = Vertrouwde afzender { $name }
-# review: new
 sync-item-sign-in-app = Aanmeldapp { $name }
-# review: new
 sync-item-settings = Instellingen
-# review: new
 sync-another-computer = een andere computer
-# review: new
-sync-no-key = Deze computer heeft de sleutel van de synchronisatiekluis niet meer. Zet de synchronisatie uit en weer aan met de synchronisatiewachtwoordzin.
+sync-no-key = De versleutelingssleutel voor synchronisatie ontbreekt op deze computer. Zet de synchronisatie uit en stel die opnieuw in met je synchronisatiewachtwoordzin.
 setup-error-read = Het instellingenbestand kon niet worden gelezen: { $error }
 setup-error-write = De instellingen konden niet worden opgeslagen: { $error }
 setup-error-no-parts = Kies ten minste één onderdeel.
@@ -1082,10 +1061,8 @@ preview-not-printed = { $name } ({ $details }) wordt niet afgedrukt. Open het om
 
 pgp-error-attached-private = Deze bijlage bevat een privésleutel. Je kunt alleen openbare sleutels rechtstreeks uit berichten importeren. Om je eigen privésleutel te herstellen, sla je de bijlage op en importeer je het bestand in Versleutelingssleutels.
 pgp-part-find-key = Sleutel zoeken
-# review: new
 reaction-notification-title = { $name } reageerde met { $emoji }
-# review: new
 reaction-notification-text = { $count ->
     [one] op { $subject }
-   *[other] op { $subject }, en { $count } reacties in totaal
+   *[other] op { $subject } ({ $count } nieuwe reacties in totaal)
 }

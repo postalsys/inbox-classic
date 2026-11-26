@@ -1,20 +1,20 @@
-<!--review--><h1>Sinhronizacija računara</h1>
+<h1>Sinhronizacija računara</h1>
 <p class="summary">Neka vaši nalozi, ključevi, kontakti, pravila i podešavanja budu isti na svakom računaru, preko fascikle ili skladišta koje je vaše.</p>
-<p>Sinhronizacija čuva trezor sa vašim nalozima i podešavanjima na mestu koje izaberete: u fascikli koju Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud ili Syncthing kopira između vaših računara ili u skladištu kompatibilnom sa S3. Sve u njemu se šifruje vašom pristupnom frazom za sinhronizaciju pre nego što napusti računar. Vaše poruke nisu u njemu; ostaju na vašim serverima e-pošte.</p>
+<p>Sinhronizacija čuva vaše naloge i podešavanja na mestu koje izaberete: u fascikli koju Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud ili Syncthing kopira između vaših računara ili u skladištu kompatibilnom sa S3. Sinhronizovani podaci se šifruju vašom pristupnom frazom za sinhronizaciju pre nego što napuste računar. Sinhronizacija ne prenosi poruke ni radne verzije sačuvane samo na ovom računaru.</p>
 <h2>Podešavanje sinhronizacije na prvom računaru</h2>
+<aside class="warning">Pristupnu frazu za sinhronizaciju čuvajte na sigurnom mestu. Bez nje nijedan drugi računar ne može da se pridruži.</aside>
 <ol>
     <li>Otvorite <b data-settings="sync"></b> i kliknite na <b data-text="ui-sync-set-up"></b>.</li>
     <li>Izaberite opciju „<b data-text="ui-sync-folder"></b>“ i kliknite na <b data-text="ui-sync-choose-folder"></b> ili izaberite opciju „<b data-text="ui-sync-bucket"></b>“ i unesite njegove podatke. Kliknite na <b data-text="ui-sync-next"></b>.</li>
     <li>Dvaput unesite pristupnu frazu za sinhronizaciju i unesite ime ovog računara. Izaberite šta želite da sinhronizujete, a zatim kliknite na <b data-text="ui-sync-turn-on"></b>.</li>
 </ol>
-<aside class="warning">Pristupnu frazu za sinhronizaciju čuvajte na sigurnom mestu. Bez nje nijedan drugi računar ne može da se pridruži.</aside>
 <h2>Dodavanje drugog računara</h2>
 <ol>
-    <li>Na drugom računaru otvorite <b data-settings="sync"></b>, kliknite na <b data-text="ui-sync-set-up"></b> i izaberite istu fasciklu ili skladište.</li>
-    <li>Unesite pristupnu frazu za sinhronizaciju koju ste izabrali na prvom računaru i kliknite na <b data-text="ui-sync-turn-on"></b>.</li>
+    <li>Na drugom računaru otvorite <b data-settings="sync"></b>, kliknite na <b data-text="ui-sync-set-up"></b> i izaberite istu fasciklu ili skladište. Kliknite na <b data-text="ui-sync-next"></b>.</li>
+    <li>Unesite pristupnu frazu za sinhronizaciju i ime ovog računara. Izaberite šta želite da sinhronizujete i kliknite na <b data-text="ui-sync-turn-on"></b>.</li>
 </ol>
-<p>Ono što računar već ima i ono što sadrži sinhronizacija spajaju se: nalog ili kontakt koji postoji na obe strane postaje jedan. Vaše poruke se ponovo preuzimaju sa servera.</p>
+<p>Postojeći podaci spajaju se sa sinhronizovanim podacima. Nalozi i kontakti koji se podudaraju spajaju se u jedan zapis. Dodati nalozi preuzimaju poruke dostupne na svojim serverima e-pošte.</p>
 <h2>Tokom sinhronizacije</h2>
-<p>Svaki računar se sinhronizuje na svakih nekoliko minuta i kada kliknete na <b data-text="ui-sync-now"></b>. Kada je ista stvar istovremeno promenjena na dva računara, zadržava se poslednja napravljena promena, a druga se čuva u istoriji sinhronizacije. Otvorite je dugmetom <b data-text="ui-sync-history"></b> i tamo možete da je vratite. Kada drugi računar ukloni nalog, glavni prozor to javlja.</p>
+<p>Svaki računar se sinhronizuje na svakih nekoliko minuta i kada kliknete na <b data-text="ui-sync-now"></b>. Kada se promene sukobe, sinhronizacija zadržava jednu verziju, a zamenjene vrednosti čuva u prozoru <b data-text="ui-sync-history"></b>, odakle ih možete vratiti. Lozinke, podaci za prijavu i privatni ključevi se ne čuvaju u toj istoriji. Kada drugi računar ukloni nalog, glavni prozor vas o tome obaveštava.</p>
 <p>Da biste prestali da sinhronizujete računar koji više ne koristite, kliknite na <b data-text="ui-sync-computers"></b> i uklonite ga. Da biste prestali da sinhronizujete ovaj računar, kliknite na <b data-text="ui-sync-turn-off"></b>: sve ostaje kako jeste.</p>
-<nav class="related"><a href="topic:move-computer"></a> <a href="topic:manage-accounts"></a> <a href="topic:encryption-keys"></a></nav><!--/review-->
+<nav class="related"><a href="topic:move-computer"></a> <a href="topic:manage-accounts"></a> <a href="topic:encryption-keys"></a></nav>

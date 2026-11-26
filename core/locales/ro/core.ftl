@@ -983,56 +983,35 @@ setup-error-newer = Această configurație a fost salvată de o versiune mai nou
 setup-error-needs-passphrase = Această configurație este protejată de o frază-parolă. Introduceți fraza-parolă cu care a fost salvată.
 setup-error-wrong-passphrase = Aceasta nu este fraza-parolă cu care a fost salvată configurația.
 setup-error-changed = Integritatea fișierului de configurație nu a putut fi confirmată. Fișierul poate fi modificat sau deteriorat și nu poate fi importat.
-# review: new
-sync-wrong-passphrase = Aceasta nu este fraza-parolă de sincronizare a acestui seif. Introduceți-o pe cea aleasă când ați configurat sincronizarea pe primul computer.
-# review: new
+sync-wrong-passphrase = Fraza-parolă de sincronizare este incorectă. Introduceți fraza-parolă aleasă când ați configurat sincronizarea pe primul computer.
 sync-place = { $place }, ca „{ $name }”
-# review: new
 sync-news-removed = { $count ->
     [one] Sincronizarea a eliminat contul { $accounts }, deoarece a fost eliminat pe alt computer.
     [few] Sincronizarea a eliminat conturile { $accounts }, deoarece au fost eliminate pe alt computer.
    *[other] Sincronizarea a eliminat conturile { $accounts }, deoarece au fost eliminate pe alt computer.
 }
-# review: new
 sync-news-lost = { $count ->
     [one] O modificare făcută în același timp pe alt computer a fost înlocuită de cea făcută aici. Istoricul sincronizării o păstrează.
     [few] { $count } modificări făcute în același timp pe alte computere au fost înlocuite de cele făcute aici. Istoricul sincronizării le păstrează.
    *[other] { $count } de modificări făcute în același timp pe alte computere au fost înlocuite de cele făcute aici. Istoricul sincronizării le păstrează.
 }
-# review: new
 sync-status-busy = Se sincronizează…
-# review: new
 sync-status-never = Nesincronizat încă.
-# review: new
 sync-status-last = Ultima sincronizare: { $when }.
-# review: new
 sync-status-today = Ultima sincronizare: astăzi la { $time }.
-# review: new
 sync-when-today = astăzi la { $time }
-# review: new
 sync-status-problem = Sincronizarea nu a reușit: { $problem }
-# review: new
 sync-removed-here = Acest computer a fost eliminat din sincronizare de pe alt computer. Dezactivați sincronizarea, apoi configurați-o din nou pentru a vă alătura.
-# review: new
 sync-item-account = Cont { $name }
-# review: new
 sync-item-contact = Contact { $name }
-# review: new
 sync-item-group = Grup { $name }
-# review: new
 sync-item-key = Cheie { $name }
-# review: new
 sync-item-rule = Regulă { $name }
-# review: new
 sync-item-trusted = Expeditor de încredere { $name }
-# review: new
 sync-item-sign-in-app = Aplicație de conectare { $name }
-# review: new
 sync-item-settings = Setări
-# review: new
 sync-another-computer = alt computer
-# review: new
-sync-no-key = Acest computer nu mai are cheia seifului de sincronizare. Dezactivați și reactivați sincronizarea cu fraza-parolă de sincronizare.
+sync-no-key = Cheia de criptare pentru sincronizare lipsește de pe acest computer. Dezactivați sincronizarea, apoi configurați-o din nou cu fraza-parolă de sincronizare.
 setup-error-read = Fișierul de configurație nu a putut fi citit: { $error }
 setup-error-write = Configurația nu a putut fi salvată: { $error }
 setup-error-no-parts = Alegeți cel puțin o categorie de date.
@@ -1179,10 +1158,9 @@ preview-not-printed = Fișierul „{ $name }” ({ $details }) nu este inclus la
 
 pgp-error-attached-private = Această atașare conține o cheie privată. Direct din poștă pot fi importate numai chei publice. Pentru a vă restaura propria cheie privată, salvați atașarea și importați fișierul în fereastra „Chei de criptare”.
 pgp-part-find-key = Găsire cheie
-# review: new
 reaction-notification-title = { $name } a reacționat cu { $emoji }
-# review: new
 reaction-notification-text = { $count ->
     [one] la { $subject }
-   *[other] la { $subject }, în total reacții: { $count }
+    [few] la { $subject } (în total { $count } reacții noi)
+   *[other] la { $subject } (în total { $count } de reacții noi)
 }

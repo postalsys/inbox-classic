@@ -888,54 +888,33 @@ setup-error-newer = Ezt a beállításfájlt az Inbox Classic egy újabb verzió
 setup-error-needs-passphrase = Ezt a beállításfájlt jelmondat védi. Írja be a mentéskor megadott jelmondatot.
 setup-error-wrong-passphrase = Nem ezzel a jelmondattal mentették a beállításfájlt.
 setup-error-changed = A beállításfájl sérült vagy módosult, ezért nem importálható.
-# review: new
-sync-wrong-passphrase = Ez nem a szinkronizált adatok jelmondata. Írja be azt, amelyet az első számítógépen a szinkronizálás beállításakor választott.
-# review: new
+sync-wrong-passphrase = A szinkronizálási jelmondat helytelen. Írja be azt a jelmondatot, amelyet az első számítógépen a szinkronizálás beállításakor választott.
 sync-place = { $place }, számítógépnév: „{ $name }”
-# review: new
 sync-news-removed = { $count ->
     [one] A szinkronizálás eltávolított egy fiókot, mert egy másik számítógépen eltávolították: { $accounts }.
    *[other] A szinkronizálás eltávolított több fiókot, mert egy másik számítógépen eltávolították őket: { $accounts }.
 }
-# review: new
 sync-news-lost = { $count ->
     [one] Egy másik számítógépen ugyanakkor végzett módosítást felülírt az itt végzett módosítás. A szinkronizálási előzmények megőrzik.
    *[other] Más számítógépeken ugyanakkor végzett { $count } módosítást felülírtak az itt végzett módosítások. A szinkronizálási előzmények megőrzik őket.
 }
-# review: new
 sync-status-busy = Szinkronizálás…
-# review: new
 sync-status-never = Még nem volt szinkronizálás.
-# review: new
 sync-status-last = Utolsó szinkronizálás: { $when }.
-# review: new
 sync-status-today = Utolsó szinkronizálás: ma, { $time }.
-# review: new
 sync-when-today = ma, { $time }
-# review: new
 sync-status-problem = A szinkronizálás nem sikerült: { $problem }
-# review: new
 sync-removed-here = Ezt a számítógépet egy másik számítógépen eltávolították a szinkronizálásból. Kapcsolja ki a szinkronizálást, majd a csatlakozáshoz állítsa be újra.
-# review: new
 sync-item-account = Fiók: { $name }
-# review: new
 sync-item-contact = Névjegy: { $name }
-# review: new
 sync-item-group = Csoport: { $name }
-# review: new
 sync-item-key = Kulcs: { $name }
-# review: new
 sync-item-rule = Szabály: { $name }
-# review: new
 sync-item-trusted = Megbízható feladó: { $name }
-# review: new
 sync-item-sign-in-app = Bejelentkezési alkalmazás: { $name }
-# review: new
 sync-item-settings = Beállítások
-# review: new
 sync-another-computer = másik számítógép
-# review: new
-sync-no-key = Ezen a számítógépen már nincs meg a szinkronizált adatok kulcsa. Kapcsolja ki, majd újra be a szinkronizálást a szinkronizálási jelmondattal.
+sync-no-key = Erről a számítógépről hiányzik a szinkronizálás titkosítási kulcsa. Kapcsolja ki a szinkronizálást, majd állítsa be újra a szinkronizálási jelmondattal.
 setup-error-read = A beállításfájlt nem sikerült beolvasni: { $error }
 setup-error-write = A beállításfájlt nem sikerült menteni: { $error }
 setup-error-no-parts = Válasszon legalább egy részt.
@@ -1065,10 +1044,8 @@ preview-not-printed = A melléklet tartalma nem szerepel a nyomaton: { $name } (
 
 pgp-error-attached-private = Ez a melléklet titkos kulcsot tartalmaz. Közvetlenül levélből csak nyilvános kulcsok importálhatók. Saját titkos kulcsának visszaállításához mentse a mellékletet, majd importálja a fájlt a Titkosítási kulcsok ablakban.
 pgp-part-find-key = Kulcs keresése
-# review: new
 reaction-notification-title = { $name } reagált: { $emoji }
-# review: new
 reaction-notification-text = { $count ->
     [one] erre: { $subject }
-   *[other] erre: { $subject }, összesen { $count } reakció
+   *[other] erre: { $subject } (összesen { $count } új reakció)
 }

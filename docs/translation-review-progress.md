@@ -1,18 +1,42 @@
-# Translation review, round 7
+# Translation review, round 8
+
+## Resume here
+
+- Authoritative checkout: `/Users/andris/Projects/PostalExpress`, branch `master`.
+- Review complete; content and baseline commits, final zero-pending check and publication remain.
+- Starting local and fetched origin/master: `69b9897538d8fb9e0acd37fc1f7958c4704454b3`. The READY handoff confirmed all strings were merged.
+- Previous reviewed baseline: `af31d1c03fc18cd3df8ed7e7ce708dfb148a2be8`. Keep it until the reviewed content commit exists.
+- User authorized current repository glossary/help-writing guidance in place of the missing Downloads guide, parallel language work, and committing/pushing master.
+- No tests, builds, native GUI checks or CI queries. Static translation checks and caller inspection only.
 
 ## Completed review
 
-- Authoritative checkout: `/Users/andris/Projects/PostalExpress`, branch `master`.
-- Started at `f5470316c0aa06cf1a4b53d7e9be16432026df4b`; previous reviewed baseline `cc96034650ebb623dad6fb4f5b7a806971d75e52`. Round 6 remains archived.
-- English and all 34 translations are reviewed. Added 408 translations for the English-only PGP/sender-check features, corrected 19 neighboring shortcut labels, and reviewed 68 target help pages. English received 10 copy corrections across two catalog values and two full help topics.
-- Corrections distinguish public-key upload from confirmed address listing, key lookup from verified ownership, private-key attachment rejection from import, and later key expiry from signature validity. Sender-check help names both default domains and background rechecking after synchronization.
-- Final provenance covers all 2,065 catalog/help files and all 476 target queue items: 429 changed catalog values and 70 changed help topics including English; zero uncovered changes or pending items.
-- Current inventory: 35 languages including English, each with 1,502 catalog entries and 53 help topics.
-- Static checks: all 210 catalogs parse; all 34 language checkers have zero structural findings after accounting for 52,870 expected removed-mark diagnostics. All 2,345 modeled mnemonic scope instances are clear; all 5,565 platform help variants are balanced and references valid. Historical contextual literal/reference differences are preserved and documented.
-- Offline pe-ffi/help-export builds and Windows/macOS/Linux help exports passed. Final generated-output and rendered-label evidence is kept with the review records.
-- Round 7 is complete and archived. Content commit and `REVIEWED`: `af31d1c03fc18cd3df8ed7e7ce708dfb148a2be8`. The baseline check reports zero pending messages, zero pending help passages and zero unmarked changes. All changes are local on master; do not push or create a PR.
-- Evidence: `/Users/andris/Projects/PostalExpress/build/i18n-round7-20261123`. Frozen language ledgers, original snapshots, source followups, final hashes and independent coverage reports are preserved there.
+Reviewed 113 English catalog entries and 10 complete English help topics. Corrected 10 English values and 6 topics
+through 36 exact edits. Independent cross-review confirmed runtime claims and added the initial conversation-view
+qualifier. All target languages match frozen English revision 4.
 
-## Validation policy
+Reviewed all 34 translations in parallel: 3,842 catalog entries and 340 complete help topics, covering 714 initially
+marked passages. Corrected 462 catalog values and 235 help topics; retained good wording. Every queued ID/topic is
+recorded, all initial snapshots match the starting Git commit, all final ledger hashes match the files, and there
+are no unresolved entries or remaining marks. Glossary notes record the wording and access-key decisions.
 
-No local test suites, CI queries or manually triggered workflows. Static checks, caller inspection and offline builds only. No native-speaker or native GUI certification is claimed.
+The main corrections clarify sync conflict history and secret exclusions, local-only mail, setup steps, conversation
+printing and selection, platform keyboard behavior, and reaction counts/notifications/domain checks. No app logic changed.
+
+## Static verification
+
+- Fluent parser and catalog completeness: 35 languages, 210 catalogs, 56,525 messages; all registered languages present.
+- Help: 1,925 topics, checked as 5,775 platform-specific documents; references and markup valid.
+- All 2,695 modeled mnemonic scopes clear (77 per language).
+- All 34 language checkers have exactly 1,670 expected removed-draft-mark diagnostics each and zero structural findings.
+- The 560 historical reference/literal differences exactly match the previous review; no new differences.
+- Exact ledger coverage, comments, unchanged catalog values, source hashes and `git diff --check` pass.
+
+These are static checks and contextual editing, not native-speaker approval or runtime testing.
+
+## Evidence
+
+State: `docs/translation-review-state.json`. Detailed snapshots, canonical per-language ledgers, independent English
+review, final static report, HTML review and late-arrival evidence are under
+`build/i18n-round8-monitor-20261125`. Build artifacts are not committed. The tracked state records exact reviewed IDs,
+full topics, final file hashes, evidence hashes and the source baseline for resuming or auditing this round.

@@ -42,8 +42,7 @@ cmd-accounts = &Konti...
 cmd-find = Find &meddelelse
 cmd-save-as = &Gem som...
 cmd-print = &Udskriv...
-# review: new
-cmd-print-conversation = Udskriv sa&mtale...
+cmd-print-conversation = Udskriv &samtale...
 cmd-import = &Importer meddelelser...
 cmd-outbox = &Udbakke...
 cmd-properties = &Egenskaber
@@ -64,43 +63,29 @@ ui-find-not-found = »{ $words }« findes ikke i denne meddelelse
 cmd-expand-all-threads = Ud&vid alle samtaler
 cmd-collapse-all-threads = F&old alle samtaler sammen
 ui-group-by-conversation = Grupper meddelelser efter samta&le
-# review: new
 ui-show-whole-conversation = Vis hele sa&mtalen i læseruden
-# review: new
-ui-show-whole-conversation-note = En samtales række åbner alle dens meddelelser, med dine svar, kladder og de meddelelser, du har lagt i andre mapper. Læste meddelelser er foldet sammen til en linje: klik på en linje for at åbne eller folde den.
-# review: new
+ui-show-whole-conversation-note = Åbn en samtales meddelelser samlet, inklusive dine svar, kladder og meddelelser i andre mapper. Læste meddelelser er som regel foldet sammen til en linje: Klik på en linje for at åbne eller folde den sammen.
 ui-conversation-order = &Rækkefølge i samtaler:
-# review: new
 ui-conversation-oldest-first = Ældste først
-# review: new
 ui-conversation-newest-first = Nyeste først
-# review: new
 ui-thread-count = { $new ->
     [0] ({ $count })
     [one] ({ $count }, { $new } ny)
    *[other] ({ $count }, { $new } nye)
 }
-# review: new
 ui-conversation-to = til { $people }
-# review: new
 ui-conversation-draft = Kladde
-# review: new
 ui-conversation-alone = Signeret eller krypteret: åbnes for sig
-# review: new
 ui-conversation-downloading = Henter…
-# review: new
 ui-conversation-earlier = { $count ->
     [one] Vis 1 tidligere meddelelse
    *[other] Vis { $count } tidligere meddelelser
 }
-# review: new
 ui-conversation-elsewhere = { $count ->
     [one] Denne samtale har også en meddelelse i en anden mappe.
    *[other] Denne samtale har også { $count } meddelelser i andre mapper.
 }
-# review: new
 ui-conversation-this-folder = Kun &denne mappe
-# review: new
 ui-conversation-whole = &Hele samtalen
 cmd-folder-list = &Mappeliste
 cmd-layout-automatic = &Automatisk
@@ -447,141 +432,74 @@ ui-settings-encryption = Kryptering
 ui-settings-language = Sprog
 ui-settings-label = { $label }:
 ui-apply = &Anvend
-# review: new
 ui-settings-sync = Synkronisering
-# review: new
 ui-sync-note = Hold dine konti, nøgler, Adressekartotek, regler og indstillinger ens på alle dine computere via en mappe eller et lager, du selv ejer. Alt krypteres med din synkroniseringsadgangsfrase, før det forlader denne computer.
-# review: new
 ui-sync-place = Synkroniseres via:
-# review: new
 ui-sync-status = Status:
-# review: new
 ui-sync-set-up = &Konfigurer synkronisering…
-# review: new
 ui-sync-now = &Synkroniser nu
-# review: new
 ui-sync-computers = Co&mputere…
-# review: new
 ui-sync-history = &Historik…
-# review: new
 ui-sync-turn-off = Slå synkronisering &fra…
-# review: new
 ui-sync-what = Hvad der synkroniseres
-# review: new
-ui-sync-what-note = Adgangskoder, logins og private nøgler overføres kun krypteret. Udelad det, der skal blive på denne computer.
-# review: new
+ui-sync-what-note = Adgangskoder, loginoplysninger og private nøgler overføres kun krypteret. Udelad det, der skal blive på denne computer.
 ui-sync-accounts = K&onti
-# review: new
 ui-sync-passwords = Ad&gangskoder
-# review: new
 ui-sync-sign-ins = &Logins med Google, Microsoft og login-apps
-# review: new
 ui-sync-sign-in-apps = Login-a&pps
-# review: new
 ui-sync-app-secrets = Kl&ienthemmeligheder til login-apps
-# review: new
 ui-sync-contacts = A&dressekartotek
-# review: new
 ui-sync-keys = &Nøgler
-# review: new
 ui-sync-private-keys = Dine p&rivate nøgler
-# review: new
 ui-sync-rules = Regl&er
-# review: new
 ui-sync-trusted = &Betroede afsendere
-# review: new
 ui-sync-settings = Inds&tillinger
-# review: new
 ui-sync-preferences = Layout og &visning
-# review: new
 ui-sync-everything = Alt
-# review: new
 ui-sync-some-left-out = Noget er udeladt
-# review: new
 ui-sync-where = Hvor det gemmes
-# review: new
 ui-sync-folder = En mappe
-# review: new
 ui-sync-folder-note = Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud eller Syncthing kopierer den til dine andre computere.
-# review: new
 ui-sync-bucket = S3-kompatibelt lager
-# review: new
 ui-sync-bucket-note = Amazon S3, Cloudflare R2, Backblaze B2, MinIO eller et andet lager, der fungerer som S3.
-# review: new
 ui-sync-folder-label = &Mappe:
-# review: new
 ui-sync-folder-none = Ingen valgt endnu
-# review: new
 ui-sync-choose-folder = &Vælg…
-# review: new
 ui-sync-choose-folder-title = Vælg den mappe, der skal synkroniseres via
-# review: new
 ui-sync-endpoint = &Slutpunkt:
-# review: new
 ui-sync-region = &Region:
-# review: new
 ui-sync-bucket-name = &Bucket:
-# review: new
 ui-sync-prefix = Mappe i b&ucket:
-# review: new
 ui-sync-access-key = &Adgangsnøgle-id:
-# review: new
 ui-sync-secret-key = &Hemmelig adgangsnøgle:
-# review: new
 ui-sync-next = &Næste
-# review: new
 ui-sync-join-title = Deltag i synkronisering
-# review: new
-ui-sync-join-note = Dette sted indeholder synkroniseringen fra dine andre computere. Skriv den synkroniseringsadgangsfrase, du valgte på den første.
-# review: new
+ui-sync-join-note = Dette sted indeholder allerede synkroniserede data. Skriv den synkroniseringsadgangsfrase, du valgte på den første computer.
 ui-sync-start-title = Start synkronisering
-# review: new
 ui-sync-start-note = Vælg en synkroniseringsadgangsfrase. Du skriver den én gang på hver computer, du tilføjer. Opbevar den et sikkert sted: Uden den kan ingen anden computer deltage.
-# review: new
 ui-sync-name = Navn på denne &computer:
-# review: new
-ui-sync-merge-note = Det, denne computer har, og det, synkroniseringen indeholder, flettes sammen: En konto eller kontakt, der findes begge steder, bliver til én.
-# review: new
-ui-sync-turn-on = Slå synkronisering t&il
-# review: new
+ui-sync-merge-note = Dataene på denne computer flettes med de synkroniserede data. Konti og kontakter, der svarer til hinanden, slås sammen.
+ui-sync-turn-on = Slå &synkronisering til
 ui-sync-on = Synkronisering er slået til.
-# review: new
 ui-sync-turn-off-ask = Vil du slå synkronisering fra på denne computer? Alt forbliver, som det er, her og på dine andre computere. Denne computer holder bare op med at synkronisere.
-# review: new
 ui-sync-turn-off-button = Slå fra
-# review: new
 ui-sync-computers-title = Computere
-# review: new
-ui-sync-computers-note = De computere, der synkroniserer via dette sted. Fjern en, du ikke længere bruger: Den holder op med at synkronisere, og det, den har synkroniseret, bliver.
-# review: new
+ui-sync-computers-note = Disse computere synkroniserer via samme sted. Fjern en computer, du ikke længere bruger, for at stoppe dens synkronisering. Dens synkroniserede data bevares.
 ui-sync-this-computer = Denne computer
-# review: new
 ui-sync-seen = Senest synkroniseret: { $when }
-# review: new
 ui-sync-remove-ask = Vil du fjerne »{ $name }« fra synkroniseringen? Den holder op med at synkronisere, næste gang den forsøger. For at synkronisere den igen skal du konfigurere synkronisering på den igen.
-# review: new
 ui-sync-loading = Læser…
-# review: new
 ui-sync-history-title = Historik
-# review: new
-ui-sync-history-note = Når det samme blev ændret på to computere på samme tid, blev den sidst foretagne ændring beholdt, og den anden ligger her. Gendan en for at bruge den i stedet.
-# review: new
+ui-sync-history-note = Når ændringer fra forskellige computere er i konflikt, beholder synkroniseringen én version. Erstattede værdier vises her; gendan en for at bruge den igen. Adgangskoder, loginoplysninger og private nøgler gemmes ikke her.
 ui-sync-history-empty = Ingen ændringer blev erstattet.
-# review: new
 ui-sync-history-row = Fra { $source }, { $when }
-# review: new
 ui-sync-restore = &Gendan
-# review: new
 ui-sync-restore-points = Gendannelsespunkter
-# review: new
-ui-sync-restore-points-note = Før en synkronisering fjerner noget her, gemmes det, som det var. Åbn et gendannelsespunkt for at hente det tilbage, du vælger fra det.
-# review: new
+ui-sync-restore-points-note = Gendannelsespunkter gemmer din opsætning, før synkroniseringen fjerner elementer fra denne computer. Åbn et punkt for at vælge, hvad du vil gendanne.
 ui-sync-restore-points-empty = Ingen endnu.
-# review: new
 ui-sync-open-point = &Åbn…
 # Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
-# review: new
-win-sync-back = < &Tilbage
+win-sync-back = < Tilb&age
 ui-language-label = S&prog:
 ui-restart-note = Genstart Inbox Classic for at skifte sprog.
 ui-restart-ask = Inbox Classic vises på { $language }, når programmet er genstartet. Vil du genstarte nu?
@@ -592,7 +510,6 @@ ui-delete-folder-question = Vil du slette mappen »{ $folder }« med dens meddel
 ui-properties = Ege&nskaber
 ui-account-sync = Send og &modtag
 ui-account-properties = &Egenskaber...
-# review: new
 ui-account-properties-of = &Kontoegenskaber...
 ui-account-move-up = Flyt &op
 ui-account-move-down = Flyt &ned
@@ -919,11 +836,8 @@ ui-setup-from = Gemt af Inbox Classic { $version } den { $date }.
 ui-setup-import-button = &Importer
 ui-setup-done = Færdig
 ui-setup-first-run = Importer indstillinger og konti fra en anden computer...
-# review: new
 ui-first-run-other = Bruger du allerede Inbox Classic på en anden computer? Hent dens konti og indstillinger hertil.
-# review: new
-ui-first-run-sync = Deltag i dens synkronisering…
-# review: new
+ui-first-run-sync = Deltag i synkronisering…
 ui-first-run-import = Importer fra en fil…
 
 ui-field-verifiers = Stol på afsenderkontroller fra:
@@ -936,11 +850,7 @@ ui-keys-publish-now = Udgiv
 ui-keys-paste = Importer fra &udklipsholder
 ui-keys-paste-none = Udklipsholderen indeholder ingen OpenPGP-nøgle.
 ui-contact-find-key = Find nø&gle
-# review: new
 ui-reactions-label = Reaktioner:
-# review: new
 ui-reaction-open-email = Åbn reaktionens e-mail
-# review: new
 ui-reaction-show-as-email = Vis som e-mail
-# review: new
 ui-reaction-when = Reaktion: { $when }

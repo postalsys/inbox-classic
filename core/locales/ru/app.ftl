@@ -40,7 +40,6 @@ cmd-accounts = Учетные &записи...
 cmd-find = Н&айти сообщение
 cmd-save-as = С&охранить как...
 cmd-print = Печ&ать...
-# review: new
 cmd-print-conversation = Печать &беседы...
 cmd-import = &Импорт сообщений...
 cmd-outbox = &Исходящие...
@@ -62,17 +61,11 @@ ui-find-not-found = «{ $words }» нет в этом сообщении
 cmd-expand-all-threads = Ра&звернуть все беседы
 cmd-collapse-all-threads = Сверну&ть все беседы
 ui-group-by-conversation = &Группировать сообщения по беседам
-# review: new
 ui-show-whole-conversation = Показывать всю бесе&ду в области чтения
-# review: new
-ui-show-whole-conversation-note = Строка беседы открывает все ее сообщения, вместе с вашими ответами, черновиками и сообщениями, разложенными по другим папкам. Прочитанные сообщения свернуты в одну строку: щелкните строку, чтобы развернуть или свернуть ее.
-# review: new
+ui-show-whole-conversation-note = Открывайте сообщения беседы вместе, включая свои ответы, черновики и сообщения в других папках. Прочитанные сообщения обычно свернуты в строку; щелкните строку, чтобы развернуть или свернуть сообщение.
 ui-conversation-order = Поряд&ок сообщений в беседе:
-# review: new
 ui-conversation-oldest-first = Сначала старые
-# review: new
 ui-conversation-newest-first = Сначала новые
-# review: new
 ui-thread-count = { $new ->
     [0] ({ $count })
     [one] ({ $count }, { $new } новое)
@@ -80,31 +73,23 @@ ui-thread-count = { $new ->
     [many] ({ $count }, { $new } новых)
    *[other] ({ $count }, { $new } нового)
 }
-# review: new
 ui-conversation-to = кому: { $people }
-# review: new
 ui-conversation-draft = Черновик
-# review: new
 ui-conversation-alone = Подписано или зашифровано: открывается отдельно
-# review: new
 ui-conversation-downloading = Загрузка…
-# review: new
 ui-conversation-earlier = { $count ->
     [one] Показать { $count } более раннее сообщение
     [few] Показать { $count } более ранних сообщения
     [many] Показать { $count } более ранних сообщений
    *[other] Показать { $count } более раннего сообщения
 }
-# review: new
 ui-conversation-elsewhere = { $count ->
     [one] В этой беседе есть еще { $count } сообщение в другой папке.
     [few] В этой беседе есть еще { $count } сообщения в других папках.
     [many] В этой беседе есть еще { $count } сообщений в других папках.
    *[other] В этой беседе есть еще { $count } сообщения в других папках.
 }
-# review: new
 ui-conversation-this-folder = &Только эта папка
-# review: new
 ui-conversation-whole = &Вся беседа
 cmd-folder-list = Список &папок
 cmd-layout-automatic = &Автоматический
@@ -452,140 +437,73 @@ ui-settings-encryption = Шифрование
 ui-settings-language = Язык
 ui-settings-label = { $label }:
 ui-apply = &Применить
-# review: new
 ui-settings-sync = Синхронизация
-# review: new
 ui-sync-note = Ваши учетные записи, ключи, адресная книга, правила и настройки будут одинаковыми на всех компьютерах. Синхронизация идет через вашу собственную папку или хранилище. Прежде чем покинуть этот компьютер, все данные шифруются парольной фразой синхронизации.
-# review: new
 ui-sync-place = Место синхронизации:
-# review: new
 ui-sync-status = Состояние:
-# review: new
 ui-sync-set-up = &Настроить синхронизацию…
-# review: new
 ui-sync-now = Синхронизировать &сейчас
-# review: new
 ui-sync-computers = &Компьютеры…
-# review: new
 ui-sync-history = &История…
-# review: new
 ui-sync-turn-off = &Отключить синхронизацию…
-# review: new
 ui-sync-what = Что синхронизировать
-# review: new
-ui-sync-what-note = Пароли, данные для входа и закрытые ключи передаются только в зашифрованном виде. Снимите флажки с того, что должно остаться только на этом компьютере.
-# review: new
+ui-sync-what-note = Пароли, данные для входа и закрытые ключи передаются только в зашифрованном виде. Исключите то, что должно остаться только на этом компьютере.
 ui-sync-accounts = &Учетные записи
-# review: new
 ui-sync-passwords = Па&роли
-# review: new
 ui-sync-sign-ins = Данные &входа через Google, Microsoft и приложения для входа
-# review: new
 ui-sync-sign-in-apps = Приложения для в&хода
-# review: new
 ui-sync-app-secrets = Секре&ты приложений для входа
-# review: new
 ui-sync-contacts = &Адресная книга
-# review: new
 ui-sync-keys = Кл&ючи
-# review: new
 ui-sync-private-keys = Ваши &закрытые ключи
-# review: new
 ui-sync-rules = Прави&ла
-# review: new
 ui-sync-trusted = Над&ежные отправители
-# review: new
 ui-sync-settings = Настро&йки
-# review: new
 ui-sync-preferences = &Макет и вид
-# review: new
 ui-sync-everything = Все
-# review: new
 ui-sync-some-left-out = Выбрано не все
-# review: new
 ui-sync-where = Где хранить
-# review: new
 ui-sync-folder = Папка
-# review: new
 ui-sync-folder-note = Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud или Syncthing копирует ее на другие ваши компьютеры.
-# review: new
 ui-sync-bucket = Хранилище, совместимое с S3
-# review: new
 ui-sync-bucket-note = Amazon S3, Cloudflare R2, Backblaze B2, MinIO или другое хранилище, которое работает как S3.
-# review: new
 ui-sync-folder-label = &Папка:
-# review: new
 ui-sync-folder-none = Пока не выбрана
-# review: new
 ui-sync-choose-folder = В&ыбрать…
-# review: new
 ui-sync-choose-folder-title = Выбор папки для синхронизации
-# review: new
 ui-sync-endpoint = &Конечная точка:
-# review: new
 ui-sync-region = &Регион:
-# review: new
 ui-sync-bucket-name = &Бакет:
-# review: new
 ui-sync-prefix = Папка в бак&ете:
-# review: new
 ui-sync-access-key = &Идентификатор ключа доступа:
-# review: new
 ui-sync-secret-key = &Секретный ключ доступа:
-# review: new
 ui-sync-next = &Далее
-# review: new
 ui-sync-join-title = Присоединение к синхронизации
-# review: new
-ui-sync-join-note = Здесь уже хранятся данные синхронизации других ваших компьютеров. Введите парольную фразу синхронизации, которую вы выбрали на первом из них.
-# review: new
+ui-sync-join-note = Здесь уже хранятся синхронизированные данные. Введите парольную фразу синхронизации, выбранную на первом компьютере.
 ui-sync-start-title = Начало синхронизации
-# review: new
 ui-sync-start-note = Придумайте парольную фразу синхронизации. Ее нужно ввести один раз на каждом добавляемом компьютере. Храните ее в надежном месте: без нее другие компьютеры не смогут присоединиться.
-# review: new
 ui-sync-name = Имя &этого компьютера:
-# review: new
-ui-sync-merge-note = Данные этого компьютера и данные синхронизации объединятся: учетная запись или контакт, которые есть и там и там, станут одной записью.
-# review: new
-ui-sync-turn-on = &Включить синхронизацию
-# review: new
+ui-sync-merge-note = Данные этого компьютера объединяются с синхронизированными данными. Совпадающие учетные записи и контакты объединяются в одну запись.
+ui-sync-turn-on = В&ключить синхронизацию
 ui-sync-on = Синхронизация включена.
-# review: new
 ui-sync-turn-off-ask = Отключить синхронизацию на этом компьютере? Все останется как есть, здесь и на других ваших компьютерах. Этот компьютер просто перестанет синхронизироваться.
-# review: new
 ui-sync-turn-off-button = Отключить
-# review: new
 ui-sync-computers-title = Компьютеры
-# review: new
-ui-sync-computers-note = Компьютеры, которые синхронизируются через это место. Удалите тот, которым больше не пользуетесь: он перестанет синхронизироваться, а то, что он синхронизировал, останется.
-# review: new
+ui-sync-computers-note = Эти компьютеры синхронизируются через одно и то же место. Удалите компьютер, которым больше не пользуетесь, чтобы прекратить его синхронизацию. Его синхронизированные данные сохранятся.
 ui-sync-this-computer = Этот компьютер
-# review: new
 ui-sync-seen = Последняя синхронизация: { $when }
-# review: new
 ui-sync-remove-ask = Удалить компьютер «{ $name }» из синхронизации? Он перестанет синхронизироваться при следующей попытке. Чтобы снова синхронизировать его, настройте на нем синхронизацию заново.
-# review: new
 ui-sync-loading = Чтение…
-# review: new
 ui-sync-history-title = История
-# review: new
-ui-sync-history-note = Если одно и то же изменили на двух компьютерах одновременно, сохранилось изменение, сделанное последним, а другое находится здесь. Восстановите его, чтобы использовать вместо текущего.
-# review: new
+ui-sync-history-note = При конфликте изменений с разных компьютеров синхронизация сохраняет одну версию. Замененные значения появляются здесь; восстановите нужное значение, чтобы снова его использовать. Пароли, данные для входа и закрытые ключи здесь не сохраняются.
 ui-sync-history-empty = Замененных изменений нет.
-# review: new
 ui-sync-history-row = Источник: { $source }, { $when }
-# review: new
 ui-sync-restore = &Восстановить
-# review: new
 ui-sync-restore-points = Точки восстановления
-# review: new
-ui-sync-restore-points-note = Прежде чем синхронизация что-то здесь удалит, прежнее состояние сохраняется. Откройте точку восстановления, чтобы вернуть из нее то, что нужно.
-# review: new
+ui-sync-restore-points-note = Точки восстановления сохраняют учетные записи и настройки перед тем, как синхронизация удалит элементы с этого компьютера. Откройте точку, чтобы выбрать, что восстановить.
 ui-sync-restore-points-empty = Пока нет.
-# review: new
 ui-sync-open-point = &Открыть…
 # Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
-# review: new
 win-sync-back = < &Назад
 ui-language-label = &Язык:
 ui-restart-note = Чтобы сменить язык, перезапустите Inbox Classic.
@@ -597,7 +515,6 @@ ui-delete-folder-question = Удалить папку «{ $folder }» вмест
 ui-properties = Сво&йства
 ui-account-sync = Отправить и &получить
 ui-account-properties = &Свойства...
-# review: new
 ui-account-properties-of = &Свойства учетной записи...
 ui-account-move-up = &Вверх
 ui-account-move-down = В&низ
@@ -940,11 +857,8 @@ ui-setup-from = Сохранено в Inbox Classic { $version }. Дата: { $d
 ui-setup-import-button = &Импорт
 ui-setup-done = Готово
 ui-setup-first-run = Импортировать настройки и учетные записи с другого компьютера...
-# review: new
 ui-first-run-other = Уже пользуетесь Inbox Classic на другом компьютере? Перенесите сюда его учетные записи и настройки.
-# review: new
-ui-first-run-sync = Присоединиться к его синхронизации…
-# review: new
+ui-first-run-sync = Присоединиться к синхронизации…
 ui-first-run-import = Импортировать из файла…
 
 ui-field-verifiers = Доверенные источники проверки отправителя:
@@ -957,11 +871,7 @@ ui-keys-publish-now = Опубликовать
 ui-keys-paste = Импорт из бу&фера обмена
 ui-keys-paste-none = В буфере обмена нет ключа OpenPGP.
 ui-contact-find-key = &Найти ключ
-# review: new
 ui-reactions-label = Реакции:
-# review: new
 ui-reaction-open-email = Открыть письмо с реакцией
-# review: new
 ui-reaction-show-as-email = Показать как письмо
-# review: new
 ui-reaction-when = Реакция: { $when }

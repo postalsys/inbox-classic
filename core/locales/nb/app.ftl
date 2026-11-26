@@ -43,8 +43,7 @@ cmd-accounts = &Kontoer...
 cmd-find = Fi&nn melding
 cmd-save-as = &Lagre som...
 cmd-print = &Skriv ut...
-# review: new
-cmd-print-conversation = Skriv ut sa&mtale...
+cmd-print-conversation = Skriv &ut samtale...
 cmd-import = Impo&rter meldinger...
 cmd-outbox = &Utboks...
 cmd-properties = &Egenskaper
@@ -65,43 +64,29 @@ ui-find-not-found = «{ $words }» finnes ikke i denne meldingen
 cmd-expand-all-threads = Utvid &alle samtaler
 cmd-collapse-all-threads = Trekk &sammen alle samtaler
 ui-group-by-conversation = &Grupper meldinger etter samtale
-# review: new
 ui-show-whole-conversation = Vis &hele samtalen i leseruten
-# review: new
-ui-show-whole-conversation-note = Raden til en samtale åpner alle meldingene i den, med svarene dine, utkast og meldingene du har lagt i andre mapper. Leste meldinger er trukket sammen til én linje: klikk på en linje for å åpne den eller trekke den sammen.
-# review: new
+ui-show-whole-conversation-note = Åpne meldingene i en samtale samlet, inkludert svarene dine, utkast og meldinger i andre mapper. Leste meldinger er vanligvis trukket sammen til én linje: Klikk på en linje for å åpne den eller trekke den sammen.
 ui-conversation-order = &Rekkefølge i samtaler:
-# review: new
 ui-conversation-oldest-first = Eldste først
-# review: new
 ui-conversation-newest-first = Nyeste først
-# review: new
 ui-thread-count = { $new ->
     [0] ({ $count })
     [one] ({ $count }, { $new } ny)
    *[other] ({ $count }, { $new } nye)
 }
-# review: new
 ui-conversation-to = til { $people }
-# review: new
 ui-conversation-draft = Utkast
-# review: new
 ui-conversation-alone = Signert eller kryptert: åpnes for seg
-# review: new
 ui-conversation-downloading = Laster ned…
-# review: new
 ui-conversation-earlier = { $count ->
     [one] Vis 1 tidligere melding
    *[other] Vis { $count } tidligere meldinger
 }
-# review: new
 ui-conversation-elsewhere = { $count ->
     [one] Denne samtalen har også en melding i en annen mappe.
    *[other] Denne samtalen har også { $count } meldinger i andre mapper.
 }
-# review: new
 ui-conversation-this-folder = Bare &denne mappen
-# review: new
 ui-conversation-whole = &Hele samtalen
 cmd-folder-list = &Mappeliste
 cmd-layout-automatic = &Automatisk
@@ -448,140 +433,73 @@ ui-settings-encryption = Kryptering
 ui-settings-language = Språk
 ui-settings-label = { $label }:
 ui-apply = &Bruk
-# review: new
 ui-settings-sync = Synkronisering
-# review: new
 ui-sync-note = Hold kontoene, nøklene, adresseboken, reglene og innstillingene dine like på alle datamaskinene dine, gjennom en mappe eller lagring du selv eier. Alt krypteres med synkroniseringspassfrasen din før det forlater denne datamaskinen.
-# review: new
 ui-sync-place = Synkroniseres gjennom:
-# review: new
 ui-sync-status = Status:
-# review: new
 ui-sync-set-up = &Konfigurer synkronisering…
-# review: new
 ui-sync-now = Synkroniser &nå
-# review: new
 ui-sync-computers = Data&maskiner…
-# review: new
 ui-sync-history = &Historikk…
-# review: new
 ui-sync-turn-off = Slå av s&ynkronisering…
-# review: new
 ui-sync-what = Hva som skal synkroniseres
-# review: new
-ui-sync-what-note = Passord, pålogginger og private nøkler overføres bare kryptert. Utelat det som skal bli på denne datamaskinen.
-# review: new
+ui-sync-what-note = Passord, påloggingsopplysninger og private nøkler overføres bare kryptert. Utelat det som skal bli på denne datamaskinen.
 ui-sync-accounts = K&ontoer
-# review: new
 ui-sync-passwords = &Passord
-# review: new
 ui-sync-sign-ins = Pålogginger med Google, Microso&ft og påloggingsapper
-# review: new
 ui-sync-sign-in-apps = Påloggings&apper
-# review: new
 ui-sync-app-secrets = Kl&ienthemmeligheter for påloggingsapper
-# review: new
 ui-sync-contacts = A&dressebok
-# review: new
 ui-sync-keys = Nøkl&er
-# review: new
 ui-sync-private-keys = Dine p&rivate nøkler
-# review: new
 ui-sync-rules = Reg&ler
-# review: new
 ui-sync-trusted = Klarerte av&sendere
-# review: new
 ui-sync-settings = Innstillin&ger
-# review: new
 ui-sync-preferences = Oppsett og &visning
-# review: new
 ui-sync-everything = Alt
-# review: new
 ui-sync-some-left-out = Noe er utelatt
-# review: new
 ui-sync-where = Hvor det skal oppbevares
-# review: new
 ui-sync-folder = En mappe
-# review: new
 ui-sync-folder-note = Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud eller Syncthing kopierer den til de andre datamaskinene dine.
-# review: new
 ui-sync-bucket = S3-kompatibel lagring
-# review: new
 ui-sync-bucket-note = Amazon S3, Cloudflare R2, Backblaze B2, MinIO eller annen lagring som fungerer som S3.
-# review: new
 ui-sync-folder-label = &Mappe:
-# review: new
 ui-sync-folder-none = Ingen valgt ennå
-# review: new
 ui-sync-choose-folder = &Velg…
-# review: new
 ui-sync-choose-folder-title = Velg mappen det skal synkroniseres gjennom
-# review: new
 ui-sync-endpoint = &Endepunkt:
-# review: new
 ui-sync-region = &Region:
-# review: new
 ui-sync-bucket-name = &Bøtte:
-# review: new
 ui-sync-prefix = Ma&ppe i bøtten:
-# review: new
 ui-sync-access-key = T&ilgangsnøkkel-ID:
-# review: new
 ui-sync-secret-key = &Hemmelig tilgangsnøkkel:
-# review: new
 ui-sync-next = &Neste
-# review: new
 ui-sync-join-title = Bli med i synkroniseringen
-# review: new
-ui-sync-join-note = Dette stedet inneholder synkroniseringen til de andre datamaskinene dine. Skriv inn synkroniseringspassfrasen du valgte på den første.
-# review: new
+ui-sync-join-note = Dette stedet inneholder allerede synkroniserte data. Skriv inn synkroniseringspassfrasen du valgte på den første datamaskinen.
 ui-sync-start-title = Start synkronisering
-# review: new
 ui-sync-start-note = Velg en synkroniseringspassfrase. Du skriver den inn én gang på hver datamaskin du legger til. Oppbevar den på et trygt sted: uten den kan ingen annen datamaskin bli med.
-# review: new
-ui-sync-name = Navn på denne &datamaskinen:
-# review: new
-ui-sync-merge-note = Det denne datamaskinen har, og det synkroniseringen har, slås sammen: en konto eller kontakt som finnes begge steder, blir én.
-# review: new
-ui-sync-turn-on = &Slå på synkronisering
-# review: new
+ui-sync-name = &Navn på denne datamaskinen:
+ui-sync-merge-note = Dataene på denne datamaskinen slås sammen med de synkroniserte dataene. Tilsvarende kontoer og kontakter slås sammen.
+ui-sync-turn-on = Slå på s&ynkronisering
 ui-sync-on = Synkronisering er på.
-# review: new
 ui-sync-turn-off-ask = Vil du slå av synkronisering på denne datamaskinen? Alt forblir som det er, her og på de andre datamaskinene dine. Denne datamaskinen slutter bare å synkronisere.
-# review: new
 ui-sync-turn-off-button = Slå av
-# review: new
 ui-sync-computers-title = Datamaskiner
-# review: new
-ui-sync-computers-note = Datamaskinene som synkroniserer gjennom dette stedet. Fjern en du ikke lenger bruker: den slutter å synkronisere, og det den har synkronisert, blir værende.
-# review: new
+ui-sync-computers-note = Disse datamaskinene synkroniserer gjennom samme sted. Fjern en datamaskin du ikke lenger bruker, for å stoppe synkroniseringen på den. Dataene den har synkronisert, beholdes.
 ui-sync-this-computer = Denne datamaskinen
-# review: new
 ui-sync-seen = Sist synkronisert { $when }
-# review: new
 ui-sync-remove-ask = Vil du fjerne «{ $name }» fra synkroniseringen? Den slutter å synkronisere neste gang den prøver. For å synkronisere den igjen må du konfigurere synkronisering på den på nytt.
-# review: new
 ui-sync-loading = Leser…
-# review: new
 ui-sync-history-title = Historikk
-# review: new
-ui-sync-history-note = Når det samme ble endret på to datamaskiner samtidig, ble den sist gjorte endringen beholdt, og den andre ligger her. Gjenopprett en endring for å bruke den i stedet.
-# review: new
+ui-sync-history-note = Når endringer fra forskjellige datamaskiner er i konflikt, beholder synkroniseringen én versjon. Erstattede verdier vises her; gjenopprett en for å bruke den igjen. Passord, påloggingsopplysninger og private nøkler lagres ikke her.
 ui-sync-history-empty = Ingen endringer er erstattet.
-# review: new
 ui-sync-history-row = Fra { $source }, { $when }
-# review: new
 ui-sync-restore = &Gjenopprett
-# review: new
 ui-sync-restore-points = Gjenopprettingspunkter
-# review: new
-ui-sync-restore-points-note = Før en synkronisering fjerner noe her, lagres hvordan ting var. Åpne et punkt for å hente tilbake det du velger fra det.
-# review: new
+ui-sync-restore-points-note = Gjenopprettingspunkter lagrer oppsettet ditt før synkroniseringen fjerner elementer fra denne datamaskinen. Åpne et punkt for å velge hva du vil gjenopprette.
 ui-sync-restore-points-empty = Ingen ennå.
-# review: new
 ui-sync-open-point = Å&pne…
 # Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
-# review: new
 win-sync-back = < &Tilbake
 ui-language-label = &Språk:
 ui-restart-note = Start Inbox Classic på nytt for å bytte språk.
@@ -593,7 +511,6 @@ ui-delete-folder-question = Vil du slette mappen «{ $folder }» med meldingene 
 ui-properties = Ege&nskaper
 ui-account-sync = Send og &motta
 ui-account-properties = &Egenskaper...
-# review: new
 ui-account-properties-of = Konto&egenskaper...
 ui-account-move-up = Flytt &opp
 ui-account-move-down = Flytt &ned
@@ -920,11 +837,8 @@ ui-setup-from = Lagret av Inbox Classic { $version } { $date }.
 ui-setup-import-button = &Importer
 ui-setup-done = Ferdig
 ui-setup-first-run = Importer innstillinger og kontoer fra en annen datamaskin...
-# review: new
 ui-first-run-other = Bruker du allerede Inbox Classic på en annen datamaskin? Hent kontoene og innstillingene derfra.
-# review: new
 ui-first-run-sync = Bli med i synkroniseringen…
-# review: new
 ui-first-run-import = Importer fra en fil…
 
 ui-field-verifiers = Stol på avsenderkontroller fra:
@@ -937,11 +851,7 @@ ui-keys-publish-now = Publiser
 ui-keys-paste = Importer fra &utklippstavlen
 ui-keys-paste-none = Utklippstavlen inneholder ingen OpenPGP-nøkkel.
 ui-contact-find-key = Finn nøk&kel
-# review: new
 ui-reactions-label = Reaksjoner:
-# review: new
 ui-reaction-open-email = Åpne reaksjons-e-posten
-# review: new
 ui-reaction-show-as-email = Vis som e-post
-# review: new
 ui-reaction-when = Reaksjon: { $when }

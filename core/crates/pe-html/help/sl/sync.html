@@ -1,20 +1,20 @@
-<!--review--><h1>Sinhronizacija računalnikov</h1>
+<h1>Sinhronizacija računalnikov</h1>
 <p class="summary">Ohranite račune, ključe, stike, pravila in nastavitve enake v vseh računalnikih, prek mape ali shrambe, ki je vaša.</p>
-<p>Sinhronizacija hrani trezor z vašimi računi in nastavitvami na mestu, ki ga izberete: v mapi, ki jo Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud ali Syncthing kopira med vašimi računalniki, ali v shrambi, združljivi s S3. Vse v njem se šifrira z zaščitnim geslom za sinhronizacijo, preden zapusti računalnik. Vaših sporočil v njem ni; ostanejo na vaših poštnih strežnikih.</p>
+<p>Sinhronizacija hrani vaše račune in nastavitve na mestu, ki ga izberete: v mapi, ki jo Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud ali Syncthing kopira med vašimi računalniki, ali v shrambi, združljivi s S3. Sinhronizirani podatki se šifrirajo z zaščitnim geslom za sinhronizacijo, preden zapustijo računalnik. Sinhronizacija ne prenaša sporočil ali osnutkov, shranjenih samo v tem računalniku.</p>
 <h2>Nastavitev sinhronizacije v prvem računalniku</h2>
+<aside class="warning">Zaščitno geslo za sinhronizacijo hranite na varnem. Brez njega se ne more pridružiti noben drug računalnik.</aside>
 <ol>
     <li>Izberite <b data-settings="sync"></b> in kliknite <b data-text="ui-sync-set-up"></b>.</li>
     <li>Izberite <b data-text="ui-sync-folder"></b> in kliknite <b data-text="ui-sync-choose-folder"></b> ali izberite <b data-text="ui-sync-bucket"></b> in vnesite njene podatke. Kliknite <b data-text="ui-sync-next"></b>.</li>
     <li>Dvakrat vnesite zaščitno geslo za sinhronizacijo in ime tega računalnika. Izberite, kaj želite sinhronizirati, nato kliknite <b data-text="ui-sync-turn-on"></b>.</li>
 </ol>
-<aside class="warning">Zaščitno geslo za sinhronizacijo hranite na varnem. Brez njega se ne more pridružiti noben drug računalnik.</aside>
 <h2>Dodajanje drugega računalnika</h2>
 <ol>
-    <li>V drugem računalniku izberite <b data-settings="sync"></b>, kliknite <b data-text="ui-sync-set-up"></b> in izberite isto mapo ali shrambo.</li>
-    <li>Vnesite zaščitno geslo za sinhronizacijo, ki ste ga izbrali v prvem računalniku, in kliknite <b data-text="ui-sync-turn-on"></b>.</li>
+    <li>V drugem računalniku izberite <b data-settings="sync"></b>, kliknite <b data-text="ui-sync-set-up"></b> in izberite isto mapo ali shrambo. Kliknite <b data-text="ui-sync-next"></b>.</li>
+    <li>Vnesite zaščitno geslo za sinhronizacijo in ime tega računalnika. Izberite, kaj želite sinhronizirati, in kliknite <b data-text="ui-sync-turn-on"></b>.</li>
 </ol>
-<p>Kar računalnik že ima, in kar hrani sinhronizacija, se združi: račun ali stik, ki je na obeh straneh, postane eden. Vaša sporočila se znova prenesejo s strežnikov.</p>
+<p>Obstoječi podatki se združijo s sinhroniziranimi podatki. Ujemajoči se računi in stiki se združijo v en zapis. Dodani računi prenesejo sporočila, ki so na voljo na njihovih poštnih strežnikih.</p>
 <h2>Med sinhronizacijo</h2>
-<p>Vsak računalnik se sinhronizira na nekaj minut in takrat, ko kliknete <b data-text="ui-sync-now"></b>. Če je bila ista stvar hkrati spremenjena v dveh računalnikih, se ohrani zadnja narejena sprememba, druga pa se shrani v zgodovino sinhronizacije. Odprete jo z gumbom <b data-text="ui-sync-history"></b> in jo lahko tam obnovite. Ko drug računalnik odstrani račun, to sporoči glavno okno.</p>
+<p>Vsak računalnik se sinhronizira na nekaj minut in ob kliku na <b data-text="ui-sync-now"></b>. Pri nasprotujočih si spremembah sinhronizacija ohrani eno različico, nadomeščene vrednosti pa shrani v <b data-text="ui-sync-history"></b>, od koder jih lahko obnovite. Gesla, prijavni podatki in zasebni ključi se ne shranijo v to zgodovino. Ko drug računalnik odstrani račun, vas glavno okno na to opozori.</p>
 <p>Če želite prenehati sinhronizirati računalnik, ki ga ne uporabljate več, kliknite <b data-text="ui-sync-computers"></b> in ga odstranite. Če želite prenehati sinhronizirati ta računalnik, kliknite <b data-text="ui-sync-turn-off"></b>: vse ostane, kot je.</p>
-<nav class="related"><a href="topic:move-computer"></a> <a href="topic:manage-accounts"></a> <a href="topic:encryption-keys"></a></nav><!--/review-->
+<nav class="related"><a href="topic:move-computer"></a> <a href="topic:manage-accounts"></a> <a href="topic:encryption-keys"></a></nav>

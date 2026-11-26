@@ -40,7 +40,6 @@ cmd-accounts = &Paskyros...
 cmd-find = &Ieškoti laiško
 cmd-save-as = Įrašyti &kaip...
 cmd-print = &Spausdinti...
-# review: new
 cmd-print-conversation = Spausdinti p&okalbį...
 cmd-import = Importuoti &laiškus...
 cmd-outbox = &Siunčiami laiškai...
@@ -62,47 +61,33 @@ ui-find-not-found = „{ $words }“ šiame laiške nėra
 cmd-expand-all-threads = Išskleisti &visus pokalbius
 cmd-collapse-all-threads = S&utraukti visus pokalbius
 ui-group-by-conversation = &Grupuoti laiškus pagal pokalbius
-# review: new
 ui-show-whole-conversation = Skaitymo srityje rodyti &visą pokalbį
-# review: new
-ui-show-whole-conversation-note = Pokalbio eilutė atveria visus jo laiškus kartu su jūsų atsakymais, juodraščiais ir laiškais, perkeltais į kitus aplankus. Skaityti laiškai suskleidžiami į eilutę: spustelėkite eilutę, kad ją išskleistumėte arba suskleistumėte.
-# review: new
+ui-show-whole-conversation-note = Pokalbio eilutė atveria visus jo laiškus kartu su jūsų atsakymais, juodraščiais ir laiškais, perkeltais į kitus aplankus. Skaityti laiškai paprastai suskleidžiami, tačiau laiškas, nuo kurio pradedama skaityti, lieka išskleistas. Spustelėkite laiško eilutę, kad jį išskleistumėte arba suskleistumėte.
 ui-conversation-order = Pokalbio laiškų tvar&ka:
-# review: new
 ui-conversation-oldest-first = Seniausi pirmiau
-# review: new
 ui-conversation-newest-first = Naujausi pirmiau
-# review: new
 ui-thread-count = { $new ->
     [0] ({ $count })
     [one] ({ $count }, { $new } naujas)
     [few] ({ $count }, { $new } nauji)
    *[other] ({ $count }, { $new } naujų)
 }
-# review: new
 ui-conversation-to = kam: { $people }
-# review: new
 ui-conversation-draft = Juodraštis
-# review: new
-ui-conversation-alone = Pasirašytas arba užšifruotas: atidaromas atskirai
-# review: new
+ui-conversation-alone = Skaitmeniniu parašu pasirašytas arba užšifruotas: atidaromas atskirai
 ui-conversation-downloading = Atsisiunčiama…
-# review: new
 ui-conversation-earlier = { $count ->
     [one] Rodyti { $count } ankstesnį laišką
     [few] Rodyti { $count } ankstesnius laiškus
    *[other] Rodyti { $count } ankstesnių laiškų
 }
-# review: new
 ui-conversation-elsewhere = { $count ->
     [1] Šis pokalbis dar turi laišką kitame aplanke.
     [one] Šis pokalbis dar turi { $count } laišką kituose aplankuose.
     [few] Šis pokalbis dar turi { $count } laiškus kituose aplankuose.
    *[other] Šis pokalbis dar turi { $count } laiškų kituose aplankuose.
 }
-# review: new
 ui-conversation-this-folder = &Tik šis aplankas
-# review: new
 ui-conversation-whole = &Visas pokalbis
 cmd-folder-list = &Aplankų sąrašas
 cmd-layout-automatic = &Automatinis
@@ -451,141 +436,74 @@ ui-settings-encryption = Šifravimas
 ui-settings-language = Kalba
 ui-settings-label = { $label }:
 ui-apply = &Taikyti
-# review: new
 ui-settings-sync = Sinchronizavimas
-# review: new
-ui-sync-note = Paskyros, raktai, adresų knygelė, taisyklės ir nustatymai visuose jūsų kompiuteriuose bus vienodi per jums priklausantį aplanką ar saugyklą. Prieš paliekant šį kompiuterį viskas užšifruojama jūsų sinchronizavimo slaptafraze.
-# review: new
+ui-sync-note = Sinchronizuokite paskyras, raktus, adresų knygelę, taisykles ir nustatymus tarp savo kompiuterių per jums priklausantį aplanką ar saugyklą. Sinchronizuojami duomenys prieš išsiunčiant iš šio kompiuterio užšifruojami jūsų sinchronizavimo slaptafraze.
 ui-sync-place = Sinchronizuojama per:
-# review: new
 ui-sync-status = Būsena:
-# review: new
 ui-sync-set-up = &Nustatyti sinchronizavimą…
-# review: new
 ui-sync-now = &Sinchronizuoti dabar
-# review: new
 ui-sync-computers = &Kompiuteriai…
-# review: new
 ui-sync-history = &Istorija…
-# review: new
 ui-sync-turn-off = Išj&ungti sinchronizavimą…
-# review: new
 ui-sync-what = Ką sinchronizuoti
-# review: new
-ui-sync-what-note = Slaptažodžiai, prisijungimai ir privatieji raktai perduodami tik užšifruoti. Praleiskite tai, kas turi likti tik šiame kompiuteryje.
-# review: new
+ui-sync-what-note = Slaptažodžiai, prisijungimo duomenys ir privatieji raktai perduodami tik užšifruoti. Praleiskite tai, kas turi likti tik šiame kompiuteryje.
 ui-sync-accounts = &Paskyros
-# review: new
 ui-sync-passwords = Sl&aptažodžiai
-# review: new
-ui-sync-sign-ins = Prisijungimai per &Google, Microsoft ir prisijungimo programas
-# review: new
+ui-sync-sign-ins = &Google, Microsoft ir prisijungimo programų prisijungimo duomenys
 ui-sync-sign-in-apps = Prisijungimo pr&ogramos
-# review: new
 ui-sync-app-secrets = Prisijungimo programų paslapt&ys
-# review: new
 ui-sync-contacts = A&dresų knygelė
-# review: new
 ui-sync-keys = &Raktai
-# review: new
 ui-sync-private-keys = Jūsų pri&vatieji raktai
-# review: new
 ui-sync-rules = Taisyk&lės
-# review: new
 ui-sync-trusted = Patikimi siuntė&jai
-# review: new
 ui-sync-settings = Nustaty&mai
-# review: new
 ui-sync-preferences = Išdėstymas ir vai&zdas
-# review: new
 ui-sync-everything = Viskas
-# review: new
 ui-sync-some-left-out = Kai kas praleista
-# review: new
 ui-sync-where = Kur laikyti duomenis
-# review: new
 ui-sync-folder = Aplankas
-# review: new
 ui-sync-folder-note = Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud arba Syncthing jį nukopijuoja į kitus jūsų kompiuterius.
-# review: new
 ui-sync-bucket = Su S3 suderinama saugykla
-# review: new
 ui-sync-bucket-note = Amazon S3, Cloudflare R2, Backblaze B2, MinIO ar kita saugykla, veikianti kaip S3.
-# review: new
 ui-sync-folder-label = Aplan&kas:
-# review: new
 ui-sync-folder-none = Dar nepasirinktas
-# review: new
 ui-sync-choose-folder = P&asirinkti…
-# review: new
 ui-sync-choose-folder-title = Pasirinkite sinchronizavimo aplanką
-# review: new
 ui-sync-endpoint = &Galinis taškas:
-# review: new
 ui-sync-region = &Regionas:
-# review: new
 ui-sync-bucket-name = Talp&ykla:
-# review: new
 ui-sync-prefix = Aplankas talpykl&oje:
-# review: new
 ui-sync-access-key = &Prieigos rakto ID:
-# review: new
 ui-sync-secret-key = &Slaptasis prieigos raktas:
-# review: new
 ui-sync-next = &Toliau
-# review: new
 ui-sync-join-title = Prisijungti prie sinchronizavimo
-# review: new
-ui-sync-join-note = Šioje vietoje laikomi kitų jūsų kompiuterių sinchronizavimo duomenys. Įveskite sinchronizavimo slaptafrazę, kurią pasirinkote pirmajame kompiuteryje.
-# review: new
+ui-sync-join-note = Šioje vietoje jau yra sinchronizuotų duomenų. Įveskite sinchronizavimo slaptafrazę, kurią pasirinkote pirmajame kompiuteryje.
 ui-sync-start-title = Pradėti sinchronizavimą
-# review: new
 ui-sync-start-note = Pasirinkite sinchronizavimo slaptafrazę. Ją įvesite po vieną kartą kiekviename pridedamame kompiuteryje. Laikykite ją saugioje vietoje: be jos joks kitas kompiuteris negalės prisijungti.
-# review: new
 ui-sync-name = Šio kompiuterio pavadi&nimas:
-# review: new
-ui-sync-merge-note = Tai, ką turi šis kompiuteris, ir sinchronizavimo duomenys sujungiami: abiejose vietose esanti paskyra ar kontaktas tampa vienu.
-# review: new
+ui-sync-merge-note = Šio kompiuterio duomenys sujungiami su sinchronizuotais duomenimis. Sutampantys paskyrų ir kontaktų įrašai sujungiami į vieną.
 ui-sync-turn-on = Įj&ungti sinchronizavimą
-# review: new
 ui-sync-on = Sinchronizavimas įjungtas.
-# review: new
 ui-sync-turn-off-ask = Išjungti sinchronizavimą šiame kompiuteryje? Viskas liks kaip yra, čia ir kituose jūsų kompiuteriuose. Šis kompiuteris tiesiog nebesisinchronizuos.
-# review: new
 ui-sync-turn-off-button = Išjungti
-# review: new
 ui-sync-computers-title = Kompiuteriai
-# review: new
-ui-sync-computers-note = Kompiuteriai, sinchronizuojami per šią vietą. Pašalinkite nebenaudojamą: jis nustos sinchronizuotis, o tai, ką jis sinchronizavo, liks.
-# review: new
+ui-sync-computers-note = Kompiuteriai, sinchronizuojami per šią vietą. Pašalinkite nebenaudojamą kompiuterį, kad jis nustotų sinchronizuotis. Jo sinchronizuoti duomenys lieka.
 ui-sync-this-computer = Šis kompiuteris
-# review: new
 ui-sync-seen = Paskutinį kartą sinchronizuota: { $when }
-# review: new
 ui-sync-remove-ask = Pašalinti kompiuterį „{ $name }“ iš sinchronizavimo? Jis nustos sinchronizuotis, kai kitą kartą bandys. Norėdami vėl jį sinchronizuoti, dar kartą nustatykite jame sinchronizavimą.
-# review: new
 ui-sync-loading = Skaitoma…
-# review: new
 ui-sync-history-title = Istorija
-# review: new
-ui-sync-history-note = Kai tas pats dalykas tuo pat metu buvo pakeistas dviejuose kompiuteriuose, išlaikytas paskutinis atliktas pakeitimas, o kitas yra čia. Atkurkite jį, jei norite naudoti jį vietoj išlaikytojo.
-# review: new
+ui-sync-history-note = Kai pakeitimai prieštarauja vienas kitam, išlaikoma viena versija, o pakeistos reikšmės išsaugomos čia. Galite jas atkurti. Slaptažodžiai, prisijungimo duomenys ir privatieji raktai šioje istorijoje nesaugomi.
 ui-sync-history-empty = Nė vienas pakeitimas nebuvo pakeistas kitu.
-# review: new
 ui-sync-history-row = Šaltinis: { $source }, { $when }
-# review: new
 ui-sync-restore = &Atkurti
-# review: new
 ui-sync-restore-points = Atkūrimo taškai
-# review: new
-ui-sync-restore-points-note = Prieš sinchronizavimui ką nors čia pašalinant, išsaugoma ankstesnė būsena. Atidarykite tašką ir susigrąžinkite tai, ką iš jo pasirinksite.
-# review: new
+ui-sync-restore-points-note = Prieš sinchronizavimui pašalinant duomenis šiame kompiuteryje, išsaugoma atsarginė sąrankos kopija. Atidarykite atkūrimo tašką ir pasirinkite, ką atkurti.
 ui-sync-restore-points-empty = Dar nėra.
-# review: new
 ui-sync-open-point = Atida&ryti…
 # Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
-# review: new
-win-sync-back = < Atga&l
+win-sync-back = < A&tgal
 ui-language-label = &Kalba:
 ui-restart-note = Paleiskite Inbox Classic iš naujo, kad pasikeistų kalba.
 ui-restart-ask = Pasirinkta kalba: { $language }. Ji įsigalios paleidus Inbox Classic iš naujo. Paleisti iš naujo dabar?
@@ -596,7 +514,6 @@ ui-delete-folder-question = Panaikinti aplanką „{ $folder }“ su jo laiškai
 ui-properties = &Ypatybės
 ui-account-sync = Siųsti ir &gauti
 ui-account-properties = &Ypatybės...
-# review: new
 ui-account-properties-of = Paskyros &ypatybės...
 ui-account-move-up = Perkelti &aukštyn
 ui-account-move-down = Perkelti ž&emyn
@@ -931,11 +848,8 @@ ui-setup-from = Įrašė Inbox Classic { $version }, { $date }.
 ui-setup-import-button = &Importuoti
 ui-setup-done = Atlikta
 ui-setup-first-run = Importuoti nustatymus ir paskyras iš kito kompiuterio...
-# review: new
 ui-first-run-other = Jau naudojate Inbox Classic kitame kompiuteryje? Perkelkite jo paskyras ir nustatymus čia.
-# review: new
-ui-first-run-sync = Prisijungti prie jo sinchronizavimo…
-# review: new
+ui-first-run-sync = Prisijungti prie sinchronizavimo…
 ui-first-run-import = Importuoti iš failo…
 
 ui-field-verifiers = Serveriai, kurių siuntėjo patikromis pasitikima:
@@ -948,11 +862,7 @@ ui-keys-publish-now = Skelbti
 ui-keys-paste = Importuoti iš iš&karpinės
 ui-keys-paste-none = Iškarpinėje nėra OpenPGP rakto.
 ui-contact-find-key = &Rasti raktą
-# review: new
 ui-reactions-label = Reakcijos:
-# review: new
 ui-reaction-open-email = Atidaryti reakcijos laišką
-# review: new
 ui-reaction-show-as-email = Rodyti kaip laišką
-# review: new
 ui-reaction-when = Reakcija: { $when }

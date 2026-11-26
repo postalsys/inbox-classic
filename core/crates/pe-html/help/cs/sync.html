@@ -1,20 +1,20 @@
-<!--review--><h1>Synchronizace počítačů</h1>
+<h1>Synchronizace počítačů</h1>
 <p class="summary">Udržujte účty, klíče, kontakty, pravidla a nastavení stejné na každém počítači, a to přes složku nebo úložiště, které vlastníte.</p>
-<p>Synchronizace uchovává trezor vašeho nastavení na místě, které zvolíte: ve složce, kterou mezi vašimi počítači kopíruje Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud nebo Syncthing, nebo v úložišti kompatibilním s S3. Vše v něm se zašifruje vaší heslovou frází synchronizace dříve, než opustí počítač. Vaše zprávy v něm nejsou; zůstávají na poštovních serverech.</p>
+<p>Synchronizace ukládá vaše účty a nastavení do zvoleného umístění: do složky, kterou mezi vašimi počítači kopíruje Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud nebo Syncthing, nebo do úložiště kompatibilního s S3. Synchronizovaná data se zašifrují vaší heslovou frází synchronizace dříve, než opustí počítač. Synchronizace nepřenáší zprávy, ani koncepty uložené pouze v tomto počítači.</p>
 <h2>Nastavení synchronizace na prvním počítači</h2>
+<aside class="warning">Heslovou frázi synchronizace uchovávejte na bezpečném místě. Bez ní se žádný další počítač nepřipojí.</aside>
 <ol>
     <li>Zvolte <b data-settings="sync"></b> a klikněte na <b data-text="ui-sync-set-up"></b>.</li>
     <li>Zvolte <b data-text="ui-sync-folder"></b> a klikněte na <b data-text="ui-sync-choose-folder"></b>, nebo zvolte <b data-text="ui-sync-bucket"></b> a vyplňte jeho údaje. Klikněte na <b data-text="ui-sync-next"></b>.</li>
     <li>Dvakrát zadejte heslovou frázi synchronizace a název tohoto počítače. Zvolte, co synchronizovat, a klikněte na <b data-text="ui-sync-turn-on"></b>.</li>
 </ol>
-<aside class="warning">Heslovou frázi synchronizace uchovávejte na bezpečném místě. Bez ní se žádný další počítač nepřipojí.</aside>
 <h2>Přidání dalšího počítače</h2>
 <ol>
-    <li>Na druhém počítači zvolte <b data-settings="sync"></b>, klikněte na <b data-text="ui-sync-set-up"></b> a zvolte stejnou složku nebo úložiště.</li>
-    <li>Zadejte heslovou frázi synchronizace, kterou jste zvolili na prvním počítači, a klikněte na <b data-text="ui-sync-turn-on"></b>.</li>
+    <li>Na druhém počítači zvolte <b data-settings="sync"></b>, klikněte na <b data-text="ui-sync-set-up"></b> a zvolte stejnou složku nebo úložiště. Klikněte na <b data-text="ui-sync-next"></b>.</li>
+    <li>Zadejte heslovou frázi synchronizace a název tohoto počítače. Zvolte, co synchronizovat, a klikněte na <b data-text="ui-sync-turn-on"></b>.</li>
 </ol>
-<p>Co počítač už má a co obsahuje synchronizace, se spojí: účet nebo kontakt, který je na obou místech, bude jen jeden. Vaše zprávy se znovu stáhnou ze serverů.</p>
+<p>Stávající data se sloučí se synchronizovanými daty. Shodné účty a kontakty se sloučí do jednoho záznamu. Přidané účty stáhnou zprávy dostupné na svých poštovních serverech.</p>
 <h2>Během synchronizace</h2>
-<p>Každý počítač se synchronizuje každých několik minut a také po kliknutí na <b data-text="ui-sync-now"></b>. Když byla stejná věc změněna na dvou počítačích současně, ponechá se změna provedená jako poslední a ta druhá se přesune do okna <b data-text="ui-sync-history"></b>, kde ji můžete obnovit. Když jiný počítač odebere účet, hlavní okno vás na to upozorní.</p>
+<p>Každý počítač se synchronizuje každých několik minut a také po kliknutí na <b data-text="ui-sync-now"></b>. Při konfliktu změn synchronizace ponechá jednu verzi a nahrazené hodnoty uloží do okna <b data-text="ui-sync-history"></b>, odkud je můžete obnovit. Hesla, přihlašovací údaje a soukromé klíče se do této historie neukládají. Když jiný počítač odebere účet, hlavní okno vás na to upozorní.</p>
 <p>Chcete-li ukončit synchronizaci počítače, který už nepoužíváte, klikněte na <b data-text="ui-sync-computers"></b> a odeberte jej. Chcete-li ukončit synchronizaci tohoto počítače, klikněte na <b data-text="ui-sync-turn-off"></b>: vše zůstane, jak je.</p>
-<nav class="related"><a href="topic:move-computer"></a> <a href="topic:manage-accounts"></a> <a href="topic:encryption-keys"></a></nav><!--/review-->
+<nav class="related"><a href="topic:move-computer"></a> <a href="topic:manage-accounts"></a> <a href="topic:encryption-keys"></a></nav>

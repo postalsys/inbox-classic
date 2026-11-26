@@ -41,7 +41,6 @@ cmd-accounts = R&ačuni...
 cmd-find = Na&jdi sporočilo
 cmd-save-as = &Shrani kot...
 cmd-print = Na&tisni...
-# review: new
 cmd-print-conversation = Natisni &pogovor...
 cmd-import = &Uvozi sporočila...
 cmd-outbox = &Odpošiljanje...
@@ -63,17 +62,11 @@ ui-find-not-found = »{ $words }« ni v tem sporočilu
 cmd-expand-all-threads = &Razširi vse pogovore
 cmd-collapse-all-threads = Strni vse po&govore
 ui-group-by-conversation = Z&druži sporočila po pogovorih
-# review: new
 ui-show-whole-conversation = Pokaži &celoten pogovor v podoknu za branje
-# review: new
-ui-show-whole-conversation-note = Vrstica pogovora odpre vsa njegova sporočila, skupaj z vašimi odgovori, osnutki in sporočili, shranjenimi v drugih mapah. Prebrana sporočila so strnjena v eno vrstico: kliknite vrstico, da jo odprete ali strnete.
-# review: new
+ui-show-whole-conversation-note = Odprite sporočila pogovora skupaj, vključno z vašimi odgovori, osnutki in sporočili v drugih mapah. Prebrana sporočila so običajno strnjena v vrstico; kliknite vrstico, da sporočilo odprete ali strnete.
 ui-conversation-order = Vrstni &red v pogovoru:
-# review: new
 ui-conversation-oldest-first = Najstarejša najprej
-# review: new
 ui-conversation-newest-first = Najnovejša najprej
-# review: new
 ui-thread-count = { $new ->
     [0] ({ $count })
     [one] ({ $count }, { $new } novo)
@@ -81,31 +74,23 @@ ui-thread-count = { $new ->
     [few] ({ $count }, { $new } nova)
    *[other] ({ $count }, { $new } novih)
 }
-# review: new
-ui-conversation-to = za { $people }
-# review: new
+ui-conversation-to = Prejemniki: { $people }
 ui-conversation-draft = Osnutek
-# review: new
 ui-conversation-alone = Podpisano ali šifrirano: odpre se posebej
-# review: new
 ui-conversation-downloading = Prenašanje…
-# review: new
 ui-conversation-earlier = { $count ->
     [one] Pokaži { $count } starejše sporočilo
     [two] Pokaži { $count } starejši sporočili
     [few] Pokaži { $count } starejša sporočila
    *[other] Pokaži { $count } starejših sporočil
 }
-# review: new
 ui-conversation-elsewhere = { $count ->
     [one] Ta pogovor ima še { $count } sporočilo v drugi mapi.
     [two] Ta pogovor ima še { $count } sporočili v drugih mapah.
     [few] Ta pogovor ima še { $count } sporočila v drugih mapah.
    *[other] Ta pogovor ima še { $count } sporočil v drugih mapah.
 }
-# review: new
 ui-conversation-this-folder = &Samo ta mapa
-# review: new
 ui-conversation-whole = &Celoten pogovor
 cmd-folder-list = &Seznam map
 cmd-layout-automatic = &Samodejno
@@ -456,140 +441,73 @@ ui-settings-encryption = Šifriranje
 ui-settings-language = Jezik
 ui-settings-label = { $label }:
 ui-apply = &Uporabi
-# review: new
 ui-settings-sync = Sinhronizacija
-# review: new
 ui-sync-note = Ohranite račune, ključe, Imenik, pravila in nastavitve enake v vseh računalnikih, prek mape ali shrambe, ki je vaša. Vse se šifrira z zaščitnim geslom za sinhronizacijo, preden zapusti ta računalnik.
-# review: new
 ui-sync-place = Sinhronizirano prek:
-# review: new
 ui-sync-status = Stanje:
-# review: new
 ui-sync-set-up = Nastavi &sinhronizacijo…
-# review: new
 ui-sync-now = Sinhroniziraj &zdaj
-# review: new
 ui-sync-computers = &Računalniki…
-# review: new
 ui-sync-history = Zgo&dovina…
-# review: new
 ui-sync-turn-off = &Izklopi sinhronizacijo…
-# review: new
 ui-sync-what = Kaj sinhronizirati
-# review: new
 ui-sync-what-note = Gesla, prijave in zasebni ključi potujejo samo šifrirani. Izpustite, kar naj ostane samo v tem računalniku.
-# review: new
 ui-sync-accounts = Raču&ni
-# review: new
 ui-sync-passwords = &Gesla
-# review: new
 ui-sync-sign-ins = Prijave z Googlom, Microsoftom in &aplikacijami za prijavo
-# review: new
 ui-sync-sign-in-apps = A&plikacije za prijavo
-# review: new
 ui-sync-app-secrets = Skri&vnosti aplikacij za prijavo
-# review: new
 ui-sync-contacts = I&menik
-# review: new
 ui-sync-keys = &Ključi
-# review: new
 ui-sync-private-keys = Vaši zase&bni ključi
-# review: new
 ui-sync-rules = Pravi&la
-# review: new
 ui-sync-trusted = Zaupanja vredni p&ošiljatelji
-# review: new
 ui-sync-settings = Nas&tavitve
-# review: new
 ui-sync-preferences = Postavitev in pogl&ed
-# review: new
 ui-sync-everything = Vse
-# review: new
 ui-sync-some-left-out = Nekaj je izpuščeno
-# review: new
 ui-sync-where = Kje naj se hrani
-# review: new
 ui-sync-folder = Mapa
-# review: new
 ui-sync-folder-note = Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud ali Syncthing jo kopira v vaše druge računalnike.
-# review: new
 ui-sync-bucket = Shramba, združljiva s S3
-# review: new
 ui-sync-bucket-note = Amazon S3, Cloudflare R2, Backblaze B2, MinIO ali druga shramba, ki deluje kot S3.
-# review: new
 ui-sync-folder-label = &Mapa:
-# review: new
 ui-sync-folder-none = Še ni izbrana
-# review: new
 ui-sync-choose-folder = Iz&beri…
-# review: new
 ui-sync-choose-folder-title = Izberite mapo za sinhronizacijo
-# review: new
 ui-sync-endpoint = &Končna točka:
-# review: new
 ui-sync-region = &Regija:
-# review: new
-ui-sync-bucket-name = Ve&dro:
-# review: new
-ui-sync-prefix = Mapa v v&edru:
-# review: new
+ui-sync-bucket-name = &Vsebnik (bucket):
+ui-sync-prefix = Mapa v vs&ebniku:
 ui-sync-access-key = &ID dostopnega ključa:
-# review: new
 ui-sync-secret-key = &Skrivni dostopni ključ:
-# review: new
 ui-sync-next = &Naprej
-# review: new
 ui-sync-join-title = Pridružitev sinhronizaciji
-# review: new
-ui-sync-join-note = Na tem mestu je sinhronizacija vaših drugih računalnikov. Vnesite zaščitno geslo za sinhronizacijo, ki ste ga izbrali v prvem računalniku.
-# review: new
+ui-sync-join-note = Na tem mestu so že shranjeni sinhronizirani podatki. Vnesite zaščitno geslo za sinhronizacijo, ki ste ga izbrali v prvem računalniku.
 ui-sync-start-title = Začetek sinhronizacije
-# review: new
 ui-sync-start-note = Izberite zaščitno geslo za sinhronizacijo. Vnesete ga enkrat v vsakem računalniku, ki ga dodate. Hranite ga na varnem: brez njega se ne more pridružiti noben drug računalnik.
-# review: new
-ui-sync-name = Ime &tega računalnika:
-# review: new
-ui-sync-merge-note = Kar ima ta računalnik, in kar ima sinhronizacija, se združi: račun ali stik, ki je na obeh straneh, postane eden.
-# review: new
-ui-sync-turn-on = &Vklopi sinhronizacijo
-# review: new
+ui-sync-name = &Ime tega računalnika:
+ui-sync-merge-note = Podatki tega računalnika se združijo s sinhroniziranimi podatki. Ujemajoči se računi in stiki se združijo v en zapis.
+ui-sync-turn-on = Vklopi &sinhronizacijo
 ui-sync-on = Sinhronizacija je vklopljena.
-# review: new
 ui-sync-turn-off-ask = Želite izklopiti sinhronizacijo v tem računalniku? Vse ostane, kot je, tukaj in v vaših drugih računalnikih. Ta računalnik se le neha sinhronizirati.
-# review: new
 ui-sync-turn-off-button = Izklopi
-# review: new
 ui-sync-computers-title = Računalniki
-# review: new
-ui-sync-computers-note = Računalniki, ki se sinhronizirajo prek tega mesta. Odstranite računalnik, ki ga ne uporabljate več: neha se sinhronizirati, kar je sinhroniziral, pa ostane.
-# review: new
+ui-sync-computers-note = Ti računalniki se sinhronizirajo prek istega mesta. Odstranite računalnik, ki ga ne uporabljate več, da se neha sinhronizirati. Njegovi sinhronizirani podatki ostanejo.
 ui-sync-this-computer = Ta računalnik
-# review: new
 ui-sync-seen = Zadnja sinhronizacija: { $when }
-# review: new
 ui-sync-remove-ask = Želite računalnik »{ $name }« odstraniti iz sinhronizacije? Ob naslednjem poskusu se neha sinhronizirati. Če ga želite znova sinhronizirati, v njem še enkrat nastavite sinhronizacijo.
-# review: new
 ui-sync-loading = Branje…
-# review: new
 ui-sync-history-title = Zgodovina
-# review: new
-ui-sync-history-note = Ko je bila ista stvar hkrati spremenjena v dveh računalnikih, je bila ohranjena zadnja narejena sprememba, druga pa je tukaj. Obnovite jo, če želite namesto ohranjene uporabiti njo.
-# review: new
+ui-sync-history-note = Pri nasprotujočih si spremembah iz različnih računalnikov sinhronizacija ohrani eno različico. Nadomeščene vrednosti najdete tukaj; obnovite vrednost, če jo želite znova uporabiti. Gesla, prijavni podatki in zasebni ključi se tukaj ne hranijo.
 ui-sync-history-empty = Nobena sprememba ni bila nadomeščena.
-# review: new
 ui-sync-history-row = Vir: { $source }, { $when }
-# review: new
 ui-sync-restore = &Obnovi
-# review: new
 ui-sync-restore-points = Točke obnovitve
-# review: new
-ui-sync-restore-points-note = Preden sinhronizacija tukaj kaj odstrani, se shrani prejšnje stanje. Odprite točko obnovitve, da iz nje vrnete, kar izberete.
-# review: new
+ui-sync-restore-points-note = Točke obnovitve shranijo vaše račune in nastavitve, preden sinhronizacija odstrani elemente iz tega računalnika. Odprite točko in izberite, kaj želite obnoviti.
 ui-sync-restore-points-empty = Še nobene.
-# review: new
 ui-sync-open-point = O&dpri…
 # Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
-# review: new
 win-sync-back = < Na&zaj
 ui-language-label = &Jezik:
 ui-restart-note = Za spremembo jezika znova zaženite Inbox Classic.
@@ -601,7 +519,6 @@ ui-delete-folder-question = Želite izbrisati mapo »{ $folder }« z njenimi spo
 ui-properties = &Lastnosti
 ui-account-sync = &Pošlji in prejmi
 ui-account-properties = L&astnosti...
-# review: new
 ui-account-properties-of = Lastnosti ra&čuna...
 ui-account-move-up = Premakni &gor
 ui-account-move-down = Premakni &dol
@@ -946,11 +863,8 @@ ui-setup-from = Shranjeno s programom Inbox Classic { $version }. Datum: { $date
 ui-setup-import-button = &Uvozi
 ui-setup-done = Končano
 ui-setup-first-run = Uvozi nastavitve in račune iz drugega računalnika...
-# review: new
 ui-first-run-other = Inbox Classic že uporabljate v drugem računalniku? Prenesite njegove račune in nastavitve sem.
-# review: new
-ui-first-run-sync = Pridruži se njegovi sinhronizaciji…
-# review: new
+ui-first-run-sync = Pridruži se sinhronizaciji…
 ui-first-run-import = Uvozi iz datoteke…
 
 ui-field-verifiers = Zaupanja vredni viri preverjanja pošiljatelja:
@@ -963,11 +877,7 @@ ui-keys-publish-now = Objavi
 ui-keys-paste = Uvozi iz odlo&žišča
 ui-keys-paste-none = Odložišče ne vsebuje ključa OpenPGP.
 ui-contact-find-key = Najdi &ključ
-# review: new
 ui-reactions-label = Odzivi:
-# review: new
 ui-reaction-open-email = Odpri e-poštno sporočilo z odzivom
-# review: new
 ui-reaction-show-as-email = Pokaži kot e-poštno sporočilo
-# review: new
 ui-reaction-when = Odziv: { $when }

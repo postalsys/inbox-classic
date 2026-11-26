@@ -42,7 +42,6 @@ cmd-accounts = A&ccounts...
 cmd-find = &Bericht zoeken
 cmd-save-as = Op&slaan als...
 cmd-print = Af&drukken...
-# review: new
 cmd-print-conversation = &Gesprek afdrukken...
 cmd-import = Berichten &importeren...
 cmd-outbox = &Postvak UIT...
@@ -64,42 +63,28 @@ ui-find-not-found = “{ $words }” staat niet in dit bericht
 cmd-expand-all-threads = Alle gesprekken &uitvouwen
 cmd-collapse-all-threads = Alle gesprekken &samenvouwen
 ui-group-by-conversation = Berichten groeperen &per gesprek
-# review: new
 ui-show-whole-conversation = &Hele gesprek tonen in het leesvenster
-# review: new
-ui-show-whole-conversation-note = De regel van een gesprek opent al zijn berichten, met je antwoorden, concepten en de berichten die je in andere mappen hebt opgeborgen. Gelezen berichten zijn ingeklapt tot één regel: klik op een regel om die te openen of in te klappen.
-# review: new
+ui-show-whole-conversation-note = Open de berichten van een gesprek samen, inclusief je antwoorden, concepten en berichten uit andere mappen. Gelezen berichten zijn meestal ingeklapt tot één regel: klik op een regel om die te openen of in te klappen.
 ui-conversation-order = Volg&orde in gesprekken:
-# review: new
 ui-conversation-oldest-first = Oudste eerst
-# review: new
 ui-conversation-newest-first = Nieuwste eerst
-# review: new
 ui-thread-count = { $new ->
     [0] ({ $count })
    *[other] ({ $count }, { $new } nieuw)
 }
-# review: new
 ui-conversation-to = aan { $people }
-# review: new
 ui-conversation-draft = Concept
-# review: new
 ui-conversation-alone = Ondertekend of versleuteld: wordt apart geopend
-# review: new
 ui-conversation-downloading = Downloaden…
-# review: new
 ui-conversation-earlier = { $count ->
     [one] 1 eerder bericht tonen
    *[other] { $count } eerdere berichten tonen
 }
-# review: new
 ui-conversation-elsewhere = { $count ->
     [one] Dit gesprek heeft ook een bericht in een andere map.
    *[other] Dit gesprek heeft ook { $count } berichten in andere mappen.
 }
-# review: new
 ui-conversation-this-folder = Alleen &deze map
-# review: new
 ui-conversation-whole = &Hele gesprek
 cmd-folder-list = &Mappenlijst
 cmd-layout-automatic = &Automatisch
@@ -446,141 +431,74 @@ ui-settings-encryption = Versleuteling
 ui-settings-language = Taal
 ui-settings-label = { $label }:
 ui-apply = &Toepassen
-# review: new
 ui-settings-sync = Synchronisatie
-# review: new
 ui-sync-note = Houd je accounts, sleutels, Adresboek, regels en instellingen op elke computer gelijk, via een map of opslag die van jou is. Alles wordt versleuteld met je synchronisatiewachtwoordzin voordat het deze computer verlaat.
-# review: new
 ui-sync-place = Gesynchroniseerd via:
-# review: new
 ui-sync-status = Status:
-# review: new
 ui-sync-set-up = Synchronisatie &instellen…
-# review: new
 ui-sync-now = &Nu synchroniseren
-# review: new
 ui-sync-computers = Co&mputers…
-# review: new
 ui-sync-history = &Geschiedenis…
-# review: new
 ui-sync-turn-off = Synchronisatie &uitzetten…
-# review: new
 ui-sync-what = Wat synchroniseren
-# review: new
-ui-sync-what-note = Wachtwoorden, aanmeldingen en privésleutels gaan alleen versleuteld over. Laat weg wat op deze computer moet blijven.
-# review: new
+ui-sync-what-note = Wachtwoorden, aanmeldgegevens en privésleutels worden alleen versleuteld overgedragen. Laat weg wat op deze computer moet blijven.
 ui-sync-accounts = Acc&ounts
-# review: new
 ui-sync-passwords = &Wachtwoorden
-# review: new
 ui-sync-sign-ins = &Aanmeldingen met Google, Microsoft en aanmeldapps
-# review: new
 ui-sync-sign-in-apps = Aanmeldap&ps
-# review: new
 ui-sync-app-secrets = &Clientgeheimen van aanmeldapps
-# review: new
 ui-sync-contacts = A&dresboek
-# review: new
 ui-sync-keys = &Sleutels
-# review: new
 ui-sync-private-keys = Je p&rivésleutels
-# review: new
 ui-sync-rules = Rege&ls
-# review: new
 ui-sync-trusted = Vertrouwde af&zenders
-# review: new
 ui-sync-settings = Inst&ellingen
-# review: new
 ui-sync-preferences = Indeling en weerga&ve
-# review: new
 ui-sync-everything = Alles
-# review: new
 ui-sync-some-left-out = Sommige onderdelen weggelaten
-# review: new
 ui-sync-where = Waar bewaren
-# review: new
 ui-sync-folder = Een map
-# review: new
 ui-sync-folder-note = Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud of Syncthing kopieert hem naar je andere computers.
-# review: new
 ui-sync-bucket = S3-compatibele opslag
-# review: new
 ui-sync-bucket-note = Amazon S3, Cloudflare R2, Backblaze B2, MinIO of andere opslag die werkt zoals S3.
-# review: new
 ui-sync-folder-label = &Map:
-# review: new
 ui-sync-folder-none = Nog niets gekozen
-# review: new
 ui-sync-choose-folder = &Kiezen…
-# review: new
 ui-sync-choose-folder-title = Map kiezen om via te synchroniseren
-# review: new
 ui-sync-endpoint = &Eindpunt:
-# review: new
 ui-sync-region = &Regio:
-# review: new
 ui-sync-bucket-name = &Bucket:
-# review: new
 ui-sync-prefix = Map in de b&ucket:
-# review: new
 ui-sync-access-key = &Toegangssleutel-ID:
-# review: new
 ui-sync-secret-key = &Geheime toegangssleutel:
-# review: new
 ui-sync-next = &Volgende
-# review: new
 ui-sync-join-title = Deelnemen aan synchronisatie
-# review: new
-ui-sync-join-note = Op deze plek staat de synchronisatie van je andere computers. Typ de synchronisatiewachtwoordzin die je op de eerste computer hebt gekozen.
-# review: new
+ui-sync-join-note = Op deze plek staan al gesynchroniseerde gegevens. Typ de synchronisatiewachtwoordzin die je op de eerste computer hebt gekozen.
 ui-sync-start-title = Synchronisatie starten
-# review: new
 ui-sync-start-note = Kies een synchronisatiewachtwoordzin. Je typt die één keer op elke computer die je toevoegt. Bewaar hem op een veilige plek: zonder deze wachtwoordzin kan geen andere computer deelnemen.
-# review: new
 ui-sync-name = &Naam van deze computer:
-# review: new
-ui-sync-merge-note = Wat deze computer heeft en wat de synchronisatie bevat, wordt samengevoegd: een account of contactpersoon die op beide staat, wordt één.
-# review: new
-ui-sync-turn-on = Synchronisatie &aanzetten
-# review: new
+ui-sync-merge-note = De gegevens van deze computer worden samengevoegd met de gesynchroniseerde gegevens. Overeenkomende accounts en contactpersonen worden samengevoegd.
+ui-sync-turn-on = Synchronisatie aanze&tten
 ui-sync-on = Synchronisatie staat aan.
-# review: new
 ui-sync-turn-off-ask = Synchronisatie op deze computer uitzetten? Alles blijft zoals het is, hier en op je andere computers. Deze computer stopt alleen met synchroniseren.
-# review: new
 ui-sync-turn-off-button = Uitzetten
-# review: new
 ui-sync-computers-title = Computers
-# review: new
-ui-sync-computers-note = De computers die via deze plek synchroniseren. Verwijder een computer die je niet meer gebruikt: hij stopt met synchroniseren en wat hij heeft gesynchroniseerd, blijft bewaard.
-# review: new
+ui-sync-computers-note = Deze computers synchroniseren via dezelfde plek. Verwijder een computer die je niet meer gebruikt om de synchronisatie daarvan te stoppen. De gesynchroniseerde gegevens blijven bewaard.
 ui-sync-this-computer = Deze computer
-# review: new
 ui-sync-seen = Laatst gesynchroniseerd: { $when }
-# review: new
 ui-sync-remove-ask = “{ $name }” uit de synchronisatie verwijderen? De computer stopt met synchroniseren bij de volgende poging. Om hem weer te synchroniseren, stel je de synchronisatie daar opnieuw in.
-# review: new
 ui-sync-loading = Lezen…
-# review: new
 ui-sync-history-title = Geschiedenis
-# review: new
-ui-sync-history-note = Als hetzelfde tegelijk op twee computers is gewijzigd, is de laatst aangebrachte wijziging behouden en staat de andere hier. Herstel er een om die in plaats daarvan te gebruiken.
-# review: new
+ui-sync-history-note = Als wijzigingen van verschillende computers met elkaar botsen, behoudt de synchronisatie één versie. Vervangen waarden staan hier; herstel er een om die weer te gebruiken. Wachtwoorden, aanmeldgegevens en privésleutels worden hier niet bewaard.
 ui-sync-history-empty = Er zijn geen wijzigingen vervangen.
-# review: new
 ui-sync-history-row = Van { $source }, { $when }
-# review: new
 ui-sync-restore = &Herstellen
-# review: new
 ui-sync-restore-points = Herstelpunten
-# review: new
-ui-sync-restore-points-note = Voordat een synchronisatie hier iets weghaalt, wordt opgeslagen hoe alles was. Open een herstelpunt om terug te halen wat je ervan kiest.
-# review: new
+ui-sync-restore-points-note = Herstelpunten bewaren je instellingen voordat de synchronisatie onderdelen van deze computer verwijdert. Open een herstelpunt om te kiezen wat je wilt herstellen.
 ui-sync-restore-points-empty = Nog geen.
-# review: new
 ui-sync-open-point = &Openen…
 # Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
-# review: new
-win-sync-back = < V&orige
+win-sync-back = < Vori&ge
 ui-language-label = T&aal:
 ui-restart-note = Start Inbox Classic opnieuw om de taal te wijzigen.
 ui-restart-ask = Na het opnieuw starten gebruikt Inbox Classic { $language }. Nu opnieuw starten?
@@ -591,7 +509,6 @@ ui-delete-folder-question = De map “{ $folder }” met alle berichten en subma
 ui-properties = Eigensc&happen
 ui-account-sync = &Verzenden en ontvangen
 ui-account-properties = &Eigenschappen...
-# review: new
 ui-account-properties-of = A&ccounteigenschappen...
 ui-account-move-up = Om&hoog
 ui-account-move-down = Om&laag
@@ -918,11 +835,8 @@ ui-setup-from = Opgeslagen met Inbox Classic { $version } op { $date }.
 ui-setup-import-button = &Importeren
 ui-setup-done = Gereed
 ui-setup-first-run = Instellingen en accounts importeren van een andere computer...
-# review: new
 ui-first-run-other = Gebruik je Inbox Classic al op een andere computer? Haal de accounts en instellingen daarvan hierheen.
-# review: new
 ui-first-run-sync = Deelnemen aan de synchronisatie…
-# review: new
 ui-first-run-import = Importeren uit een bestand…
 
 ui-field-verifiers = Afzendercontroles vertrouwen van:
@@ -935,11 +849,7 @@ ui-keys-publish-now = Publiceren
 ui-keys-paste = Importeren van het &klembord
 ui-keys-paste-none = Het klembord bevat geen OpenPGP-sleutel.
 ui-contact-find-key = Sleutel &zoeken
-# review: new
 ui-reactions-label = Reacties:
-# review: new
 ui-reaction-open-email = E-mail met reactie openen
-# review: new
 ui-reaction-show-as-email = Tonen als e-mail
-# review: new
 ui-reaction-when = Gereageerd: { $when }

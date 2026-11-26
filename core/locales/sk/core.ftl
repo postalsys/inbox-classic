@@ -1007,55 +1007,34 @@ setup-error-newer = Tieto nastavenia uložila novšia verzia Inbox Classic ({ $v
 setup-error-needs-passphrase = Tieto nastavenia sú chránené prístupovou frázou. Zadajte frázu, s ktorou boli uložené.
 setup-error-wrong-passphrase = To nie je prístupová fráza, s ktorou boli tieto nastavenia uložené.
 setup-error-changed = Nepodarilo sa potvrdiť celistvosť súboru nastavení, preto ho nemožno importovať.
-# review: new
-sync-wrong-passphrase = To nie je prístupová fráza synchronizácie tohto trezoru. Zadajte tú, ktorú ste zvolili pri nastavení synchronizácie na prvom počítači.
-# review: new
+sync-wrong-passphrase = Prístupová fráza synchronizácie je nesprávna. Zadajte frázu, ktorú ste zvolili pri nastavení synchronizácie na prvom počítači.
 sync-place = { $place }, ako „{ $name }“
-# review: new
 sync-news-removed = { $count ->
     [one] Synchronizácia odstránila konto { $accounts }, pretože bolo odstránené na inom počítači.
    *[other] Synchronizácia odstránila kontá, pretože boli odstránené na inom počítači: { $accounts }
 }
-# review: new
 sync-news-lost = { $count ->
     [one] Zmena vykonaná v rovnakom čase na inom počítači bola nahradená zmenou vykonanou tu. História synchronizácie ju uchováva.
     [few] { $count } zmeny vykonané v rovnakom čase na iných počítačoch boli nahradené zmenami vykonanými tu. História synchronizácie ich uchováva.
    *[other] { $count } zmien vykonaných v rovnakom čase na iných počítačoch bolo nahradených zmenami vykonanými tu. História synchronizácie ich uchováva.
 }
-# review: new
 sync-status-busy = Synchronizuje sa…
-# review: new
 sync-status-never = Zatiaľ nesynchronizované.
-# review: new
 sync-status-last = Naposledy synchronizované: { $when }.
-# review: new
 sync-status-today = Naposledy synchronizované dnes o { $time }.
-# review: new
 sync-when-today = dnes o { $time }
-# review: new
 sync-status-problem = Synchronizácia zlyhala: { $problem }
-# review: new
 sync-removed-here = Tento počítač bol zo synchronizácie odstránený na inom počítači. Vypnite synchronizáciu a potom ju znova nastavte, aby ste sa pripojili.
-# review: new
 sync-item-account = Konto { $name }
-# review: new
 sync-item-contact = Kontakt { $name }
-# review: new
 sync-item-group = Skupina { $name }
-# review: new
 sync-item-key = Kľúč { $name }
-# review: new
 sync-item-rule = Pravidlo { $name }
-# review: new
 sync-item-trusted = Dôveryhodný odosielateľ { $name }
-# review: new
 sync-item-sign-in-app = Prihlasovacia aplikácia { $name }
-# review: new
 sync-item-settings = Nastavenia
-# review: new
 sync-another-computer = iný počítač
-# review: new
-sync-no-key = Tento počítač už nemá kľúč trezoru synchronizácie. Vypnite synchronizáciu a znova ju zapnite s prístupovou frázou synchronizácie.
+sync-no-key = V tomto počítači chýba šifrovací kľúč synchronizácie. Vypnite synchronizáciu a potom ju znova nastavte pomocou svojej prístupovej frázy synchronizácie.
 setup-error-read = Súbor nastavení sa nepodarilo prečítať: { $error }
 setup-error-write = Nastavenia sa nepodarilo uložiť: { $error }
 setup-error-no-parts = Vyberte aspoň jednu časť.
@@ -1208,10 +1187,9 @@ preview-not-printed = Súbor { $name } ({ $details }) sa nevytlačí. Ak ho chce
 
 pgp-error-attached-private = Táto príloha obsahuje súkromný kľúč. Priamo z pošty možno importovať iba verejné kľúče. Ak chcete obnoviť svoj súkromný kľúč, uložte prílohu a importujte jej súbor v okne Šifrovacie kľúče.
 pgp-part-find-key = Nájsť kľúč
-# review: new
 reaction-notification-title = { $name }: reakcia { $emoji }
-# review: new
 reaction-notification-text = { $count ->
     [one] na správu { $subject }
-   *[other] na správu { $subject }, reakcií spolu: { $count }
+    [few] na správu { $subject } (spolu { $count } nové reakcie)
+   *[other] na správu { $subject } (spolu { $count } nových reakcií)
 }

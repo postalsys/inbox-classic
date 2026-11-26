@@ -42,7 +42,6 @@ cmd-accounts = &Konton...
 cmd-find = &Sök efter meddelande
 cmd-save-as = &Spara som...
 cmd-print = Skriv &ut...
-# review: new
 cmd-print-conversation = Skriv ut konve&rsation...
 cmd-import = &Importera meddelanden...
 cmd-outbox = &Utkorgen...
@@ -64,43 +63,29 @@ ui-find-not-found = ”{ $words }” finns inte i det här meddelandet
 cmd-expand-all-threads = &Expandera alla konversationer
 cmd-collapse-all-threads = Komprimera &alla konversationer
 ui-group-by-conversation = Gr&uppera meddelanden efter konversation
-# review: new
 ui-show-whole-conversation = Visa hela konversationen i läs&fönstret
-# review: new
-ui-show-whole-conversation-note = En konversations rad öppnar alla dess meddelanden, med dina svar, utkast och de meddelanden du har lagt i andra mappar. Lästa meddelanden är hopfällda till en rad: klicka på en rad för att öppna eller fälla ihop den.
-# review: new
+ui-show-whole-conversation-note = Öppna en konversations meddelanden tillsammans, inklusive dina svar, utkast och meddelanden i andra mappar. Lästa meddelanden är oftast hopfällda till en rad: klicka på en rad för att öppna eller fälla ihop den.
 ui-conversation-order = &Ordning i konversationer:
-# review: new
 ui-conversation-oldest-first = Äldsta först
-# review: new
 ui-conversation-newest-first = Nyaste först
-# review: new
 ui-thread-count = { $new ->
     [0] ({ $count })
-    [one] ({ $count }, { $new } ny)
+    [one] ({ $count }, { $new } nytt)
    *[other] ({ $count }, { $new } nya)
 }
-# review: new
 ui-conversation-to = till { $people }
-# review: new
 ui-conversation-draft = Utkast
-# review: new
 ui-conversation-alone = Signerat eller krypterat: öppnas för sig
-# review: new
 ui-conversation-downloading = Hämtar…
-# review: new
 ui-conversation-earlier = { $count ->
     [one] Visa 1 tidigare meddelande
    *[other] Visa { $count } tidigare meddelanden
 }
-# review: new
 ui-conversation-elsewhere = { $count ->
     [one] Den här konversationen har också ett meddelande i en annan mapp.
    *[other] Den här konversationen har också { $count } meddelanden i andra mappar.
 }
-# review: new
 ui-conversation-this-folder = Endast &den här mappen
-# review: new
 ui-conversation-whole = &Hela konversationen
 cmd-folder-list = &Mapplista
 cmd-layout-automatic = &Automatisk
@@ -447,140 +432,73 @@ ui-settings-encryption = Kryptering
 ui-settings-language = Språk
 ui-settings-label = { $label }:
 ui-apply = &Verkställ
-# review: new
 ui-settings-sync = Synkronisering
-# review: new
 ui-sync-note = Håll dina konton, nycklar, adressboken, regler och inställningar likadana på alla datorer, via en mapp eller lagring som du äger. Allt krypteras med din synkroniseringslösenfras innan det lämnar den här datorn.
-# review: new
 ui-sync-place = Synkroniseras via:
-# review: new
 ui-sync-status = Status:
-# review: new
 ui-sync-set-up = &Konfigurera synkronisering…
-# review: new
 ui-sync-now = &Synkronisera nu
-# review: new
 ui-sync-computers = Dato&rer…
-# review: new
 ui-sync-history = &Historik…
-# review: new
 ui-sync-turn-off = S&täng av synkronisering…
-# review: new
 ui-sync-what = Vad som synkroniseras
-# review: new
-ui-sync-what-note = Lösenord, inloggningar och privata nycklar överförs bara krypterade. Utelämna det som ska stanna på den här datorn.
-# review: new
+ui-sync-what-note = Lösenord, inloggningsuppgifter och privata nycklar överförs bara krypterade. Utelämna det som ska stanna på den här datorn.
 ui-sync-accounts = K&onton
-# review: new
 ui-sync-passwords = &Lösenord
-# review: new
 ui-sync-sign-ins = &Inloggningar med Google, Microsoft och inloggningsappar
-# review: new
 ui-sync-sign-in-apps = Inloggningsa&ppar
-# review: new
 ui-sync-app-secrets = Klienthe&mligheter för inloggningsappar
-# review: new
 ui-sync-contacts = A&dressbok
-# review: new
 ui-sync-keys = &Nycklar
-# review: new
 ui-sync-private-keys = Dina privata n&ycklar
-# review: new
 ui-sync-rules = Re&gler
-# review: new
 ui-sync-trusted = &Betrodda avsändare
-# review: new
 ui-sync-settings = Inställning&ar
-# review: new
 ui-sync-preferences = Layout och &utseende
-# review: new
 ui-sync-everything = Allt
-# review: new
 ui-sync-some-left-out = Vissa delar utelämnade
-# review: new
 ui-sync-where = Var det sparas
-# review: new
 ui-sync-folder = En mapp
-# review: new
 ui-sync-folder-note = Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud eller Syncthing kopierar den till dina andra datorer.
-# review: new
 ui-sync-bucket = S3-kompatibel lagring
-# review: new
 ui-sync-bucket-note = Amazon S3, Cloudflare R2, Backblaze B2, MinIO eller annan lagring som fungerar som S3.
-# review: new
 ui-sync-folder-label = &Mapp:
-# review: new
 ui-sync-folder-none = Ingen vald ännu
-# review: new
 ui-sync-choose-folder = Väl&j…
-# review: new
 ui-sync-choose-folder-title = Välj mappen att synkronisera via
-# review: new
 ui-sync-endpoint = &Slutpunkt:
-# review: new
 ui-sync-region = &Region:
-# review: new
 ui-sync-bucket-name = &Bucket:
-# review: new
 ui-sync-prefix = Mapp i b&ucketen:
-# review: new
 ui-sync-access-key = Åt&komstnyckel-ID:
-# review: new
 ui-sync-secret-key = &Hemlig åtkomstnyckel:
-# review: new
 ui-sync-next = &Nästa
-# review: new
 ui-sync-join-title = Anslut till synkronisering
-# review: new
-ui-sync-join-note = Här finns synkroniseringen från dina andra datorer. Skriv synkroniseringslösenfrasen som du valde på den första.
-# review: new
+ui-sync-join-note = Här finns redan synkroniserade data. Skriv synkroniseringslösenfrasen som du valde på den första datorn.
 ui-sync-start-title = Starta synkronisering
-# review: new
 ui-sync-start-note = Välj en synkroniseringslösenfras. Du skriver den en gång på varje dator som du lägger till. Förvara den på ett säkert ställe: utan den kan ingen annan dator ansluta.
-# review: new
-ui-sync-name = Namn på den här &datorn:
-# review: new
-ui-sync-merge-note = Det som den här datorn har och det som synkroniseringen innehåller slås ihop: ett konto eller en kontakt som finns på båda blir en.
-# review: new
-ui-sync-turn-on = Slå &på synkronisering
-# review: new
+ui-sync-name = Namn på den här da&torn:
+ui-sync-merge-note = Data på den här datorn slås ihop med synkroniserade data. Motsvarande konton och kontakter slås ihop.
+ui-sync-turn-on = Slå på &synkronisering
 ui-sync-on = Synkronisering är på.
-# review: new
 ui-sync-turn-off-ask = Vill du stänga av synkronisering på den här datorn? Allt förblir som det är, här och på dina andra datorer. Den här datorn slutar bara att synkronisera.
-# review: new
 ui-sync-turn-off-button = Stäng av
-# review: new
 ui-sync-computers-title = Datorer
-# review: new
-ui-sync-computers-note = Datorerna som synkroniserar via den här platsen. Ta bort en som du inte längre använder: den slutar att synkronisera, och det den har synkroniserat finns kvar.
-# review: new
+ui-sync-computers-note = De här datorerna synkroniserar via samma plats. Ta bort en dator som du inte längre använder för att stoppa dess synkronisering. Dess synkroniserade data finns kvar.
 ui-sync-this-computer = Den här datorn
-# review: new
 ui-sync-seen = Senast synkroniserad: { $when }
-# review: new
 ui-sync-remove-ask = Vill du ta bort ”{ $name }” från synkroniseringen? Den slutar att synkronisera nästa gång den försöker. Om du vill synkronisera den igen konfigurerar du synkronisering på den en gång till.
-# review: new
 ui-sync-loading = Läser…
-# review: new
 ui-sync-history-title = Historik
-# review: new
-ui-sync-history-note = När samma sak ändrades på två datorer samtidigt behölls den senast gjorda ändringen och den andra finns här. Återställ en för att använda den i stället.
-# review: new
+ui-sync-history-note = När ändringar från olika datorer är i konflikt behåller synkroniseringen en version. Ersatta värden visas här; återställ ett för att använda det igen. Lösenord, inloggningsuppgifter och privata nycklar sparas inte här.
 ui-sync-history-empty = Inga ändringar har ersatts.
-# review: new
 ui-sync-history-row = Från { $source }, { $when }
-# review: new
 ui-sync-restore = Åter&ställ
-# review: new
 ui-sync-restore-points = Återställningspunkter
-# review: new
-ui-sync-restore-points-note = Innan en synkronisering tar bort något här sparas hur det var. Öppna en återställningspunkt för att hämta tillbaka det du väljer ur den.
-# review: new
+ui-sync-restore-points-note = Återställningspunkter sparar din konfiguration innan synkroniseringen tar bort objekt från den här datorn. Öppna en punkt för att välja vad du vill återställa.
 ui-sync-restore-points-empty = Inga ännu.
-# review: new
 ui-sync-open-point = Ö&ppna…
 # Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
-# review: new
 win-sync-back = < &Föregående
 ui-language-label = S&pråk:
 ui-restart-note = Starta om Inbox Classic för att byta språk.
@@ -592,7 +510,6 @@ ui-delete-folder-question = Vill du ta bort mappen ”{ $folder }” med dess me
 ui-properties = &Egenskaper
 ui-account-sync = Skicka och &ta emot
 ui-account-properties = Egen&skaper...
-# review: new
 ui-account-properties-of = &Kontoegenskaper...
 ui-account-move-up = Flytta &upp
 ui-account-move-down = Flytta ne&d
@@ -918,11 +835,8 @@ ui-setup-from = Sparad av Inbox Classic { $version } den { $date }.
 ui-setup-import-button = &Importera
 ui-setup-done = Klart
 ui-setup-first-run = Importera inställningar och konton från en annan dator...
-# review: new
 ui-first-run-other = Använder du redan Inbox Classic på en annan dator? Hämta dess konton och inställningar hit.
-# review: new
-ui-first-run-sync = Anslut till dess synkronisering…
-# review: new
+ui-first-run-sync = Anslut till synkronisering…
 ui-first-run-import = Importera från en fil…
 
 ui-field-verifiers = Lita på avsändarkontroller från:
@@ -935,11 +849,7 @@ ui-keys-publish-now = Publicera
 ui-keys-paste = Importera från &urklipp
 ui-keys-paste-none = Urklipp innehåller ingen OpenPGP-nyckel.
 ui-contact-find-key = Sö&k nyckel
-# review: new
 ui-reactions-label = Reaktioner:
-# review: new
 ui-reaction-open-email = Öppna reaktionens e-postmeddelande
-# review: new
 ui-reaction-show-as-email = Visa som e-postmeddelande
-# review: new
 ui-reaction-when = Reaktion: { $when }

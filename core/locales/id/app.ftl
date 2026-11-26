@@ -43,7 +43,6 @@ cmd-accounts = &Akun...
 cmd-find = &Cari Pesan
 cmd-save-as = &Simpan Sebagai...
 cmd-print = &Cetak...
-# review: new
 cmd-print-conversation = Cetak &Percakapan...
 cmd-import = &Impor Pesan...
 cmd-outbox = &Kotak Keluar...
@@ -65,42 +64,28 @@ ui-find-not-found = “{ $words }” tidak ada di pesan ini
 cmd-expand-all-threads = Perluas &Semua Percakapan
 cmd-collapse-all-threads = &Ciutkan Semua Percakapan
 ui-group-by-conversation = &Kelompokkan pesan menurut percakapan
-# review: new
 ui-show-whole-conversation = T&ampilkan seluruh percakapan di panel baca
-# review: new
-ui-show-whole-conversation-note = Baris percakapan membuka semua pesannya, termasuk balasan dan draf Anda serta pesan yang Anda simpan di folder lain. Pesan yang sudah dibaca diciutkan menjadi satu baris: klik baris untuk membuka atau menciutkannya.
-# review: new
+ui-show-whole-conversation-note = Buka pesan-pesan dalam percakapan bersama-sama, termasuk balasan dan draf Anda serta pesan di folder lain. Pesan yang sudah dibaca biasanya diciutkan menjadi satu baris; klik baris untuk membuka atau menciutkannya.
 ui-conversation-order = Urutan per&cakapan:
-# review: new
 ui-conversation-oldest-first = Terlama dulu
-# review: new
 ui-conversation-newest-first = Terbaru dulu
-# review: new
 ui-thread-count = { $new ->
     [0] ({ $count })
    *[other] ({ $count }, { $new } baru)
 }
-# review: new
 ui-conversation-to = kepada { $people }
-# review: new
 ui-conversation-draft = Draf
-# review: new
 ui-conversation-alone = Ditandatangani atau dienkripsi: dibuka tersendiri
-# review: new
 ui-conversation-downloading = Mengunduh…
-# review: new
 ui-conversation-earlier = { $count ->
     [1] Tampilkan 1 pesan sebelumnya
    *[other] Tampilkan { $count } pesan sebelumnya
 }
-# review: new
 ui-conversation-elsewhere = { $count ->
     [1] Percakapan ini juga memiliki 1 pesan di folder lain.
    *[other] Percakapan ini juga memiliki { $count } pesan di folder lain.
 }
-# review: new
 ui-conversation-this-folder = &Hanya Folder Ini
-# review: new
 ui-conversation-whole = &Seluruh Percakapan
 cmd-folder-list = Daftar &Folder
 cmd-layout-automatic = &Otomatis
@@ -448,141 +433,74 @@ ui-settings-language = Bahasa
 # a group's title as the label before its first control, in the Mac's panes: the colon as the language writes it
 ui-settings-label = { $label }:
 ui-apply = &Terapkan
-# review: new
 ui-settings-sync = Sinkronisasi
-# review: new
 ui-sync-note = Jaga agar akun, kunci, Buku Alamat, aturan, dan pengaturan Anda tetap sama di setiap komputer, melalui folder atau penyimpanan milik Anda sendiri. Semuanya dienkripsi dengan frasa sandi sinkronisasi Anda sebelum meninggalkan komputer ini.
-# review: new
 ui-sync-place = Disinkronkan melalui:
-# review: new
 ui-sync-status = Status:
-# review: new
 ui-sync-set-up = &Siapkan Sinkronisasi…
-# review: new
 ui-sync-now = Sinkronkan S&ekarang
-# review: new
 ui-sync-computers = Ko&mputer…
-# review: new
 ui-sync-history = Ri&wayat…
-# review: new
 ui-sync-turn-off = M&atikan Sinkronisasi…
-# review: new
 ui-sync-what = Yang disinkronkan
-# review: new
-ui-sync-what-note = Kata sandi, proses masuk, dan kunci privat hanya dikirim dalam keadaan terenkripsi. Kosongkan centang pada apa yang harus tetap berada di komputer ini.
-# review: new
+ui-sync-what-note = Kata sandi, kredensial masuk, dan kunci privat hanya dikirim dalam keadaan terenkripsi. Hapus centang pada data yang harus tetap berada di komputer ini.
 ui-sync-accounts = Ak&un
-# review: new
 ui-sync-passwords = Kata san&di
-# review: new
-ui-sync-sign-ins = &Proses masuk dengan Google, Microsoft, dan aplikasi masuk
-# review: new
+ui-sync-sign-ins = Kredensial masuk Google, Microsoft, dan a&plikasi masuk
 ui-sync-sign-in-apps = Apl&ikasi masuk
-# review: new
 ui-sync-app-secrets = Ra&hasia aplikasi masuk
-# review: new
 ui-sync-contacts = &Buku Alamat
-# review: new
 ui-sync-keys = &Kunci
-# review: new
 ui-sync-private-keys = Kunci p&rivat Anda
-# review: new
 ui-sync-rules = Atura&n
-# review: new
 ui-sync-trusted = Pengirim teper&caya
-# review: new
 ui-sync-settings = Pen&gaturan
-# review: new
 ui-sync-preferences = Tata &letak dan tampilan
-# review: new
 ui-sync-everything = Semuanya
-# review: new
 ui-sync-some-left-out = Sebagian tidak disertakan
-# review: new
 ui-sync-where = Tempat menyimpannya
-# review: new
 ui-sync-folder = Sebuah folder
-# review: new
 ui-sync-folder-note = Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud, atau Syncthing menyalinnya ke komputer Anda yang lain.
-# review: new
 ui-sync-bucket = Penyimpanan yang kompatibel dengan S3
-# review: new
 ui-sync-bucket-note = Amazon S3, Cloudflare R2, Backblaze B2, MinIO, atau penyimpanan lain yang bekerja seperti S3.
-# review: new
 ui-sync-folder-label = &Folder:
-# review: new
 ui-sync-folder-none = Belum dipilih
-# review: new
 ui-sync-choose-folder = &Pilih…
-# review: new
 ui-sync-choose-folder-title = Pilih Folder untuk Sinkronisasi
-# review: new
 ui-sync-endpoint = &Endpoint:
-# review: new
 ui-sync-region = &Region:
-# review: new
-ui-sync-bucket-name = &Bucket:
-# review: new
+ui-sync-bucket-name = Bu&cket:
 ui-sync-prefix = Folder di b&ucket:
-# review: new
 ui-sync-access-key = ID kunci &akses:
-# review: new
 ui-sync-secret-key = Kunci akses ra&hasia:
-# review: new
 ui-sync-next = Ber&ikutnya
-# review: new
 ui-sync-join-title = Bergabung dengan Sinkronisasi
-# review: new
-ui-sync-join-note = Tempat ini menyimpan sinkronisasi komputer Anda yang lain. Ketik frasa sandi sinkronisasi yang Anda pilih di komputer pertama.
-# review: new
+ui-sync-join-note = Lokasi ini sudah berisi data yang disinkronkan. Masukkan frasa sandi sinkronisasi yang Anda pilih di komputer pertama.
 ui-sync-start-title = Mulai Sinkronisasi
-# review: new
 ui-sync-start-note = Pilih frasa sandi sinkronisasi. Anda mengetiknya sekali di setiap komputer yang Anda tambahkan. Simpan di tempat yang aman: tanpanya, tidak ada komputer lain yang dapat bergabung.
-# review: new
-ui-sync-name = &Nama komputer ini:
-# review: new
-ui-sync-merge-note = Isi komputer ini dan isi sinkronisasi digabungkan: akun atau kontak yang ada di keduanya menjadi satu.
-# review: new
+ui-sync-name = N&ama komputer ini:
+ui-sync-merge-note = Data komputer ini digabungkan dengan data yang disinkronkan. Akun dan kontak yang cocok digabungkan menjadi satu.
 ui-sync-turn-on = Ak&tifkan Sinkronisasi
-# review: new
 ui-sync-on = Sinkronisasi aktif.
-# review: new
 ui-sync-turn-off-ask = Matikan sinkronisasi di komputer ini? Semuanya tetap seperti sekarang, di sini dan di komputer Anda yang lain. Komputer ini hanya berhenti menyinkronkan.
-# review: new
 ui-sync-turn-off-button = Matikan
-# review: new
 ui-sync-computers-title = Komputer
-# review: new
-ui-sync-computers-note = Komputer yang menyinkronkan melalui tempat ini. Hapus komputer yang tidak lagi Anda gunakan: komputer itu berhenti menyinkronkan, dan apa yang sudah disinkronkannya tetap ada.
-# review: new
+ui-sync-computers-note = Komputer-komputer ini menyinkronkan melalui lokasi yang sama. Hapus komputer yang tidak lagi Anda gunakan untuk menghentikan sinkronisasinya. Data yang telah disinkronkannya tetap ada.
 ui-sync-this-computer = Komputer ini
-# review: new
 ui-sync-seen = Terakhir disinkronkan { $when }
-# review: new
 ui-sync-remove-ask = Hapus “{ $name }” dari sinkronisasi? Komputer itu berhenti menyinkronkan saat mencoba lagi berikutnya. Untuk menyinkronkannya lagi, siapkan sinkronisasi di komputer itu sekali lagi.
-# review: new
 ui-sync-loading = Membaca…
-# review: new
 ui-sync-history-title = Riwayat
-# review: new
-ui-sync-history-note = Jika hal yang sama diubah di dua komputer pada waktu yang sama, perubahan yang dibuat terakhir dipertahankan dan perubahan lainnya ada di sini. Pulihkan salah satunya untuk menggunakannya sebagai gantinya.
-# review: new
+ui-sync-history-note = Saat perubahan dari komputer berbeda bertentangan, sinkronisasi mempertahankan salah satu versi. Nilai yang digantikan ditampilkan di sini; pulihkan untuk menggunakannya lagi. Kata sandi, kredensial masuk, dan kunci privat tidak disimpan di sini.
 ui-sync-history-empty = Tidak ada perubahan yang digantikan.
-# review: new
 ui-sync-history-row = Dari { $source }, { $when }
-# review: new
 ui-sync-restore = &Pulihkan
-# review: new
 ui-sync-restore-points = Titik pemulihan
-# review: new
-ui-sync-restore-points-note = Sebelum sinkronisasi menghapus sesuatu di sini, keadaan sebelumnya disimpan. Buka salah satunya untuk mengembalikan bagian yang Anda pilih.
-# review: new
+ui-sync-restore-points-note = Titik pemulihan menyimpan pengaturan Anda sebelum sinkronisasi menghapus item dari komputer ini. Buka salah satunya untuk memilih apa yang akan dipulihkan.
 ui-sync-restore-points-empty = Belum ada.
-# review: new
 ui-sync-open-point = &Buka…
 # Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
-# review: new
-win-sync-back = < &Kembali
+win-sync-back = < K&embali
 ui-language-label = &Bahasa:
 ui-restart-note = Mulai ulang Inbox Classic untuk mengganti bahasa.
 ui-restart-ask = Inbox Classic menampilkan bahasa { $language } setelah dimulai ulang. Mulai ulang sekarang?
@@ -593,8 +511,7 @@ ui-delete-folder-question = Hapus folder “{ $folder }” beserta pesan dan fol
 ui-properties = Pr&operti
 ui-account-sync = &Kirim dan Terima
 ui-account-properties = P&roperti...
-# review: new
-ui-account-properties-of = P&roperti akun...
+ui-account-properties-of = P&roperti Akun...
 ui-account-move-up = &Pindahkan ke Atas
 ui-account-move-down = Pindahkan ke Ba&wah
 ui-menu-open = &Buka
@@ -898,11 +815,8 @@ ui-setup-from = Disimpan oleh Inbox Classic { $version } pada { $date }.
 ui-setup-import-button = &Impor
 ui-setup-done = Selesai
 ui-setup-first-run = Impor pengaturan dan akun dari komputer lain...
-# review: new
 ui-first-run-other = Sudah menggunakan Inbox Classic di komputer lain? Bawa akun dan pengaturannya ke sini.
-# review: new
-ui-first-run-sync = Bergabung dengan Sinkronisasinya…
-# review: new
+ui-first-run-sync = Bergabung dengan Sinkronisasi…
 ui-first-run-import = Impor dari File…
 
 ui-field-verifiers = Percayai hasil pemeriksaan pengirim dari:
@@ -915,11 +829,7 @@ ui-keys-publish-now = Publikasikan
 ui-keys-paste = Impor dari K&lipboard
 ui-keys-paste-none = Klipboard tidak berisi kunci OpenPGP.
 ui-contact-find-key = &Cari Kunci
-# review: new
 ui-reactions-label = Reaksi:
-# review: new
 ui-reaction-open-email = Buka Email Reaksi
-# review: new
 ui-reaction-show-as-email = Tampilkan sebagai Email
-# review: new
 ui-reaction-when = Bereaksi pada { $when }

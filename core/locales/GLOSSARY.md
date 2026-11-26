@@ -147,6 +147,74 @@ These current placements supersede earlier shortcut notes for the same labels.
 
 Use the established Address Book name in lookup prose: Danish Adressekartotek (Adressekartoteket in a sentence) and Finnish Osoitekirja.
 
+## Conversations, settings sync and reactions
+
+Settings sync transfers selected setup data, not mail or local-only drafts. Added accounts download only mail
+available on their servers. Conflicting changes keep one version; do not promise the last actual edit wins.
+History excludes passwords, sign-in credentials and private keys. Restore points contain setup data, not mail.
+Removing a computer from sync leaves its synced data available. Shared selection instructions must work for both
+checkboxes and Linux switches.
+
+Conversation open/fold wording describes the initial view; later views remember user choices. The starting message
+is open even when read. A long conversation initially includes the latest 20 messages and any earlier span needed
+to include the starting message. The earlier-message link is available only in oldest-first order. Conversation
+printing omits unavailable, digitally signed and encrypted messages. When extending actions to other folders,
+Archive and Move leave additional Sent/Drafts messages there; explicitly selected messages still follow the action.
+Windows/Linux Enter expands a collapsed conversation; Mac Return opens it. Keep the platform-specific shortcut row.
+
+Reaction badges show up to three distinct emoji and a total when more than one reaction exists. Notification counts
+are new reactions in the batch, possibly across messages, not historical totals for the displayed subject. Sender
+names need gender-neutral wording; subjects are already quoted. Trusted server checks confirm a sending domain,
+not personal identity. The original message must be stored locally and the sender must be a participant. Open
+Reaction Email opens that person's latest reaction email; Show as Email restores that person's reaction emails
+for the selected message. Notifications follow the normal new-mail settings.
+
+Keep numeric placeholders in plural categories that include 21 or 101; use exact `[1]` when only one item fits the
+sentence. The sync setup scope includes computer name, data choices, Back, Turn On and Cancel together; check its
+keys against the overlapping settings-page scope too. Account rename help uses the Linux-specific account-name
+field on Linux and finishes with OK.
+
+### Round 8 language decisions
+
+These decisions accompany the completed contextual review; they are not a claim of native-speaker approval.
+
+| Language | Wording and access-key decisions |
+| --- | --- |
+| bg | Use контейнер for the S3 bucket, not the literal household noun кофа; the prefix field is Папка в контейнера. Sync bucket/prefix keys О/Е and Turn On key Ю avoid the actual combined wizard collisions. |
+| ca | Use credencials d’inici de sessió for saved credentials and es transmeten xifrades for encrypted transfer. Use avui, TIME so an arbitrary formatted time does not force a les for one o’clock. Access keys: ui-sync-name O, win-sync-back R. |
+| cs | Keep polite plural Czech instructions and counted one/few/other forms. Use výchozí zpráva for the message at which the conversation opens. Rozvržení a zobrazení uses key B to remain distinct from other sync controls. |
+| da | Keep synkroniseringsadgangsfrase, loginoplysninger and gendannelsespunkter. Plural meddelelser markeres som læste; retain existing literal keyboard examples. Access keys: cmd-print-conversation S, ui-sync-turn-on S, win-sync-back A. |
+| de | Keep Synchronisierungs-Passphrase, Anmeldedaten and Wiederherstellungspunkte; übereinstimmende Konten und Kontakte avoids broken gender agreement in the old merge sentence. Access keys: ui-sync-name M, ui-sync-turn-on E. |
+| el | Keep Συγχρονισμός, φράση πρόσβασης συγχρονισμού and gender-neutral reaction title { $name }: αντίδραση { $emoji }. New wizard Back Ω and Turn On Ρ are unaccented Greek access letters; do not change visible accents to obtain keys. |
+| es | Keep contraseña de sincronización and datos de acceso; use se transmiten cifrados. Use hoy, TIME to avoid singular/plural hour assumptions. Access keys: ui-sync-name Q, ui-sync-turn-on C. |
+| et | Sync credentials use sisselogimisandmed; retain sünkroonimisparool for the sync passphrase. An S3 bucket is andmesalv, not the literal ämber. New sync wizard keys: computer name N, Turn On K and Back A. |
+| fi | Sync credentials use kirjautumistiedot and a passphrase is a salalause. Keep lukuruutu and distinguish a digitaalinen allekirjoitus from signature text. New sync wizard keys: secret access key V, Back T and Turn On K. |
+| fr | Keep phrase secrète de synchronisation and points de restauration; history row Source avoids ambiguity. Access keys: ui-sync-name O, win-sync-back C. |
+| hr | Retain Croatian račun, računalo, mapa, skica and pristupna fraza; do not drift toward Serbian terminology. Sync computer name/account/Turn On keys I/Č/R are distinct in the full setup scope. |
+| hu | Use Tároló (bucket) for the S3 bucket field; retain the provider term as an aid to locating it in provider settings. Sync bucket/name keys L/G avoid the combined wizard collisions; reaction wording remains gender-neutral. |
+| id | Sync credentials: kredensial masuk. Reaction title uses memberi reaksi, without gendered pronouns. New wizard mnemonic choices: computer name A, Back E, bucket C; account properties P. |
+| it | Keep passphrase di sincronizzazione; use credenziali di accesso and punti di ripristino. Aprire separatamente avoids literal stack wording. Use oggi, TIME without assuming alle for every hour. Access keys: ui-sync-name O, ui-sync-turn-on C, win-sync-back D. |
+| ja | Sync credential choice uses サインイン情報, not the act of サインイン. Existing スレッド and リアクション retained. New counts follow Japanese no-space convention: 新着{ $new }. |
+| ko | Draft-message badge uses 초안, distinct from the folder 임시 보관함. Keep normal Korean spacing and gender-neutral reaction title { $name }: { $emoji } 반응. |
+| lt | Sync credentials use prisijungimo duomenys, a passphrase is a slaptafrazė, and cryptographic signing is skaitmeninis parašas. Keep numeric one/few/other counts and exact [1] for singular-only prose. The sync wizard Back button uses T, distinct from rules L. |
+| lv | Sync credentials use pierakstīšanās dati; an S3 bucket is konteiners, not the literal spainis. The Show Earlier action takes accusative plural agrākus ziņojumus in zero/other branches. Keep ASCII access keys: S3 bucket K, prefix A, computer name D, Turn On S and Back T. |
+| nb | Keep synkroniseringspassfrase, påloggingsopplysninger and gjenopprettingspunkter. Use meldingshodet instead of the unexplained hodet. Access keys: cmd-print-conversation U, ui-sync-name N, ui-sync-turn-on Y. |
+| nl | Keep synchronisatiewachtwoordzin, aanmeldgegevens and herstelpunten. The replaced change is explicitly named in sync-news-lost to avoid ambiguous pronouns. Access keys: ui-sync-turn-on T, win-sync-back G. |
+| pl | Use Odbiorcy: before the arbitrary recipient-name list, so names need no genitive inflection after do. Sync computer name/Turn On keys Z/W are distinct in the full setup scope. |
+| pt | Keep frase de acesso da sincronização, credenciais de início de sessão, encriptar, guardar and pontos de restauro. Use hoje, TIME without assuming às for every hour. Access keys: ui-sync-turn-on S. |
+| pt-BR | Keep frase secreta de sincronização, credenciais de login, criptografar, salvar and pontos de restauração. Use hoje, TIME without assuming às for every hour. Access keys: win-sync-back A. |
+| ro | Recipient descriptions use the plural destinatarii when the UI shows the recipient list. Retain bucket as the storage-provider term. Sync prefix/name/Back keys F/M/I avoid combined wizard collisions; the keyboard key does not change the surrounding natural Romanian wording. |
+| ru | Instructions shared by checkboxes and Linux switches say to exclude the data, without requiring removal of a checkbox tick. For the counted one branch of replaced changes (21 etc.), refer to Замененные изменения in the follow-up rather than the singular Оно. Turn On uses key К. |
+| sk | The account-properties context command uses the established konto: Vlastnosti konta. Use Preposlať consistently for Forward. Keep ordinary Latin mnemonic keys when practical: account properties K, sync Back P, Turn On Y. |
+| sl | Use Prejemniki: before arbitrary recipient names. Retain one/two/few/other numeric forms and the distinct exact-one reaction case. Use Vsebnik (bucket) for S3 storage, and Mapa v vsebniku for its prefix, rather than the literal household noun vedro. Sync bucket/prefix/name/Turn On keys V/E/I/S are distinct across the combined scopes. |
+| sr-Latn | Retain Serbian Latin Ekavian, nalog, fascikla, radna verzija, pristupna fraza and podaci za prijavu. Use Primaoci: before arbitrary recipient names. Use saželi in formal plural instructions, not the infinitive sažeti. Sync name/Back/Trusted Senders keys I/Z/C are distinct in the combined scopes. |
+| sv | Keep synkroniseringslösenfras, inloggningsuppgifter and återställningspunkter. A new meddelande is nytt: thread counter and help example now use 1 nytt. Access keys: ui-sync-name T, ui-sync-turn-on S. |
+| tr | Use oturum açma bilgileri for synced credentials, not opened oturumlar. Retain eşitleme anahtar parolası. New wizard Name B and Turn On E avoid collisions and dotted/dotless i. Arbitrary names stay uninflected. |
+| uk | Retain lowercase ви, U+2019 apostrophes and a head noun before dynamic labels: параметр, кнопка, команда, розділ. The Кому: label can precede names without changing them. Sync selection guidance must work for Linux switches as well as checkboxes; use Не включайте до синхронізації. Existing mnemonic assignments already fit all 77 scopes. |
+| vi | Retain cảm xúc for emoji reactions and thông tin đăng nhập for credentials. Print Conversation uses appended (&V), because all ASCII letters within its natural wording are taken in File menu. New sync controls use folder M, Turn On B, Back L. |
+| zh-Hans | Sync credential choice uses 登录凭据; retain 对话, 回应 and 帐户. Counts use no spaces around placeables. |
+| zh-Hant | Sync credential choice uses 登入認證; retain Taiwan 交談, 回應, 連絡人, 金鑰 and 密語. New progress ellipsis normalized to existing ASCII ... convention. |
+
 ## Fixed terms
 
 The terms of Outlook Express and Outlook in each language, kept the same everywhere.

@@ -914,54 +914,33 @@ setup-error-newer = El archivo se exportó con una versión más reciente de Inb
 setup-error-needs-passphrase = El archivo está protegido con una contraseña. Introduzca la contraseña que usó al exportarlo.
 setup-error-wrong-passphrase = No se puede abrir el archivo con esta contraseña.
 setup-error-changed = No se pudo verificar la integridad del archivo de configuración. Puede estar dañado o haber sido modificado, por lo que no se puede importar.
-# review: new
-sync-wrong-passphrase = Esa no es la contraseña de sincronización de esta caja fuerte. Escriba la que eligió al configurar la sincronización en su primer equipo.
-# review: new
+sync-wrong-passphrase = La contraseña de sincronización es incorrecta. Escriba la que eligió al configurar la sincronización en su primer equipo.
 sync-place = { $place }, como «{ $name }»
-# review: new
 sync-news-removed = { $count ->
     [one] La sincronización eliminó la cuenta { $accounts }, porque se eliminó en otro equipo.
    *[other] La sincronización eliminó las cuentas { $accounts }, porque se eliminaron en otro equipo.
 }
-# review: new
 sync-news-lost = { $count ->
     [one] Un cambio hecho al mismo tiempo en otro equipo se reemplazó por el hecho aquí. El historial de sincronización lo conserva.
    *[other] { $count } cambios hechos al mismo tiempo en otros equipos se reemplazaron por los hechos aquí. El historial de sincronización los conserva.
 }
-# review: new
 sync-status-busy = Sincronizando…
-# review: new
 sync-status-never = Aún no se ha sincronizado.
-# review: new
 sync-status-last = Última sincronización: { $when }.
-# review: new
-sync-status-today = Última sincronización: hoy a las { $time }.
-# review: new
-sync-when-today = hoy a las { $time }
-# review: new
+sync-status-today = Última sincronización: hoy, { $time }.
+sync-when-today = hoy, { $time }
 sync-status-problem = No se pudo sincronizar: { $problem }
-# review: new
 sync-removed-here = Este equipo se quitó de la sincronización desde otro equipo. Desactive la sincronización y vuelva a configurarla para unirse.
-# review: new
 sync-item-account = Cuenta { $name }
-# review: new
 sync-item-contact = Contacto { $name }
-# review: new
 sync-item-group = Grupo { $name }
-# review: new
 sync-item-key = Clave { $name }
-# review: new
 sync-item-rule = Regla { $name }
-# review: new
 sync-item-trusted = Remitente de confianza { $name }
-# review: new
 sync-item-sign-in-app = Aplicación de inicio de sesión { $name }
-# review: new
 sync-item-settings = Configuración
-# review: new
 sync-another-computer = otro equipo
-# review: new
-sync-no-key = Este equipo ya no tiene la clave de la caja fuerte de sincronización. Desactive la sincronización y vuelva a activarla con la contraseña de sincronización.
+sync-no-key = Falta la clave de cifrado de la sincronización en este equipo. Desactive la sincronización y vuelva a configurarla con su contraseña de sincronización.
 setup-error-read = No se pudo leer el archivo de configuración: { $error }
 setup-error-write = No se pudo guardar el archivo de configuración: { $error }
 setup-error-no-parts = Elija al menos una categoría de datos.
@@ -1090,10 +1069,8 @@ preview-not-printed = { $name } ({ $details }) no se imprime. Ábralo para impri
 
 pgp-error-attached-private = Este adjunto contiene una clave privada. Solo se pueden importar claves públicas directamente del correo. Para restaurar su propia clave privada, guarde el adjunto e importe el archivo en Claves de cifrado.
 pgp-part-find-key = Buscar clave
-# review: new
 reaction-notification-title = { $name } reaccionó con { $emoji }
-# review: new
 reaction-notification-text = { $count ->
     [one] a { $subject }
-   *[other] a { $subject }, y { $count } reacciones en total
+   *[other] a { $subject } ({ $count } reacciones nuevas en total)
 }

@@ -43,7 +43,6 @@ cmd-accounts = 帐户(&A)...
 cmd-find = 查找邮件(&F)
 cmd-save-as = 另存为(&S)...
 cmd-print = 打印(&P)...
-# review: new
 cmd-print-conversation = 打印对话(&V)...
 cmd-import = 导入邮件(&I)...
 cmd-outbox = 发件箱(&O)...
@@ -65,42 +64,28 @@ ui-find-not-found = 此邮件中没有“{ $words }”
 cmd-expand-all-threads = 展开所有对话(&E)
 cmd-collapse-all-threads = 折叠所有对话(&O)
 ui-group-by-conversation = 按对话分组邮件(&G)
-# review: new
 ui-show-whole-conversation = 在阅读窗格中显示整个对话(&W)
-# review: new
-ui-show-whole-conversation-note = 选择对话所在的行会打开它的所有邮件，包括您的答复、草稿以及归档到其他文件夹的邮件。已读邮件折叠为一行：单击该行可将其展开或折叠。
-# review: new
+ui-show-whole-conversation-note = 一起打开对话中的邮件，包括您的答复、草稿和其他文件夹中的邮件。已读邮件通常折叠为一行；单击该行可将其展开或折叠。
 ui-conversation-order = 对话顺序(&O)：
-# review: new
 ui-conversation-oldest-first = 最早的在前
-# review: new
 ui-conversation-newest-first = 最新的在前
-# review: new
 ui-thread-count = { $new ->
     [0] ({ $count })
-   *[other] ({ $count }，{ $new } 封新邮件)
+   *[other] ({ $count }，{ $new }封新邮件)
 }
-# review: new
 ui-conversation-to = 收件人：{ $people }
-# review: new
 ui-conversation-draft = 草稿
-# review: new
 ui-conversation-alone = 已签名或已加密：单独打开
-# review: new
 ui-conversation-downloading = 正在下载…
-# review: new
 ui-conversation-earlier = { $count ->
     [1] 显示 1 封更早的邮件
-   *[other] 显示 { $count } 封更早的邮件
+   *[other] 显示{ $count }封更早的邮件
 }
-# review: new
 ui-conversation-elsewhere = { $count ->
     [1] 此对话在其他文件夹中还有 1 封邮件。
-   *[other] 此对话在其他文件夹中还有 { $count } 封邮件。
+   *[other] 此对话在其他文件夹中还有{ $count }封邮件。
 }
-# review: new
 ui-conversation-this-folder = 仅此文件夹(&T)
-# review: new
 ui-conversation-whole = 整个对话(&W)
 cmd-folder-list = 文件夹列表(&F)
 cmd-layout-automatic = 自动(&A)
@@ -448,140 +433,73 @@ ui-settings-language = 语言
 # a group's title as the label before its first control, in the Mac's panes: the colon as the language writes it
 ui-settings-label = { $label }：
 ui-apply = 应用(&A)
-# review: new
 ui-settings-sync = 同步
-# review: new
 ui-sync-note = 通过您自己的文件夹或存储，让每台计算机上的帐户、密钥、通讯簿、规则和设置保持一致。所有内容在离开这台计算机之前都会用您的同步密码短语加密。
-# review: new
 ui-sync-place = 同步位置：
-# review: new
 ui-sync-status = 状态：
-# review: new
 ui-sync-set-up = 设置同步(&S)…
-# review: new
 ui-sync-now = 立即同步(&N)
-# review: new
 ui-sync-computers = 计算机(&M)…
-# review: new
 ui-sync-history = 历史记录(&H)…
-# review: new
 ui-sync-turn-off = 关闭同步(&T)…
-# review: new
 ui-sync-what = 同步内容
-# review: new
 ui-sync-what-note = 密码、登录信息和私钥只以加密形式传输。请取消选中应只留在这台计算机上的内容。
-# review: new
 ui-sync-accounts = 帐户(&O)
-# review: new
 ui-sync-passwords = 密码(&W)
-# review: new
-ui-sync-sign-ins = 通过 Google、Microsoft 和登录应用的登录(&I)
-# review: new
+ui-sync-sign-ins = Google、Microsoft 和登录应用的登录凭据(&I)
 ui-sync-sign-in-apps = 登录应用(&P)
-# review: new
 ui-sync-app-secrets = 登录应用的客户端密码(&C)
-# review: new
 ui-sync-contacts = 通讯簿(&D)
-# review: new
 ui-sync-keys = 密钥(&K)
-# review: new
 ui-sync-private-keys = 您的私钥(&R)
-# review: new
 ui-sync-rules = 规则(&U)
-# review: new
 ui-sync-trusted = 受信任的发件人(&E)
-# review: new
 ui-sync-settings = 设置(&G)
-# review: new
 ui-sync-preferences = 布局和视图(&V)
-# review: new
 ui-sync-everything = 全部
-# review: new
 ui-sync-some-left-out = 部分内容未同步
-# review: new
 ui-sync-where = 存放位置
-# review: new
 ui-sync-folder = 文件夹
-# review: new
 ui-sync-folder-note = 由 Dropbox、OneDrive、iCloud Drive、Google Drive、Nextcloud 或 Syncthing 将其复制到您的其他计算机。
-# review: new
 ui-sync-bucket = S3 兼容存储
-# review: new
 ui-sync-bucket-note = Amazon S3、Cloudflare R2、Backblaze B2、MinIO 或其他与 S3 用法相同的存储。
-# review: new
 ui-sync-folder-label = 文件夹(&F)：
-# review: new
 ui-sync-folder-none = 尚未选择
-# review: new
 ui-sync-choose-folder = 选择(&C)…
-# review: new
 ui-sync-choose-folder-title = 选择用于同步的文件夹
-# review: new
 ui-sync-endpoint = 终结点(&E)：
-# review: new
 ui-sync-region = 区域(&R)：
-# review: new
 ui-sync-bucket-name = 存储桶(&B)：
-# review: new
 ui-sync-prefix = 存储桶中的文件夹(&U)：
-# review: new
 ui-sync-access-key = 访问密钥 ID(&A)：
-# review: new
 ui-sync-secret-key = 秘密访问密钥(&S)：
-# review: new
 ui-sync-next = 下一步(&N)
-# review: new
 ui-sync-join-title = 加入同步
-# review: new
-ui-sync-join-note = 此位置保存着您其他计算机的同步数据。请键入您在第一台计算机上选择的同步密码短语。
-# review: new
+ui-sync-join-note = 此位置已有同步数据。请键入您在第一台计算机上选择的同步密码短语。
 ui-sync-start-title = 开始同步
-# review: new
 ui-sync-start-note = 请选择一个同步密码短语。您添加的每台计算机都需要键入一次。请将它保存在安全的地方：没有它，其他计算机就无法加入。
-# review: new
 ui-sync-name = 此计算机的名称(&N)：
-# review: new
-ui-sync-merge-note = 这台计算机上已有的内容和同步中的内容会合并：两边都有的帐户或联系人会合为一个。
-# review: new
+ui-sync-merge-note = 这台计算机的数据会与同步数据合并。相匹配的帐户和联系人会合为一个。
 ui-sync-turn-on = 打开同步(&T)
-# review: new
 ui-sync-on = 同步已打开。
-# review: new
 ui-sync-turn-off-ask = 要在这台计算机上关闭同步吗？这里和您其他计算机上的所有内容都保持不变，只是这台计算机不再同步。
-# review: new
 ui-sync-turn-off-button = 关闭
-# review: new
 ui-sync-computers-title = 计算机
-# review: new
 ui-sync-computers-note = 通过此位置同步的计算机。删除不再使用的计算机：它会停止同步，它已同步的内容会保留。
-# review: new
 ui-sync-this-computer = 这台计算机
-# review: new
 ui-sync-seen = 上次同步：{ $when }
-# review: new
 ui-sync-remove-ask = 要将“{ $name }”从同步中删除吗？它会在下次尝试同步时停止同步。要再次同步它，请在该计算机上重新设置同步。
-# review: new
 ui-sync-loading = 正在读取…
-# review: new
 ui-sync-history-title = 历史记录
-# review: new
-ui-sync-history-note = 当同一项内容在两台计算机上同时被更改时，会保留最后做出的更改，另一项更改保存在这里。还原它即可改用它。
-# review: new
+ui-sync-history-note = 不同计算机的更改发生冲突时，同步会保留其中一个版本。被替换的值显示在这里；还原后即可重新使用。密码、登录凭据和私钥不会保存在这里。
 ui-sync-history-empty = 没有被替换的更改。
-# review: new
 ui-sync-history-row = 来自{ $source }，{ $when }
-# review: new
 ui-sync-restore = 还原(&R)
-# review: new
 ui-sync-restore-points = 还原点
-# review: new
 ui-sync-restore-points-note = 在同步从这里删除内容之前，会先保存当时的状态。打开一个还原点，即可找回其中您选择的内容。
-# review: new
 ui-sync-restore-points-empty = 尚无。
-# review: new
 ui-sync-open-point = 打开(&O)…
 # Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
-# review: new
 win-sync-back = < 上一步(&B)
 ui-language-label = 语言(&L)：
 ui-restart-note = 重新启动 Inbox Classic 以更改语言。
@@ -593,7 +511,6 @@ ui-delete-folder-question = 要删除文件夹“{ $folder }”及其中的邮�
 ui-properties = 属性(&S)
 ui-account-sync = 发送和接收(&V)
 ui-account-properties = 属性(&R)...
-# review: new
 ui-account-properties-of = 帐户属性(&C)...
 ui-account-move-up = 上移(&U)
 ui-account-move-down = 下移(&W)
@@ -899,11 +816,8 @@ ui-setup-from = 由 Inbox Classic { $version }于{ $date }保存。
 ui-setup-import-button = 导入(&I)
 ui-setup-done = 完成
 ui-setup-first-run = 从另一台计算机导入设置和帐户...
-# review: new
 ui-first-run-other = 已经在另一台计算机上使用 Inbox Classic？将它的帐户和设置带到这里。
-# review: new
-ui-first-run-sync = 加入它的同步…
-# review: new
+ui-first-run-sync = 加入同步…
 ui-first-run-import = 从文件导入…
 
 ui-field-verifiers = 信任以下服务器的发件人检查结果：
@@ -916,11 +830,7 @@ ui-keys-publish-now = 发布
 ui-keys-paste = 从剪贴板导入(&L)
 ui-keys-paste-none = 剪贴板中没有 OpenPGP 密钥。
 ui-contact-find-key = 查找密钥(&F)
-# review: new
 ui-reactions-label = 回应：
-# review: new
 ui-reaction-open-email = 打开回应邮件
-# review: new
 ui-reaction-show-as-email = 显示为邮件
-# review: new
 ui-reaction-when = 回应时间：{ $when }

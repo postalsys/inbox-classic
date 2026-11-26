@@ -40,7 +40,6 @@ cmd-accounts = &Kontod...
 cmd-find = &Otsi kirja
 cmd-save-as = &Salvesta nimega...
 cmd-print = &Prindi...
-# review: new
 cmd-print-conversation = Prindi vest&lus...
 cmd-import = &Impordi kirjad...
 cmd-outbox = Väl&jundkaust...
@@ -62,43 +61,29 @@ ui-find-not-found = „{ $words }“ ei ole selles kirjas
 cmd-expand-all-threads = &Laienda kõik vestlused
 cmd-collapse-all-threads = &Ahenda kõik vestlused
 ui-group-by-conversation = &Rühmita kirjad vestluste kaupa
-# review: new
 ui-show-whole-conversation = Näita lugemispaanil kogu &vestlust
-# review: new
-ui-show-whole-conversation-note = Vestluse rida avab kõik selle kirjad koos teie vastuste, mustandite ja teistesse kaustadesse paigutatud kirjadega. Loetud kirjad on ahendatud üheks reaks: klõpsake rida, et see avada või ahendada.
-# review: new
+ui-show-whole-conversation-note = Avage vestluse kirjad koos oma vastuste, mustandite ja teistes kaustades olevate kirjadega. Loetud kirjad on tavaliselt ahendatud üheks reaks; klõpsake rida, et kiri avada või ahendada.
 ui-conversation-order = Vestluse &järjestus:
-# review: new
 ui-conversation-oldest-first = Vanimad eespool
-# review: new
 ui-conversation-newest-first = Uusimad eespool
-# review: new
 ui-thread-count = { $new ->
     [0] ({ $count })
     [one] ({ $count }, { $new } uus)
    *[other] ({ $count }, { $new } uut)
 }
-# review: new
 ui-conversation-to = kellele: { $people }
-# review: new
 ui-conversation-draft = Mustand
-# review: new
-ui-conversation-alone = Allkirjastatud või krüptitud: avaneb eraldi
-# review: new
+ui-conversation-alone = Digiallkirjaga või krüpteeritud: avaneb eraldi
 ui-conversation-downloading = Allalaadimine…
-# review: new
 ui-conversation-earlier = { $count ->
     [one] Näita { $count } varasemat kirja
    *[other] Näita { $count } varasemat kirja
 }
-# review: new
 ui-conversation-elsewhere = { $count ->
     [one] Sellel vestlusel on ka üks kiri teises kaustas.
    *[other] Sellel vestlusel on ka { $count } kirja teistes kaustades.
 }
-# review: new
 ui-conversation-this-folder = &Ainult see kaust
-# review: new
 ui-conversation-whole = &Kogu vestlus
 cmd-folder-list = &Kaustade loend
 cmd-layout-automatic = &Automaatne
@@ -442,141 +427,74 @@ ui-settings-encryption = Krüpteerimine
 ui-settings-language = Keel
 ui-settings-label = { $label }:
 ui-apply = R&akenda
-# review: new
 ui-settings-sync = Sünkroonimine
-# review: new
-ui-sync-note = Hoidke oma kontod, võtmed, aadressiraamat, reeglid ja seaded kõigis arvutites ühesugused, kasutades teile kuuluvat kausta või salvestusruumi. Kõik krüpteeritakse teie sünkroonimisparooliga enne, kui see sellest arvutist lahkub.
-# review: new
+ui-sync-note = Hoidke oma kontod, võtmed, aadressiraamat, reeglid ja seaded kõigis arvutites ühesugused, kasutades teile kuuluvat kausta või salvestusruumi. Sünkroonitavad andmed krüpteeritakse teie sünkroonimisparooliga enne nende saatmist.
 ui-sync-place = Sünkroonimise koht:
-# review: new
 ui-sync-status = Olek:
-# review: new
 ui-sync-set-up = Seadista sü&nkroonimine…
-# review: new
 ui-sync-now = Sünkrooni ko&he
-# review: new
 ui-sync-computers = Arv&utid…
-# review: new
 ui-sync-history = A&jalugu…
-# review: new
 ui-sync-turn-off = Lülita sün&kroonimine välja…
-# review: new
 ui-sync-what = Mida sünkroonida
-# review: new
 ui-sync-what-note = Paroolid, sisselogimisandmed ja privaatvõtmed liiguvad ainult krüpteeritult. Jätke välja see, mis peab jääma ainult sellesse arvutisse.
-# review: new
 ui-sync-accounts = K&ontod
-# review: new
 ui-sync-passwords = Paroo&lid
-# review: new
 ui-sync-sign-ins = &Google’i, Microsofti ja sisselogimisrakenduste sisselogimisandmed
-# review: new
 ui-sync-sign-in-apps = S&isselogimisrakendused
-# review: new
 ui-sync-app-secrets = Sisselogimisrakenduste kli&endi saladused
-# review: new
 ui-sync-contacts = Aa&dressiraamat
-# review: new
 ui-sync-keys = &Võtmed
-# review: new
 ui-sync-private-keys = Teie privaatvõt&med
-# review: new
 ui-sync-rules = &Reeglid
-# review: new
 ui-sync-trusted = Usaldusväärsed saa&tjad
-# review: new
 ui-sync-settings = &Seaded
-# review: new
 ui-sync-preferences = &Paigutus ja vaade
-# review: new
 ui-sync-everything = Kõik
-# review: new
 ui-sync-some-left-out = Osa on välja jäetud
-# review: new
 ui-sync-where = Kus seda hoida
-# review: new
 ui-sync-folder = Kaust
-# review: new
 ui-sync-folder-note = Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud või Syncthing kopeerib selle teie teistesse arvutitesse.
-# review: new
 ui-sync-bucket = S3-ga ühilduv salvestusruum
-# review: new
 ui-sync-bucket-note = Amazon S3, Cloudflare R2, Backblaze B2, MinIO või muu salvestusruum, mis töötab nagu S3.
-# review: new
 ui-sync-folder-label = &Kaust:
-# review: new
 ui-sync-folder-none = Pole veel valitud
-# review: new
 ui-sync-choose-folder = &Vali…
-# review: new
 ui-sync-choose-folder-title = Valige kaust, mille kaudu sünkroonida
-# review: new
 ui-sync-endpoint = &Lõpp-punkt:
-# review: new
 ui-sync-region = &Piirkond:
-# review: new
-ui-sync-bucket-name = Ä&mber:
-# review: new
-ui-sync-prefix = Kau&st ämbris:
-# review: new
+ui-sync-bucket-name = &Andmesalv:
+ui-sync-prefix = &Kaust andmesalves:
 ui-sync-access-key = &Juurdepääsuvõtme ID:
-# review: new
 ui-sync-secret-key = Sala&ne juurdepääsuvõti:
-# review: new
 ui-sync-next = &Edasi
-# review: new
 ui-sync-join-title = Liitu sünkroonimisega
-# review: new
-ui-sync-join-note = Selles kohas on teie teiste arvutite sünkroonimine. Sisestage sünkroonimisparool, mille valisite esimeses arvutis.
-# review: new
+ui-sync-join-note = Selles asukohas on juba sünkroonitud andmed. Sisestage sünkroonimisparool, mille valisite esimeses arvutis.
 ui-sync-start-title = Alusta sünkroonimist
-# review: new
 ui-sync-start-note = Valige sünkroonimisparool. Sisestate selle üks kord igas arvutis, mille lisate. Hoidke seda turvalises kohas: ilma selleta ei saa ükski teine arvuti liituda.
-# review: new
-ui-sync-name = Selle arvuti n&imi:
-# review: new
-ui-sync-merge-note = Selle arvuti andmed ja sünkroonimise andmed ühendatakse: konto või kontakt, mis on mõlemas, muutub üheks.
-# review: new
-ui-sync-turn-on = Lülita sünk&roonimine sisse
-# review: new
+ui-sync-name = Selle arvuti &nimi:
+ui-sync-merge-note = Selle arvuti andmed ühendatakse sünkroonitud andmetega. Kattuvad kontod ja kontaktid liidetakse üheks.
+ui-sync-turn-on = Lülita sün&kroonimine sisse
 ui-sync-on = Sünkroonimine on sisse lülitatud.
-# review: new
 ui-sync-turn-off-ask = Kas lülitada sünkroonimine selles arvutis välja? Kõik jääb nii, nagu on, siin ja teie teistes arvutites. See arvuti lihtsalt lõpetab sünkroonimise.
-# review: new
 ui-sync-turn-off-button = Lülita välja
-# review: new
 ui-sync-computers-title = Arvutid
-# review: new
-ui-sync-computers-note = Arvutid, mis selle koha kaudu sünkroonivad. Eemaldage arvuti, mida te enam ei kasuta: selle sünkroonimine lõpeb ja see, mida see sünkroonis, jääb alles.
-# review: new
+ui-sync-computers-note = Need arvutid sünkroonivad sama asukoha kaudu. Kui te arvutit enam ei kasuta, eemaldage see sünkroonimise lõpetamiseks. Selle sünkroonitud andmed jäävad alles.
 ui-sync-this-computer = See arvuti
-# review: new
 ui-sync-seen = Viimati sünkroonitud { $when }
-# review: new
 ui-sync-remove-ask = Kas eemaldada „{ $name }“ sünkroonimisest? Selle sünkroonimine lõpeb järgmisel katsel. Uuesti sünkroonimiseks seadistage sünkroonimine selles arvutis uuesti.
-# review: new
 ui-sync-loading = Lugemine…
-# review: new
 ui-sync-history-title = Ajalugu
-# review: new
-ui-sync-history-note = Kui sama asja muudeti kahes arvutis samal ajal, jäeti alles viimasena tehtud muudatus ja teine on siin. Taastage muudatus, kui soovite kasutada hoopis seda.
-# review: new
+ui-sync-history-note = Kui eri arvutites tehtud muudatused on vastuolus, jätab sünkroonimine alles ühe versiooni. Asendatud väärtused kuvatakse siin; nende uuesti kasutamiseks taastage need. Paroole, sisselogimisandmeid ja privaatvõtmeid siin ei säilitata.
 ui-sync-history-empty = Ühtegi muudatust pole asendatud.
-# review: new
 ui-sync-history-row = Allikas: { $source }, { $when }
-# review: new
 ui-sync-restore = &Taasta
-# review: new
 ui-sync-restore-points = Taastepunktid
-# review: new
-ui-sync-restore-points-note = Enne kui sünkroonimine siin midagi eemaldab, salvestatakse senine olukord. Avage taastepunkt, et tuua sellest tagasi see, mida valite.
-# review: new
+ui-sync-restore-points-note = Taastepunktid salvestavad teie seadistuse enne, kui sünkroonimine sellest arvutist andmeid eemaldab. Avage taastepunkt ja valige, mida taastada.
 ui-sync-restore-points-empty = Veel pole.
-# review: new
 ui-sync-open-point = &Ava…
 # Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
-# review: new
-win-sync-back = < &Tagasi
+win-sync-back = < T&agasi
 ui-language-label = &Keel:
 ui-restart-note = Keele vahetamiseks tuleb Inbox Classic taaskäivitada.
 ui-restart-ask = Valitud keel ({ $language }) rakendub pärast Inbox Classicu taaskäivitamist. Kas taaskäivitada kohe?
@@ -587,7 +505,6 @@ ui-delete-folder-question = Kas kustutada kaust „{ $folder }“ koos selle kir
 ui-properties = Atri&buudid
 ui-account-sync = Saada ja võta &vastu
 ui-account-properties = Atri&buudid...
-# review: new
 ui-account-properties-of = K&onto atribuudid...
 ui-account-move-up = Liiguta ü&les
 ui-account-move-down = Liiguta &alla
@@ -915,11 +832,8 @@ ui-setup-from = Salvestatud { $date } rakendusega Inbox Classic { $version }.
 ui-setup-import-button = &Impordi
 ui-setup-done = Valmis
 ui-setup-first-run = Impordi seaded ja kontod teisest arvutist...
-# review: new
 ui-first-run-other = Kas kasutate Inbox Classicut juba teises arvutis? Tooge selle kontod ja seaded siia.
-# review: new
-ui-first-run-sync = Liitu selle sünkroonimisega…
-# review: new
+ui-first-run-sync = Liitu sünkroonimisega…
 ui-first-run-import = Impordi failist…
 
 ui-field-verifiers = Usalda saatja kontrolli tulemusi serveritelt:
@@ -932,11 +846,7 @@ ui-keys-publish-now = Avalda
 ui-keys-paste = Impordi &lõikelaualt
 ui-keys-paste-none = Lõikelaual pole OpenPGP võtit.
 ui-contact-find-key = &Otsi võtit
-# review: new
 ui-reactions-label = Reaktsioonid:
-# review: new
 ui-reaction-open-email = Ava reaktsiooni e-kiri
-# review: new
 ui-reaction-show-as-email = Näita tavalise kirjana
-# review: new
 ui-reaction-when = Reaktsioon: { $when }

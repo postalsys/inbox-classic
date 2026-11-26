@@ -43,8 +43,7 @@ cmd-accounts = &Tài khoản...
 cmd-find = Tì&m thư
 cmd-save-as = &Lưu dưới dạng...
 cmd-print = &In...
-# review: new
-cmd-print-conversation = In &cuộc hội thoại...
+cmd-print-conversation = In cuộc hội thoại (&V)...
 cmd-import = &Nhập thư...
 cmd-outbox = &Hộp thư đi...
 cmd-properties = T&huộc tính
@@ -65,42 +64,28 @@ ui-find-not-found = Không có “{ $words }” trong thư này
 cmd-expand-all-threads = Mở rộn&g tất cả cuộc hội thoại
 cmd-collapse-all-threads = T&hu gọn tất cả cuộc hội thoại
 ui-group-by-conversation = &Nhóm thư theo cuộc hội thoại
-# review: new
 ui-show-whole-conversation = Hiện toàn bộ &cuộc hội thoại trong ngăn đọc
-# review: new
-ui-show-whole-conversation-note = Hàng của một cuộc hội thoại mở tất cả các thư của nó, kèm các thư trả lời và thư nháp của bạn cùng các thư đã lưu vào thư mục khác. Thư đã đọc được thu gọn thành một dòng: bấm vào dòng để mở hoặc thu gọn thư.
-# review: new
+ui-show-whole-conversation-note = Mở cùng lúc các thư trong cuộc hội thoại, gồm thư trả lời, thư nháp của bạn và thư trong các thư mục khác. Thư đã đọc thường được thu gọn thành một dòng; bấm vào dòng để mở hoặc thu gọn thư.
 ui-conversation-order = Thứ tự &sắp xếp cuộc hội thoại:
-# review: new
 ui-conversation-oldest-first = Cũ nhất trước
-# review: new
 ui-conversation-newest-first = Mới nhất trước
-# review: new
 ui-thread-count = { $new ->
     [0] ({ $count })
    *[other] ({ $count }, { $new } mới)
 }
-# review: new
 ui-conversation-to = đến { $people }
-# review: new
 ui-conversation-draft = Thư nháp
-# review: new
 ui-conversation-alone = Đã ký hoặc mã hóa: mở riêng
-# review: new
 ui-conversation-downloading = Đang tải xuống…
-# review: new
 ui-conversation-earlier = { $count ->
     [1] Hiện 1 thư trước đó
    *[other] Hiện { $count } thư trước đó
 }
-# review: new
 ui-conversation-elsewhere = { $count ->
     [1] Cuộc hội thoại này còn có 1 thư trong thư mục khác.
    *[other] Cuộc hội thoại này còn có { $count } thư trong các thư mục khác.
 }
-# review: new
 ui-conversation-this-folder = Chỉ thư mục &này
-# review: new
 ui-conversation-whole = Toàn bộ &cuộc hội thoại
 cmd-folder-list = &Danh sách thư mục
 cmd-layout-automatic = &Tự động
@@ -448,141 +433,74 @@ ui-settings-language = Ngôn ngữ
 # a group's title as the label before its first control, in the Mac's panes: the colon as the language writes it
 ui-settings-label = { $label }:
 ui-apply = Áp &dụng
-# review: new
 ui-settings-sync = Đồng bộ hóa
-# review: new
 ui-sync-note = Giữ cho tài khoản, khóa, Sổ địa chỉ, quy tắc và cài đặt của bạn giống nhau trên mọi máy tính, thông qua một thư mục hoặc kho lưu trữ do bạn sở hữu. Mọi thứ đều được mã hóa bằng cụm mật khẩu đồng bộ của bạn trước khi rời khỏi máy tính này.
-# review: new
 ui-sync-place = Đồng bộ qua:
-# review: new
 ui-sync-status = Trạng thái:
-# review: new
 ui-sync-set-up = &Thiết lập đồng bộ…
-# review: new
 ui-sync-now = Đồng bộ &ngay
-# review: new
 ui-sync-computers = &Máy tính…
-# review: new
 ui-sync-history = &Lịch sử…
-# review: new
 ui-sync-turn-off = Tắt đồng &bộ…
-# review: new
 ui-sync-what = Nội dung cần đồng bộ
-# review: new
 ui-sync-what-note = Mật khẩu, thông tin đăng nhập và khóa riêng tư chỉ được truyền đi ở dạng mã hóa. Hãy bỏ chọn những gì nên ở lại trên máy tính này.
-# review: new
 ui-sync-accounts = Tài kh&oản
-# review: new
 ui-sync-passwords = Mật k&hẩu
-# review: new
-ui-sync-sign-ins = Đăn&g nhập bằng Google, Microsoft và ứng dụng đăng nhập
-# review: new
+ui-sync-sign-ins = Thôn&g tin đăng nhập Google, Microsoft và ứng dụng đăng nhập
 ui-sync-sign-in-apps = Ứng dụng đăng nhậ&p
-# review: new
 ui-sync-app-secrets = Bí mật củ&a ứng dụng đăng nhập
-# review: new
 ui-sync-contacts = &Sổ địa chỉ
-# review: new
 ui-sync-keys = &Khóa
-# review: new
 ui-sync-private-keys = Khóa &riêng tư của bạn
-# review: new
 ui-sync-rules = &Quy tắc
-# review: new
 ui-sync-trusted = Người gửi t&in cậy
-# review: new
 ui-sync-settings = &Cài đặt
-# review: new
 ui-sync-preferences = Bố trí và chế độ &xem
-# review: new
 ui-sync-everything = Mọi thứ
-# review: new
 ui-sync-some-left-out = Đã bỏ qua một số mục
-# review: new
 ui-sync-where = Nơi lưu giữ
-# review: new
 ui-sync-folder = Một thư mục
-# review: new
 ui-sync-folder-note = Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud hoặc Syncthing sẽ sao chép thư mục này sang các máy tính khác của bạn.
-# review: new
 ui-sync-bucket = Kho lưu trữ tương thích S3
-# review: new
 ui-sync-bucket-note = Amazon S3, Cloudflare R2, Backblaze B2, MinIO hoặc kho lưu trữ khác hoạt động giống S3.
-# review: new
-ui-sync-folder-label = &Thư mục:
-# review: new
+ui-sync-folder-label = Thư &mục:
 ui-sync-folder-none = Chưa chọn
-# review: new
 ui-sync-choose-folder = &Chọn…
-# review: new
 ui-sync-choose-folder-title = Chọn thư mục để đồng bộ qua
-# review: new
 ui-sync-endpoint = Điể&m cuối:
-# review: new
 ui-sync-region = &Vùng:
-# review: new
 ui-sync-bucket-name = &Bucket:
-# review: new
 ui-sync-prefix = Thư mục trong b&ucket:
-# review: new
 ui-sync-access-key = &ID khóa truy cập:
-# review: new
 ui-sync-secret-key = &Khóa truy cập bí mật:
-# review: new
 ui-sync-next = Tiế&p
-# review: new
 ui-sync-join-title = Tham gia đồng bộ
-# review: new
-ui-sync-join-note = Nơi này đang chứa dữ liệu đồng bộ của các máy tính khác của bạn. Hãy nhập cụm mật khẩu đồng bộ bạn đã chọn trên máy tính đầu tiên.
-# review: new
+ui-sync-join-note = Nơi này đã có dữ liệu đồng bộ. Hãy nhập cụm mật khẩu đồng bộ bạn đã chọn trên máy tính đầu tiên.
 ui-sync-start-title = Bắt đầu đồng bộ
-# review: new
 ui-sync-start-note = Hãy chọn một cụm mật khẩu đồng bộ. Bạn nhập nó một lần trên mỗi máy tính bạn thêm vào. Hãy cất nó ở nơi an toàn: nếu không có nó, không máy tính nào khác có thể tham gia.
-# review: new
 ui-sync-name = Tê&n của máy tính này:
-# review: new
-ui-sync-merge-note = Những gì máy tính này có và những gì bản đồng bộ có sẽ được gộp lại: một tài khoản hoặc liên hệ có ở cả hai nơi sẽ trở thành một.
-# review: new
-ui-sync-turn-on = Bật đồn&g bộ
-# review: new
+ui-sync-merge-note = Dữ liệu trên máy tính này được gộp với dữ liệu đồng bộ. Các tài khoản và liên hệ trùng khớp sẽ được gộp thành một.
+ui-sync-turn-on = &Bật đồng bộ
 ui-sync-on = Đồng bộ đang bật.
-# review: new
 ui-sync-turn-off-ask = Tắt đồng bộ trên máy tính này? Mọi thứ vẫn giữ nguyên, ở đây và trên các máy tính khác của bạn. Máy tính này chỉ ngừng đồng bộ.
-# review: new
 ui-sync-turn-off-button = Tắt
-# review: new
 ui-sync-computers-title = Máy tính
-# review: new
 ui-sync-computers-note = Các máy tính đồng bộ qua nơi này. Hãy gỡ máy tính bạn không còn dùng: máy đó sẽ ngừng đồng bộ, và những gì nó đã đồng bộ vẫn được giữ lại.
-# review: new
 ui-sync-this-computer = Máy tính này
-# review: new
 ui-sync-seen = Đồng bộ lần cuối { $when }
-# review: new
 ui-sync-remove-ask = Gỡ “{ $name }” khỏi đồng bộ? Máy đó sẽ ngừng đồng bộ ở lần thử tiếp theo. Để đồng bộ lại, hãy thiết lập đồng bộ trên máy đó một lần nữa.
-# review: new
 ui-sync-loading = Đang đọc…
-# review: new
 ui-sync-history-title = Lịch sử
-# review: new
-ui-sync-history-note = Khi cùng một mục được thay đổi trên hai máy tính cùng lúc, thay đổi được thực hiện sau cùng được giữ lại và thay đổi kia nằm ở đây. Hãy khôi phục một thay đổi để dùng nó thay thế.
-# review: new
+ui-sync-history-note = Khi các thay đổi từ những máy tính khác nhau xung đột, tính năng đồng bộ giữ lại một phiên bản. Các giá trị bị thay thế xuất hiện ở đây; hãy khôi phục một giá trị để dùng lại. Mật khẩu, thông tin đăng nhập và khóa riêng tư không được lưu ở đây.
 ui-sync-history-empty = Không có thay đổi nào bị thay thế.
-# review: new
 ui-sync-history-row = Từ { $source }, { $when }
-# review: new
 ui-sync-restore = &Khôi phục
-# review: new
 ui-sync-restore-points = Điểm khôi phục
-# review: new
 ui-sync-restore-points-note = Trước khi một lần đồng bộ xóa thứ gì đó ở đây, trạng thái lúc đó sẽ được lưu lại. Hãy mở một điểm để lấy lại những phần bạn chọn.
-# review: new
 ui-sync-restore-points-empty = Chưa có.
-# review: new
 ui-sync-open-point = &Mở…
 # Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
-# review: new
-win-sync-back = < &Quay lại
+win-sync-back = < Quay &lại
 ui-language-label = &Ngôn ngữ:
 ui-restart-note = Khởi động lại Inbox Classic để đổi ngôn ngữ.
 ui-restart-ask = Inbox Classic sẽ hiển thị bằng { $language } sau khi khởi động lại. Khởi động lại ngay?
@@ -593,7 +511,6 @@ ui-delete-folder-question = Xóa thư mục “{ $folder }” cùng các thư v�
 ui-properties = T&huộc tính
 ui-account-sync = &Gửi và nhận
 ui-account-properties = Thuộc tín&h...
-# review: new
 ui-account-properties-of = Thuộc tính tài &khoản...
 ui-account-move-up = Di chuyển &lên
 ui-account-move-down = &Di chuyển xuống
@@ -899,11 +816,8 @@ ui-setup-from = Được lưu bởi Inbox Classic { $version } vào { $date }.
 ui-setup-import-button = &Nhập
 ui-setup-done = Xong
 ui-setup-first-run = Nhập cài đặt và tài khoản từ máy tính khác...
-# review: new
 ui-first-run-other = Bạn đã dùng Inbox Classic trên máy tính khác? Hãy mang tài khoản và cài đặt của máy đó sang đây.
-# review: new
-ui-first-run-sync = Tham gia đồng bộ của máy đó…
-# review: new
+ui-first-run-sync = Tham gia đồng bộ…
 ui-first-run-import = Nhập từ tệp…
 
 ui-field-verifiers = Tin cậy kết quả kiểm tra người gửi từ:
@@ -916,11 +830,7 @@ ui-keys-publish-now = Công bố
 ui-keys-paste = Nhập từ bộ nhớ &tạm
 ui-keys-paste-none = Bộ nhớ tạm không chứa khóa OpenPGP.
 ui-contact-find-key = Tìm khó&a
-# review: new
 ui-reactions-label = Cảm xúc:
-# review: new
 ui-reaction-open-email = Mở email cảm xúc
-# review: new
 ui-reaction-show-as-email = Hiển thị dưới dạng email
-# review: new
 ui-reaction-when = Bày tỏ lúc { $when }

@@ -42,7 +42,6 @@ cmd-accounts = H&esaplar...
 cmd-find = İ&leti Bul
 cmd-save-as = &Farklı Kaydet...
 cmd-print = &Yazdır...
-# review: new
 cmd-print-conversation = K&onuşmayı Yazdır...
 cmd-import = İletileri İçe Ak&tar...
 cmd-outbox = &Giden Kutusu...
@@ -64,42 +63,28 @@ ui-find-not-found = “{ $words }” bu iletide yok
 cmd-expand-all-threads = Tüm Konuşmaları Genişl&et
 cmd-collapse-all-threads = Tüm Konuşmaları &Daralt
 ui-group-by-conversation = İletileri konuşmaya göre &grupla
-# review: new
 ui-show-whole-conversation = &Konuşmanın tamamını okuma bölmesinde göster
-# review: new
-ui-show-whole-conversation-note = Bir konuşmanın satırı, yanıtlarınız, taslaklarınız ve başka klasörlere taşınmış iletiler dahil tüm iletilerini açar. Okunmuş iletiler tek satıra daraltılır: açmak veya daraltmak için bir satıra tıklayın.
-# review: new
+ui-show-whole-conversation-note = Yanıtlarınız, taslaklarınız ve başka klasörlerdeki iletiler dahil konuşmanın iletilerini birlikte açar. Okunmuş iletiler genellikle tek satıra daraltılır; açmak veya daraltmak için satıra tıklayın.
 ui-conversation-order = Konuşma &sırası:
-# review: new
 ui-conversation-oldest-first = Önce en eski
-# review: new
 ui-conversation-newest-first = Önce en yeni
-# review: new
 ui-thread-count = { $new ->
     [0] ({ $count })
    *[other] ({ $count }, { $new } yeni)
 }
-# review: new
 ui-conversation-to = alıcı: { $people }
-# review: new
 ui-conversation-draft = Taslak
-# review: new
 ui-conversation-alone = İmzalı veya şifreli: ayrı açılır
-# review: new
 ui-conversation-downloading = İndiriliyor…
-# review: new
 ui-conversation-earlier = { $count ->
     [one] 1 eski iletiyi göster
    *[other] { $count } eski iletiyi göster
 }
-# review: new
 ui-conversation-elsewhere = { $count ->
     [one] Bu konuşmanın başka bir klasörde de bir iletisi var.
    *[other] Bu konuşmanın başka klasörlerde de { $count } iletisi var.
 }
-# review: new
 ui-conversation-this-folder = Yalnızca &Bu Klasör
-# review: new
 ui-conversation-whole = &Tüm Konuşma
 cmd-folder-list = Klasör &Listesi
 cmd-layout-automatic = &Otomatik
@@ -446,140 +431,73 @@ ui-settings-encryption = Şifreleme
 ui-settings-language = Dil
 ui-settings-label = { $label }:
 ui-apply = &Uygula
-# review: new
 ui-settings-sync = Eşitleme
-# review: new
 ui-sync-note = Hesaplarınızı, anahtarlarınızı, Adres Defteri'ni, kurallarınızı ve ayarlarınızı, size ait bir klasör veya depolama alanı üzerinden her bilgisayarda aynı tutun. Her şey bu bilgisayardan çıkmadan önce eşitleme anahtar parolanızla şifrelenir.
-# review: new
 ui-sync-place = Eşitleme yeri:
-# review: new
 ui-sync-status = Durum:
-# review: new
 ui-sync-set-up = &Eşitlemeyi Kur…
-# review: new
 ui-sync-now = Şimdi Eşit&le
-# review: new
 ui-sync-computers = &Bilgisayarlar…
-# review: new
 ui-sync-history = &Geçmiş…
-# review: new
 ui-sync-turn-off = Eşitlemeyi &Kapat…
-# review: new
 ui-sync-what = Neler eşitlenecek
-# review: new
 ui-sync-what-note = Parolalar, oturum açma bilgileri ve gizli anahtarlar yalnızca şifreli olarak aktarılır. Bu bilgisayarda kalması gerekenleri dışarıda bırakın.
-# review: new
 ui-sync-accounts = &Hesaplar
-# review: new
 ui-sync-passwords = &Parolalar
-# review: new
-ui-sync-sign-ins = Google, Microsoft ve oturum açma uygulamalarıyla açılan &oturumlar
-# review: new
+ui-sync-sign-ins = Google, Microsoft ve oturum açma uygulamalarının &oturum açma bilgileri
 ui-sync-sign-in-apps = Oturum açma uygul&amaları
-# review: new
 ui-sync-app-secrets = Oturum açma uygulamalarının gizli &dizileri
-# review: new
 ui-sync-contacts = Adre&s Defteri
-# review: new
 ui-sync-keys = A&nahtarlar
-# review: new
 ui-sync-private-keys = Gi&zli anahtarlarınız
-# review: new
 ui-sync-rules = Ku&rallar
-# review: new
 ui-sync-trusted = Gü&venilen gönderenler
-# review: new
 ui-sync-settings = A&yarlar
-# review: new
 ui-sync-preferences = Yerleşi&m ve görünüm
-# review: new
 ui-sync-everything = Her şey
-# review: new
 ui-sync-some-left-out = Bazı öğeler dışarıda bırakıldı
-# review: new
 ui-sync-where = Nerede tutulacak
-# review: new
 ui-sync-folder = Bir klasör
-# review: new
 ui-sync-folder-note = Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud veya Syncthing onu diğer bilgisayarlarınıza kopyalar.
-# review: new
 ui-sync-bucket = S3 uyumlu depolama
-# review: new
 ui-sync-bucket-note = Amazon S3, Cloudflare R2, Backblaze B2, MinIO veya S3 gibi çalışan başka bir depolama.
-# review: new
 ui-sync-folder-label = &Klasör:
-# review: new
 ui-sync-folder-none = Henüz seçilmedi
-# review: new
 ui-sync-choose-folder = &Seç…
-# review: new
 ui-sync-choose-folder-title = Eşitleme Klasörünü Seç
-# review: new
 ui-sync-endpoint = &Uç nokta:
-# review: new
 ui-sync-region = &Bölge:
-# review: new
 ui-sync-bucket-name = Bu&cket:
-# review: new
 ui-sync-prefix = Bucket içindeki klasö&r:
-# review: new
 ui-sync-access-key = Erişim anahtarı ki&mliği:
-# review: new
 ui-sync-secret-key = Gi&zli erişim anahtarı:
-# review: new
 ui-sync-next = İl&eri
-# review: new
 ui-sync-join-title = Eşitlemeye Katıl
-# review: new
-ui-sync-join-note = Bu konumda diğer bilgisayarlarınızın eşitlemesi bulunuyor. İlk bilgisayarda seçtiğiniz eşitleme anahtar parolasını yazın.
-# review: new
+ui-sync-join-note = Bu konumda zaten eşitlenmiş veriler var. İlk bilgisayarda seçtiğiniz eşitleme anahtar parolasını yazın.
 ui-sync-start-title = Eşitlemeyi Başlat
-# review: new
 ui-sync-start-note = Bir eşitleme anahtar parolası seçin. Eklediğiniz her bilgisayarda bu parolayı bir kez yazarsınız. Parolayı güvenli bir yerde saklayın: o olmadan başka hiçbir bilgisayar katılamaz.
-# review: new
-ui-sync-name = Bu bilgisayarın a&dı:
-# review: new
-ui-sync-merge-note = Bu bilgisayardakilerle eşitlemedekiler birleştirilir: ikisinde de bulunan bir hesap veya kişi tek bir kayıt olur.
-# review: new
-ui-sync-turn-on = Eşitlemeyi &Aç
-# review: new
+ui-sync-name = Bu &bilgisayarın adı:
+ui-sync-merge-note = Bu bilgisayarın verileri eşitlenmiş verilerle birleştirilir. Eşleşen hesaplar ve kişiler tek bir kayıt olur.
+ui-sync-turn-on = &Eşitlemeyi Aç
 ui-sync-on = Eşitleme açık.
-# review: new
 ui-sync-turn-off-ask = Bu bilgisayarda eşitleme kapatılsın mı? Burada ve diğer bilgisayarlarınızda her şey olduğu gibi kalır. Yalnızca bu bilgisayar eşitlemeyi bırakır.
-# review: new
 ui-sync-turn-off-button = Kapat
-# review: new
 ui-sync-computers-title = Bilgisayarlar
-# review: new
 ui-sync-computers-note = Bu konum üzerinden eşitlenen bilgisayarlar. Artık kullanmadığınız birini kaldırın: eşitlemeyi bırakır ve eşitlediği veriler yerinde kalır.
-# review: new
 ui-sync-this-computer = Bu bilgisayar
-# review: new
 ui-sync-seen = Son eşitleme: { $when }
-# review: new
 ui-sync-remove-ask = “{ $name }” eşitlemeden kaldırılsın mı? Bir sonraki denemesinde eşitlemeyi bırakır. Yeniden eşitlemek için o bilgisayarda eşitlemeyi bir kez daha kurun.
-# review: new
 ui-sync-loading = Okunuyor…
-# review: new
 ui-sync-history-title = Geçmiş
-# review: new
-ui-sync-history-note = Aynı öğe iki bilgisayarda aynı anda değiştirildiğinde en son yapılan değişiklik korundu, diğeri burada. Bunun yerine kullanmak için birini geri yükleyin.
-# review: new
+ui-sync-history-note = Farklı bilgisayarlardaki değişiklikler çakıştığında eşitleme bir sürümü korur. Yerine başka bir değer kullanılan eski değerler burada görünür; yeniden kullanmak için birini geri yükleyin. Parolalar, oturum açma bilgileri ve gizli anahtarlar burada tutulmaz.
 ui-sync-history-empty = Yerine başkası konan değişiklik yok.
-# review: new
 ui-sync-history-row = Kaynak: { $source }, { $when }
-# review: new
 ui-sync-restore = &Geri Yükle
-# review: new
 ui-sync-restore-points = Geri yükleme noktaları
-# review: new
 ui-sync-restore-points-note = Eşitleme buradan bir şeyi kaldırmadan önce önceki durum kaydedilir. İçinden seçtiklerinizi geri getirmek için birini açın.
-# review: new
 ui-sync-restore-points-empty = Henüz yok.
-# review: new
 ui-sync-open-point = &Aç…
 # Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
-# review: new
 win-sync-back = < &Geri
 ui-language-label = &Dil:
 ui-restart-note = Dili değiştirmek için Inbox Classic'i yeniden başlatın.
@@ -591,7 +509,6 @@ ui-delete-folder-question = “{ $folder }” klasörü, iletileri ve içindeki 
 ui-properties = &Özellikler
 ui-account-sync = Gön&der ve Al
 ui-account-properties = Öze&llikler...
-# review: new
 ui-account-properties-of = Hesap ö&zellikleri...
 ui-account-move-up = Yukarı &Taşı
 ui-account-move-down = Aşa&ğı Taşı
@@ -918,11 +835,8 @@ ui-setup-from = Kaydeden: Inbox Classic { $version }, tarih: { $date }.
 ui-setup-import-button = İçe &Aktar
 ui-setup-done = Bitti
 ui-setup-first-run = Ayarları ve hesapları başka bir bilgisayardan içe aktar...
-# review: new
 ui-first-run-other = Inbox Classic'i başka bir bilgisayarda zaten kullanıyor musunuz? O bilgisayarın hesaplarını ve ayarlarını buraya getirin.
-# review: new
-ui-first-run-sync = O Bilgisayarın Eşitlemesine Katıl…
-# review: new
+ui-first-run-sync = Eşitlemeye Katıl…
 ui-first-run-import = Dosyadan İçe Aktar…
 
 ui-field-verifiers = Gönderen denetimleri güvenilir sayılan sunucular:
@@ -935,11 +849,7 @@ ui-keys-publish-now = Yayımla
 ui-keys-paste = &Panodan İçe Aktar
 ui-keys-paste-none = Panoda OpenPGP anahtarı yok.
 ui-contact-find-key = Anahtar &Bul
-# review: new
 ui-reactions-label = Tepkiler:
-# review: new
 ui-reaction-open-email = Tepki E-postasını Aç
-# review: new
 ui-reaction-show-as-email = E-posta Olarak Göster
-# review: new
 ui-reaction-when = Tepki: { $when }

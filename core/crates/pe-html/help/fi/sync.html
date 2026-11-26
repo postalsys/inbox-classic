@@ -1,20 +1,20 @@
-<!--review--><h1>Tietokoneiden synkronointi</h1>
+<h1>Tietokoneiden synkronointi</h1>
 <p class="summary">Pidä tilisi, avaimesi, yhteystietosi, sääntösi ja asetuksesi samoina jokaisella tietokoneella omistamasi kansion tai tallennustilan kautta.</p>
-<p>Synkronointi säilyttää asetuksistasi holvia valitsemassasi paikassa: kansiossa, jonka Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud tai Syncthing kopioi tietokoneidesi välillä, tai S3-yhteensopivassa tallennustilassa. Kaikki holvin sisältö salataan synkronoinnin salalauseellasi ennen kuin se lähtee tietokoneelta. Viestisi eivät ole holvissa, vaan ne pysyvät postipalvelimillasi.</p>
+<p>Synkronointi tallentaa tilit ja asetukset valitsemaasi sijaintiin: kansioon, jota Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud tai Syncthing kopioi tietokoneidesi välillä, tai S3-yhteensopivaan tallennustilaan. Synkronoitavat tiedot salataan synkronoinnin salalauseellasi ennen lähettämistä. Synkronointi ei siirrä viestejä eikä pelkästään tälle tietokoneelle tallennettuja luonnoksia.</p>
 <h2>Synkronoinnin määrittäminen ensimmäisellä tietokoneella</h2>
+<aside class="warning">Säilytä synkronoinnin salalause turvallisessa paikassa. Ilman sitä mikään muu tietokone ei voi liittyä.</aside>
 <ol>
     <li>Avaa asetussivu <b data-settings="sync"></b> ja napsauta <b data-text="ui-sync-set-up"></b>.</li>
     <li>Valitse <b data-text="ui-sync-folder"></b> ja napsauta <b data-text="ui-sync-choose-folder"></b>, tai valitse <b data-text="ui-sync-bucket"></b> ja täytä sen tiedot. Napsauta <b data-text="ui-sync-next"></b>.</li>
     <li>Kirjoita synkronoinnin salalause kahdesti ja anna tälle tietokoneelle nimi. Valitse, mitä synkronoidaan, ja napsauta <b data-text="ui-sync-turn-on"></b>.</li>
 </ol>
-<aside class="warning">Säilytä synkronoinnin salalause turvallisessa paikassa. Ilman sitä mikään muu tietokone ei voi liittyä.</aside>
 <h2>Toisen tietokoneen lisääminen</h2>
 <ol>
-    <li>Avaa toisella tietokoneella asetussivu <b data-settings="sync"></b>, napsauta <b data-text="ui-sync-set-up"></b> ja valitse sama kansio tai tallennustila.</li>
-    <li>Kirjoita synkronoinnin salalause, jonka valitsit ensimmäisellä tietokoneella, ja napsauta <b data-text="ui-sync-turn-on"></b>.</li>
+    <li>Avaa toisella tietokoneella asetussivu <b data-settings="sync"></b>, napsauta <b data-text="ui-sync-set-up"></b> ja valitse sama kansio tai tallennustila. Napsauta <b data-text="ui-sync-next"></b>.</li>
+    <li>Kirjoita synkronoinnin salalause ja anna tälle tietokoneelle nimi. Valitse, mitä synkronoidaan, ja napsauta <b data-text="ui-sync-turn-on"></b>.</li>
 </ol>
-<p>Tietokoneella jo olevat tiedot ja synkronoinnin tiedot yhdistetään: tili tai yhteystieto, joka on molemmissa, yhdistyy yhdeksi. Viestisi ladataan uudelleen palvelimilta.</p>
+<p>Olemassa olevat tiedot yhdistetään synkronoituihin tietoihin. Toisiaan vastaavat tilit ja yhteystiedot yhdistetään yhdeksi. Lisätyt tilit lataavat viestit, jotka ovat saatavilla niiden postipalvelimilla.</p>
 <h2>Synkronoinnin aikana</h2>
-<p>Jokainen tietokone synkronoi muutaman minuutin välein ja silloin, kun napsautat <b data-text="ui-sync-now"></b>. Kun sama asia muutettiin kahdella tietokoneella samaan aikaan, viimeksi tehty muutos säilytetään ja toinen siirtyy kohtaan <b data-text="ui-sync-history"></b>, jossa voit palauttaa sen. Kun toinen tietokone poistaa tilin, pääikkuna kertoo siitä.</p>
-<p>Jos haluat lopettaa synkronoinnin tietokoneella, jota et enää käytä, napsauta <b data-text="ui-sync-computers"></b> ja poista se. Jos haluat lopettaa tämän tietokoneen synkronoinnin, napsauta <b data-text="ui-sync-turn-off"></b>: kaikki pysyy ennallaan.</p>
-<nav class="related"><a href="topic:move-computer"></a> <a href="topic:manage-accounts"></a> <a href="topic:encryption-keys"></a></nav><!--/review-->
+<p>Jokainen tietokone synkronoi muutaman minuutin välein ja silloin, kun napsautat <b data-text="ui-sync-now"></b>. Jos muutokset ovat ristiriidassa, synkronointi säilyttää yhden version ja tallentaa korvatut arvot palautettaviksi kohtaan <b data-text="ui-sync-history"></b>. Salasanoja, kirjautumistietoja ja yksityisiä avaimia ei säilytetä tässä historiassa. Kun toinen tietokone poistaa tilin, pääikkuna kertoo siitä.</p>
+<p>Jos haluat lopettaa synkronoinnin tietokoneella, jota et enää käytä, napsauta <b data-text="ui-sync-computers"></b> ja poista se. Jos haluat lopettaa tämän tietokoneen synkronoinnin, napsauta <b data-text="ui-sync-turn-off"></b>: kaikki tiedot säilyvät ennallaan.</p>
+<nav class="related"><a href="topic:move-computer"></a> <a href="topic:manage-accounts"></a> <a href="topic:encryption-keys"></a></nav>

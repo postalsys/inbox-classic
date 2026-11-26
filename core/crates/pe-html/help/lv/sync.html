@@ -1,20 +1,20 @@
-<!--review--><h1>Datoru sinhronizācija</h1>
+<h1>Datoru sinhronizācija</h1>
 <p class="summary">Uzturiet kontus, atslēgas, kontaktpersonas, kārtulas un iestatījumus vienādus visos datoros, izmantojot jums piederošu mapi vai krātuvi.</p>
-<p>Sinhronizācija glabā jūsu iestatījumu glabātuvi jūsu izvēlētā vietā: mapē, ko Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud vai Syncthing kopē starp jūsu datoriem, vai ar S3 saderīgā krātuvē. Pirms dati atstāj datoru, viss glabātuvē tiek šifrēts ar jūsu sinhronizācijas paroles frāzi. Jūsu ziņojumu tajā nav; tie paliek jūsu pasta serveros.</p>
+<p>Sinhronizācija glabā lietotnes iestatījumus jūsu izvēlētā vietā: mapē, ko Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud vai Syncthing kopē starp jūsu datoriem, vai ar S3 saderīgā krātuvē. Sinhronizējamie dati tiek šifrēti ar jūsu sinhronizācijas paroles frāzi pirms nosūtīšanas. Sinhronizācija nepārsūta ziņojumus, arī melnrakstus, kas saglabāti tikai šajā datorā.</p>
 <h2>Sinhronizācijas iestatīšana pirmajā datorā</h2>
-<ol>
-    <li>Atveriet iestatījumus <b data-settings="sync"></b> un noklikšķiniet uz <b data-text="ui-sync-set-up"></b>.</li>
-    <li>Izvēlieties opciju „<b data-text="ui-sync-folder"></b>” un noklikšķiniet uz <b data-text="ui-sync-choose-folder"></b> vai izvēlieties opciju „<b data-text="ui-sync-bucket"></b>” un aizpildiet tās datus. Noklikšķiniet uz <b data-text="ui-sync-next"></b>.</li>
-    <li>Divreiz ievadiet sinhronizācijas paroles frāzi un šī datora nosaukumu. Izvēlieties, ko sinhronizēt, un noklikšķiniet uz <b data-text="ui-sync-turn-on"></b>.</li>
-</ol>
 <aside class="warning">Glabājiet sinhronizācijas paroles frāzi drošā vietā. Bez tās neviens cits dators nevarēs pievienoties.</aside>
+<ol>
+    <li>Atveriet iestatījumus <b data-settings="sync"></b> un noklikšķiniet uz pogas „<b data-text="ui-sync-set-up"></b>”.</li>
+    <li>Izvēlieties opciju „<b data-text="ui-sync-folder"></b>” un noklikšķiniet uz pogas „<b data-text="ui-sync-choose-folder"></b>” vai izvēlieties opciju „<b data-text="ui-sync-bucket"></b>” un aizpildiet tās datus. Noklikšķiniet uz pogas „<b data-text="ui-sync-next"></b>”.</li>
+    <li>Divreiz ievadiet sinhronizācijas paroles frāzi un norādiet šī datora nosaukumu. Izvēlieties, ko sinhronizēt, un noklikšķiniet uz pogas „<b data-text="ui-sync-turn-on"></b>”.</li>
+</ol>
 <h2>Cita datora pievienošana</h2>
 <ol>
-    <li>Otrā datorā atveriet iestatījumus <b data-settings="sync"></b>, noklikšķiniet uz <b data-text="ui-sync-set-up"></b> un izvēlieties to pašu mapi vai krātuvi.</li>
-    <li>Ievadiet sinhronizācijas paroles frāzi, ko izvēlējāties pirmajā datorā, un noklikšķiniet uz <b data-text="ui-sync-turn-on"></b>.</li>
+    <li>Otrā datorā atveriet iestatījumus <b data-settings="sync"></b>, noklikšķiniet uz pogas „<b data-text="ui-sync-set-up"></b>” un izvēlieties to pašu mapi vai krātuvi. Noklikšķiniet uz pogas „<b data-text="ui-sync-next"></b>”.</li>
+    <li>Ievadiet sinhronizācijas paroles frāzi un šī datora nosaukumu. Izvēlieties, ko sinhronizēt, un noklikšķiniet uz pogas „<b data-text="ui-sync-turn-on"></b>”.</li>
 </ol>
-<p>Datorā jau esošie dati un sinhronizācijas dati tiek apvienoti: konts vai kontaktpersona, kas ir abās vietās, kļūst par vienu. Jūsu ziņojumi tiek vēlreiz lejupielādēti no serveriem.</p>
+<p>Esošie dati tiek apvienoti ar sinhronizētajiem datiem. Atbilstošie kontu un kontaktpersonu ieraksti tiek apvienoti. Pievienotajiem kontiem tiek lejupielādēti ziņojumi, kas pieejami to pasta serveros.</p>
 <h2>Sinhronizācijas laikā</h2>
-<p>Katrs dators sinhronizē ik pēc dažām minūtēm un tad, kad noklikšķināt uz <b data-text="ui-sync-now"></b>. Ja kaut kas tika mainīts divos datoros vienlaikus, tiek paturēta pēdējā veiktā izmaiņa, bet otra nonāk logā <b data-text="ui-sync-history"></b>, kur to var atjaunot. Ja cits dators noņem kontu, galvenajā logā par to tiek paziņots.</p>
-<p>Lai pārtrauktu sinhronizāciju datorā, ko vairs neizmantojat, noklikšķiniet uz <b data-text="ui-sync-computers"></b> un noņemiet to. Lai pārtrauktu šī datora sinhronizāciju, noklikšķiniet uz <b data-text="ui-sync-turn-off"></b>: viss paliek, kā ir.</p>
-<nav class="related"><a href="topic:move-computer"></a> <a href="topic:manage-accounts"></a> <a href="topic:encryption-keys"></a></nav><!--/review-->
+<p>Katrs dators sinhronizē ik pēc dažām minūtēm un tad, kad noklikšķināt uz pogas „<b data-text="ui-sync-now"></b>”. Ja izmaiņas ir pretrunā, sinhronizācija patur vienu versiju un aizstātās vērtības saglabā atjaunošanai logā „<b data-text="ui-sync-history"></b>”. Paroles, pierakstīšanās dati un privātās atslēgas šajā vēsturē netiek glabāti. Ja cits dators noņem kontu, galvenajā logā par to tiek paziņots.</p>
+<p>Lai pārtrauktu sinhronizāciju datorā, ko vairs neizmantojat, noklikšķiniet uz pogas „<b data-text="ui-sync-computers"></b>” un noņemiet to. Lai pārtrauktu šī datora sinhronizāciju, noklikšķiniet uz pogas „<b data-text="ui-sync-turn-off"></b>”: visi dati paliek nemainīti.</p>
+<nav class="related"><a href="topic:move-computer"></a> <a href="topic:manage-accounts"></a> <a href="topic:encryption-keys"></a></nav>

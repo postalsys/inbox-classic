@@ -40,7 +40,6 @@ cmd-accounts = &Cuentas...
 cmd-find = &Buscar mensaje
 cmd-save-as = &Guardar como...
 cmd-print = Im&primir...
-# review: new
 cmd-print-conversation = Imprimir c&onversación...
 cmd-import = &Importar mensajes...
 cmd-outbox = Bandeja de &salida...
@@ -62,43 +61,29 @@ ui-find-not-found = No se encontró «{ $words }» en este mensaje
 cmd-expand-all-threads = &Expandir todas las conversaciones
 cmd-collapse-all-threads = &Contraer todas las conversaciones
 ui-group-by-conversation = Agrupar lo&s mensajes por conversación
-# review: new
 ui-show-whole-conversation = Mostrar &toda la conversación en el panel de lectura
-# review: new
-ui-show-whole-conversation-note = La fila de una conversación abre todos sus mensajes, con sus respuestas, sus borradores y los mensajes archivados en otras carpetas. Los mensajes leídos se contraen en una línea: haga clic en una línea para abrirla o contraerla.
-# review: new
+ui-show-whole-conversation-note = Abra juntos los mensajes de una conversación, incluidas sus respuestas, sus borradores y los mensajes guardados en otras carpetas. Los mensajes leídos suelen estar contraídos en una línea: haga clic en una línea para abrirla o contraerla.
 ui-conversation-order = &Orden de la conversación:
-# review: new
 ui-conversation-oldest-first = Primero el más antiguo
-# review: new
 ui-conversation-newest-first = Primero el más reciente
-# review: new
 ui-thread-count = { $new ->
     [0] ({ $count })
     [one] ({ $count }, { $new } nuevo)
    *[other] ({ $count }, { $new } nuevos)
 }
-# review: new
 ui-conversation-to = para { $people }
-# review: new
 ui-conversation-draft = Borrador
-# review: new
 ui-conversation-alone = Firmado o cifrado: se abre por separado
-# review: new
 ui-conversation-downloading = Descargando…
-# review: new
 ui-conversation-earlier = { $count ->
     [one] Mostrar 1 mensaje anterior
    *[other] Mostrar { $count } mensajes anteriores
 }
-# review: new
 ui-conversation-elsewhere = { $count ->
     [one] Esta conversación también tiene un mensaje en otra carpeta.
    *[other] Esta conversación también tiene { $count } mensajes en otras carpetas.
 }
-# review: new
 ui-conversation-this-folder = &Solo esta carpeta
-# review: new
 ui-conversation-whole = &Toda la conversación
 cmd-folder-list = Lis&ta de carpetas
 cmd-layout-automatic = &Automático
@@ -442,140 +427,73 @@ ui-settings-encryption = Cifrado
 ui-settings-language = Idioma
 ui-settings-label = { $label }:
 ui-apply = Apli&car
-# review: new
 ui-settings-sync = Sincronización
-# review: new
 ui-sync-note = Mantenga iguales en todos sus equipos las cuentas, las claves, la Libreta de direcciones, las reglas y la configuración, a través de una carpeta o un almacenamiento de su propiedad. Todo se cifra con su contraseña de sincronización antes de salir de este equipo.
-# review: new
 ui-sync-place = Sincronizado a través de:
-# review: new
 ui-sync-status = Estado:
-# review: new
 ui-sync-set-up = Con&figurar la sincronización…
-# review: new
 ui-sync-now = Sincronizar &ahora
-# review: new
 ui-sync-computers = &Equipos…
-# review: new
 ui-sync-history = &Historial…
-# review: new
 ui-sync-turn-off = &Desactivar la sincronización…
-# review: new
 ui-sync-what = Qué sincronizar
-# review: new
-ui-sync-what-note = Las contraseñas, los datos de acceso y las claves privadas solo viajan cifrados. Excluya lo que deba quedarse en este equipo.
-# review: new
+ui-sync-what-note = Las contraseñas, los datos de acceso y las claves privadas solo se transmiten cifrados. Excluya lo que deba quedarse en este equipo.
 ui-sync-accounts = Cue&ntas
-# review: new
 ui-sync-passwords = Contra&señas
-# review: new
 ui-sync-sign-ins = &Inicios de sesión con Google, Microsoft y aplicaciones de inicio de sesión
-# review: new
 ui-sync-sign-in-apps = A&plicaciones de inicio de sesión
-# review: new
 ui-sync-app-secrets = Sec&retos de las aplicaciones de inicio de sesión
-# review: new
 ui-sync-contacts = &Libreta de direcciones
-# review: new
 ui-sync-keys = Cla&ves
-# review: new
 ui-sync-private-keys = S&us claves privadas
-# review: new
 ui-sync-rules = Re&glas
-# review: new
 ui-sync-trusted = Re&mitentes de confianza
-# review: new
 ui-sync-settings = C&onfiguración
-# review: new
 ui-sync-preferences = Diseño y vis&ta
-# review: new
 ui-sync-everything = Todo
-# review: new
 ui-sync-some-left-out = Algunos elementos excluidos
-# review: new
 ui-sync-where = Dónde guardarla
-# review: new
 ui-sync-folder = Una carpeta
-# review: new
 ui-sync-folder-note = Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud o Syncthing la copia en sus otros equipos.
-# review: new
 ui-sync-bucket = Almacenamiento compatible con S3
-# review: new
 ui-sync-bucket-note = Amazon S3, Cloudflare R2, Backblaze B2, MinIO u otro almacenamiento que funcione como S3.
-# review: new
 ui-sync-folder-label = &Carpeta:
-# review: new
 ui-sync-folder-none = Aún no se ha elegido ninguna
-# review: new
 ui-sync-choose-folder = &Elegir…
-# review: new
 ui-sync-choose-folder-title = Elegir la carpeta de sincronización
-# review: new
 ui-sync-endpoint = &Punto de conexión:
-# review: new
 ui-sync-region = &Región:
-# review: new
 ui-sync-bucket-name = &Bucket:
-# review: new
 ui-sync-prefix = Carpeta en el b&ucket:
-# review: new
 ui-sync-access-key = &ID de clave de acceso:
-# review: new
 ui-sync-secret-key = Clave de acceso secre&ta:
-# review: new
 ui-sync-next = &Siguiente
-# review: new
 ui-sync-join-title = Unirse a la sincronización
-# review: new
-ui-sync-join-note = Esta ubicación contiene la sincronización de sus otros equipos. Escriba la contraseña de sincronización que eligió en el primero.
-# review: new
+ui-sync-join-note = Esta ubicación ya contiene datos sincronizados. Escriba la contraseña de sincronización que eligió en el primer equipo.
 ui-sync-start-title = Iniciar la sincronización
-# review: new
 ui-sync-start-note = Elija una contraseña de sincronización. La escribirá una vez en cada equipo que agregue. Guárdela en un lugar seguro: sin ella, ningún otro equipo podrá unirse.
-# review: new
-ui-sync-name = &Nombre de este equipo:
-# review: new
-ui-sync-merge-note = Lo que tiene este equipo y lo que contiene la sincronización se combinan: una cuenta o un contacto que esté en ambos pasa a ser uno solo.
-# review: new
-ui-sync-turn-on = Acti&var la sincronización
-# review: new
+ui-sync-name = Nombre de este e&quipo:
+ui-sync-merge-note = Los datos de este equipo se combinan con los datos sincronizados. Las cuentas y los contactos coincidentes se fusionan.
+ui-sync-turn-on = A&ctivar la sincronización
 ui-sync-on = La sincronización está activada.
-# review: new
 ui-sync-turn-off-ask = ¿Desactivar la sincronización en este equipo? Todo queda como está, aquí y en sus otros equipos. Este equipo simplemente deja de sincronizarse.
-# review: new
 ui-sync-turn-off-button = Desactivar
-# review: new
 ui-sync-computers-title = Equipos
-# review: new
-ui-sync-computers-note = Los equipos que se sincronizan a través de esta ubicación. Quite el que ya no use: deja de sincronizarse y lo que sincronizó se conserva.
-# review: new
+ui-sync-computers-note = Estos equipos se sincronizan a través de la misma ubicación. Quite un equipo que ya no use para detener su sincronización. Sus datos sincronizados se conservan.
 ui-sync-this-computer = Este equipo
-# review: new
 ui-sync-seen = Última sincronización: { $when }
-# review: new
 ui-sync-remove-ask = ¿Quitar «{ $name }» de la sincronización? Dejará de sincronizarse la próxima vez que lo intente. Para volver a sincronizarlo, configure de nuevo la sincronización en él.
-# review: new
 ui-sync-loading = Leyendo…
-# review: new
 ui-sync-history-title = Historial
-# review: new
-ui-sync-history-note = Cuando se modificó lo mismo en dos equipos a la vez, se conservó el último cambio realizado y el otro está aquí. Restaure uno para usarlo en su lugar.
-# review: new
+ui-sync-history-note = Cuando hay cambios en conflicto de distintos equipos, la sincronización conserva una versión. Aquí aparecen los valores sustituidos; restaure uno para volver a usarlo. Las contraseñas, los datos de acceso y las claves privadas no se guardan aquí.
 ui-sync-history-empty = No se reemplazó ningún cambio.
-# review: new
-ui-sync-history-row = Desde { $source }, { $when }
-# review: new
+ui-sync-history-row = Origen: { $source }, { $when }
 ui-sync-restore = &Restaurar
-# review: new
 ui-sync-restore-points = Puntos de restauración
-# review: new
-ui-sync-restore-points-note = Antes de que una sincronización quite algo aquí, se guarda cómo estaba todo. Abra uno para recuperar lo que elija de él.
-# review: new
+ui-sync-restore-points-note = Los puntos de restauración guardan su configuración antes de que la sincronización elimine elementos de este equipo. Abra uno para elegir qué restaurar.
 ui-sync-restore-points-empty = Aún no hay ninguno.
-# review: new
 ui-sync-open-point = &Abrir…
 # Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
-# review: new
 win-sync-back = < &Atrás
 ui-language-label = &Idioma:
 ui-restart-note = Reinicie Inbox Classic para aplicar el nuevo idioma.
@@ -587,7 +505,6 @@ ui-delete-folder-question = ¿Eliminar la carpeta «{ $folder }», todos sus men
 ui-properties = Pr&opiedades
 ui-account-sync = &Enviar y recibir
 ui-account-properties = P&ropiedades...
-# review: new
 ui-account-properties-of = Propiedades de la c&uenta...
 ui-account-move-up = Mover &arriba
 ui-account-move-down = Mover a&bajo
@@ -915,11 +832,8 @@ ui-setup-from = Guardado con Inbox Classic { $version } el { $date }.
 ui-setup-import-button = &Importar
 ui-setup-done = Listo
 ui-setup-first-run = Importar configuración y cuentas de otro equipo...
-# review: new
 ui-first-run-other = ¿Ya usa Inbox Classic en otro equipo? Traiga aquí sus cuentas y su configuración.
-# review: new
-ui-first-run-sync = Unirse a su sincronización…
-# review: new
+ui-first-run-sync = Unirse a la sincronización…
 ui-first-run-import = Importar desde un archivo…
 
 ui-field-verifiers = Confiar en las comprobaciones del remitente realizadas por:
@@ -932,11 +846,7 @@ ui-keys-publish-now = Publicar
 ui-keys-paste = Importar del por&tapapeles
 ui-keys-paste-none = El portapapeles no contiene ninguna clave OpenPGP.
 ui-contact-find-key = &Buscar clave
-# review: new
 ui-reactions-label = Reacciones:
-# review: new
 ui-reaction-open-email = Abrir el correo de la reacción
-# review: new
 ui-reaction-show-as-email = Mostrar como correo
-# review: new
 ui-reaction-when = Reacción: { $when }

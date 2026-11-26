@@ -997,56 +997,35 @@ setup-error-newer = Ovu datoteku je sačuvala novija verzija programa Inbox Clas
 setup-error-needs-passphrase = Ova datoteka je zaštićena pristupnom frazom. Unesite pristupnu frazu sa kojom je sačuvana.
 setup-error-wrong-passphrase = To nije pristupna fraza sa kojom je ova datoteka sačuvana.
 setup-error-changed = Nije moguće potvrditi celovitost datoteke podešavanja. Možda je izmenjena ili oštećena i ne može da se uveze.
-# review: new
-sync-wrong-passphrase = To nije pristupna fraza za sinhronizaciju ovog trezora. Unesite onu koju ste izabrali kada ste podesili sinhronizaciju na prvom računaru.
-# review: new
+sync-wrong-passphrase = Pristupna fraza za sinhronizaciju nije ispravna. Unesite frazu koju ste izabrali pri podešavanju sinhronizacije na prvom računaru.
 sync-place = { $place }, kao „{ $name }“
-# review: new
 sync-news-removed = { $count ->
     [1] Sinhronizacija je uklonila nalog jer je uklonjen na drugom računaru: { $accounts }.
    *[other] Sinhronizacija je uklonila naloge jer su uklonjeni na drugom računaru: { $accounts }.
 }
-# review: new
 sync-news-lost = { $count ->
     [1] Promena napravljena u isto vreme na drugom računaru zamenjena je promenom napravljenom ovde. Istorija sinhronizacije je čuva.
     [one] { $count } promena napravljena u isto vreme na drugim računarima zamenjena je promenama napravljenim ovde. Istorija sinhronizacije ih čuva.
     [few] { $count } promene napravljene u isto vreme na drugim računarima zamenjene su promenama napravljenim ovde. Istorija sinhronizacije ih čuva.
    *[other] { $count } promena napravljenih u isto vreme na drugim računarima zamenjeno je promenama napravljenim ovde. Istorija sinhronizacije ih čuva.
 }
-# review: new
 sync-status-busy = Sinhronizacija…
-# review: new
 sync-status-never = Još nije sinhronizovano.
-# review: new
 sync-status-last = Poslednja sinhronizacija: { $when }.
-# review: new
 sync-status-today = Poslednja sinhronizacija: danas u { $time }.
-# review: new
 sync-when-today = danas u { $time }
-# review: new
 sync-status-problem = Sinhronizacija nije uspela: { $problem }
-# review: new
 sync-removed-here = Ovaj računar je uklonjen iz sinhronizacije na drugom računaru. Isključite sinhronizaciju, a zatim je ponovo podesite da biste se pridružili.
-# review: new
 sync-item-account = Nalog { $name }
-# review: new
 sync-item-contact = Kontakt { $name }
-# review: new
 sync-item-group = Grupa { $name }
-# review: new
 sync-item-key = Ključ { $name }
-# review: new
 sync-item-rule = Pravilo { $name }
-# review: new
 sync-item-trusted = Pouzdani pošiljalac { $name }
-# review: new
 sync-item-sign-in-app = Aplikacija za prijavljivanje { $name }
-# review: new
 sync-item-settings = Podešavanja
-# review: new
 sync-another-computer = drugi računar
-# review: new
-sync-no-key = Ovaj računar više nema ključ trezora za sinhronizaciju. Isključite sinhronizaciju i ponovo je uključite pomoću pristupne fraze za sinhronizaciju.
+sync-no-key = Ovom računaru nedostaje ključ za šifrovanje sinhronizacije. Isključite sinhronizaciju, a zatim je ponovo podesite pomoću svoje pristupne fraze za sinhronizaciju.
 setup-error-read = Datoteku podešavanja nije moguće pročitati: { $error }
 setup-error-write = Podešavanja nije moguće sačuvati: { $error }
 setup-error-no-parts = Izaberite bar jednu kategoriju.
@@ -1194,10 +1173,8 @@ preview-not-printed = { $name } ({ $details }) se ne štampa. Otvorite datoteku 
 
 pgp-error-attached-private = Ovaj prilog sadrži privatni ključ. Neposredno iz pošte mogu da se uvezu samo javni ključevi. Da biste obnovili svoj privatni ključ, sačuvajte prilog i uvezite njegovu datoteku u prozoru Ključevi za šifrovanje.
 pgp-part-find-key = Pronađi ključ
-# review: new
 reaction-notification-title = { $name }: reakcija { $emoji }
-# review: new
 reaction-notification-text = { $count ->
-    [1] na { $subject }
-   *[other] na { $subject }, ukupno reakcija: { $count }
+    [1] na poruku { $subject }
+   *[other] na poruku { $subject } (ukupno novih reakcija: { $count })
 }

@@ -1,20 +1,20 @@
-<!--review--><h1>Synkroniser dine computere</h1>
+<h1>Synkroniser dine computere</h1>
 <p class="summary">Hold dine konti, nøgler, kontakter, regler og indstillinger ens på alle dine computere via en mappe eller et lager, du selv ejer.</p>
-<p>Synkronisering gemmer en boks med din opsætning et sted, du vælger: en mappe, som Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud eller Syncthing kopierer mellem dine computere, eller et S3-kompatibelt lager. Alt i den krypteres med din synkroniseringsadgangsfrase, før det forlader computeren. Dine meddelelser er ikke med; de bliver på dine mailservere.</p>
+<p>Synkronisering gemmer din opsætning et sted, du vælger: en mappe, som Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud eller Syncthing kopierer mellem dine computere, eller et S3-kompatibelt lager. De synkroniserede data krypteres med din synkroniseringsadgangsfrase, før de forlader computeren. Synkronisering overfører ikke meddelelser, heller ikke kladder, der kun er gemt på denne computer.</p>
 <h2>Konfigurer synkronisering på din første computer</h2>
+<aside class="warning">Opbevar synkroniseringsadgangsfrasen et sikkert sted. Uden den kan ingen anden computer deltage.</aside>
 <ol>
     <li>Åbn <b data-settings="sync"></b>, og klik på <b data-text="ui-sync-set-up"></b>.</li>
     <li>Vælg <b data-text="ui-sync-folder"></b>, og klik på <b data-text="ui-sync-choose-folder"></b>, eller vælg <b data-text="ui-sync-bucket"></b>, og udfyld oplysningerne. Klik på <b data-text="ui-sync-next"></b>.</li>
-    <li>Skriv en synkroniseringsadgangsfrase to gange og et navn til denne computer. Vælg, hvad der skal synkroniseres, og klik på <b data-text="ui-sync-turn-on"></b>.</li>
+    <li>Skriv en synkroniseringsadgangsfrase to gange. Skriv også et navn til denne computer. Vælg, hvad der skal synkroniseres, og klik på <b data-text="ui-sync-turn-on"></b>.</li>
 </ol>
-<aside class="warning">Opbevar synkroniseringsadgangsfrasen et sikkert sted. Uden den kan ingen anden computer deltage.</aside>
 <h2>Tilføj en anden computer</h2>
 <ol>
-    <li>Åbn <b data-settings="sync"></b> på den anden computer, klik på <b data-text="ui-sync-set-up"></b>, og vælg den samme mappe eller det samme lager.</li>
-    <li>Skriv den synkroniseringsadgangsfrase, du valgte på den første computer, og klik på <b data-text="ui-sync-turn-on"></b>.</li>
+    <li>Åbn <b data-settings="sync"></b> på den anden computer, klik på <b data-text="ui-sync-set-up"></b>, og vælg den samme mappe eller det samme lager. Klik på <b data-text="ui-sync-next"></b>.</li>
+    <li>Skriv synkroniseringsadgangsfrasen og et navn til denne computer. Vælg, hvad der skal synkroniseres, og klik på <b data-text="ui-sync-turn-on"></b>.</li>
 </ol>
-<p>Det, computeren allerede har, og det, synkroniseringen indeholder, flettes sammen: En konto eller kontakt, der findes begge steder, bliver til én. Dine meddelelser hentes igen fra serverne.</p>
+<p>Eksisterende data flettes med de synkroniserede data. Konti og kontakter, der svarer til hinanden, slås sammen. Tilføjede konti henter de meddelelser, der er tilgængelige på deres mailservere.</p>
 <h2>Mens den synkroniserer</h2>
-<p>Hver computer synkroniserer med få minutters mellemrum, og når du klikker på <b data-text="ui-sync-now"></b>. Når det samme blev ændret på to computere på samme tid, beholdes den sidst foretagne ændring, og den anden havner i <b data-text="ui-sync-history"></b>, hvor du kan gendanne den. Når en anden computer fjerner en konto, fortæller hovedvinduet det.</p>
+<p>Hver computer synkroniserer med få minutters mellemrum, og når du klikker på <b data-text="ui-sync-now"></b>. Når ændringer er i konflikt, beholder synkroniseringen én version og gemmer erstattede værdier i <b data-text="ui-sync-history"></b>, så du kan gendanne dem. Adgangskoder, loginoplysninger og private nøgler gemmes ikke i denne historik. Når en anden computer fjerner en konto, fortæller hovedvinduet det.</p>
 <p>Hvis du vil stoppe synkroniseringen af en computer, du ikke længere bruger, skal du klikke på <b data-text="ui-sync-computers"></b> og fjerne den. Hvis du vil stoppe synkroniseringen af denne computer, skal du klikke på <b data-text="ui-sync-turn-off"></b>: Alt forbliver, som det er.</p>
-<nav class="related"><a href="topic:move-computer"></a> <a href="topic:manage-accounts"></a> <a href="topic:encryption-keys"></a></nav><!--/review-->
+<nav class="related"><a href="topic:move-computer"></a> <a href="topic:manage-accounts"></a> <a href="topic:encryption-keys"></a></nav>

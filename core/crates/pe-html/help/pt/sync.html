@@ -1,20 +1,20 @@
-<!--review--><h1>Sincronizar os seus computadores</h1>
+<h1>Sincronizar os seus computadores</h1>
 <p class="summary">Mantenha as contas, as chaves, os contactos, as regras e as definições iguais em todos os computadores, através de uma pasta ou de um armazenamento que lhe pertence.</p>
-<p>A sincronização guarda um cofre com a sua configuração num local à sua escolha: uma pasta que o Dropbox, o OneDrive, o iCloud Drive, o Google Drive, o Nextcloud ou o Syncthing copia entre os seus computadores, ou um armazenamento compatível com S3. Tudo o que contém é encriptado com a frase de acesso da sincronização antes de sair do computador. As mensagens não fazem parte dele; ficam nos servidores de correio.</p>
+<p>A sincronização guarda a sua configuração num local à sua escolha: uma pasta que o Dropbox, o OneDrive, o iCloud Drive, o Google Drive, o Nextcloud ou o Syncthing copia entre os seus computadores, ou um armazenamento compatível com S3. Os dados sincronizados são encriptados com a frase de acesso da sincronização antes de saírem do computador. A sincronização não transfere mensagens, incluindo rascunhos guardados apenas neste computador.</p>
 <h2>Configurar a sincronização no primeiro computador</h2>
+<aside class="warning">Guarde a frase de acesso da sincronização num local seguro. Sem ela, nenhum outro computador pode aderir.</aside>
 <ol>
     <li>Escolha <b data-settings="sync"></b> e clique em <b data-text="ui-sync-set-up"></b>.</li>
     <li>Escolha <b data-text="ui-sync-folder"></b> e clique em <b data-text="ui-sync-choose-folder"></b>, ou escolha <b data-text="ui-sync-bucket"></b> e preencha os respetivos dados. Clique em <b data-text="ui-sync-next"></b>.</li>
-    <li>Escreva duas vezes uma frase de acesso para a sincronização e um nome para este computador. Escolha o que sincronizar e clique em <b data-text="ui-sync-turn-on"></b>.</li>
+    <li>Escreva duas vezes uma frase de acesso para a sincronização. Introduza também um nome para este computador. Escolha o que sincronizar e clique em <b data-text="ui-sync-turn-on"></b>.</li>
 </ol>
-<aside class="warning">Guarde a frase de acesso da sincronização num local seguro. Sem ela, nenhum outro computador pode aderir.</aside>
 <h2>Adicionar outro computador</h2>
 <ol>
-    <li>No outro computador, escolha <b data-settings="sync"></b>, clique em <b data-text="ui-sync-set-up"></b> e escolha a mesma pasta ou o mesmo armazenamento.</li>
-    <li>Escreva a frase de acesso da sincronização que escolheu no primeiro computador e clique em <b data-text="ui-sync-turn-on"></b>.</li>
+    <li>No outro computador, escolha <b data-settings="sync"></b>, clique em <b data-text="ui-sync-set-up"></b> e escolha a mesma pasta ou o mesmo armazenamento. Clique em <b data-text="ui-sync-next"></b>.</li>
+    <li>Escreva a frase de acesso da sincronização e um nome para este computador. Escolha o que sincronizar e clique em <b data-text="ui-sync-turn-on"></b>.</li>
 </ol>
-<p>O que o computador já tem e o que a sincronização contém são combinados: uma conta ou um contacto que exista em ambos passa a ser um só. As mensagens são transferidas novamente dos servidores.</p>
+<p>Os dados existentes são combinados com os dados sincronizados. As contas e os contactos correspondentes são unidos. As contas adicionadas transferem as mensagens disponíveis nos respetivos servidores de correio.</p>
 <h2>Durante a sincronização</h2>
-<p>Cada computador sincroniza a cada poucos minutos e quando clica em <b data-text="ui-sync-now"></b>. Quando o mesmo item é alterado em dois computadores ao mesmo tempo, a última alteração feita é mantida e a outra vai para <b data-text="ui-sync-history"></b>, onde a pode restaurar. Quando outro computador remove uma conta, a janela principal informa-o.</p>
+<p>Cada computador sincroniza a cada poucos minutos e quando clica em <b data-text="ui-sync-now"></b>. Quando há alterações em conflito, a sincronização mantém uma versão e guarda os valores substituídos em <b data-text="ui-sync-history"></b> para os poder restaurar. As palavras-passe, as credenciais de início de sessão e as chaves privadas ficam de fora deste histórico. Quando outro computador remove uma conta, a janela principal informa-o.</p>
 <p>Para deixar de sincronizar um computador que já não utiliza, clique em <b data-text="ui-sync-computers"></b> e remova-o. Para deixar de sincronizar este computador, clique em <b data-text="ui-sync-turn-off"></b>: tudo fica como está.</p>
-<nav class="related"><a href="topic:move-computer"></a> <a href="topic:manage-accounts"></a> <a href="topic:encryption-keys"></a></nav><!--/review-->
+<nav class="related"><a href="topic:move-computer"></a> <a href="topic:manage-accounts"></a> <a href="topic:encryption-keys"></a></nav>

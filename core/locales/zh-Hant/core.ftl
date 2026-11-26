@@ -780,53 +780,32 @@ setup-error-newer = 此設定檔是由較新版的 Inbox Classic（{ $version }�
 setup-error-needs-passphrase = 此設定檔受到密語保護。請輸入儲存時使用的密語。
 setup-error-wrong-passphrase = 這不是儲存此設定檔時使用的密語。
 setup-error-changed = 設定檔未通過完整性檢查。它可能已遭竄改或損毀，無法匯入。
-# review: new
-sync-wrong-passphrase = 這不是此保管庫的同步密語。請輸入您在第一部電腦上設定同步時選擇的密語。
-# review: new
+sync-wrong-passphrase = 同步密語不正確。請輸入您在第一部電腦上設定同步時選擇的密語。
 sync-place = { $place }，名稱為「{ $name }」
-# review: new
 sync-news-removed = { $count ->
    *[other] 由於帳戶{ $accounts }已在另一部電腦上移除，同步已將其移除。
 }
-# review: new
 sync-news-lost = { $count ->
     [1] 另一部電腦上同時進行的一項變更已被這裡的變更取代。同步歷程記錄保留了它。
    *[other] 其他電腦上同時進行的{ $count }項變更已被這裡的變更取代。同步歷程記錄保留了它們。
 }
-# review: new
 sync-status-busy = 正在同步...
-# review: new
 sync-status-never = 尚未同步。
-# review: new
 sync-status-last = 上次同步時間：{ $when }。
-# review: new
 sync-status-today = 上次同步時間：今天{ $time }。
-# review: new
 sync-when-today = 今天{ $time }
-# review: new
 sync-status-problem = 無法同步：{ $problem }
-# review: new
 sync-removed-here = 這部電腦已在另一部電腦上從同步中移除。請關閉同步，然後重新設定以加入。
-# review: new
 sync-item-account = 帳戶{ $name }
-# review: new
 sync-item-contact = 連絡人{ $name }
-# review: new
 sync-item-group = 群組{ $name }
-# review: new
 sync-item-key = 金鑰{ $name }
-# review: new
 sync-item-rule = 規則{ $name }
-# review: new
 sync-item-trusted = 信任的寄件者{ $name }
-# review: new
 sync-item-sign-in-app = 登入應用程式{ $name }
-# review: new
 sync-item-settings = 設定
-# review: new
 sync-another-computer = 另一部電腦
-# review: new
-sync-no-key = 這部電腦上已不再有同步保管庫的金鑰。請使用同步密語關閉同步，然後重新開啟。
+sync-no-key = 這部電腦上缺少同步使用的加密金鑰。請關閉同步，再使用同步密語重新設定。
 setup-error-read = 無法讀取設定檔：{ $error }
 setup-error-write = 無法儲存設定：{ $error }
 setup-error-no-parts = 請至少選擇一個項目。
@@ -922,10 +901,8 @@ preview-not-printed = 未列印{ $name }（{ $details }）。請開啟檔案以�
 
 pgp-error-attached-private = 這個附件包含私密金鑰。只有公開金鑰能直接從郵件匯入。若要還原您自己的私密金鑰，請儲存附件，再到「加密金鑰」匯入該檔案。
 pgp-part-find-key = 尋找金鑰
-# review: new
 reaction-notification-title = { $name }回應了{ $emoji }
-# review: new
 reaction-notification-text = { $count ->
     [1] 郵件：{ $subject }
-   *[other] 郵件：{ $subject }，共{ $count }個回應
+   *[other] 郵件：{ $subject }，共有{ $count }個新回應
 }

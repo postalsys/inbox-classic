@@ -2,7 +2,7 @@
 <p class="summary">从计算机中删除 Inbox Classic，并选择是否保留其本地数据。</p>
 <!--os:windows--><p>在<i>设置 &gt; 应用 &gt; 已安装的应用</i>中卸载 Inbox Classic。卸载程序会询问是否同时删除所有本地应用数据，包括帐户、邮件、联系人、密钥和设置。</p><!--/os-->
 <!--os:mac--><p>退出 Inbox Classic，然后将它从“应用程序”文件夹移到废纸篓。它下载的邮件仍保留在 <code>~/Library/Application Support/Inbox Classic</code> 中，直到您也删除该文件夹。</p><!--/os-->
-<!--os:linux--><p><!--review-->使用 <code>sudo apt remove inbox-classic</code> 删除软件包；在 Fedora 上使用 <code>sudo dnf remove inbox-classic</code>；在 Arch Linux 和 Omarchy 上使用 <code>sudo pacman -R inbox-classic</code>。它下载的邮件仍保留在 <code>~/.local/share/inbox-classic</code> 中，直到您也删除该文件夹。<!--/review--></p><!--/os-->
+<!--os:linux--><p>使用 <code>sudo apt remove inbox-classic</code> 删除软件包；在 Fedora 上使用 <code>sudo dnf remove inbox-classic</code>；在 Arch Linux 和 Omarchy 上使用 <code>sudo pacman -R inbox-classic</code>。它下载的邮件仍保留在 <code>~/.local/share/inbox-classic</code> 中，直到您也删除该文件夹。</p><!--/os-->
 <p>这些默认数据文件夹中还包含联系人、密钥和设置；删除它们会删除所有这些本地数据。如果您更改过位置，位置可能有所不同。卸载不会删除服务器上的邮件，也不一定会从系统的密码存储中删除凭据。</p>
 <p>要删除已保存的帐户登录凭据，请先在<b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>中删除每个帐户。如果只想删除一个帐户，请参阅<a href="topic:manage-accounts"></a>。</p>
 <nav class="related"><a href="topic:data-storage"></a> <a href="topic:updates"></a> <a href="topic:manage-accounts"></a></nav>

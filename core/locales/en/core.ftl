@@ -910,7 +910,7 @@ setup-error-newer = This setup was saved by a newer Inbox Classic ({ $version })
 setup-error-needs-passphrase = This setup is protected by a passphrase. Type the passphrase it was saved with.
 setup-error-wrong-passphrase = That is not the passphrase this setup was saved with.
 setup-error-changed = The setup file failed its integrity check. It may be altered or damaged and cannot be imported.
-sync-wrong-passphrase = That is not the sync passphrase of this vault. Type the one you chose when you set up sync on your first computer.
+sync-wrong-passphrase = That sync passphrase is incorrect. Enter the passphrase you chose when you set up sync on your first computer.
 sync-place = { $place }, as “{ $name }”
 sync-news-removed = { $count ->
     [one] Sync removed the account { $accounts }, as it was removed on another computer.
@@ -936,7 +936,7 @@ sync-item-trusted = Trusted sender { $name }
 sync-item-sign-in-app = Sign-in app { $name }
 sync-item-settings = Settings
 sync-another-computer = another computer
-sync-no-key = This computer no longer has the key of the sync vault. Turn sync off and on again with the sync passphrase.
+sync-no-key = The encryption key for sync is missing on this computer. Turn sync off, then set it up again with your sync passphrase.
 setup-error-read = The setup file could not be read: { $error }
 setup-error-write = The setup could not be saved: { $error }
 setup-error-no-parts = Choose at least one part.
@@ -1086,5 +1086,5 @@ preview-not-printed = { $name } ({ $details }) is not printed. Open it to print 
 reaction-notification-title = { $name } reacted { $emoji }
 reaction-notification-text = { $count ->
     [one] to { $subject }
-   *[other] to { $subject }, and { $count } reactions in all
+   *[other] to { $subject } ({ $count } new reactions in total)
 }

@@ -1,20 +1,20 @@
-<!--review--><h1>コンピューター間で同期する</h1>
+<h1>コンピューター間で同期する</h1>
 <p class="summary">アカウント、キー、連絡先、ルール、設定を、自分が管理するフォルダーまたはストレージを通じて、すべてのコンピューターで同じに保ちます。</p>
-<p>同期では、選択した場所に設定の保管庫が置かれます。その場所は、Dropbox、OneDrive、iCloud Drive、Google Drive、Nextcloud、Syncthingがコンピューター間でコピーするフォルダー、またはS3互換ストレージです。保管庫の中身はすべて、コンピューターから送られる前に同期パスフレーズで暗号化されます。メッセージは保管庫に含まれず、メール サーバーに残ります。</p>
+<p>同期では、選択した場所に設定を保存します。その場所は、Dropbox、OneDrive、iCloud Drive、Google Drive、Nextcloud、Syncthingがコンピューター間でコピーするフォルダー、またはS3互換ストレージです。同期するデータは、コンピューターから送られる前に同期パスフレーズで暗号化されます。メッセージは、このコンピューターだけにある下書きも含め、同期では転送されません。</p>
 <h2>最初のコンピューターで同期を設定する</h2>
+<aside class="warning">同期パスフレーズは安全な場所に保管してください。パスフレーズがないと、ほかのコンピューターは参加できません。</aside>
 <ol>
     <li><b data-settings="sync"></b>を開き、<b data-text="ui-sync-set-up"></b>をクリックします。</li>
     <li><b data-text="ui-sync-folder"></b>を選択して<b data-text="ui-sync-choose-folder"></b>をクリックするか、<b data-text="ui-sync-bucket"></b>を選択して詳細を入力します。<b data-text="ui-sync-next"></b>をクリックします。</li>
     <li>同期パスフレーズを2回入力し、このコンピューターの名前を入力します。同期する項目を選択し、<b data-text="ui-sync-turn-on"></b>をクリックします。</li>
 </ol>
-<aside class="warning">同期パスフレーズは安全な場所に保管してください。パスフレーズがないと、ほかのコンピューターは参加できません。</aside>
 <h2>別のコンピューターを追加する</h2>
 <ol>
-    <li>別のコンピューターで<b data-settings="sync"></b>を開き、<b data-text="ui-sync-set-up"></b>をクリックして、同じフォルダーまたはストレージを選択します。</li>
-    <li>最初のコンピューターで決めた同期パスフレーズを入力し、<b data-text="ui-sync-turn-on"></b>をクリックします。</li>
+    <li>別のコンピューターで<b data-settings="sync"></b>を開き、<b data-text="ui-sync-set-up"></b>をクリックして、同じフォルダーまたはストレージを選択し、<b data-text="ui-sync-next"></b>をクリックします。</li>
+    <li>最初のコンピューターで決めた同期パスフレーズと、このコンピューターの名前を入力します。同期する項目を選択し、<b data-text="ui-sync-turn-on"></b>をクリックします。</li>
 </ol>
-<p>そのコンピューターにすでにあるものと同期にあるものが統合されます。両方にあるアカウントや連絡先は1つになります。メッセージはサーバーからもう一度ダウンロードされます。</p>
+<p>そのコンピューターの既存のデータと同期データが統合されます。一致するアカウントや連絡先は1つになります。追加されたアカウントでは、サーバーにあるメールがダウンロードされます。既存のアカウントのダウンロード済みメールは保持されます。</p>
 <h2>同期中の動作</h2>
-<p>各コンピューターは数分ごとに、また<b data-text="ui-sync-now"></b>をクリックしたときに同期します。同じものが2台のコンピューターで同時に変更された場合は、最後に行われた変更が残り、もう一方の変更は<b data-text="ui-sync-history"></b>に移されます。そこから復元できます。別のコンピューターでアカウントが削除されると、メイン ウィンドウにそのことが表示されます。</p>
+<p>各コンピューターは数分ごとに、また<b data-text="ui-sync-now"></b>をクリックしたときに同期します。異なるコンピューターでの変更が競合すると、一方の値が残り、置き換えられた値が<b data-text="ui-sync-history"></b>に表示されます。そこから復元できます。パスワード、サインイン情報、秘密キーは履歴には保存されません。別のコンピューターでアカウントが削除されると、メイン ウィンドウにそのことが表示されます。</p>
 <p>使わなくなったコンピューターの同期を止めるには、<b data-text="ui-sync-computers"></b>をクリックして、そのコンピューターを削除します。このコンピューターの同期を止めるには、<b data-text="ui-sync-turn-off"></b>をクリックします。すべてそのまま残ります。</p>
-<nav class="related"><a href="topic:move-computer"></a> <a href="topic:manage-accounts"></a> <a href="topic:encryption-keys"></a></nav><!--/review-->
+<nav class="related"><a href="topic:move-computer"></a> <a href="topic:manage-accounts"></a> <a href="topic:encryption-keys"></a></nav>

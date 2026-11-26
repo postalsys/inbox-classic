@@ -923,54 +923,33 @@ setup-error-newer = Тези настройки са запазени от по-
 setup-error-needs-passphrase = Файлът с настройки е защитен с фраза за достъп. Въведете фразата, използвана при запазването му.
 setup-error-wrong-passphrase = Фразата за достъп не съвпада с използваната при запазването на файла.
 setup-error-changed = Целостта на файла с настройки не може да се потвърди. Той може да е променен или повреден и не може да бъде импортиран.
-# review: new
-sync-wrong-passphrase = Това не е фразата за достъп за синхронизиране на този трезор. Въведете тази, която избрахте, когато настроихте синхронизирането на първия си компютър.
-# review: new
+sync-wrong-passphrase = Фразата за достъп за синхронизиране е неправилна. Въведете фразата, която избрахте, когато настроихте синхронизирането на първия си компютър.
 sync-place = { $place }, като „{ $name }“
-# review: new
 sync-news-removed = { $count ->
     [one] Синхронизирането премахна акаунта { $accounts }, защото е премахнат на друг компютър.
    *[other] Синхронизирането премахна акаунтите { $accounts }, защото са премахнати на друг компютър.
 }
-# review: new
 sync-news-lost = { $count ->
     [one] Промяна, направена по същото време на друг компютър, беше заменена с направената тук. Историята на синхронизирането я пази.
    *[other] { $count } промени, направени по същото време на други компютри, бяха заменени с направените тук. Историята на синхронизирането ги пази.
 }
-# review: new
 sync-status-busy = Синхронизиране…
-# review: new
 sync-status-never = Все още не е синхронизирано.
-# review: new
 sync-status-last = Последно синхронизиране: { $when }.
-# review: new
 sync-status-today = Последно синхронизиране: днес в { $time }.
-# review: new
 sync-when-today = днес в { $time }
-# review: new
 sync-status-problem = Синхронизирането не бе успешно: { $problem }
-# review: new
 sync-removed-here = Този компютър е премахнат от синхронизирането на друг компютър. Изключете синхронизирането, след което го настройте отново, за да се присъедините.
-# review: new
 sync-item-account = Акаунт { $name }
-# review: new
 sync-item-contact = Контакт { $name }
-# review: new
 sync-item-group = Група { $name }
-# review: new
 sync-item-key = Ключ { $name }
-# review: new
 sync-item-rule = Правило { $name }
-# review: new
 sync-item-trusted = Доверен подател { $name }
-# review: new
 sync-item-sign-in-app = Приложение за влизане { $name }
-# review: new
 sync-item-settings = Настройки
-# review: new
 sync-another-computer = друг компютър
-# review: new
-sync-no-key = Този компютър вече няма ключа на трезора за синхронизиране. Изключете синхронизирането и го включете отново с фразата за достъп за синхронизиране.
+sync-no-key = Ключът за шифроване на синхронизираните данни липсва на този компютър. Изключете синхронизирането, след което го настройте отново с фразата си за достъп за синхронизиране.
 setup-error-read = Файлът с настройките не можа да бъде прочетен: { $error }
 setup-error-write = Настройките не можаха да бъдат запазени: { $error }
 setup-error-no-parts = Изберете поне една категория.
@@ -1100,10 +1079,8 @@ preview-not-printed = { $name } ({ $details }) не се отпечатва. О�
 
 pgp-error-attached-private = Този прикачен файл съдържа частен ключ. Направо от пощата могат да се импортират само публични ключове. За да възстановите свой частен ключ, запишете прикачения файл и го импортирайте от прозореца „Ключове за шифроване“.
 pgp-part-find-key = Намиране на ключ
-# review: new
 reaction-notification-title = { $name }: реакция { $emoji }
-# review: new
 reaction-notification-text = { $count ->
     [one] към { $subject }
-   *[other] към { $subject }, общо реакции: { $count }
+   *[other] към { $subject } (общо { $count } нови реакции)
 }

@@ -911,54 +911,33 @@ setup-error-newer = Filen ble lagret med en nyere versjon av Inbox Classic ({ $v
 setup-error-needs-passphrase = Filen er beskyttet med en passfrase. Skriv inn passfrasen som ble brukt da den ble lagret.
 setup-error-wrong-passphrase = Passfrasen stemmer ikke med den som ble brukt da filen ble lagret.
 setup-error-changed = Kunne ikke bekrefte at oppsettfilen er intakt. Den kan være endret eller skadet og kan ikke importeres.
-# review: new
-sync-wrong-passphrase = Det er ikke synkroniseringspassfrasen for dette hvelvet. Skriv inn den du valgte da du konfigurerte synkronisering på den første datamaskinen.
-# review: new
+sync-wrong-passphrase = Synkroniseringspassfrasen er feil. Skriv inn den du valgte da du konfigurerte synkronisering på den første datamaskinen.
 sync-place = { $place }, som «{ $name }»
-# review: new
 sync-news-removed = { $count ->
     [one] Synkroniseringen fjernet kontoen { $accounts }, fordi den ble fjernet på en annen datamaskin.
    *[other] Synkroniseringen fjernet kontoene { $accounts }, fordi de ble fjernet på en annen datamaskin.
 }
-# review: new
 sync-news-lost = { $count ->
     [one] En endring som ble gjort samtidig på en annen datamaskin, ble erstattet av den som ble gjort her. Synkroniseringshistorikken tar vare på den.
    *[other] { $count } endringer som ble gjort samtidig på andre datamaskiner, ble erstattet av dem som ble gjort her. Synkroniseringshistorikken tar vare på dem.
 }
-# review: new
 sync-status-busy = Synkroniserer…
-# review: new
 sync-status-never = Ikke synkronisert ennå.
-# review: new
 sync-status-last = Sist synkronisert { $when }.
-# review: new
 sync-status-today = Sist synkronisert i dag kl. { $time }.
-# review: new
 sync-when-today = i dag kl. { $time }
-# review: new
 sync-status-problem = Kunne ikke synkronisere: { $problem }
-# review: new
 sync-removed-here = Denne datamaskinen ble fjernet fra synkroniseringen på en annen datamaskin. Slå av synkronisering, og konfigurer den på nytt for å bli med igjen.
-# review: new
 sync-item-account = Konto { $name }
-# review: new
 sync-item-contact = Kontakt { $name }
-# review: new
 sync-item-group = Gruppe { $name }
-# review: new
 sync-item-key = Nøkkel { $name }
-# review: new
 sync-item-rule = Regel { $name }
-# review: new
 sync-item-trusted = Klarert avsender { $name }
-# review: new
 sync-item-sign-in-app = Påloggingsapp { $name }
-# review: new
 sync-item-settings = Innstillinger
-# review: new
 sync-another-computer = en annen datamaskin
-# review: new
-sync-no-key = Denne datamaskinen har ikke lenger nøkkelen til synkroniseringshvelvet. Slå synkronisering av og på igjen med synkroniseringspassfrasen.
+sync-no-key = Krypteringsnøkkelen for synkronisering mangler på denne datamaskinen. Slå av synkronisering, og konfigurer den på nytt med synkroniseringspassfrasen.
 setup-error-read = Oppsettfilen kunne ikke leses: { $error }
 setup-error-write = Oppsettet kunne ikke lagres: { $error }
 setup-error-no-parts = Velg minst én kategori.
@@ -1088,10 +1067,8 @@ preview-not-printed = { $name } ({ $details }) skrives ikke ut. Åpne filen for 
 
 pgp-error-attached-private = Dette vedlegget inneholder en privat nøkkel. Bare offentlige nøkler kan importeres direkte fra e-post. For å gjenopprette din egen private nøkkel må du lagre vedlegget og importere filen under Krypteringsnøkler.
 pgp-part-find-key = Finn nøkkel
-# review: new
 reaction-notification-title = { $name } reagerte med { $emoji }
-# review: new
 reaction-notification-text = { $count ->
     [one] på { $subject }
-   *[other] på { $subject }, og { $count } reaksjoner totalt
+   *[other] på { $subject } ({ $count } nye reaksjoner totalt)
 }

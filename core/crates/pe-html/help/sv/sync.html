@@ -1,20 +1,20 @@
-<!--review--><h1>Synkronisera dina datorer</h1>
+<h1>Synkronisera dina datorer</h1>
 <p class="summary">Håll dina konton, nycklar, kontakter, regler och inställningar likadana på alla datorer, via en mapp eller lagring som du äger.</p>
-<p>Synkronisering sparar ett valv med din konfiguration på en plats som du väljer: en mapp som Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud eller Syncthing kopierar mellan dina datorer, eller S3-kompatibel lagring. Allt i det krypteras med din synkroniseringslösenfras innan det lämnar datorn. Dina meddelanden finns inte i det; de stannar på dina e-postservrar.</p>
+<p>Synkronisering sparar din konfiguration på en plats som du väljer: en mapp som Dropbox, OneDrive, iCloud Drive, Google Drive, Nextcloud eller Syncthing kopierar mellan dina datorer, eller S3-kompatibel lagring. Synkroniserade data krypteras med din synkroniseringslösenfras innan de lämnar datorn. Synkronisering överför inte meddelanden, inte heller utkast som bara är sparade på den här datorn.</p>
 <h2>Konfigurera synkronisering på din första dator</h2>
+<aside class="warning">Förvara synkroniseringslösenfrasen på ett säkert ställe. Utan den kan ingen annan dator ansluta.</aside>
 <ol>
     <li>Öppna <b data-settings="sync"></b> och klicka på <b data-text="ui-sync-set-up"></b>.</li>
     <li>Välj <b data-text="ui-sync-folder"></b> och klicka på <b data-text="ui-sync-choose-folder"></b>, eller välj <b data-text="ui-sync-bucket"></b> och fyll i uppgifterna. Klicka på <b data-text="ui-sync-next"></b>.</li>
-    <li>Skriv en synkroniseringslösenfras två gånger och ett namn på den här datorn. Välj vad som ska synkroniseras och klicka på <b data-text="ui-sync-turn-on"></b>.</li>
+    <li>Skriv en synkroniseringslösenfras två gånger. Ange också ett namn på den här datorn. Välj vad som ska synkroniseras och klicka på <b data-text="ui-sync-turn-on"></b>.</li>
 </ol>
-<aside class="warning">Förvara synkroniseringslösenfrasen på ett säkert ställe. Utan den kan ingen annan dator ansluta.</aside>
 <h2>Lägg till en annan dator</h2>
 <ol>
-    <li>Öppna <b data-settings="sync"></b> på den andra datorn, klicka på <b data-text="ui-sync-set-up"></b> och välj samma mapp eller lagring.</li>
-    <li>Skriv synkroniseringslösenfrasen som du valde på den första datorn och klicka på <b data-text="ui-sync-turn-on"></b>.</li>
+    <li>Öppna <b data-settings="sync"></b> på den andra datorn, klicka på <b data-text="ui-sync-set-up"></b> och välj samma mapp eller lagring. Klicka på <b data-text="ui-sync-next"></b>.</li>
+    <li>Skriv synkroniseringslösenfrasen och ett namn på den här datorn. Välj vad som ska synkroniseras och klicka på <b data-text="ui-sync-turn-on"></b>.</li>
 </ol>
-<p>Det som datorn redan har och det som synkroniseringen innehåller slås ihop: ett konto eller en kontakt som finns på båda blir en. Dina meddelanden hämtas på nytt från servrarna.</p>
+<p>Befintliga data slås ihop med synkroniserade data. Motsvarande konton och kontakter slås ihop. Konton som läggs till hämtar de meddelanden som finns tillgängliga på deras e-postservrar.</p>
 <h2>Medan den synkroniserar</h2>
-<p>Varje dator synkroniserar med några minuters mellanrum och när du klickar på <b data-text="ui-sync-now"></b>. När samma sak ändrades på två datorer samtidigt behålls den senast gjorda ändringen och den andra hamnar i <b data-text="ui-sync-history"></b>, där du kan återställa den. När en annan dator tar bort ett konto visas det i huvudfönstret.</p>
+<p>Varje dator synkroniserar med några minuters mellanrum och när du klickar på <b data-text="ui-sync-now"></b>. När ändringar är i konflikt behåller synkroniseringen en version och sparar ersatta värden i <b data-text="ui-sync-history"></b>, så att du kan återställa dem. Lösenord, inloggningsuppgifter och privata nycklar sparas inte i den här historiken. När en annan dator tar bort ett konto visas det i huvudfönstret.</p>
 <p>Om du vill sluta synkronisera en dator som du inte längre använder klickar du på <b data-text="ui-sync-computers"></b> och tar bort den. Om du vill sluta synkronisera den här datorn klickar du på <b data-text="ui-sync-turn-off"></b>: allt förblir som det är.</p>
-<nav class="related"><a href="topic:move-computer"></a> <a href="topic:manage-accounts"></a> <a href="topic:encryption-keys"></a></nav><!--/review-->
+<nav class="related"><a href="topic:move-computer"></a> <a href="topic:manage-accounts"></a> <a href="topic:encryption-keys"></a></nav>

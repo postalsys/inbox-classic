@@ -2,7 +2,7 @@
 <p class="summary">コンピューターからInbox Classicを削除し、ローカルのデータを残すかどうかを選択します。</p>
 <!--os:windows--><p><i>設定 &gt; アプリ &gt; インストールされているアプリ</i>からInbox Classicをアンインストールします。その際、アカウント、メール、連絡先、キー、設定を含む、ローカルのアプリのデータもすべて削除するかどうか尋ねられます。</p><!--/os-->
 <!--os:mac--><p>Inbox Classicを終了し、「アプリケーション」からゴミ箱に移動します。ダウンロードしたメールは、そのフォルダーも削除するまで<code>~/Library/Application Support/Inbox Classic</code>に残ります。</p><!--/os-->
-<!--os:linux--><p><!--review--><code>sudo apt remove inbox-classic</code>で、Fedoraでは<code>sudo dnf remove inbox-classic</code>で、Arch LinuxとOmarchyでは<code>sudo pacman -R inbox-classic</code>でパッケージを削除します。ダウンロードしたメールは、そのフォルダーも削除するまで<code>~/.local/share/inbox-classic</code>に残ります。<!--/review--></p><!--/os-->
+<!--os:linux--><p><code>sudo apt remove inbox-classic</code>で、Fedoraでは<code>sudo dnf remove inbox-classic</code>で、Arch LinuxとOmarchyでは<code>sudo pacman -R inbox-classic</code>でパッケージを削除します。ダウンロードしたメールは、そのフォルダーも削除するまで<code>~/.local/share/inbox-classic</code>に残ります。</p><!--/os-->
 <p>これらの既定のデータ フォルダーには、連絡先、キー、設定も含まれます。削除すると、それらのローカルのデータもすべて削除されます。場所を変更した場合は、異なる場所にあることがあります。アンインストールしても、サーバーのメールは削除されず、システムのパスワードの保管場所からサインイン情報が削除されるとも限りません。</p>
 <p>保存されたアカウントのサインイン情報を削除するには、先に<b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>で各アカウントを削除します。1つのアカウントだけを削除するには、<a href="topic:manage-accounts"></a>を参照してください。</p>
 <nav class="related"><a href="topic:data-storage"></a> <a href="topic:updates"></a> <a href="topic:manage-accounts"></a></nav>

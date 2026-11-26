@@ -1033,56 +1033,35 @@ setup-error-newer = Tę konfigurację zapisała nowsza wersja Inbox Classic ({ $
 setup-error-needs-passphrase = Ten plik konfiguracji jest zabezpieczony hasłem. Wpisz hasło użyte przy jego zapisywaniu.
 setup-error-wrong-passphrase = To hasło nie pasuje do pliku konfiguracji.
 setup-error-changed = Nie można potwierdzić integralności pliku konfiguracji. Mógł zostać zmieniony lub uszkodzony, więc nie można go zaimportować.
-# review: new
-sync-wrong-passphrase = To nie jest hasło synchronizacji tego sejfu. Wpisz hasło wybrane podczas konfigurowania synchronizacji na pierwszym komputerze.
-# review: new
+sync-wrong-passphrase = Hasło synchronizacji jest nieprawidłowe. Wpisz hasło wybrane podczas konfigurowania synchronizacji na pierwszym komputerze.
 sync-place = { $place }, jako „{ $name }”
-# review: new
 sync-news-removed = { $count ->
     [one] Synchronizacja usunęła konto { $accounts }, ponieważ zostało usunięte na innym komputerze.
    *[other] Synchronizacja usunęła konta, ponieważ zostały usunięte na innym komputerze: { $accounts }
 }
-# review: new
 sync-news-lost = { $count ->
     [one] Zmiana wprowadzona w tym samym czasie na innym komputerze została zastąpiona zmianą wprowadzoną tutaj. Zachowano ją w historii synchronizacji.
     [few] { $count } zmiany wprowadzone w tym samym czasie na innych komputerach zostały zastąpione zmianami wprowadzonymi tutaj. Zachowano je w historii synchronizacji.
     [many] { $count } zmian wprowadzonych w tym samym czasie na innych komputerach zostało zastąpionych zmianami wprowadzonymi tutaj. Zachowano je w historii synchronizacji.
    *[other] { $count } zmian wprowadzonych w tym samym czasie na innych komputerach zostało zastąpionych zmianami wprowadzonymi tutaj. Zachowano je w historii synchronizacji.
 }
-# review: new
 sync-status-busy = Synchronizowanie…
-# review: new
 sync-status-never = Jeszcze nie synchronizowano.
-# review: new
 sync-status-last = Ostatnia synchronizacja: { $when }.
-# review: new
 sync-status-today = Ostatnia synchronizacja: dziś o { $time }.
-# review: new
 sync-when-today = dziś o { $time }
-# review: new
 sync-status-problem = Nie udało się zsynchronizować: { $problem }
-# review: new
 sync-removed-here = Ten komputer został usunięty z synchronizacji na innym komputerze. Wyłącz synchronizację, a potem skonfiguruj ją ponownie, aby dołączyć.
-# review: new
 sync-item-account = Konto { $name }
-# review: new
 sync-item-contact = Kontakt { $name }
-# review: new
 sync-item-group = Grupa { $name }
-# review: new
 sync-item-key = Klucz { $name }
-# review: new
 sync-item-rule = Reguła { $name }
-# review: new
 sync-item-trusted = Zaufany nadawca { $name }
-# review: new
 sync-item-sign-in-app = Aplikacja logowania { $name }
-# review: new
 sync-item-settings = Ustawienia
-# review: new
 sync-another-computer = inny komputer
-# review: new
-sync-no-key = Ten komputer nie ma już klucza sejfu synchronizacji. Wyłącz synchronizację i włącz ją ponownie, podając hasło synchronizacji.
+sync-no-key = Na tym komputerze brakuje klucza szyfrowania synchronizacji. Wyłącz synchronizację, a następnie skonfiguruj ją ponownie, podając hasło synchronizacji.
 setup-error-read = Nie udało się odczytać pliku konfiguracji: { $error }
 setup-error-write = Nie udało się zapisać konfiguracji: { $error }
 setup-error-no-parts = Wybierz co najmniej jedną część.
@@ -1258,10 +1237,10 @@ preview-not-printed = Plik { $name } ({ $details }) nie jest uwzględniany na wy
 
 pgp-error-attached-private = Ten załącznik zawiera klucz prywatny. Bezpośrednio z poczty można importować tylko klucze publiczne. Aby przywrócić własny klucz prywatny, zapisz załącznik, a następnie zaimportuj jego plik w oknie Klucze szyfrowania.
 pgp-part-find-key = Znajdź klucz
-# review: new
 reaction-notification-title = { $name }: reakcja { $emoji }
-# review: new
 reaction-notification-text = { $count ->
-    [one] na { $subject }
-   *[other] na { $subject }, łącznie reakcji: { $count }
+    [one] na wiadomość { $subject }
+    [few] na wiadomość { $subject } (łącznie { $count } nowe reakcje)
+    [many] na wiadomość { $subject } (łącznie { $count } nowych reakcji)
+   *[other] na wiadomość { $subject } (łącznie { $count } nowych reakcji)
 }

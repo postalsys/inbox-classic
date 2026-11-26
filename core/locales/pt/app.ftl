@@ -43,7 +43,6 @@ cmd-accounts = &Contas...
 cmd-find = &Localizar mensagem
 cmd-save-as = &Guardar como...
 cmd-print = &Imprimir...
-# review: new
 cmd-print-conversation = Imprimir con&versa...
 cmd-import = I&mportar mensagens...
 cmd-outbox = Caixa de &Saída...
@@ -65,43 +64,29 @@ ui-find-not-found = Não foi encontrado «{ $words }» nesta mensagem
 cmd-expand-all-threads = E&xpandir todas as conversas
 cmd-collapse-all-threads = Re&duzir todas as conversas
 ui-group-by-conversation = A&grupar mensagens por conversa
-# review: new
 ui-show-whole-conversation = Mostrar a conversa &inteira no painel de leitura
-# review: new
-ui-show-whole-conversation-note = A linha de uma conversa abre todas as suas mensagens, com as suas respostas, os rascunhos e as mensagens arquivadas noutras pastas. As mensagens lidas ficam recolhidas numa linha: clique numa linha para a abrir ou recolher.
-# review: new
+ui-show-whole-conversation-note = Abra juntas as mensagens de uma conversa, incluindo as suas respostas, os rascunhos e as mensagens guardadas noutras pastas. As mensagens lidas ficam geralmente recolhidas numa linha: clique numa linha para a abrir ou recolher.
 ui-conversation-order = &Ordem da conversa:
-# review: new
 ui-conversation-oldest-first = Mais antiga primeiro
-# review: new
 ui-conversation-newest-first = Mais recente primeiro
-# review: new
 ui-thread-count = { $new ->
     [0] ({ $count })
     [one] ({ $count }, { $new } nova)
    *[other] ({ $count }, { $new } novas)
 }
-# review: new
 ui-conversation-to = para { $people }
-# review: new
 ui-conversation-draft = Rascunho
-# review: new
 ui-conversation-alone = Assinada ou encriptada: abre-se à parte
-# review: new
 ui-conversation-downloading = A transferir…
-# review: new
 ui-conversation-earlier = { $count ->
     [one] Mostrar 1 mensagem anterior
    *[other] Mostrar { $count } mensagens anteriores
 }
-# review: new
 ui-conversation-elsewhere = { $count ->
     [one] Esta conversa também tem uma mensagem noutra pasta.
    *[other] Esta conversa também tem { $count } mensagens noutras pastas.
 }
-# review: new
 ui-conversation-this-folder = &Apenas esta pasta
-# review: new
 ui-conversation-whole = &Toda a conversa
 cmd-folder-list = Lista de &pastas
 cmd-layout-automatic = &Automático
@@ -448,140 +433,73 @@ ui-settings-encryption = Encriptação
 ui-settings-language = Idioma
 ui-settings-label = { $label }:
 ui-apply = &Aplicar
-# review: new
 ui-settings-sync = Sincronização
-# review: new
 ui-sync-note = Mantenha as contas, as chaves, o Livro de Endereços, as regras e as definições iguais em todos os computadores, através de uma pasta ou de um armazenamento que lhe pertence. Tudo é encriptado com a frase de acesso da sincronização antes de sair deste computador.
-# review: new
 ui-sync-place = Sincronizado através de:
-# review: new
 ui-sync-status = Estado:
-# review: new
 ui-sync-set-up = Configurar &sincronização…
-# review: new
 ui-sync-now = Sincro&nizar agora
-# review: new
 ui-sync-computers = Co&mputadores…
-# review: new
 ui-sync-history = &Histórico…
-# review: new
 ui-sync-turn-off = &Desativar sincronização…
-# review: new
 ui-sync-what = O que sincronizar
-# review: new
-ui-sync-what-note = As palavras-passe, os inícios de sessão e as chaves privadas só circulam encriptados. Deixe de fora o que deve ficar apenas neste computador.
-# review: new
+ui-sync-what-note = As palavras-passe, as credenciais de início de sessão e as chaves privadas só são transmitidas encriptadas. Deixe de fora o que deve ficar apenas neste computador.
 ui-sync-accounts = C&ontas
-# review: new
 ui-sync-passwords = &Palavras-passe
-# review: new
 ui-sync-sign-ins = &Inícios de sessão com Google, Microsoft e aplicações de início de sessão
-# review: new
 ui-sync-sign-in-apps = Aplicaçõ&es de início de sessão
-# review: new
 ui-sync-app-secrets = Se&gredos das aplicações de início de sessão
-# review: new
 ui-sync-contacts = &Livro de Endereços
-# review: new
 ui-sync-keys = &Chaves
-# review: new
 ui-sync-private-keys = As suas chaves pri&vadas
-# review: new
 ui-sync-rules = &Regras
-# review: new
 ui-sync-trusted = Reme&tentes fidedignos
-# review: new
 ui-sync-settings = De&finições
-# review: new
 ui-sync-preferences = Esq&uema e visualização
-# review: new
 ui-sync-everything = Tudo
-# review: new
 ui-sync-some-left-out = Alguns dados ficam de fora
-# review: new
 ui-sync-where = Onde guardar
-# review: new
 ui-sync-folder = Uma pasta
-# review: new
 ui-sync-folder-note = O Dropbox, o OneDrive, o iCloud Drive, o Google Drive, o Nextcloud ou o Syncthing copiam-na para os seus outros computadores.
-# review: new
 ui-sync-bucket = Armazenamento compatível com S3
-# review: new
 ui-sync-bucket-note = Amazon S3, Cloudflare R2, Backblaze B2, MinIO ou outro armazenamento que funcione como o S3.
-# review: new
 ui-sync-folder-label = &Pasta:
-# review: new
 ui-sync-folder-none = Ainda nenhuma escolhida
-# review: new
 ui-sync-choose-folder = &Escolher…
-# review: new
 ui-sync-choose-folder-title = Escolher a pasta de sincronização
-# review: new
 ui-sync-endpoint = En&dpoint:
-# review: new
 ui-sync-region = &Região:
-# review: new
 ui-sync-bucket-name = &Bucket:
-# review: new
 ui-sync-prefix = Pasta no b&ucket:
-# review: new
 ui-sync-access-key = ID da &chave de acesso:
-# review: new
 ui-sync-secret-key = Chave de acesso secre&ta:
-# review: new
 ui-sync-next = &Seguinte
-# review: new
 ui-sync-join-title = Aderir à sincronização
-# review: new
-ui-sync-join-note = Este local contém a sincronização dos seus outros computadores. Escreva a frase de acesso da sincronização que escolheu no primeiro.
-# review: new
+ui-sync-join-note = Este local já contém dados sincronizados. Escreva a frase de acesso da sincronização que escolheu no primeiro computador.
 ui-sync-start-title = Iniciar a sincronização
-# review: new
-ui-sync-start-note = Escolha uma frase de acesso para a sincronização. Escreve-a uma vez em cada computador que adicionar. Guarde-a num local seguro: sem ela, nenhum outro computador pode aderir.
-# review: new
+ui-sync-start-note = Escolha uma frase de acesso para a sincronização. Introduza-a uma vez em cada computador que adicionar. Guarde-a num local seguro: sem ela, nenhum outro computador pode aderir.
 ui-sync-name = &Nome deste computador:
-# review: new
-ui-sync-merge-note = O que este computador tem e o que a sincronização contém são combinados: uma conta ou um contacto que exista em ambos passa a ser um só.
-# review: new
-ui-sync-turn-on = Ativar s&incronização
-# review: new
+ui-sync-merge-note = Os dados deste computador são combinados com os dados sincronizados. As contas e os contactos correspondentes são unidos.
+ui-sync-turn-on = Ativar &sincronização
 ui-sync-on = A sincronização está ativada.
-# review: new
 ui-sync-turn-off-ask = Desativar a sincronização neste computador? Tudo fica como está, aqui e nos seus outros computadores. Este computador apenas deixa de sincronizar.
-# review: new
 ui-sync-turn-off-button = Desativar
-# review: new
 ui-sync-computers-title = Computadores
-# review: new
-ui-sync-computers-note = Os computadores que sincronizam através deste local. Remova um que já não utilize: deixa de sincronizar, e o que sincronizou mantém-se.
-# review: new
+ui-sync-computers-note = Estes computadores sincronizam através do mesmo local. Remova um que já não utilize para interromper a sua sincronização. Os dados que sincronizou são mantidos.
 ui-sync-this-computer = Este computador
-# review: new
 ui-sync-seen = Última sincronização: { $when }
-# review: new
 ui-sync-remove-ask = Remover «{ $name }» da sincronização? Deixa de sincronizar na próxima vez que tentar. Para voltar a sincronizá-lo, configure novamente a sincronização nesse computador.
-# review: new
 ui-sync-loading = A ler…
-# review: new
 ui-sync-history-title = Histórico
-# review: new
-ui-sync-history-note = Quando o mesmo item foi alterado em dois computadores ao mesmo tempo, a última alteração feita foi mantida e a outra está aqui. Restaure uma para a utilizar em vez da atual.
-# review: new
+ui-sync-history-note = Quando há alterações em conflito de diferentes computadores, a sincronização mantém uma versão. Os valores substituídos aparecem aqui; restaure um para o voltar a utilizar. As palavras-passe, as credenciais de início de sessão e as chaves privadas não são guardadas aqui.
 ui-sync-history-empty = Nenhuma alteração foi substituída.
-# review: new
 ui-sync-history-row = Origem: { $source }, { $when }
-# review: new
 ui-sync-restore = &Restaurar
-# review: new
 ui-sync-restore-points = Pontos de restauro
-# review: new
-ui-sync-restore-points-note = Antes de uma sincronização retirar algo daqui, o estado anterior é guardado. Abra um para recuperar o que escolher dele.
-# review: new
+ui-sync-restore-points-note = Os pontos de restauro guardam a configuração antes de a sincronização remover itens deste computador. Abra um para escolher o que restaurar.
 ui-sync-restore-points-empty = Ainda nenhum.
-# review: new
 ui-sync-open-point = &Abrir…
 # Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
-# review: new
 win-sync-back = < &Anterior
 ui-language-label = &Idioma:
 ui-restart-note = Reinicie o Inbox Classic para mudar o idioma.
@@ -593,7 +511,6 @@ ui-delete-folder-question = Eliminar a pasta «{ $folder }» com as respetivas m
 ui-properties = Propriedade&s
 ui-account-sync = Enviar e &receber
 ui-account-properties = &Propriedades...
-# review: new
 ui-account-properties-of = Propriedades da c&onta...
 ui-account-move-up = Mover para &cima
 ui-account-move-down = Mover para &baixo
@@ -926,11 +843,8 @@ ui-setup-from = Guardado pelo Inbox Classic { $version } a { $date }.
 ui-setup-import-button = &Importar
 ui-setup-done = Concluído
 ui-setup-first-run = Importar definições e contas de outro computador...
-# review: new
 ui-first-run-other = Já utiliza o Inbox Classic noutro computador? Traga para aqui as contas e as definições desse computador.
-# review: new
-ui-first-run-sync = Aderir à sincronização desse computador…
-# review: new
+ui-first-run-sync = Aderir à sincronização…
 ui-first-run-import = Importar de um ficheiro…
 
 ui-field-verifiers = Confiar nas verificações do remetente efetuadas por:
@@ -943,11 +857,7 @@ ui-keys-publish-now = Publicar
 ui-keys-paste = Importar da área de &transferência
 ui-keys-paste-none = A área de transferência não contém nenhuma chave OpenPGP.
 ui-contact-find-key = Pro&curar chave
-# review: new
 ui-reactions-label = Reações:
-# review: new
 ui-reaction-open-email = Abrir o e-mail da reação
-# review: new
 ui-reaction-show-as-email = Mostrar como e-mail
-# review: new
 ui-reaction-when = Reação: { $when }

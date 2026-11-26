@@ -930,54 +930,33 @@ setup-error-newer = Aquest fitxer de configuració s’ha desat amb una versió 
 setup-error-needs-passphrase = Aquest fitxer de configuració està protegit amb una frase de pas. Escriviu la frase de pas amb què es va desar.
 setup-error-wrong-passphrase = La frase de pas no és la que es va fer servir per protegir aquest fitxer de configuració.
 setup-error-changed = No s’ha pogut comprovar la integritat del fitxer de configuració. Pot haver-se malmès o modificat i no es pot importar.
-# review: new
-sync-wrong-passphrase = Aquesta no és la frase de pas de sincronització d’aquesta caixa forta. Escriviu la que vau triar en configurar la sincronització al primer ordinador.
-# review: new
+sync-wrong-passphrase = Aquesta frase de pas de sincronització és incorrecta. Escriviu la que vau triar en configurar la sincronització al primer ordinador.
 sync-place = { $place }, amb el nom «{ $name }»
-# review: new
 sync-news-removed = { $count ->
     [one] La sincronització ha eliminat el compte { $accounts }, perquè s’ha eliminat en un altre ordinador.
    *[other] La sincronització ha eliminat els comptes { $accounts }, perquè s’han eliminat en un altre ordinador.
 }
-# review: new
 sync-news-lost = { $count ->
     [one] Un canvi fet alhora en un altre ordinador s’ha substituït pel que s’ha fet aquí. L’historial de sincronització el conserva.
    *[other] { $count } canvis fets alhora en altres ordinadors s’han substituït pels que s’han fet aquí. L’historial de sincronització els conserva.
 }
-# review: new
 sync-status-busy = S’està sincronitzant…
-# review: new
 sync-status-never = Encara no s’ha sincronitzat.
-# review: new
 sync-status-last = Darrera sincronització: { $when }.
-# review: new
-sync-status-today = Darrera sincronització: avui a les { $time }.
-# review: new
-sync-when-today = avui a les { $time }
-# review: new
+sync-status-today = Darrera sincronització: avui, { $time }.
+sync-when-today = avui, { $time }
 sync-status-problem = No s’ha pogut sincronitzar: { $problem }
-# review: new
 sync-removed-here = Aquest ordinador s’ha tret de la sincronització des d’un altre ordinador. Desactiveu la sincronització i torneu-la a configurar per unir-vos-hi.
-# review: new
 sync-item-account = Compte { $name }
-# review: new
 sync-item-contact = Contacte { $name }
-# review: new
 sync-item-group = Grup { $name }
-# review: new
 sync-item-key = Clau { $name }
-# review: new
 sync-item-rule = Regla { $name }
-# review: new
 sync-item-trusted = Remitent de confiança { $name }
-# review: new
 sync-item-sign-in-app = Aplicació d’inici de sessió { $name }
-# review: new
 sync-item-settings = Opcions
-# review: new
 sync-another-computer = un altre ordinador
-# review: new
-sync-no-key = Aquest ordinador ja no té la clau de la caixa forta de sincronització. Desactiveu la sincronització i torneu-la a activar amb la frase de pas de sincronització.
+sync-no-key = En aquest ordinador falta la clau de xifratge de la sincronització. Desactiveu la sincronització i torneu-la a configurar amb la frase de pas de sincronització.
 setup-error-read = No s’ha pogut llegir el fitxer de configuració: { $error }
 setup-error-write = No s’ha pogut desar el fitxer de configuració: { $error }
 setup-error-no-parts = Trieu almenys una secció.
@@ -1107,10 +1086,8 @@ preview-not-printed = { $name } ({ $details }) no s’imprimeix. Obriu-lo per im
 
 pgp-error-attached-private = Aquest fitxer adjunt conté una clau privada. Només es poden importar claus públiques directament del correu. Per restaurar la vostra clau privada, deseu el fitxer adjunt i importeu-lo a Claus de xifratge.
 pgp-part-find-key = Cerca la clau
-# review: new
 reaction-notification-title = { $name } ha reaccionat amb { $emoji }
-# review: new
 reaction-notification-text = { $count ->
     [one] a { $subject }
-   *[other] a { $subject }, i { $count } reaccions en total
+   *[other] a { $subject } ({ $count } reaccions noves en total)
 }

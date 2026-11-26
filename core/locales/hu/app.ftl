@@ -42,7 +42,6 @@ cmd-accounts = &Fiókok...
 cmd-find = Üzenet ke&resése
 cmd-save-as = Me&ntés másként...
 cmd-print = N&yomtatás...
-# review: new
 cmd-print-conversation = Be&szélgetés nyomtatása...
 cmd-import = Üzenetek &importálása...
 cmd-outbox = &Postázandó üzenetek...
@@ -64,42 +63,28 @@ ui-find-not-found = „{ $words }” nem szerepel ebben az üzenetben
 cmd-expand-all-threads = Minden beszélgetés kibon&tása
 cmd-collapse-all-threads = Minden beszélgetés össze&csukása
 ui-group-by-conversation = Üzenetek csoportosítása beszélgetés &szerint
-# review: new
 ui-show-whole-conversation = Teljes &beszélgetés megjelenítése az olvasóablakban
-# review: new
-ui-show-whole-conversation-note = A beszélgetés sora megnyitja az összes üzenetét, az Ön válaszaival és piszkozataival, valamint a más mappákba áthelyezett üzenetekkel együtt. Az olvasott üzenetek egy sorrá vannak összecsukva: kattintson egy sorra a kibontásához vagy összecsukásához.
-# review: new
+ui-show-whole-conversation-note = A beszélgetés üzeneteinek megnyitása együtt, a válaszokkal, piszkozatokkal és a más mappákban lévő üzenetekkel együtt. Az olvasott üzenetek általában egy sorrá vannak összecsukva; kattintson a sorra az üzenet megnyitásához vagy összecsukásához.
 ui-conversation-order = Üzenetek so&rrendje a beszélgetésben:
-# review: new
 ui-conversation-oldest-first = Legrégebbi elöl
-# review: new
 ui-conversation-newest-first = Legújabb elöl
-# review: new
 ui-thread-count = { $new ->
     [0] ({ $count })
    *[other] ({ $count }, { $new } új)
 }
-# review: new
 ui-conversation-to = címzett: { $people }
-# review: new
 ui-conversation-draft = Piszkozat
-# review: new
 ui-conversation-alone = Aláírt vagy titkosított: külön nyílik meg
-# review: new
 ui-conversation-downloading = Letöltés…
-# review: new
 ui-conversation-earlier = { $count ->
     [one] { $count } korábbi üzenet megjelenítése
    *[other] { $count } korábbi üzenet megjelenítése
 }
-# review: new
 ui-conversation-elsewhere = { $count ->
     [one] A beszélgetés egy másik mappában is tartalmaz egy üzenetet.
    *[other] A beszélgetés más mappákban is tartalmaz { $count } üzenetet.
 }
-# review: new
 ui-conversation-this-folder = &Csak ez a mappa
-# review: new
 ui-conversation-whole = &Teljes beszélgetés
 cmd-folder-list = &Mappalista
 cmd-layout-automatic = &Automatikus
@@ -445,140 +430,73 @@ ui-settings-encryption = Titkosítás
 ui-settings-language = Nyelv
 ui-settings-label = { $label }:
 ui-apply = Al&kalmaz
-# review: new
 ui-settings-sync = Szinkronizálás
-# review: new
-ui-sync-note = Fiókjai, kulcsai, címjegyzéke, szabályai és beállításai minden számítógépen ugyanazok maradnak, egy saját mappán vagy tárhelyen keresztül. Mielőtt bármi elhagyná ezt a számítógépet, a szinkronizálási jelmondat titkosítja.
-# review: new
+ui-sync-note = Fiókjai, kulcsai, címjegyzéke, szabályai és beállításai minden számítógépen ugyanazok maradnak, egy saját mappán vagy tárhelyen keresztül. Az alkalmazás a szinkronizálási jelmondattal titkosítja az adatokat, mielőtt elhagynák ezt a számítógépet.
 ui-sync-place = Szinkronizálás helye:
-# review: new
 ui-sync-status = Állapot:
-# review: new
 ui-sync-set-up = &Szinkronizálás beállítása…
-# review: new
 ui-sync-now = Szinkronizálás &most
-# review: new
 ui-sync-computers = Számító&gépek…
-# review: new
 ui-sync-history = &Előzmények…
-# review: new
 ui-sync-turn-off = Szinkronizálás k&ikapcsolása…
-# review: new
 ui-sync-what = Szinkronizálandó adatok
-# review: new
 ui-sync-what-note = A jelszavak, a bejelentkezési adatok és a titkos kulcsok csak titkosítva kerülnek át. Hagyja ki, aminek csak ezen a számítógépen kell maradnia.
-# review: new
 ui-sync-accounts = &Fiókok
-# review: new
 ui-sync-passwords = &Jelszavak
-# review: new
 ui-sync-sign-ins = Bejelentkezési &adatok (Google, Microsoft, bejelentkezési alkalmazások)
-# review: new
 ui-sync-sign-in-apps = Bejelentkezési a&lkalmazások
-# review: new
 ui-sync-app-secrets = &Titkos ügyfélkulcsok
-# review: new
 ui-sync-contacts = &Címjegyzék
-# review: new
 ui-sync-keys = Kulcs&ok
-# review: new
 ui-sync-private-keys = Saját titkos k&ulcsok
-# review: new
 ui-sync-rules = S&zabályok
-# review: new
 ui-sync-trusted = Megbízható fela&dók
-# review: new
 ui-sync-settings = &Beállítások
-# review: new
 ui-sync-preferences = Elrendezés és &nézet
-# review: new
 ui-sync-everything = Minden
-# review: new
 ui-sync-some-left-out = Néhány elem kimarad
-# review: new
 ui-sync-where = Tárolás helye
-# review: new
 ui-sync-folder = Mappa
-# review: new
 ui-sync-folder-note = A Dropbox, a OneDrive, az iCloud Drive, a Google Drive, a Nextcloud vagy a Syncthing átmásolja a többi számítógépére.
-# review: new
 ui-sync-bucket = S3-kompatibilis tárhely
-# review: new
 ui-sync-bucket-note = Amazon S3, Cloudflare R2, Backblaze B2, MinIO vagy más, az S3-hoz hasonlóan működő tárhely.
-# review: new
 ui-sync-folder-label = &Mappa:
-# review: new
 ui-sync-folder-none = Még nincs kiválasztva
-# review: new
 ui-sync-choose-folder = &Kiválasztás…
-# review: new
 ui-sync-choose-folder-title = A szinkronizálás mappájának kiválasztása
-# review: new
 ui-sync-endpoint = Vé&gpont:
-# review: new
 ui-sync-region = &Régió:
-# review: new
-ui-sync-bucket-name = &Tároló (bucket):
-# review: new
+ui-sync-bucket-name = Táro&ló (bucket):
 ui-sync-prefix = Mappa a tár&olóban:
-# review: new
 ui-sync-access-key = &Hozzáférési kulcs azonosítója:
-# review: new
 ui-sync-secret-key = Titko&s hozzáférési kulcs:
-# review: new
 ui-sync-next = Tová&bb
-# review: new
 ui-sync-join-title = Csatlakozás a szinkronizáláshoz
-# review: new
-ui-sync-join-note = Ezen a helyen már ott van a többi számítógépének szinkronizálása. Írja be a szinkronizálási jelmondatot, amelyet az első számítógépen választott.
-# review: new
+ui-sync-join-note = Ez a hely már tartalmaz szinkronizált adatokat. Írja be az első számítógépen választott szinkronizálási jelmondatot.
 ui-sync-start-title = Szinkronizálás indítása
-# review: new
 ui-sync-start-note = Válasszon szinkronizálási jelmondatot. Minden hozzáadott számítógépen egyszer kell beírnia. Tartsa biztonságos helyen: nélküle egyetlen további számítógép sem csatlakozhat.
-# review: new
-ui-sync-name = A számítógép &neve:
-# review: new
-ui-sync-merge-note = A számítógépen lévő és a szinkronizált adatok egyesülnek: a mindkét helyen meglévő fiók vagy névjegy eggyé válik.
-# review: new
+ui-sync-name = A számító&gép neve:
+ui-sync-merge-note = A számítógép adatai egyesülnek a szinkronizált adatokkal. Az egyező fiókokból és névjegyekből egy-egy bejegyzés lesz.
 ui-sync-turn-on = Szinkronizálás b&ekapcsolása
-# review: new
 ui-sync-on = A szinkronizálás be van kapcsolva.
-# review: new
 ui-sync-turn-off-ask = Kikapcsolja a szinkronizálást ezen a számítógépen? Minden úgy marad, ahogy van, itt és a többi számítógépen is. Ez a számítógép egyszerűen nem szinkronizál tovább.
-# review: new
 ui-sync-turn-off-button = Kikapcsolás
-# review: new
 ui-sync-computers-title = Számítógépek
-# review: new
-ui-sync-computers-note = Az ezen a helyen keresztül szinkronizáló számítógépek. Távolítsa el, amelyiket már nem használja: leáll a szinkronizálása, a már szinkronizált adatai megmaradnak.
-# review: new
+ui-sync-computers-note = Ezek a számítógépek ugyanazon a helyen keresztül szinkronizálnak. Távolítsa el a már nem használt számítógépet a szinkronizálásának leállításához. A szinkronizált adatai megmaradnak.
 ui-sync-this-computer = Ez a számítógép
-# review: new
 ui-sync-seen = Utolsó szinkronizálás: { $when }
-# review: new
 ui-sync-remove-ask = Eltávolítja a szinkronizálásból ezt a számítógépet: „{ $name }”? A következő próbálkozáskor leáll a szinkronizálása. Az újbóli szinkronizáláshoz állítsa be rajta ismét a szinkronizálást.
-# review: new
 ui-sync-loading = Beolvasás…
-# review: new
 ui-sync-history-title = Előzmények
-# review: new
-ui-sync-history-note = Ha ugyanazt két számítógépen egyszerre módosították, a legutoljára végzett módosítás maradt meg, a másik pedig itt látható. Állítson vissza egyet, ha inkább azt szeretné használni.
-# review: new
+ui-sync-history-note = Ha a különböző számítógépeken végzett módosítások ütköznek, a szinkronizálás megtartja az egyik változatot. A felülírt értékek itt láthatók; visszaállítással újra használhatja őket. Jelszavak, bejelentkezési adatok és titkos kulcsok nem kerülnek ide.
 ui-sync-history-empty = Nem lett felülírva módosítás.
-# review: new
 ui-sync-history-row = Forrás: { $source }, { $when }
-# review: new
 ui-sync-restore = &Visszaállítás
-# review: new
 ui-sync-restore-points = Visszaállítási pontok
-# review: new
-ui-sync-restore-points-note = Mielőtt a szinkronizálás eltávolítana itt valamit, az alkalmazás menti a korábbi állapotot. Nyisson meg egy visszaállítási pontot, hogy visszahozza belőle, amit kiválaszt.
-# review: new
+ui-sync-restore-points-note = A visszaállítási pontok mentik a fiókokat és beállításokat, mielőtt a szinkronizálás elemeket távolítana el erről a számítógépről. Nyisson meg egy pontot, és válassza ki, mit állít vissza.
 ui-sync-restore-points-empty = Még nincs.
-# review: new
 ui-sync-open-point = &Megnyitás…
 # Set Up Sync on Windows: back from its second step to the first, as a wizard's Back button
-# review: new
 win-sync-back = < &Vissza
 ui-language-label = &Nyelv:
 ui-restart-note = A nyelv módosításához indítsa újra az Inbox Classicot.
@@ -590,7 +508,6 @@ ui-delete-folder-question = Törli ezt a mappát az üzeneteivel és a benne lé
 ui-properties = T&ulajdonságok
 ui-account-sync = Küldés és fo&gadás
 ui-account-properties = &Tulajdonságok...
-# review: new
 ui-account-properties-of = F&ióktulajdonságok...
 ui-account-move-up = &Feljebb
 ui-account-move-down = &Lejjebb
@@ -917,11 +834,8 @@ ui-setup-from = Mentette: Inbox Classic { $version }, dátum: { $date }.
 ui-setup-import-button = &Importálás
 ui-setup-done = Kész
 ui-setup-first-run = Beállítások és fiókok importálása egy másik számítógépről...
-# review: new
 ui-first-run-other = Már használja az Inbox Classicot egy másik számítógépen? Hozza át ide a fiókjait és beállításait.
-# review: new
-ui-first-run-sync = Csatlakozás a szinkronizálásához…
-# review: new
+ui-first-run-sync = Csatlakozás a szinkronizáláshoz…
 ui-first-run-import = Importálás fájlból…
 
 ui-field-verifiers = Megbízható feladóellenőrzési források:
@@ -934,11 +848,7 @@ ui-keys-publish-now = Közzététel
 ui-keys-paste = Importálás a &vágólapról
 ui-keys-paste-none = A vágólapon nincs OpenPGP-kulcs.
 ui-contact-find-key = Kulcs ke&resése
-# review: new
 ui-reactions-label = Reakciók:
-# review: new
 ui-reaction-open-email = Reakciós e-mail megnyitása
-# review: new
 ui-reaction-show-as-email = Megjelenítés e-mailként
-# review: new
 ui-reaction-when = Reakció: { $when }

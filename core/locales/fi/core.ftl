@@ -917,54 +917,33 @@ setup-error-newer = Tämä asetustiedosto on tallennettu uudemmalla Inbox Classi
 setup-error-needs-passphrase = Tämä asetustiedosto on suojattu salalauseella. Kirjoita salalause, jolla se tallennettiin.
 setup-error-wrong-passphrase = Tämä ei ole salalause, jolla asetustiedosto tallennettiin.
 setup-error-changed = Asetustiedoston eheystarkistus epäonnistui. Tiedostoa ei voi tuoda.
-# review: new
-sync-wrong-passphrase = Tämä ei ole tämän holvin synkronoinnin salalause. Kirjoita salalause, jonka valitsit, kun määritit synkronoinnin ensimmäisellä tietokoneellasi.
-# review: new
+sync-wrong-passphrase = Synkronoinnin salalause on väärä. Kirjoita salalause, jonka valitsit määrittäessäsi synkronoinnin ensimmäisellä tietokoneella.
 sync-place = { $place }, nimellä ”{ $name }”
-# review: new
 sync-news-removed = { $count ->
     [one] Synkronointi poisti tilin { $accounts }, koska se poistettiin toisella tietokoneella.
    *[other] Synkronointi poisti tilit { $accounts }, koska ne poistettiin toisella tietokoneella.
 }
-# review: new
 sync-news-lost = { $count ->
     [one] Toisella tietokoneella samaan aikaan tehty muutos korvattiin täällä tehdyllä muutoksella. Synkronoinnin historia säilyttää sen.
    *[other] { $count } muilla tietokoneilla samaan aikaan tehtyä muutosta korvattiin täällä tehdyillä muutoksilla. Synkronoinnin historia säilyttää ne.
 }
-# review: new
 sync-status-busy = Synkronoidaan…
-# review: new
 sync-status-never = Ei vielä synkronoitu.
-# review: new
 sync-status-last = Synkronoitu viimeksi { $when }.
-# review: new
 sync-status-today = Synkronoitu viimeksi tänään klo { $time }.
-# review: new
 sync-when-today = tänään klo { $time }
-# review: new
 sync-status-problem = Synkronointi epäonnistui: { $problem }
-# review: new
 sync-removed-here = Tämä tietokone poistettiin synkronoinnista toisella tietokoneella. Poista synkronointi käytöstä ja määritä se sitten uudelleen, jotta voit liittyä.
-# review: new
 sync-item-account = Tili { $name }
-# review: new
 sync-item-contact = Yhteystieto { $name }
-# review: new
 sync-item-group = Ryhmä { $name }
-# review: new
 sync-item-key = Avain { $name }
-# review: new
 sync-item-rule = Sääntö { $name }
-# review: new
 sync-item-trusted = Luotettu lähettäjä { $name }
-# review: new
 sync-item-sign-in-app = Kirjautumissovellus { $name }
-# review: new
 sync-item-settings = Asetukset
-# review: new
 sync-another-computer = toinen tietokone
-# review: new
-sync-no-key = Tällä tietokoneella ei ole enää synkronointiholvin avainta. Poista synkronointi käytöstä ja ota se uudelleen käyttöön synkronoinnin salalauseella.
+sync-no-key = Synkronoinnin salausavain puuttuu tältä tietokoneelta. Poista synkronointi käytöstä ja määritä se sitten uudelleen synkronoinnin salalauseella.
 setup-error-read = Asetustiedostoa ei voitu lukea: { $error }
 setup-error-write = Asetuksia ei voitu tallentaa: { $error }
 setup-error-no-parts = Valitse vähintään yksi osa.
@@ -1094,10 +1073,8 @@ preview-not-printed = Tiedostoa { $name } ({ $details }) ei tulosteta. Avaa se t
 
 pgp-error-attached-private = Tämä liite sisältää yksityisen avaimen. Suoraan viestistä voi tuoda vain julkisia avaimia. Palauta oma yksityinen avaimesi tallentamalla liite ja tuomalla tiedosto Salausavaimet-ikkunassa.
 pgp-part-find-key = Etsi avain
-# review: new
 reaction-notification-title = { $name } reagoi: { $emoji }
-# review: new
 reaction-notification-text = { $count ->
     [one] viestiin { $subject }
-   *[other] viestiin { $subject }, reaktioita yhteensä { $count }
+   *[other] viestiin { $subject } (yhteensä { $count } uutta reaktiota)
 }
