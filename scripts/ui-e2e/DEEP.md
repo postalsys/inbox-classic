@@ -10,7 +10,7 @@ The accounts: Work (20,000), Home (6,000, 400 folders), Gmail-like (5,000, OAuth
 
 A check runs either settled, after the driver waited for things to be quiet, or now and then before that (the walk's checks while things are under way, and those between Fast fingers' acts). Settled means, the same on every target:
 
-1. the core is quiet (no sync, no action, no barrier: `pe_quiet`) and the window is not reading its list;
+1. the core is quiet (no sync, no action, no barrier: `pe_quiet`), the window is not reading its list and has no read mark to come (the message shown is marked read a moment after it shows, and a conversation shown marks its unread messages in other folders too);
 2. a sync of every account as a barrier, which ends after every command queued before it, then 1 again;
 3. the rows the window draws are the list as the store has it now. The window hands the core its row count and the message at each row in sight (blank where its page is not read), and the core answers (`ListView::drawn_current`, `pe_list_view_drawn_current`). This is the only test of the window's own state. Whatever is still on its way to it (an event in its queue, a reload gathering changes, a page, a paint) leaves the rows other than the core reads them, so no driver lists those things itself. The driver waits at most 10 seconds for it and does not fail. A row left blank, or a list left behind, is then the checks' to report.
 

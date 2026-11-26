@@ -1801,6 +1801,8 @@ public final class Mailbox: NSObject {
 
     /// the list is being read off the window thread
     var listLoading: Bool { listRequest != 0 }
+    /// The read mark of the message shown still to come (a moment after it is shown)
+    var markReadPending: Bool { markReadTimer?.isValid ?? false }
 
     /// whether the list is the one before, dimmed while another loads
     var listCovered: Bool { !listCover.isHidden }

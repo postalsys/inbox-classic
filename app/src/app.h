@@ -1214,6 +1214,8 @@ private:
     std::pair<int64_t, uint64_t> readerRow_{};
     // the message of the reading pane marked read a moment after it is shown (TIMER_MARK_READ)
     void OnMessageShown();
+    // TIMER_MARK_READ is running: the read mark is still to come (the deep test's "quiet" waits for it)
+    bool markReadPending_ = false;
     // in the middle of the list while it has no rows: why, and what to do about it
     void DrawEmptyList(HDC dc) const;
     // the selection taken from the list again (a message, or the positions of several), its summary, and with several
