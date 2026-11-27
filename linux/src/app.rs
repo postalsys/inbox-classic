@@ -9,7 +9,7 @@ use std::rc::Rc;
 
 use adw::prelude::*;
 use gtk::{gio, glib};
-use pe_core::{DraftKind, Event, FailureKind, SignInWith};
+use pe_core::{DraftKind, Event};
 
 use crate::commands::Command;
 use crate::mailbox::Mailbox;
@@ -18,7 +18,7 @@ use crate::stack::Click;
 use crate::ui::{self, TITLE};
 use crate::{Arguments, compose, notify, tray};
 
-/// Every account is synced this often
+/// Every account is synced this often (one whose sign-in was refused less often: [`pe_core::Core::sync_scheduled`])
 const SYNC_INTERVAL: u32 = 10 * 60;
 /// How many requests done before anyone waited for them are remembered (`Requests::done_early`)
 const DONE_EARLY_KEPT: usize = 64;
@@ -78,8 +78,6 @@ pub struct Shell {
     requests: RefCell<Requests>,
     /// Accounts whose password prompt is open, so a second failure does not open another
     prompting: RefCell<HashSet<i64>>,
-    /// Accounts whose last sync failed: their failure stays in the status bar
-    failing: RefCell<HashSet<i64>>,
     /// The last message sent, as the outgoing part of the status bar says once the Outbox is empty
     last_sent: RefCell<Option<(String, String)>>,
     /// What the message rules did in the sync going on, said over Done when it ends
@@ -153,7 +151,6 @@ pub fn start(application: &adw::Application, arguments: Arguments) {
         main: RefCell::default(),
         requests: RefCell::default(),
         prompting: RefCell::default(),
-        failing: RefCell::default(),
         last_sent: RefCell::default(),
         rules_said: RefCell::default(),
         send_timer: RefCell::default(),
@@ -169,6 +166,7 @@ pub fn start(application: &adw::Application, arguments: Arguments) {
         let _ = cell.set(state.clone());
     });
     install_app_actions(application);
+    crate::account_status::install_action(application);
     crate::webview::follow_style();
     let main = Mailbox::new(application);
     *state.main.borrow_mut() = Some(main.clone());
@@ -179,11 +177,12 @@ pub fn start(application: &adw::Application, arguments: Arguments) {
     });
     state.show_outbox();
     glib::timeout_add_seconds_local(SYNC_INTERVAL, || {
-        shell().sync_all();
+        shell().sync_scheduled();
         glib::ControlFlow::Continue
     });
     *state.tray.borrow_mut() = tray::Tray::start();
     state.show_unread();
+    state.show_account_states();
     application.connect_shutdown(|_| {
         let shell = shell();
         shell.settings.flush();
@@ -360,19 +359,16 @@ impl Shell {
         let main = self.main();
         match &event {
             Event::SyncStarted { account } => {
-                self.failing.borrow_mut().remove(account);
                 main.set_sync_status(&t!(UiChecking, account = &main.account_name(*account)), false);
             }
             Event::SyncFinished { .. } => {
                 #[cfg(feature = "e2e")]
                 self.syncs_finished.set(self.syncs_finished.get() + 1);
-                // a failure stays in the status bar until the account syncs without one; what the rules did, over Done
+                // what the rules did, over Done
                 let rules_said = self.rules_said.take();
-                if self.failing.borrow().is_empty() {
-                    let over = rules_said.is_some();
-                    main.set_sync_status(&rules_said.unwrap_or_else(|| t!(UiDone)), over);
-                }
+                self.show_status_text(rules_said);
             }
+            Event::AccountStateChanged { account, prompt } => self.account_state_changed(*account, *prompt),
             Event::AutoconfigDone { request }
             | Event::SignInDone { request }
             | Event::SignInAppChecked { request }
@@ -466,13 +462,9 @@ impl Shell {
                 main.set_sync_status(&said, true);
                 *self.rules_said.borrow_mut() = (*count > 0).then_some(said);
             }
-            Event::Failed { account, kind, message } => {
-                self.failing.borrow_mut().insert(*account);
-                main.set_sync_status(&format!("{}: {message}", main.account_name(*account)), true);
-                if *kind == FailureKind::Authentication {
-                    spawn(ask_password(*account));
-                }
-            }
+            // the core's words of it, until the account syncs without one (a sign-in to give is asked for by the
+            // account's state)
+            Event::Failed { .. } => self.show_status_text(None),
             _ => {}
         }
         main.on_event(&event);
@@ -486,6 +478,43 @@ impl Shell {
             self.show_unread();
         }
         main.show_counts();
+    }
+
+    /// The status bar's words of every account, as the core says them (an account that needs a sign-in or can not
+    /// connect, the latest failure), else what the rules did (`rules_said`), else Done
+    fn show_status_text(&self, rules_said: Option<String>) {
+        let main = self.main();
+        match self.core.accounts_status_text().ok().flatten() {
+            Some(text) => main.set_sync_status(&text, true),
+            None => {
+                let over = rules_said.is_some();
+                main.set_sync_status(&rules_said.unwrap_or_else(|| t!(UiDone)), over);
+            }
+        }
+    }
+
+    /// What `account` shows of its sign-in changed: the status bar, the tray, the compose windows from it, and, when
+    /// the core asks (`prompt`), the one dialog or a notification (the window's tree and bar follow in
+    /// [`Mailbox::on_event`])
+    fn account_state_changed(&self, account: i64, prompt: bool) {
+        self.show_status_text(None);
+        self.show_account_states();
+        for compose in self.composes.borrow().iter() {
+            if compose.account.get() == account {
+                compose.show_account_note();
+            }
+        }
+        if prompt {
+            crate::account_status::prompt(account);
+        }
+    }
+
+    /// The tray's warning while accounts need the user to sign in, its tooltip saying which
+    pub fn show_account_states(&self) {
+        let summary = self.core.accounts_summary().unwrap_or_default();
+        if let Some(tray) = &*self.tray.borrow() {
+            tray.attention(summary.needing_sign_in > 0, summary.text);
+        }
     }
 
     pub fn show_unread(&self) {
@@ -572,6 +601,13 @@ impl Shell {
     pub fn sync_all(&self) {
         for account in self.core.accounts().unwrap_or_default() {
             let _ = self.core.sync(account.id);
+        }
+    }
+
+    /// The timer's sync of every account: one whose sign-in was refused only once its wait since is over
+    fn sync_scheduled(&self) {
+        for account in self.core.accounts().unwrap_or_default() {
+            let _ = self.core.sync_scheduled(account.id);
         }
     }
 
@@ -669,41 +705,40 @@ fn quoted(subject: &str) -> String {
     }
 }
 
-/// A refused password is asked for again; an account that signs in through the browser signs in again
-async fn ask_password(account: i64) {
+/// The password of `account` asked for (with `hint`, the core's word on app passwords), then given to the core and
+/// the account synced with it
+pub async fn enter_password(account: i64, hint: &str) {
     let shell = shell();
     if !shell.prompting.borrow_mut().insert(account) {
         return;
     }
     let main = shell.main();
-    if let Some(with) = main.sign_in(account) {
-        sign_in_again(account, with).await;
-    } else if let Some(password) = crate::accounts::password_dialog(main.window(), &main.account_name(account)).await {
+    let window = main.window().clone();
+    if let Some(password) = crate::accounts::password_dialog(&window, &main.account_name(account), hint).await {
         shell.core.set_password(account, &password);
+        main.sync_asked();
         let _ = shell.core.sync(account);
     }
     shell.prompting.borrow_mut().remove(&account);
 }
 
-async fn sign_in_again(account: i64, with: SignInWith) {
+/// `account`, which signs in through the browser, signed in again: the core syncs it with the new sign-in, or its
+/// state says the browser signed in to another address
+pub async fn sign_in_again(account: i64) {
     let shell = shell();
-    let main = shell.main();
-    let window = main.window().clone();
-    let text = t!(GtkSignInAgainAsk, account = &main.account_name(account));
-    if !ui::confirm(&window, TITLE, &text, false).await {
+    if !shell.prompting.borrow_mut().insert(account) {
         return;
     }
-    let Some(request) = crate::accounts::sign_in_with_browser(&window, with, &main.account_email(account)).await else {
-        return;
-    };
-    match shell.core.reauthorize(account, request) {
-        Ok(()) => {
-            let _ = shell.core.sync(account);
-        }
-        Err(reason) => {
+    let main = shell.main();
+    let window = main.window().clone();
+    let email = main.account_email(account);
+    if let Some(request) = crate::accounts::sign_in_again_with_browser(&window, account, &email).await {
+        main.sync_asked();
+        if let Err(reason) = shell.core.reauthorize(account, request) {
             ui::alert(&window, TITLE, &t!(UiSignInAgainFailed, reason = &reason.to_string())).await;
         }
     }
+    shell.prompting.borrow_mut().remove(&account);
 }
 
 thread_local! {
@@ -798,6 +833,11 @@ pub fn run_command(command: Command) {
         Command::Sync => {
             main.sync_asked();
             shell.sync_all();
+        }
+        Command::SignInAgain => {
+            if let Some(account) = main.status_account() {
+                spawn(crate::account_status::run(account));
+            }
         }
         Command::MarkRead => main.mark_selected(true),
         Command::MarkUnread => main.mark_selected(false),

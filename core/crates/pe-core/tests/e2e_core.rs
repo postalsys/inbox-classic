@@ -1153,13 +1153,23 @@ fn signs_in_with_oauth() {
     // signing in again takes a sign-in of the same account only, also with the client turned off since
     core.set_sign_in_enabled(google, false).unwrap();
     let (again, _) = sign_in(SIGNED_IN, "the-code");
-    core.reauthorize(account, again).unwrap();
+    assert_eq!(
+        core.reauthorize(account, again).unwrap(),
+        pe_core::Reauthorized::SignedIn
+    );
     let mut other = server.account_settings();
     other.email = "someone.else@example.com".into();
     core.update_account(account, &other).unwrap();
     let (again, _) = sign_in(SIGNED_IN, "the-code");
-    let refused = core.reauthorize(account, again).unwrap_err();
-    assert!(refused.to_string().contains(SIGNED_IN), "{refused}");
+    assert_eq!(
+        core.reauthorize(account, again).unwrap(),
+        pe_core::Reauthorized::OtherAddress
+    );
+    // the account's state names the address the browser signed in to
+    assert_eq!(
+        core.account_state(account),
+        pe_core::AccountState::SignInNeeded(pe_core::SignInReason::OtherAddress(SIGNED_IN.into()))
+    );
     // changing the settings keeps how it signs in, and its servers
     let mut elsewhere = server.account_settings();
     elsewhere.smtp_host = "smtp.attacker.example".into();

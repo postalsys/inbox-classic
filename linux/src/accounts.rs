@@ -446,8 +446,26 @@ fn more_menu(button: &gtk::Button, chosen: async_channel::Sender<Start>) {
 
 /// Signs in with `with` for `email` in the browser; the finished sign-in request, None when it did not work
 pub async fn sign_in_with_browser(parent: &impl IsA<gtk::Widget>, with: SignInWith, email: &str) -> Option<u64> {
+    let begun = shell().core.sign_in_begin(with, email);
+    browser_sign_in(parent, begun, email).await
+}
+
+/// Signs `account`, whose address is `email`, in again in the browser, as its state asks (the provider's account
+/// picker after the browser signed in to another address); the finished sign-in request for
+/// [`pe_core::Core::reauthorize`], None when it did not work
+pub async fn sign_in_again_with_browser(parent: &impl IsA<gtk::Widget>, account: i64, email: &str) -> Option<u64> {
+    let begun = shell().core.sign_in_again_begin(account);
+    browser_sign_in(parent, begun, email).await
+}
+
+/// The sign-in `begun` (its request and the page to open) in the browser, waited for
+async fn browser_sign_in(
+    parent: &impl IsA<gtk::Widget>,
+    begun: pe_core::Result<(u64, String)>,
+    email: &str,
+) -> Option<u64> {
     let shell = shell();
-    let Ok((request, page)) = shell.core.sign_in_begin(with, email) else {
+    let Ok((request, page)) = begun else {
         ui::alert(parent, TITLE, &t!(UiSignInNotStarted)).await;
         return None;
     };
@@ -642,9 +660,14 @@ pub async fn new_account(parent: &impl IsA<gtk::Widget>) -> i64 {
     0
 }
 
-/// Asks for the password of an account; None when cancelled
-pub async fn password_dialog(parent: &impl IsA<gtk::Widget>, account: &str) -> Option<String> {
-    let intro = t!(UiEnterPassword, account = account);
+/// Asks for the password of the account named `account`, with `hint` (the core's word on app passwords) under the
+/// question when there is one; None when cancelled
+pub async fn password_dialog(parent: &impl IsA<gtk::Widget>, account: &str, hint: &str) -> Option<String> {
+    let mut intro = t!(UiEnterPassword, account = account);
+    if !hint.is_empty() {
+        intro.push_str("\n\n");
+        intro.push_str(hint);
+    }
     let form = Form::new(
         parent,
         &t!(UiLogon),
@@ -676,11 +699,15 @@ async fn properties(parent: &gtk::Widget, account: i64, signs_in_with: Option<St
     let verifiers = core.account_verifiers_text(account).unwrap_or_default();
     // the key of its addresses, after the rest
     let security = crate::keys::AccountSecurity::new(account);
-    let more = Some(security.group.upcast_ref::<gtk::Widget>());
     if let Some(with) = signs_in_with {
         // a browser sign-in account: the names, the other addresses and the sender checks only, the rest is the
-        // provider's
+        // provider's; Sign In Again above its Security
         let intro = t!(UiSignsInWith, app = &with);
+        let sign_in = sign_in_again_button(account);
+        let more = gtk::Box::new(gtk::Orientation::Vertical, 12);
+        more.append(&sign_in);
+        more.append(&security.group);
+        let more = Some(more.upcast_ref::<gtk::Widget>());
         let form = Form::with_more(
             parent,
             &crate::words::plain(crate::words::Text::UiProperties),
@@ -712,6 +739,7 @@ async fn properties(parent: &gtk::Widget, account: i64, signs_in_with: Option<St
         form.close();
         return saved;
     }
+    let more = Some(security.group.upcast_ref::<gtk::Widget>());
     // last, the other addresses it sends from and the servers whose sender checks it trusts
     let mut fields = server_fields(&stored, &account_name);
     let other_addresses = fields.len();
@@ -782,6 +810,17 @@ async fn properties(parent: &gtk::Widget, account: i64, signs_in_with: Option<St
     }
     form.close();
     saved
+}
+
+/// Properties' Sign In Again of an account that signs in through the browser: what its state offers, on while there
+/// is a sign-in to give
+fn sign_in_again_button(account: i64) -> gtk::Button {
+    let button = gtk::Button::with_label(crate::commands::Command::SignInAgain.label());
+    button.set_widget_name("account-sign-in-again");
+    button.set_halign(gtk::Align::Start);
+    button.set_sensitive(crate::account_status::can_sign_in_again(account));
+    button.connect_clicked(move |_| spawn(crate::account_status::run(account)));
+    button
 }
 
 /// The other addresses of Properties saved, or why not said

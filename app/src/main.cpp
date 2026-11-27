@@ -61,11 +61,15 @@ int g_listWidth = 360;
 constexpr int kGap = 4;
 // the splitter being dragged: 0 none, 1 between the tree and the rest, 2 between the list and the reading pane
 int g_dragging = 0;
-// the account whose password prompt is open, and those waiting for theirs, so a failure does not open another
+// an account's dialog asked for (wParam the account's id), shown once the event that asked for it is over, so the
+// tree and the bar over the list show the state behind it
+constexpr UINT WM_ACCOUNT_PROMPT = WM_APP + 63;
+// the accounts whose WM_ACCOUNT_PROMPT is posted and not handled yet: two refusals in a row ask for one dialog, which
+// shows the state as it is then
+std::vector<int64_t> g_promptsPosted;
+// the account whose sign-in dialog is open, and those waiting for theirs: one dialog at a time
 int64_t g_prompting = 0;
 std::vector<int64_t> g_promptQueue;
-// accounts whose last sync failed: their failure stays in the status bar
-std::set<int64_t> g_failing;
 
 // ---- the core's events ----
 
@@ -92,12 +96,18 @@ void ShowStatus(const std::wstring& text) {
     SendMessageW(g_status, SB_SETTEXTW, 0, reinterpret_cast<LPARAM>(text.c_str()));
 }
 
-// the answer to something the user did; one that is over (a search found, a download done) leaves "Done", never an
-// empty pane, which a sync may replace
+// "Done", or the core's words where "Done" would be: an account that needs a sign-in or can not connect ("Work needs
+// you to sign in"), or the last failure of a connected account's work ("Work: ...") until it syncs without one
+std::wstring DoneText() {
+    core::String text(g_core ? pe_accounts_status_text(g_core.get()) : nullptr);
+    return text ? Text(text.get()) : core::T(PE_TEXT_UI_DONE);
+}
+
+// the answer to something the user did; one that is over (a search found, a download done) leaves "Done" (DoneText),
+// never an empty pane, which a sync may replace
 void SetStatus(const std::wstring& text) {
-    std::wstring done = core::T(PE_TEXT_UI_DONE);
-    ShowStatus(text.empty() ? done : text);
-    g_statusIsSync = text.empty() || text == done;
+    ShowStatus(text.empty() ? DoneText() : text);
+    g_statusIsSync = text.empty();
 }
 
 // a sync's words: shown unless the user's answer is there, or always (`over`: a failure, what the rules did)
@@ -262,6 +272,9 @@ void UpdateMenu(HMENU menu) {
             EnableMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.CanMarkAllRead() ? MF_ENABLED : MF_GRAYED));
         } else if (id == IDM_NEW_FOLDER) {
             EnableMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.CanNewFolder() ? MF_ENABLED : MF_GRAYED));
+        } else if (id == IDM_SIGN_IN_AGAIN) {
+            // off while the account it is for needs no sign-in the user can give
+            EnableMenuItem(menu, id, MF_BYCOMMAND | (CanSignInAgain(g_core.get(), g_mailbox.SignInAccount()) ? MF_ENABLED : MF_GRAYED));
         }
     }
     if (HasOwnItem(menu, IDM_WATCH_CONVERSATION)) {
@@ -452,10 +465,17 @@ void ShowOutbox() {
     SetOutgoing(text);
 }
 
-void SyncAll() {
+// every account synced: the user's Send/Recv (`pe_sync`), or the timer's (`pe_sync_scheduled`, which leaves an account
+// whose sign-in was refused alone for a while)
+void SyncAll(bool scheduled = false) {
     core::AccountList accounts(pe_accounts(g_core.get()));
     for (size_t i = 0; i < pe_account_list_count(accounts.get()); i++) {
-        pe_sync(g_core.get(), pe_account_list_get(accounts.get(), i)->id);
+        int64_t account = pe_account_list_get(accounts.get(), i)->id;
+        if (scheduled) {
+            pe_sync_scheduled(g_core.get(), account);
+        } else {
+            pe_sync(g_core.get(), account);
+        }
     }
 }
 
@@ -500,36 +520,11 @@ void AccountMenu(const NMTOOLBARW* button) {
     }
 }
 
-// an account that signs in through the browser signs in again
-void SignInAgain(int64_t account) {
-    std::wstring text = core::T(PE_TEXT_UI_SIGN_IN_REFUSED, {{"account", g_mailbox.AccountName(account)}}) + L"\n\n" +
-                        core::T(PE_TEXT_UI_SIGN_IN_AGAIN_ASK);
-    if (MessageBoxApp(g_main, text.c_str(), kTitle, MB_YESNO | MB_ICONQUESTION) != IDYES) {
-        return;
-    }
-    uint64_t request =
-        SignInWithBrowser(g_main, g_core.get(), g_mailbox.SignIn(account), g_mailbox.AccountEmail(account));
-    if (!request) {
-        return;
-    }
-    char* why = nullptr;
-    if (pe_account_reauthorize(g_core.get(), account, request, &why)) {
-        pe_sync(g_core.get(), account);
-        return;
-    }
-    core::String reason(why);
-    std::wstring refused = core::T(PE_TEXT_UI_SIGN_IN_AGAIN_FAILED,
-                                   {{"reason", reason ? Text(reason.get()) : core::T(PE_TEXT_UI_UNKNOWN_REASON)}});
-    MessageBoxApp(g_main, refused.c_str(), kTitle, MB_OK | MB_ICONWARNING);
-}
-
-void PromptFor(int64_t account) {
-    if (g_mailbox.SignIn(account).provider != PE_O_AUTH_PROVIDER_NONE) {
-        SignInAgain(account);
-        return;
-    }
+// the password of an account asked for again (`hint` under the field: the provider's word on app passwords), kept and
+// the account synced
+void EnterPassword(int64_t account, const std::wstring& hint) {
     std::wstring password;
-    if (PasswordDialog(g_main, g_mailbox.AccountName(account), password)) {
+    if (PasswordDialog(g_main, g_mailbox.AccountName(account), hint, password)) {
         std::string utf8 = core::Narrow(password);
         pe_account_set_password(g_core.get(), account, utf8.c_str());
         SecureZeroMemory(utf8.data(), utf8.size());
@@ -538,8 +533,79 @@ void PromptFor(int64_t account) {
     }
 }
 
-// the password or browser sign-in prompts, one at a time: an account that fails while another's is open waits for it
-void AskPassword(int64_t account) {
+// what an account's state asks of the user, as the bar's button, a click on its mark and Sign In Again do it
+void RunStatusAction(int64_t account) {
+    core::AccountStatus status(g_core.get(), account);
+    switch (status->action) {
+    case PE_STATUS_ACTION_SIGN_IN_AGAIN:
+        SignInAgainInBrowser(g_main, g_core.get(), account, g_mailbox.AccountEmail(account));
+        break;
+    case PE_STATUS_ACTION_ENTER_PASSWORD:
+        EnterPassword(account, Text(status->password_hint));
+        break;
+    case PE_STATUS_ACTION_COPY_ADMIN_LINK:
+        // for the organization's administrator, who approves the app there; the status bar says what to do with it,
+        // until the next sync says something
+        if (CopyText(g_main, Text(status->admin_link))) {
+            SetSyncStatus(core::T(PE_TEXT_ACCOUNT_STATE_ADMIN_LINK_COPIED), true);
+        }
+        break;
+    case PE_STATUS_ACTION_HELP:
+        OpenHelpTopic(status->help_topic ? status->help_topic : "");
+        break;
+    case PE_STATUS_ACTION_SYNC_NOW:
+        SyncAsked();
+        pe_sync(g_core.get(), account);
+        break;
+    case PE_STATUS_ACTION_NONE:
+        break;
+    }
+}
+
+// Sign In Again of the menus and Properties: the sign-in the account takes, the password or the browser's
+void SignInAgain(int64_t account) {
+    core::AccountStatus status(g_core.get(), account);
+    if (status->action == PE_STATUS_ACTION_ENTER_PASSWORD) {
+        EnterPassword(account, Text(status->password_hint));
+    } else {
+        SignInAgainInBrowser(g_main, g_core.get(), account, g_mailbox.AccountEmail(account));
+    }
+}
+
+// the one dialog of an account's state, when the core asks for it (AccountStateChanged with count 1): the password, a
+// question before the browser sign-in, or the bar's words with its button; Cancel leaves the tree's mark, the bar
+// over the list and the status bar to say it
+void PromptFor(int64_t account) {
+    core::AccountStatus status(g_core.get(), account);
+    std::wstring bar = Text(status->bar);
+    switch (status->prompt) {
+    case PE_PROMPT_PASSWORD:
+        EnterPassword(account, Text(status->password_hint));
+        break;
+    case PE_PROMPT_BROWSER_SIGN_IN: {
+        std::wstring text = bar + L"\n\n" + core::T(PE_TEXT_UI_SIGN_IN_AGAIN_ASK);
+        if (MessageBoxApp(g_main, text.c_str(), kTitle, MB_YESNO | MB_ICONQUESTION) == IDYES) {
+            SignInAgainInBrowser(g_main, g_core.get(), account, g_mailbox.AccountEmail(account));
+        }
+        break;
+    }
+    case PE_PROMPT_INFORM: {
+        // what can not be fixed by signing in here: the bar's words, its button beside OK
+        std::wstring button = Text(status->button);
+        if (button.empty()) {
+            MessageBoxApp(g_main, bar.c_str(), kTitle, MB_OK | MB_ICONWARNING);
+        } else if (constexpr int kAct = 100; AskAnswers(g_main, bar, {{button, kAct}, {core::T(PE_TEXT_UI_OK), IDOK}}, IDOK) == kAct) {
+            RunStatusAction(account);
+        }
+        break;
+    }
+    case PE_PROMPT_NONE:
+        break;
+    }
+}
+
+// the dialogs of the accounts, one at a time: an account whose dialog comes while another's is open waits for it
+void Prompt(int64_t account) {
     if (account == g_prompting || std::ranges::find(g_promptQueue, account) != g_promptQueue.end()) {
         return;
     }
@@ -577,6 +643,36 @@ void SyncChanged() {
     }
 }
 
+// AccountStateChanged: the status bar, the tray icon and its tooltip follow, and the compose windows of the account
+// (the tree and the bar over the list follow it themselves). With `ask` (count 1) the account's one dialog, or while
+// the window is in the tray or minimized a notification, whose click brings the dialog
+void AccountStateChanged(int64_t account, bool ask) {
+    SetSyncStatus(DoneText());
+    uint32_t needing = 0;
+    core::String summary(pe_accounts_summary(g_core.get(), &needing));
+    TrayAttention(g_main, needing, summary ? Text(summary.get()) : L"");
+    ComposeAccountStateChanged(account);
+    if (!ask) {
+        return;
+    }
+    // on the screen: the dialog (over another app's window it waits on the taskbar); in the tray or minimized: the
+    // notification
+    if (IsWindowVisible(g_main) && !IsIconic(g_main)) {
+        if (std::ranges::find(g_promptsPosted, account) == g_promptsPosted.end()) {
+            g_promptsPosted.push_back(account);
+            PostMessageW(g_main, WM_ACCOUNT_PROMPT, static_cast<WPARAM>(account), 0);
+        }
+        return;
+    }
+    core::AccountStatus status(g_core.get(), account);
+    std::wstring title = Text(status->notification_title);
+    if (!title.empty()) {
+        g_lastNotification = title;
+        g_lastNotificationText = Text(status->notification_text);
+        TrayNotifyAccount(g_main, title, g_lastNotificationText, account);
+    }
+}
+
 void OnEvent(const UiEvent& event) {
     // the picture of a preview, for the page that asked for it: nothing else changed
     if (event.kind == PE_EVENT_KIND_PREVIEW_ANSWERED) {
@@ -589,14 +685,11 @@ void OnEvent(const UiEvent& event) {
         OptionsPdfPreviewsOff();
         break;
     case PE_EVENT_KIND_SYNC_STARTED:
-        g_failing.erase(event.account);
         SetSyncStatus(core::T(PE_TEXT_UI_CHECKING, {{"account", g_mailbox.AccountName(event.account)}}));
         break;
     case PE_EVENT_KIND_SYNC_FINISHED:
-        // a failure stays in the status bar until the account syncs without one
-        if (g_failing.empty()) {
-            SetSyncStatus(g_rulesSaid.empty() ? core::T(PE_TEXT_UI_DONE) : g_rulesSaid, !g_rulesSaid.empty());
-        }
+        // what the rules did, else "Done" or the core's words for the accounts (a failure stays until it syncs without)
+        SetSyncStatus(g_rulesSaid.empty() ? DoneText() : g_rulesSaid, !g_rulesSaid.empty());
         g_rulesSaid.clear();
         // how much text the search still has to read
         ShowFolderName();
@@ -625,7 +718,7 @@ void OnEvent(const UiEvent& event) {
         g_lastSent = core::T(PE_TEXT_UI_SENT_AT, {{"subject", Quoted(event.message)}, {"time", TimeNow()}});
         // a draft saved earlier is gone once sent: the status bar no longer says it is in Drafts
         if (StatusText() == core::T(PE_TEXT_UI_DRAFT_SAVED)) {
-            SetStatus(core::T(PE_TEXT_UI_DONE));
+            SetStatus(L"");
         }
         break;
     case PE_EVENT_KIND_DRAFT_SAVED:
@@ -692,11 +785,12 @@ void OnEvent(const UiEvent& event) {
         SetStatus(event.message);
         break;
     case PE_EVENT_KIND_FAILED:
-        g_failing.insert(event.account);
-        SetSyncStatus(g_mailbox.AccountName(event.account) + L": " + event.message, true);
-        if (event.failure == PE_FAILURE_KIND_AUTHENTICATION) {
-            AskPassword(event.account);
-        }
+        // in the core's words, which keep it until the account syncs without a failure (the dialog of a refused
+        // sign-in comes with AccountStateChanged)
+        SetSyncStatus(DoneText(), true);
+        break;
+    case PE_EVENT_KIND_ACCOUNT_STATE_CHANGED:
+        AccountStateChanged(event.account, event.count == 1);
         break;
     default:
         break;
@@ -814,6 +908,7 @@ HMENU BuildMenu() {
     AppendMenuW(view, MF_STRING, IDM_VIEW_SOURCE, MenuItem(PE_TEXT_CMD_VIEW_SOURCE, L"Ctrl+U").c_str());
     HMENU tools = CreatePopupMenu();
     AppendMenuW(tools, MF_STRING, IDM_SYNC, MenuItem(PE_TEXT_CMD_SYNC, L"F5").c_str());
+    AppendMenuW(tools, MF_STRING | MF_GRAYED, IDM_SIGN_IN_AGAIN, DialogMenuItem(PE_TEXT_CMD_SIGN_IN_AGAIN).c_str());
     AppendMenuW(tools, MF_STRING, IDM_OUTBOX, MenuItem(PE_TEXT_CMD_OUTBOX).c_str());
     AppendMenuW(tools, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(tools, MF_STRING, IDM_ADDRESS_BOOK, MenuItem(PE_TEXT_CMD_ADDRESS_BOOK, L"Ctrl+Shift+B").c_str());
@@ -1559,6 +1654,8 @@ void CreateChildren(HWND hwnd) {
     SendMessageW(g_undoSend, WM_SETFONT, SendMessageW(g_status, WM_GETFONT, 0, 0), FALSE);
     SetWindowSubclass(g_status, StatusProc, 0, 0);
     g_mailbox.Create(hwnd, g_core.get());
+    // a click on an account's mark in the tree, the bar's button over the list
+    g_mailbox.onStatusAction = [](int64_t account) { RunStatusAction(account); };
     g_folderCaption = CreateFolderCaption(hwnd, false, reinterpret_cast<HFONT>(SendMessageW(g_mailbox.Tree(), WM_GETFONT, 0, 0)));
     LoadPanes();
     UpdateUnreadOnlyButton();
@@ -1709,6 +1806,10 @@ constexpr ULONG_PTR kTestNotification = 0x4E4F5445;
 constexpr ULONG_PTR kTestLink = 0x4C494E4B;
 // with --test-hooks only: what the taskbar button's overlay shows (TrayBadge), plus 10 so a refused one is no 0
 constexpr ULONG_PTR kTestBadge = 0x42414447;
+// with --test-hooks only: the mark of a row of the folder tree (Mailbox::TestTreeMark), and whether the tray icon
+// carries the warning sign of an account that needs a sign-in (11) or not (10)
+constexpr ULONG_PTR kTestTreeMark = 0x4D41524B;
+constexpr ULONG_PTR kTestTrayAttention = 0x41545454;
 // with --test-hooks only: 11 when the last message opened came from the store (downloaded ahead), 10 when not
 constexpr ULONG_PTR kTestFromStore = 0x53544F52;
 // with --test-hooks only: the picture of the list's row of the message whose subject is the text (TestRowPicture)
@@ -1997,6 +2098,12 @@ void OnCommand(WORD id, WORD code) {
         SyncAsked();
         SyncAll();
         return;
+    case IDM_SIGN_IN_AGAIN:
+        // the account of the row chosen, or the bar's on a list of every account, while it needs a sign-in
+        if (int64_t account = g_mailbox.SignInAccount(); CanSignInAgain(g_core.get(), account)) {
+            SignInAgain(account);
+        }
+        return;
     case IDM_SELECT_ALL:
         if (HWND edit = FocusedEdit()) {
             SendMessageW(edit, EM_SETSEL, 0, -1);
@@ -2189,7 +2296,8 @@ void DropQueuedEvents() {
 LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
     int64_t noteFolder = 0;
     uint64_t noteUid = 0;
-    switch (TrayMessage(hwnd, message, wParam, lParam, noteFolder, noteUid)) {
+    int64_t noteAccount = 0;
+    switch (TrayMessage(hwnd, message, wParam, lParam, noteFolder, noteUid, noteAccount)) {
     case TrayAction::None:
         break;
     case TrayAction::Handled:
@@ -2200,6 +2308,11 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 0;
     case TrayAction::Menu:
         TrayMenu();
+        return 0;
+    case TrayAction::Account:
+        // a notification about an account's sign-in: the window, then the account's dialog
+        ShowMain();
+        Prompt(noteAccount);
         return 0;
     }
     switch (message) {
@@ -2250,6 +2363,12 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         if (g_arguments.testHooks && data->dwData == kTestBadge) {
             return static_cast<LRESULT>(TrayBadge() + 10);
+        }
+        if (g_arguments.testHooks && data->dwData == kTestTreeMark && data->cbData % sizeof(wchar_t) == 0) {
+            return g_mailbox.TestTreeMark(std::wstring(static_cast<const wchar_t*>(data->lpData), data->cbData / sizeof(wchar_t)));
+        }
+        if (g_arguments.testHooks && data->dwData == kTestTrayAttention) {
+            return TrayAttentionShown() ? 11 : 10;
         }
         if (g_arguments.testHooks && data->dwData == kTestLink && data->cbData % sizeof(wchar_t) == 0) {
             std::wstring uri(static_cast<const wchar_t*>(data->lpData), data->cbData / sizeof(wchar_t));
@@ -2335,6 +2454,10 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     }
     case WM_OPEN_MAILTO:
         OpenMailto(std::exchange(g_pendingMailto, {}));
+        return 0;
+    case WM_ACCOUNT_PROMPT:
+        std::erase(g_promptsPosted, static_cast<int64_t>(wParam));
+        Prompt(static_cast<int64_t>(wParam));
         return 0;
     case WM_OPEN_FILE:
         OpenFileWindow(std::exchange(g_pendingFile, {}));
@@ -2426,7 +2549,7 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 0;
     case WM_TIMER:
         if (wParam == TIMER_SYNC) {
-            SyncAll();
+            SyncAll(true);
         } else if (wParam == TIMER_SEND_WAITING) {
             ShowOutbox();
         } else {

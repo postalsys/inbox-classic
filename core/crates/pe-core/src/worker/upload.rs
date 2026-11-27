@@ -104,7 +104,9 @@ impl Worker {
                 Ok(()) => self.to_main(Command::SyncFolder {
                     folder: upload.folder(),
                 }),
-                Err(failure) => self.reset_after(&failure),
+                Err(failure) => {
+                    self.reset_after(&failure);
+                }
             }
         }
         self.log_out().await;

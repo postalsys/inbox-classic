@@ -40,6 +40,14 @@ menu = "tools"
 key = "F5"
 mac = "Mod+Shift+N"
 
+# the selected account (or the one only) signs in again, as the bar over the list offers: enabled while its
+# PeAccountStatus can_sign_in_again, and it does that status's action (the browser sign-in, the password dialog, the
+# administrator's link); also in the account's menu of the folder list.
+[[command]]
+id = "sign_in_again"
+windows = 184
+menu = "tools"
+
 [[command]]
 id = "undo"
 windows = 135

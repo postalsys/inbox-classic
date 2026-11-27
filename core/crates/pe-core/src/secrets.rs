@@ -2,8 +2,11 @@
 //! the system's password store between runs (the Credential Manager, the keychain, the Secret Service), so the user gives a password once. The credentials are named
 //! after the store's profile ID and the account or app, so two stores on one machine (the app's, a test's) never
 //! share one.
+//!
+//! The Credential Manager takes at most 2,560 bytes a credential (1,280 UTF-16 units), less than a refresh token of
+//! some providers, so on Windows the store is wrapped in [`parts::Parts`], which keeps a longer secret in parts.
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::sync::{Arc, Mutex, MutexGuard};
 
 use pe_store::{AccountId, SignInAppId};
@@ -47,6 +50,9 @@ pub(crate) trait Backend: Send + Sync {
     fn save(&self, key: Key, password: &str) -> Result<(), String>;
     fn remove(&self, key: Key);
 }
+
+#[cfg(any(windows, test))]
+mod parts;
 
 /// The system's own password store: the Credential Manager on Windows, the login keychain on the Mac, the Secret
 /// Service (GNOME Keyring) on Linux, all through keyring-core
@@ -92,7 +98,7 @@ mod native {
             Ok(NativeStore { store, profile })
         }
 
-        fn entry(&self, key: Key) -> Option<keyring_core::Entry> {
+        fn entry(&self, key: Key, part: u32) -> Option<keyring_core::Entry> {
             let name = match key {
                 Key::Account(account) => format!("{}/{account}", self.profile),
                 Key::App(app) => format!("{}/app/{app}", self.profile),
@@ -101,15 +107,19 @@ mod native {
                 Key::SyncBucket => format!("{}/sync-bucket", self.profile),
                 Key::RestorePoints => format!("{}/restore-points", self.profile),
             };
+            // the further parts of a long secret (parts.rs)
+            let name = if part == 0 { name } else { format!("{name}#{part}") };
             self.store.build("InboxClassic", &name, None).ok()
         }
     }
 
-    impl super::Backend for NativeStore {
-        fn load(&self, key: Key) -> Result<Option<String>, String> {
-            let entry = self
-                .entry(key)
-                .ok_or_else(|| pe_i18n::tr_args(pe_i18n::Text::SecretsUnavailable, &[("store", (&name()).into())]))?;
+    impl NativeStore {
+        fn unavailable() -> String {
+            pe_i18n::tr_args(pe_i18n::Text::SecretsUnavailable, &[("store", (&name()).into())])
+        }
+
+        fn load_at(&self, key: Key, part: u32) -> Result<Option<String>, String> {
+            let entry = self.entry(key, part).ok_or_else(Self::unavailable)?;
             match entry.get_password() {
                 Ok(password) => Ok(Some(password)),
                 Err(keyring_core::Error::NoEntry) => Ok(None),
@@ -117,17 +127,47 @@ mod native {
             }
         }
 
-        fn save(&self, key: Key, password: &str) -> Result<(), String> {
-            let entry = self
-                .entry(key)
-                .ok_or_else(|| pe_i18n::tr_args(pe_i18n::Text::SecretsUnavailable, &[("store", (&name()).into())]))?;
+        fn save_at(&self, key: Key, part: u32, password: &str) -> Result<(), String> {
+            let entry = self.entry(key, part).ok_or_else(Self::unavailable)?;
             entry.set_password(password).map_err(|e| e.to_string())
         }
 
-        fn remove(&self, key: Key) {
-            if let Some(entry) = self.entry(key) {
+        fn remove_at(&self, key: Key, part: u32) {
+            if let Some(entry) = self.entry(key, part) {
                 let _ = entry.delete_credential();
             }
+        }
+    }
+
+    /// The keychain and the Secret Service take a secret of any length whole
+    #[cfg(not(windows))]
+    impl super::Backend for NativeStore {
+        fn load(&self, key: Key) -> Result<Option<String>, String> {
+            self.load_at(key, 0)
+        }
+
+        fn save(&self, key: Key, password: &str) -> Result<(), String> {
+            self.save_at(key, 0, password)
+        }
+
+        fn remove(&self, key: Key) {
+            self.remove_at(key, 0)
+        }
+    }
+
+    /// The Credential Manager, its parts named `#1`, `#2`, ... after the secret's own credential
+    #[cfg(windows)]
+    impl super::parts::PartStore for NativeStore {
+        fn load_part(&self, key: Key, part: u32) -> Result<Option<String>, String> {
+            self.load_at(key, part)
+        }
+
+        fn save_part(&self, key: Key, part: u32, text: &str) -> Result<(), String> {
+            self.save_at(key, part, text)
+        }
+
+        fn remove_part(&self, key: Key, part: u32) {
+            self.remove_at(key, part)
         }
     }
 }
@@ -147,8 +187,18 @@ pub(crate) fn store_name() -> String {
 #[derive(Default)]
 struct SecretMap {
     passwords: HashMap<Key, String>,
-    /// Accounts whose password was refused and reported: reported once until a new one is set
-    refused: HashSet<AccountId>,
+    /// How many times each account's secret was set or removed: a refresh that started before a new sign-in does
+    /// not write the refresh token it got over the new one ([`Secrets::set_unless_changed`])
+    generations: HashMap<AccountId, u64>,
+}
+
+impl SecretMap {
+    /// A new secret of `key`: a refresh under way keeps its token to itself
+    fn changed(&mut self, key: Key) {
+        if let Key::Account(account) = key {
+            *self.generations.entry(account).or_default() += 1;
+        }
+    }
 }
 
 #[derive(Clone)]
@@ -165,6 +215,9 @@ impl Secrets {
         #[cfg(any(windows, target_os = "macos", target_os = "linux"))]
         let (backend, unavailable): (Option<Arc<dyn Backend>>, _) = match kind {
             PasswordStore::System => match native::NativeStore::new(profile.to_string()) {
+                #[cfg(windows)]
+                Ok(backend) => (Some(Arc::new(parts::Parts::new(backend))), None),
+                #[cfg(not(windows))]
                 Ok(backend) => (Some(Arc::new(backend)), None),
                 Err(error) => (None, Some(error)),
             },
@@ -223,10 +276,13 @@ impl Secrets {
         {
             let mut map = self.map();
             map.passwords.insert(key, password.to_string());
-            if let Key::Account(account) = key {
-                map.refused.remove(&account);
-            }
+            map.changed(key);
         }
+        self.save(key, password)
+    }
+
+    /// Keeps the password between runs, where the system has a place for it
+    fn save(&self, key: Key, password: &str) -> Result<(), String> {
         match (&self.backend, &self.unavailable) {
             (Some(backend), _) => backend.save(key, password),
             (None, Some(reason)) => Err(reason.clone()),
@@ -234,14 +290,36 @@ impl Secrets {
         }
     }
 
+    /// How many times the secret of `account` was set or removed: what [`Secrets::set_unless_changed`] compares
+    pub(crate) fn generation(&self, account: AccountId) -> u64 {
+        self.map().generations.get(&account).copied().unwrap_or(0)
+    }
+
+    /// Keeps `password` for `account` as [`Secrets::set`] does, unless the secret changed since it was
+    /// `generation` (a new sign-in while a refresh with the old one was under way): Ok(false) then, and the newer one
+    /// stays. A token a provider rotated keeps the refusals told, as nothing was signed in again.
+    pub(crate) fn set_unless_changed(
+        &self,
+        account: AccountId,
+        password: &str,
+        generation: u64,
+    ) -> Result<bool, String> {
+        {
+            let mut map = self.map();
+            if map.generations.get(&account).copied().unwrap_or(0) != generation {
+                return Ok(false);
+            }
+            map.passwords.insert(Key::Account(account), password.to_string());
+        }
+        self.save(Key::Account(account), password).map(|()| true)
+    }
+
     pub(crate) fn remove(&self, key: impl Into<Key>) {
         let key = key.into();
         {
             let mut map = self.map();
             map.passwords.remove(&key);
-            if let Key::Account(account) = key {
-                map.refused.remove(&account);
-            }
+            map.changed(key);
         }
         if let Some(backend) = &self.backend {
             backend.remove(key);
@@ -252,11 +330,6 @@ impl Secrets {
     /// a private OpenPGP key kept today can not be opened after a restart
     pub(crate) fn persistent(&self) -> bool {
         self.backend.is_some()
-    }
-
-    /// Whether a refused password is news: true the first time after it was set
-    pub(crate) fn first_refusal(&self, account: AccountId) -> bool {
-        self.map().refused.insert(account)
     }
 }
 
@@ -270,10 +343,8 @@ mod tests {
         assert_eq!(secrets.get(1), None);
         secrets.set(1, "pw").unwrap();
         assert_eq!(secrets.get(1).as_deref(), Some("pw"));
-        assert!(secrets.first_refusal(1));
-        assert!(!secrets.first_refusal(1));
         secrets.set(1, "new").unwrap();
-        assert!(secrets.first_refusal(1), "a new password can be refused again");
+        assert_eq!(secrets.get(1).as_deref(), Some("new"));
         secrets.remove(1);
         assert_eq!(secrets.get(1), None);
         // an app's secret is kept apart from the account of the same number
@@ -282,6 +353,21 @@ mod tests {
         assert_eq!(secrets.get(Key::App(1)).as_deref(), Some("client secret"));
         secrets.remove(Key::App(1));
         assert_eq!(secrets.get(Key::App(1)), None);
+    }
+
+    #[test]
+    fn a_refresh_does_not_write_over_a_new_sign_in() {
+        let secrets = Secrets::new(PasswordStore::Memory, "test");
+        secrets.set(1, "old").unwrap();
+        let before = secrets.generation(1);
+        // the provider rotated the token while nothing else changed: kept
+        assert!(secrets.set_unless_changed(1, "rotated", before).unwrap());
+        assert_eq!(secrets.get(1).as_deref(), Some("rotated"));
+        assert_eq!(secrets.generation(1), before, "a rotation is no new sign-in");
+        // a new sign-in meanwhile: the refresh's token is dropped
+        secrets.set(1, "signed in again").unwrap();
+        assert!(!secrets.set_unless_changed(1, "rotated from old", before).unwrap());
+        assert_eq!(secrets.get(1).as_deref(), Some("signed in again"));
     }
 
     /// The system's store keeps a password between runs, under the profile of the store. On Windows always (the

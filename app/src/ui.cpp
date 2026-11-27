@@ -976,6 +976,7 @@ HIMAGELIST IconList(IconSet set) {
     case IconSet::SecureGood: strips = kSecureGoodStrips; break;
     case IconSet::SecureWarning: strips = kSecureWarningStrips; break;
     case IconSet::SecureNeutral: strips = kSecureNeutralStrips; break;
+    case IconSet::Marks: strips = kMarkStrips; break;
     }
     // the strip closest to the DPI, at least as large
     const IconStrip* chosen = &strips.back();
@@ -995,6 +996,30 @@ HIMAGELIST IconList(IconSet set) {
                                     IMAGE_BITMAP, LR_CREATEDIBSECTION);
     }
     return list;
+}
+
+bool CanSignInAgain(const PeCore* core, int64_t account) {
+    return account && core::AccountStatus(core, account)->can_sign_in_again;
+}
+
+HICON WarningIcon(int size) {
+    // the system's own, shared (not destroyed), looked up once a size
+    static std::unordered_map<int, HICON> icons;
+    HICON& icon = icons[size];
+    if (!icon) {
+        icon = static_cast<HICON>(LoadImageW(nullptr, IDI_WARNING, IMAGE_ICON, size, size, LR_SHARED));
+    }
+    return icon;
+}
+
+void DrawAccountMark(HDC dc, PeAccountMark mark, int left, int top, int size, bool selected) {
+    if (mark == PE_ACCOUNT_MARK_SIGN_IN) {
+        if (HICON icon = WarningIcon(size)) {
+            DrawIconEx(dc, left, top, icon, size, size, 0, nullptr, DI_NORMAL);
+        }
+    } else if (mark == PE_ACCOUNT_MARK_CANNOT_CONNECT) {
+        DrawListMark(dc, IconList(IconSet::Marks), MARK_CLOUD_OFF, left, top, size, selected);
+    }
 }
 
 std::wstring MenuText(std::wstring text) {
@@ -1408,8 +1433,10 @@ LRESULT CALLBACK AskProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 }  // namespace
 
 int AskAnswers(HWND owner, const std::wstring& text, const std::vector<std::pair<std::wstring, int>>& answers, int safe) {
-    static const wchar_t* kAskClass = L"InboxClassicAsk";
-    RegisterDialogClass(kAskClass, AskProc);
+    // a class of its own: keys.cpp's Ask has another window procedure under InboxClassicAsk, and the class registered
+    // first would take both
+    static const wchar_t* kAnswersClass = L"InboxClassicAnswers";
+    RegisterDialogClass(kAnswersClass, AskProc);
     int pad = Scale(12);
     int width = Scale(440);
     HDC dc = GetDC(owner);
@@ -1420,7 +1447,7 @@ int AskAnswers(HWND owner, const std::wstring& text, const std::vector<std::pair
     ReleaseDC(owner, dc);
     int textHeight = bounds.bottom;
     int height = pad + textHeight + Scale(18) + Scale(25) + pad;
-    HWND dialog = CreateModalWindow(owner, kAskClass, L"Inbox Classic", width, height);
+    HWND dialog = CreateModalWindow(owner, kAnswersClass, L"Inbox Classic", width, height);
     if (!dialog) {
         return safe;
     }

@@ -52,7 +52,6 @@ reader-downloading-detail = Ziņojums tiks parādīts šeit, kad lejupielāde b�
 reader-downloading-size = Ziņojuma lielums ir { $size }. Tas tiks parādīts šeit, kad būs lejupielādēts.
 reader-failed = Neizdevās lejupielādēt ziņojumu
 reader-failed-network = Neizdevās sazināties ar pasta serveri ({ $reason }).
-reader-failed-sign-in = Pasta serveris noraidīja pierakstīšanos ({ $reason }). Logā „Konti” pārbaudiet paroli vai pierakstieties vēlreiz.
 reader-failed-security = Neizdevās izveidot drošu savienojumu ar pasta serveri ({ $reason }).
 reader-failed-other = Pasta serveris atbildēja: { $reason }.
 reader-retry-note = Tiks mēģināts vēlreiz, kad konts atkal izveidos savienojumu.

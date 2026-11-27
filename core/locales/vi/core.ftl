@@ -39,7 +39,6 @@ reader-downloading-detail = Thư sẽ hiện ở đây khi tải xuống xong.
 reader-downloading-size = Thư có kích cỡ { $size }. Thư sẽ hiện ở đây khi được tải xuống.
 reader-failed = Không thể tải thư xuống
 reader-failed-network = Không thể kết nối với máy chủ thư hoặc kết nối bị gián đoạn ({ $reason }).
-reader-failed-sign-in = Máy chủ thư không chấp nhận đăng nhập ({ $reason }). Hãy kiểm tra mật khẩu hoặc đăng nhập lại trong thiết đặt của tài khoản.
 reader-failed-security = Không thể tạo kết nối bảo mật với máy chủ thư ({ $reason }).
 reader-failed-other = Máy chủ thư trả lời: { $reason }.
 reader-retry-note = Ứng dụng sẽ thử lại khi tài khoản kết nối lại.

@@ -67,7 +67,6 @@ reader-downloading-detail = Le message s'affichera ici une fois le téléchargem
 reader-downloading-size = Le message fait { $size }. Il apparaîtra ici une fois téléchargé.
 reader-failed = Le message n'a pas pu être téléchargé
 reader-failed-network = La connexion au serveur de messagerie a échoué ou a été interrompue ({ $reason }).
-reader-failed-sign-in = Le serveur de messagerie a refusé la connexion ({ $reason }). Vérifiez le mot de passe ou reconnectez-vous dans les paramètres du compte.
 reader-failed-security = Impossible d'établir une connexion sécurisée au serveur de messagerie ({ $reason }).
 reader-failed-other = Le serveur de messagerie a répondu : { $reason }.
 reader-retry-note = Une nouvelle tentative aura lieu dès que la connexion au compte sera rétablie.

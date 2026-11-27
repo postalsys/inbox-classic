@@ -196,7 +196,10 @@ const TOOLS: &[Tool] = &[
         title: "List accounts",
         level: AgentLevels::READ,
         hints: READS,
-        description: Description::Text("The mail accounts this agent may use, with their ids and addresses."),
+        description: Description::Text(
+            "The mail accounts this agent may use, with their ids and addresses, and whether each is signed in \
+             (`state`: connected, sign_in_needed or cannot_connect, with a `note` when it is not connected).",
+        ),
         schema: || object(json!({}), &[]),
     },
     Tool {
@@ -1172,9 +1175,58 @@ fn list_accounts(call: &Call) -> Outcome {
         .map_err(engine)?
         .into_iter()
         .filter(|a| call.host.accounts.contains(&a.id))
-        .map(|a| json!({ "account": a.id, "name": a.settings.name, "email": a.settings.email }))
+        .map(|a| {
+            let mut listed = json!({ "account": a.id, "name": a.settings.name, "email": a.settings.email });
+            let (state, note) = account_state(call.core, a.id);
+            listed["state"] = json!(state);
+            if let Some(note) = note {
+                listed["note"] = json!(note);
+            }
+            listed
+        })
         .collect();
     Ok(json!({ "accounts": accounts }))
+}
+
+/// Whether an account is signed in, for an agent: `connected`, `sign_in_needed` or `cannot_connect`, with what it
+/// means for the agent when it is not connected
+pub(crate) fn account_state(core: &Core, account: AccountId) -> (&'static str, Option<String>) {
+    match core.account_state(account) {
+        pe_core::AccountState::Connected => ("connected", None),
+        pe_core::AccountState::SignInNeeded(_) => ("sign_in_needed", Some(signed_out(core, account))),
+        pe_core::AccountState::CannotConnect => (
+            "cannot_connect",
+            Some(
+                "Inbox Classic cannot reach this account's mail server now and keeps trying. Its mail stored here can \
+                 be listed and searched; messages not downloaded yet can not be read until it connects."
+                    .into(),
+            ),
+        ),
+    }
+}
+
+/// Why an account's mail can not be fetched while it is not signed in, and that only the user can sign it in
+fn signed_out(core: &Core, account: AccountId) -> String {
+    let why = core
+        .account_status(account)
+        .map(|status| status.bar)
+        .unwrap_or_default();
+    format!(
+        "{} The account is not signed in, so Inbox Classic can not fetch its mail: the user has to sign in again in \
+         Inbox Classic (agents can not start a sign-in). Its mail stored here can still be listed and searched.",
+        why.trim()
+    )
+    .trim()
+    .to_string()
+}
+
+/// An error for a message of `folder` that has to be fetched from the server while its account is not signed in
+fn fetch_refused(call: &Call, folder: FolderId) -> Result<(), String> {
+    let account = call.core.folder(folder).map_err(engine)?.account_id;
+    if matches!(call.core.account_state(account), pe_core::AccountState::SignInNeeded(_)) {
+        return Err(signed_out(call.core, account));
+    }
+    Ok(())
 }
 
 fn list_folders(call: &Call, args: &Args) -> Outcome {
@@ -1243,6 +1295,7 @@ async fn downloaded(call: &Call<'_>, folder: FolderId, uid: u64) -> Result<(), S
     if call.message(folder, uid)?.cached {
         return Ok(());
     }
+    fetch_refused(call, folder)?;
     call.core.open_message(folder, uid).map_err(engine)?;
     let deadline = Instant::now() + DOWNLOAD_WAIT;
     let mut told = Instant::now();

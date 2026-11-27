@@ -53,7 +53,6 @@ reader-downloading-detail = Poruka će se pojaviti ovde kada se preuzimanje zavr
 reader-downloading-size = Veličina poruke je { $size }. Poruka će se prikazati kada se preuzimanje završi.
 reader-failed = Poruku nije moguće preuzeti
 reader-failed-network = Povezivanje sa serverom e-pošte nije uspelo ili je veza prekinuta ({ $reason }).
-reader-failed-sign-in = Server e-pošte nije prihvatio prijavu ({ $reason }). Proverite lozinku ili se ponovo prijavite u podešavanjima naloga.
 reader-failed-security = Nije moguće uspostaviti bezbednu vezu sa serverom e-pošte ({ $reason }).
 reader-failed-other = Server e-pošte je odgovorio: { $reason }.
 reader-retry-note = Inbox Classic će pokušati ponovo kada se nalog ponovo poveže.

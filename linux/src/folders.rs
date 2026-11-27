@@ -14,8 +14,8 @@ use std::rc::Rc;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{gio, glib};
-use pe_core::MessageRef;
 use pe_core::tree::{TreeList, TreeRow, TreeRowKind};
+use pe_core::{MessageRef, TreeMark};
 
 mod imp {
     use super::*;
@@ -31,6 +31,10 @@ mod imp {
         /// What a screen reader says for it: the core's title ("Inbox - Work" under All Inboxes)
         #[property(get, set)]
         pub title: RefCell<String>,
+        /// What the account's mark on the row means (the row's [`TreeRow::mark`]), in the core's words: its tooltip
+        /// and what a screen reader says for it; empty without a mark. The row's mark button follows it
+        #[property(get, set)]
+        pub mark_tip: RefCell<String>,
         /// The core's row it shows
         pub row: RefCell<Option<TreeRow>>,
         pub expanded: Cell<bool>,
@@ -68,6 +72,10 @@ impl FolderItem {
         if self.title() != row.title {
             self.set_title(row.title.as_str());
         }
+        // after the row: the mark button reads the row's mark when the tip changes
+        if self.mark_tip() != row.mark_tooltip {
+            self.set_mark_tip(row.mark_tooltip.as_str());
+        }
         self.show();
     }
 
@@ -96,6 +104,24 @@ impl FolderItem {
             .borrow_mut()
             .get_or_insert_with(gio::ListStore::new::<FolderItem>)
             .append(child);
+    }
+}
+
+/// The icon of a mark (the theme's, the app's own warning where it has none) and its style: the warning color for
+/// a sign-in needed, dimmed for a connection that will likely come back by itself; None for no mark
+pub fn mark_icon(mark: TreeMark) -> Option<(&'static [&'static str], &'static str)> {
+    match mark {
+        TreeMark::None => None,
+        TreeMark::SignIn => Some((&["dialog-warning-symbolic", "ic-warning-symbolic"], "warning")),
+        TreeMark::CannotConnect => Some((&["network-offline-symbolic", "ic-cloud-off-symbolic"], "dim-label")),
+    }
+}
+
+/// `image` shows the icon of `mark` in its style
+pub fn show_mark_icon(image: &gtk::Image, mark: TreeMark) {
+    if let Some((names, class)) = mark_icon(mark) {
+        crate::icons::show(image, names);
+        image.set_css_classes(&[class]);
     }
 }
 
@@ -128,11 +154,14 @@ pub fn list_id(list: TreeList, folder: i64, account: i64) -> i64 {
 }
 
 /// The label of a row as Pango markup: its name, with the count when there is one (bold but for Flagged, which
-/// counts flagged messages, not unread ones)
+/// counts flagged messages, not unread ones). The account's mark, on a row that has one, takes the place of the
+/// count, the name still bold with unread messages
 fn label_markup(row: &TreeRow, collapsed: bool) -> String {
-    let count = row.shown(collapsed);
+    let marked = row.mark != TreeMark::None;
+    let count = if marked { 0 } else { row.shown(collapsed) };
     let name = glib::markup_escape_text(&row.label);
     match (count, row.bold(collapsed)) {
+        (0, true) if marked && row.kind != TreeRowKind::Account => format!("<b>{name}</b>"),
         (0, _) => name.to_string(),
         // a heading is small and grey: the unread mail it hides is told in the text's full color, so it is not missed
         (count, true) if row.kind == TreeRowKind::Account => {
@@ -156,6 +185,7 @@ type Menu = Box<dyn Fn(&gtk::Widget, f64, f64, &TreeRow)>;
 type Opened = Box<dyn Fn(&TreeRow, bool)>;
 type Moved = Box<dyn Fn(i64, i64, bool)>;
 type Selected = Box<dyn Fn(&TreeRow, bool)>;
+type MarkClicked = Box<dyn Fn(i64)>;
 
 /// What the tree tells the window: a row chosen, messages dropped onto a folder, and the accounts reordered
 pub struct Handlers {
@@ -177,6 +207,8 @@ pub struct Handlers {
     /// An account's row dragged onto another of its kind: the account dragged, the account of the row it was dropped
     /// on, and whether below it (else above)
     pub moved: Moved,
+    /// The account's mark on a row clicked: the account, whose status action runs (the rest of the row selects it)
+    pub mark_clicked: MarkClicked,
 }
 
 /// An account's row dragged inside the tree: a type of its own, so no other program or row takes it
@@ -377,6 +409,31 @@ impl FolderTree {
     #[cfg(feature = "e2e")]
     pub fn markup_of(&self, id: i64) -> Option<String> {
         self.items.borrow().get(&id).map(|item| item.markup())
+    }
+
+    /// The mark of row `id` and its tooltip as the row shows them, for the e2e driver
+    #[cfg(feature = "e2e")]
+    pub fn mark_of(&self, id: i64) -> Option<(TreeMark, String)> {
+        let item = self.items.borrow().get(&id)?.clone();
+        Some((item.row()?.mark, item.mark_tip()))
+    }
+
+    /// The mark's button on the row of `id` as it is drawn, when it shows, for the e2e driver
+    #[cfg(feature = "e2e")]
+    pub fn mark_button(&self, id: i64) -> Option<gtk::Button> {
+        crate::e2e::descendants::<gtk::TreeExpander>(self.view.upcast_ref())
+            .into_iter()
+            .find(|expander| {
+                expander
+                    .list_row()
+                    .and_then(|row| row.item())
+                    .and_downcast::<FolderItem>()
+                    .is_some_and(|item| item.id() == id)
+            })
+            .and_then(|expander| expander.child())
+            .and_then(|row| row.last_child())
+            .and_downcast::<gtk::Button>()
+            .filter(|button| button.is_visible() && button.is_mapped())
     }
 
     /// The id of what is selected ([`row_id`]), 0 for nothing
@@ -619,10 +676,13 @@ fn factory(handlers: Rc<RefCell<Option<Handlers>>>, arrows: Rc<Cell<bool>>) -> g
         let label = gtk::Label::new(None);
         label.set_use_markup(true);
         label.set_xalign(0.0);
+        label.set_hexpand(true);
         label.set_ellipsize(gtk::pango::EllipsizeMode::End);
+        let mark = mark_button(item, handlers.clone());
         let row = gtk::Box::new(gtk::Orientation::Horizontal, 6);
         row.append(&icon);
         row.append(&label);
+        row.append(&mark);
         let expander = gtk::TreeExpander::new();
         expander.set_child(Some(&row));
         item.set_child(Some(&expander));
@@ -646,6 +706,20 @@ fn factory(handlers: Rc<RefCell<Option<Handlers>>>, arrows: Rc<Cell<bool>>) -> g
         folder
             .chain_property::<FolderItem>("title")
             .bind(item, "accessible-label", gtk::Widget::NONE);
+        // the mark follows the item's, set after its icon name (the tip last)
+        let shown = folder.clone();
+        let button = mark.downgrade();
+        folder
+            .chain_property::<FolderItem>("mark-tip")
+            .watch(None::<&glib::Object>, move || {
+                let item = shown
+                    .evaluate(None::<&glib::Object>)
+                    .and_then(|value| value.get::<Option<glib::Object>>().ok().flatten())
+                    .and_downcast::<FolderItem>();
+                if let Some(button) = button.upgrade() {
+                    show_mark(&button, item.as_ref());
+                }
+            });
         add_drop_target(&expander, item, handlers.clone());
         add_drag_source(&expander, item);
         add_row_drop_target(&expander, item, handlers.clone());
@@ -665,16 +739,57 @@ fn factory(handlers: Rc<RefCell<Option<Handlers>>>, arrows: Rc<Cell<bool>>) -> g
                 expander.set_indent_for_icon(arrows.get());
             }
             crate::ui::set_class(&expander, "account-heading", heading);
-            if let Some(icon) = expander
-                .downcast_ref::<gtk::TreeExpander>()
-                .and_then(|e| e.child())
-                .and_then(|row| row.first_child())
-            {
+            let row_box = expander.downcast_ref::<gtk::TreeExpander>().and_then(|e| e.child());
+            if let Some(icon) = row_box.as_ref().and_then(|row| row.first_child()) {
                 icon.set_visible(!heading);
+            }
+            if let Some(mark) = row_box.and_then(|row| row.last_child()).and_downcast::<gtk::Button>() {
+                let folder = item.item().and_downcast::<gtk::TreeListRow>().and_then(|r| r.item());
+                show_mark(&mark, folder.and_downcast_ref::<FolderItem>());
             }
         }
     });
     factory
+}
+
+/// The account's mark at the end of a row: a flat button whose click runs the account's status action (signing in
+/// again, trying again) without selecting the row; hidden on the rows without one
+fn mark_button(item: &gtk::ListItem, handlers: Rc<RefCell<Option<Handlers>>>) -> gtk::Button {
+    let mark = gtk::Button::new();
+    mark.set_child(Some(&gtk::Image::new()));
+    mark.add_css_class("flat");
+    mark.add_css_class("tree-mark");
+    mark.set_valign(gtk::Align::Center);
+    // the list moves between its rows with the arrows: the bar over the list is the mark's way for the keyboard
+    mark.set_focusable(false);
+    mark.set_widget_name("folder-mark");
+    mark.set_visible(false);
+    let weak_item = item.downgrade();
+    mark.connect_clicked(move |_| {
+        let account = weak_item
+            .upgrade()
+            .and_then(|item| row_of(&item))
+            .map(|row| row.account);
+        if let (Some(account), Some(handlers)) = (account, &*handlers.borrow()) {
+            (handlers.mark_clicked)(account);
+        }
+    });
+    mark
+}
+
+/// The mark of `item` on its row's button: its icon and color, its tooltip and the words a screen reader says
+fn show_mark(button: &gtk::Button, item: Option<&FolderItem>) {
+    let mark = item.and_then(FolderItem::row).map_or(TreeMark::None, |row| row.mark);
+    button.set_visible(mark != TreeMark::None);
+    if mark == TreeMark::None {
+        return;
+    }
+    let tip = item.map(FolderItem::mark_tip).unwrap_or_default();
+    button.set_tooltip_text(Some(&tip));
+    button.update_property(&[gtk::accessible::Property::Label(&tip)]);
+    if let Some(image) = button.child().and_downcast::<gtk::Image>() {
+        show_mark_icon(&image, mark);
+    }
 }
 
 /// The right-click menu of a row (the row selected first when it can be), and a click anywhere on a heading opening or
@@ -935,6 +1050,8 @@ mod tests {
             new_folder_account: account,
             new_folder_parent: folder,
             icon: "",
+            mark: TreeMark::None,
+            mark_tooltip: String::new(),
         }
     }
 
@@ -995,6 +1112,26 @@ mod tests {
         assert_eq!(
             label_markup(&heading, true),
             "<b>Inbox &amp; more <span alpha=\"100%\">(3)</span></b>"
+        );
+    }
+
+    #[test]
+    fn the_mark_takes_the_place_of_the_count() {
+        let mut inbox = row(TreeRowKind::Folder, 1, 5);
+        inbox.unread = 2;
+        inbox.mark = TreeMark::SignIn;
+        assert_eq!(label_markup(&inbox, false), "<b>Inbox &amp; more</b>");
+        inbox.unread = 0;
+        assert_eq!(label_markup(&inbox, false), "Inbox &amp; more");
+        let mut heading = row(TreeRowKind::Account, 1, 0);
+        heading.hidden = 3;
+        heading.mark = TreeMark::CannotConnect;
+        assert_eq!(label_markup(&heading, true), "Inbox &amp; more");
+        assert_eq!(mark_icon(TreeMark::None), None);
+        assert_eq!(mark_icon(TreeMark::SignIn).map(|(_, class)| class), Some("warning"));
+        assert_eq!(
+            mark_icon(TreeMark::CannotConnect).map(|(_, class)| class),
+            Some("dim-label")
         );
     }
 }

@@ -100,6 +100,89 @@ typedef enum PeFailureKind {
   PE_FAILURE_KIND_OTHER = 4,
 } PeFailureKind;
 
+// What an account is now
+typedef enum PeAccountState {
+  // Signed in (or nothing failed yet): nothing to show
+  PE_ACCOUNT_STATE_CONNECTED = 0,
+  // The user has to sign in: `reason` says why, `prompt` and `action` what to offer
+  PE_ACCOUNT_STATE_SIGN_IN_NEEDED = 1,
+  // The server could not be reached in two syncs in a row; the timer's syncs go on trying
+  PE_ACCOUNT_STATE_CANNOT_CONNECT = 2,
+} PeAccountState;
+
+// Why an account needs a sign-in (`PeAccountState` SIGN_IN_NEEDED)
+typedef enum PeSignInReason {
+  PE_SIGN_IN_REASON_NONE = 0,
+  // The password or the sign-in was refused, or there is none
+  PE_SIGN_IN_REASON_REFUSED = 1,
+  // The organization's administrator has to approve Inbox Classic (`admin_link`)
+  PE_SIGN_IN_REASON_ADMIN_CONSENT = 2,
+  // The provider says IMAP is turned off for the mailbox
+  PE_SIGN_IN_REASON_IMAP_OFF = 3,
+  // Signing in again came back signed in to another address (the bar names it)
+  PE_SIGN_IN_REASON_OTHER_ADDRESS = 4,
+} PeSignInReason;
+
+// What the bar's button does
+typedef enum PeStatusAction {
+  // No button
+  PE_STATUS_ACTION_NONE = 0,
+  // The browser sign-in: `pe_sign_in_again_begin`, then on `SignInDone` `pe_account_reauthorize` (which syncs);
+  // after another address the provider shows its account picker by itself
+  PE_STATUS_ACTION_SIGN_IN_AGAIN = 1,
+  // The password dialog with `password_hint`, then `pe_account_set_password` and `pe_sync`
+  PE_STATUS_ACTION_ENTER_PASSWORD = 2,
+  // `admin_link` to the clipboard, for the organization's administrator
+  PE_STATUS_ACTION_COPY_ADMIN_LINK = 3,
+  // The help topic `help_topic`
+  PE_STATUS_ACTION_HELP = 4,
+  // A sync now: `pe_sync`
+  PE_STATUS_ACTION_SYNC_NOW = 5,
+} PeStatusAction;
+
+// The dialog an app shows when `AccountStateChanged` comes with `count` 1
+typedef enum PePrompt {
+  PE_PROMPT_NONE = 0,
+  // The password dialog (with `password_hint`), then `pe_account_set_password` and `pe_sync`
+  PE_PROMPT_PASSWORD = 1,
+  // Asks with `bar`'s words whether to sign in again in the browser, then as `PE_STATUS_ACTION_SIGN_IN_AGAIN`
+  PE_PROMPT_BROWSER_SIGN_IN = 2,
+  // `bar`'s words with OK, and `button` where it has one (doing `action`)
+  PE_PROMPT_INFORM = 3,
+} PePrompt;
+
+// The mark of an account's rows in the folder tree
+typedef enum PeAccountMark {
+  PE_ACCOUNT_MARK_NONE = 0,
+  // A warning: the account needs a sign-in
+  PE_ACCOUNT_MARK_SIGN_IN = 1,
+  // The account can not connect
+  PE_ACCOUNT_MARK_CANNOT_CONNECT = 2,
+} PeAccountMark;
+
+// The messages a row lists when chosen (`pe_list_view_set_list`)
+typedef enum PeTreeList {
+  // None (a heading)
+  PE_TREE_LIST_NONE = 0,
+  // The row's folder's
+  PE_TREE_LIST_FOLDER = 1,
+  PE_TREE_LIST_ALL_INBOXES = 2,
+  PE_TREE_LIST_FLAGGED = 3,
+  PE_TREE_LIST_ALL_SENT = 4,
+  PE_TREE_LIST_ALL_DRAFTS = 5,
+} PeTreeList;
+
+// How `pe_account_reauthorize` ended
+typedef enum PeReauthorized {
+  // It did not: `error` says why
+  PE_REAUTHORIZED_FAILED = 0,
+  // The account has the new sign-in and syncs with it (the core started the sync)
+  PE_REAUTHORIZED_SIGNED_IN = 1,
+  // The browser signed in to another address: the account's state says so (its bar, `AccountStateChanged`), so
+  // the app says nothing more
+  PE_REAUTHORIZED_OTHER_ADDRESS = 2,
+} PeReauthorized;
+
 typedef enum PeAgentAskKind {
   // Answered already, or no such question
   PE_AGENT_ASK_KIND_NONE = 0,
@@ -310,6 +393,13 @@ typedef enum PeEventKind {
   // Settings sync's state changed, a probe or the computers have their answer, or a sync brought news: the Sync
   // settings read `pe_settings_sync_state` again, the windows take `pe_settings_sync_news`
   PE_EVENT_KIND_SETTINGS_SYNC_CHANGED = 42,
+  // What `account` shows of its sign-in and connection changed: read `pe_account_status`, the status bar
+  // (`pe_accounts_status_text` or `pe_accounts_summary`), the bar over the list (`pe_status_account_for`) and the
+  // folder tree (`pe_folder_tree`) again. With `count` 1 the app shows its one dialog for the state now
+  // (`PeAccountStatus` `prompt`), and while in the background a notification: the only place that dialog comes
+  // from (a `Failed` with AUTHENTICATION is for the status bar alone). It comes before the `Failed` of the same
+  // refusal.
+  PE_EVENT_KIND_ACCOUNT_STATE_CHANGED = 43,
 } PeEventKind;
 
 typedef enum PeSecurity {
@@ -372,18 +462,6 @@ typedef enum PeTreeMenu {
   // An account's
   PE_TREE_MENU_ACCOUNT = 3,
 } PeTreeMenu;
-
-// The messages a row lists when chosen (`pe_list_view_set_list`)
-typedef enum PeTreeList {
-  // None (a heading)
-  PE_TREE_LIST_NONE = 0,
-  // The row's folder's
-  PE_TREE_LIST_FOLDER = 1,
-  PE_TREE_LIST_ALL_INBOXES = 2,
-  PE_TREE_LIST_FLAGGED = 3,
-  PE_TREE_LIST_ALL_SENT = 4,
-  PE_TREE_LIST_ALL_DRAFTS = 5,
-} PeTreeList;
 
 // A conversation's mark (Message > Watch Conversation, Ignore Conversation)
 typedef enum PeThreadMark {
@@ -878,6 +956,38 @@ typedef struct PeTree PeTree;
 // The list of `pe_trusted_senders`
 typedef struct PeTrustedSenderList PeTrustedSenderList;
 
+// An account's state and what the apps show for it, in the language in use (`pe_account_status`). Every string is
+// owned by it, never NULL (empty where the state has nothing to show, all of them while connected); free it with
+// `pe_account_status_free`.
+typedef struct PeAccountStatus {
+  enum PeAccountState state;
+  enum PeSignInReason reason;
+  enum PeStatusAction action;
+  // The dialog to show when `AccountStateChanged` comes with `count` 1
+  enum PePrompt prompt;
+  // Sign In Again applies (the Tools and account menus' `IDM_SIGN_IN_AGAIN`, Properties): it needs a sign-in the
+  // user can give. It does `action`.
+  bool can_sign_in_again;
+  // The mark of its rows in the folder tree (as `PeTreeRow` has it) and its tooltip
+  enum PeAccountMark mark;
+  char *tooltip;
+  // The bar over the message list (`pe_status_account_for`), and the bar's button (empty: no button); `bar` is the
+  // text of the BROWSER_SIGN_IN and INFORM dialogs too
+  char *bar;
+  char *button;
+  // A desktop notification, when `AccountStateChanged` asks for the dialog while the app is in the background
+  char *notification_title;
+  char *notification_text;
+  // Under Compose's From while this account is chosen
+  char *compose_note;
+  // For COPY_ADMIN_LINK: where the organization's administrator approves Inbox Classic
+  char *admin_link;
+  // The help topic of this state (`pe_help_topic`), for HELP and a help link
+  char *help_topic;
+  // Under the password field of the PASSWORD dialog
+  char *password_hint;
+} PeAccountStatus;
+
 // A program that wants to connect
 typedef struct PeAgentConnect {
   // Its file
@@ -1214,7 +1324,7 @@ typedef struct PeEvent {
   // `preview_token`, for `PreviewsPrepared`. NULL otherwise
   const char *detail;
   // How many messages, for `NewMail`, `RulesApplied` and `ActionUndone`; the seconds left, for `SendWaiting`; how
-  // many addresses got a key, for `KeysFound`; 0 otherwise
+  // many addresses got a key, for `KeysFound`; 1 when the app shows its dialog, for `AccountStateChanged`; 0 otherwise
   uint64_t count;
 } PeEvent;
 
@@ -1359,6 +1469,12 @@ typedef struct PeTreeRow {
   // Its icon's word: `inbox`, `sent`, `drafts`, `deleted`, `junk`, `archive`, `flagged`, `all`, `account` for a
   // heading, or empty for any other folder
   const char *icon;
+  // The sign-in state of `account` on the rows that stand for it (its heading, its Inbox under All Inboxes, the
+  // only account's Inbox): a warning while it needs a sign-in, another mark while it can not connect, NONE on every
+  // other row. The tree is read again on `AccountStateChanged`.
+  enum PeAccountMark mark;
+  // The mark's tooltip (and what a screen reader says of it); empty without a mark
+  const char *mark_tooltip;
 } PeTreeRow;
 
 // A row of the message list
@@ -2205,6 +2321,92 @@ char *pe_picture_uri(const char *path);
 // # Safety
 // `text` must be NULL or a string from this library that was not freed yet.
 void pe_string_free(char *text);
+
+// The state of `account` and what to show for it; while it is connected (or for an unknown account, or a closed
+// core) every value is the empty default, made without reading the store. Free with `pe_account_status_free`.
+//
+// # Safety
+// `core` must be a live handle.
+struct PeAccountStatus pe_account_status(const struct PeCore *core,
+                                         int64_t account);
+
+// Frees the strings of a [`PeAccountStatus`]
+//
+// # Safety
+// `status` must come from `pe_account_status`, freed once.
+void pe_account_status_free(struct PeAccountStatus status);
+
+// The state of `account` alone, with no strings and nothing read from the store: for menus
+//
+// # Safety
+// `core` must be a live handle.
+enum PeAccountState pe_account_state(const struct PeCore *core, int64_t account);
+
+// The status bar's words for every account, in place of "Done": an account that needs a sign-in ("Work needs you
+// to sign in", "2 accounts need you to sign in"), else one that can not connect, else the latest failure of a
+// connected account's work ("Work: ...") until it syncs without one. NULL when there is nothing to say. Read it
+// again on `AccountStateChanged`, `Failed` and `SyncFinished`. Free with `pe_string_free`.
+//
+// # Safety
+// `core` must be a live handle.
+char *pe_accounts_status_text(const struct PeCore *core);
+
+// `pe_accounts_status_text` and how many accounts need a sign-in (into `needing_sign_in` when it is not NULL), in
+// one call: the tray's tooltip and mark
+//
+// # Safety
+// `core` must be a live handle, `needing_sign_in` NULL or a valid pointer.
+char *pe_accounts_summary(const struct PeCore *core,
+                          uint32_t *needing_sign_in);
+
+// How many accounts need the user to sign in: a mark on the tray icon or the Dock while above 0
+//
+// # Safety
+// `core` must be a live handle.
+uint32_t pe_accounts_needing_sign_in(const struct PeCore *core);
+
+// The account the bar over the message list speaks for (its `pe_account_status` `bar` and `button`), the list being
+// a tree row's (`PeTreeRow` `list` and `folder`): on a list of every account (All Inboxes, All Sent, All Drafts,
+// Flagged) the first account that needs a sign-in, else the first that can not connect; on a folder's list its own
+// account while it is not connected. 0 when there is no bar. Read it again on `AccountStateChanged` and when the
+// list changes.
+//
+// # Safety
+// `core` must be a live handle.
+int64_t pe_status_account_for(const struct PeCore *core,
+                              enum PeTreeList list,
+                              int64_t folder);
+
+// The sync of the apps' timer (every 10 minutes): as `pe_sync`, but an account whose sign-in was refused is synced
+// only once the back-off since the refusal is over (10 minutes, 30, an hour, then every 4 hours). True when the sync
+// was started, false when it was skipped for that, or failed.
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_sync_scheduled(const struct PeCore *core,
+                       int64_t account);
+
+// Starts signing in again for `account`, which signs in through the browser, with its own provider and address
+// (Sign In Again, Try Again): `url` gets the page to open in the browser (free it with `pe_string_free`), and
+// `SignInDone` with the returned request in `uid` follows; answer it with `pe_account_reauthorize`. After the browser
+// signed in to another address the provider is asked for its account picker. 0 on failure, and for an account with
+// a password.
+//
+// # Safety
+// `core` must be a live handle, `url` a valid pointer.
+uint64_t pe_sign_in_again_begin(const struct PeCore *core,
+                                int64_t account,
+                                char **url);
+
+// Gives an account signed in through the browser the result of the finished sign-in `request` (Sign In Again), and
+// syncs it. FAILED with the reason in `error` (NULL or a pointer to a string to free with `pe_string_free`).
+//
+// # Safety
+// `core` must be a live handle, `error` NULL or a valid pointer.
+enum PeReauthorized pe_account_reauthorize(const struct PeCore *core,
+                                           int64_t account,
+                                           uint64_t request,
+                                           char **error);
 
 // Starts the MCP server agents reach this app on (a socket or named pipe of its own, for this store and this user);
 // false when it could not (another app has this store open). Stopped by `pe_core_close`.
@@ -3289,11 +3491,14 @@ const struct PeMessage *pe_message_list_get(const struct PeMessageList *list, si
 // `list` must be NULL or a list that was not freed yet.
 void pe_message_list_free(struct PeMessageList *list);
 
-// Syncs an account in the background: `SyncStarted`, what changed, `SyncFinished`
+// Syncs an account in the background: `SyncStarted`, what changed, `SyncFinished`. The user's own Send/Recv (and
+// the sync after a new password or sign-in): it goes at once whatever the account's state. The timer's syncs use
+// `pe_sync_scheduled`.
 //
 // # Safety
 // `core` must be a live handle.
-bool pe_sync(const struct PeCore *core, int64_t account);
+bool pe_sync(const struct PeCore *core,
+             int64_t account);
 
 // Gets a message ready to show, in the background: `MessageReady` follows
 //
@@ -4166,17 +4371,6 @@ void pe_sign_in_cancel(const struct PeCore *core, uint64_t request);
 int64_t pe_account_add_signed_in(const struct PeCore *core,
                                  uint64_t request,
                                  const char *name);
-
-// Gives an account signed in through the browser the result of a new sign-in, after the old one was refused.
-// False with the reason in `error` (NULL or a pointer to a string to free with `pe_string_free`), as when the
-// browser signed in to another account.
-//
-// # Safety
-// `core` must be a live handle, `error` NULL or a valid pointer.
-bool pe_account_reauthorize(const struct PeCore *core,
-                            int64_t account,
-                            uint64_t request,
-                            char **error);
 
 // The sign-in apps, the built-in Microsoft and Google clients first; NULL on failure
 //

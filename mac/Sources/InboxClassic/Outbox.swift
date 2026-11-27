@@ -122,8 +122,9 @@ private final class OutboxWindow: NSObject, NSTableViewDataSource, NSTableViewDe
         case "to": return queued.recipients
         case "queued": return formatDate(queued.created)
         default:
+            // why it did not go, or why it waits, as the core says it now
             if let problem = queued.problem {
-                return Text.uiOutboxStatusNotSent.text(["reason": problem])
+                return problem
             } else if queued.notBefore != 0 {
                 return (queued.undoable ? Text.uiOutboxStatusUndo : Text.uiOutboxStatusAgent).text(["time": timeOfDay(queued.notBefore)])
             }

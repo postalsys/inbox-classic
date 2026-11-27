@@ -1095,6 +1095,7 @@ extension UITest {
         try await reactions()
         try await oneTimeCodes()
         try await watchAndIgnore()
+        try await accountStatus()
     }
 
     // ---- reading with the keyboard ----
@@ -2656,7 +2657,12 @@ extension UITest {
         let logon = await waitFor(30) { window("form").flatMap { $0.title == Text.uiLogon.text ? $0 : nil } }
         check(logon != nil, "a refused password is asked for again")
         let status: NSTextField? = find("status.text", in: main.window)
-        check(status?.stringValue.lowercased().contains("authentication") == true, "the status bar says why (\(status?.stringValue ?? ""))")
+        // the server's why while the sync runs, then the core's words for the account that needs a sign-in
+        let said = await waitFor(20) { () -> String? in
+            let shown = status?.stringValue ?? ""
+            return shown.lowercased().contains("authentication") || shown == main.core.accountsStatusText ? shown : nil
+        }
+        check(said != nil, "the status bar says why (\(status?.stringValue ?? ""))")
         await shot(main.window, "trouble-1-password")
         // the right password, and the account syncs
         type("testpass2", into: logon.flatMap { find("form.field.0", in: $0) })
@@ -2891,9 +2897,12 @@ extension UITest {
         step("the account's menu")
         let menu = main.mailbox.accountMenu(accounts[0].id)
         let titles = menu.items.filter { !$0.isSeparatorItem }.map(\.title)
-        check(titles == [Text.uiAccountSync.text, Command.markAllRead.label, Command.newFolder.label, Text.uiAccountMoveUp.text, Text.uiAccountMoveDown.text, Text.uiAccountProperties.opens]
+        check(titles == [Text.uiAccountSync.text, Command.signInAgain.label, Command.markAllRead.label, Command.newFolder.label,
+                         Text.uiAccountMoveUp.text, Text.uiAccountMoveDown.text, Text.uiAccountProperties.opens]
               && menu.items.filter(\.isSeparatorItem).count == 3,
-              "the first account's right-click menu has Send and Receive, Mark All Read, New Folder, Move Up, Move Down and Properties (\(titles))")
+              "the first account's right-click menu has Send and Receive, Sign In Again, Mark All Read, New Folder, Move Up, Move Down and Properties (\(titles))")
+        check(menu.items.first { $0.title == Command.signInAgain.label }?.isEnabled == false,
+              "Sign In Again is off while the account is signed in")
         check(menu.items.first { $0.title == Command.markAllRead.label }?.isEnabled == true, "Mark All Read is on, with unread mail in the account")
         let markRead = menu.indexOfItem(withTitle: "Mark All Read")
         if markRead >= 0 {

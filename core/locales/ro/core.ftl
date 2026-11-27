@@ -50,7 +50,6 @@ reader-downloading-detail = Mesajul va apărea aici după ce se termină descăr
 reader-downloading-size = Mesajul are { $size }. Va apărea aici după ce este descărcat.
 reader-failed = Mesajul nu a putut fi descărcat
 reader-failed-network = Conexiunea cu serverul de e-mail nu a putut fi stabilită sau a fost întreruptă ({ $reason }).
-reader-failed-sign-in = Serverul de e-mail nu a acceptat conectarea ({ $reason }). Verificați parola sau conectați-vă din nou din setările contului.
 reader-failed-security = Conexiunea cu serverul de e-mail nu a putut fi securizată ({ $reason }).
 reader-failed-other = Serverul de e-mail a răspuns: { $reason }.
 reader-retry-note = Se va încerca din nou descărcarea după reconectarea contului.

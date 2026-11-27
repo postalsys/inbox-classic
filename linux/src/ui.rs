@@ -61,6 +61,10 @@ flowboxchild.attachment-file:hover { background-color: alpha(currentColor, 0.07)
 .flag-row { padding: 0 6px; min-height: 30px; border-radius: 6px; }
 .flag-row label { font-weight: normal; }
 .flag-row:hover { background-color: alpha(@view_fg_color, 0.08); }
+button.tree-mark { min-height: 0; min-width: 0; padding: 1px 4px; margin: -3px -4px -3px 0; }
+.info-bar.sign-in { background-color: alpha(@warning_bg_color, 0.14); }
+.info-bar.cannot-connect { background-color: alpha(currentColor, 0.05); }
+.compose-account-note { font-size: 0.9em; }
 .account-heading { margin-top: 6px; }
 .account-heading label { font-size: 0.85em; font-weight: bold; color: alpha(@view_fg_color, 0.6); }
 row.drop-above, row.drop-below { background-image: linear-gradient(@accent_color, @accent_color); background-repeat: no-repeat; background-size: calc(100% - 12px) 2px; }
@@ -92,6 +96,35 @@ button.key-chip.more { border-style: dashed; }
 .security-tint { color: var(--security-border); }
 .key-warning { padding: 10px 12px; border-radius: 12px; background-color: alpha(@warning_bg_color, 0.14); }
 ";
+
+/// A bar over a list in the style of the app's bars (`info-bar`): an icon and a sentence that wraps onto more lines in
+/// a narrow window rather than being cut off; the caller adds its buttons after them. Hidden to begin with
+pub struct InfoBar {
+    pub widget: gtk::Box,
+    pub icon: gtk::Image,
+    pub text: gtk::Label,
+}
+
+impl InfoBar {
+    /// The bar named `name`, its sentence `<name>-text`
+    pub fn new(name: &str) -> InfoBar {
+        let icon = gtk::Image::new();
+        icon.set_valign(gtk::Align::Center);
+        let text = gtk::Label::new(None);
+        text.set_xalign(0.0);
+        text.set_hexpand(true);
+        text.set_wrap(true);
+        text.set_wrap_mode(gtk::pango::WrapMode::WordChar);
+        text.set_widget_name(&format!("{name}-text"));
+        let widget = gtk::Box::new(gtk::Orientation::Horizontal, 8);
+        widget.add_css_class("info-bar");
+        widget.set_widget_name(name);
+        widget.append(&icon);
+        widget.append(&text);
+        widget.set_visible(false);
+        InfoBar { widget, icon, text }
+    }
+}
 
 /// The CSS class `class` on `widget` or off it
 pub fn set_class(widget: &impl IsA<gtk::Widget>, class: &str, on: bool) {

@@ -397,6 +397,41 @@ struct File {
     label: String,
 }
 
+/// The note under From: a mark and the core's sentence
+struct AccountNote {
+    row: gtk::Box,
+    icon: gtk::Image,
+    text: gtk::Label,
+}
+
+impl AccountNote {
+    fn new() -> AccountNote {
+        let icon = gtk::Image::new();
+        let text = gtk::Label::new(None);
+        text.set_xalign(0.0);
+        // one line, its whole sentence as the tip in a narrow window
+        text.set_ellipsize(gtk::pango::EllipsizeMode::End);
+        text.set_widget_name("compose-account-note");
+        let row = gtk::Box::new(gtk::Orientation::Horizontal, 6);
+        row.add_css_class("compose-account-note");
+        row.append(&icon);
+        row.append(&text);
+        row.set_visible(false);
+        AccountNote { row, icon, text }
+    }
+
+    fn show(&self, status: Option<&pe_core::AccountStatus>) {
+        let Some(status) = status.filter(|status| !status.compose_note.is_empty()) else {
+            self.row.set_visible(false);
+            return;
+        };
+        self.text.set_text(&status.compose_note);
+        self.text.set_tooltip_text(Some(&status.compose_note));
+        crate::folders::show_mark_icon(&self.icon, status.mark);
+        self.row.set_visible(true);
+    }
+}
+
 pub struct Compose {
     pub window: adw::ApplicationWindow,
     pub(crate) account: Cell<i64>,
@@ -406,6 +441,8 @@ pub struct Compose {
     /// The other address it goes from, None for the account's own
     from_address: RefCell<Option<String>>,
     from: gtk::DropDown,
+    /// Under From while the account chosen needs a sign-in or can not connect: the message will wait in the Outbox
+    account_note: AccountNote,
     pub to: gtk::Entry,
     pub cc: gtk::Entry,
     pub bcc: gtk::Entry,
@@ -555,6 +592,10 @@ impl Compose {
         {
             from.set_selected(index as u32);
         }
+        let account_note = AccountNote::new();
+        let from_field = gtk::Box::new(gtk::Orientation::Vertical, 4);
+        from_field.append(&from);
+        from_field.append(&account_note.row);
         let to = field_entry("compose-to");
         let cc = field_entry("compose-cc");
         let bcc = field_entry("compose-bcc");
@@ -585,7 +626,7 @@ impl Compose {
         grid.set_column_spacing(8);
         grid.set_row_spacing(4);
         let rows: [(String, gtk::Widget); 7] = [
-            (t!(UiFieldFrom), from.clone().upcast()),
+            (t!(UiFieldFrom), from_field.upcast()),
             (t!(UiFieldTo), to_row.upcast()),
             (t!(UiFieldCc), cc.clone().upcast()),
             (t!(UiFieldBcc), bcc.clone().upcast()),
@@ -678,8 +719,11 @@ impl Compose {
         window.set_widget_name("compose-window");
         let mut placed = placed.into_iter();
         let mut next = || placed.next().expect("seven rows");
-        let (_from_row, _to_row, cc_row, bcc_row, keys_row, _subject_row, attach_row) =
+        let (from_row, _to_row, cc_row, bcc_row, keys_row, _subject_row, attach_row) =
             (next(), next(), next(), next(), next(), next(), next());
+        // "From:" beside the list, not in the middle of the list and the note under it
+        from_row[0].set_valign(gtk::Align::Start);
+        from_row[0].set_margin_top(8);
         // "Keys:" beside the first line of chips when they wrap
         keys_row[0].set_valign(gtk::Align::Start);
         keys_row[0].set_margin_top(3);
@@ -689,6 +733,7 @@ impl Compose {
             choices,
             from_address: RefCell::new(None),
             from,
+            account_note,
             to,
             cc,
             bcc,
@@ -736,6 +781,7 @@ impl Compose {
         crate::compose_keys::connect(&compose);
         compose.connect_pick(&pick_buttons);
         compose.filling.set(false);
+        compose.show_account_note();
         // a reply to encrypted mail opens encrypted: its recipients' keys looked up
         crate::compose_keys::opened(&compose);
         compose
@@ -1138,8 +1184,25 @@ impl Compose {
             self.account.set(account);
             self.editor
                 .signature(&shell().core.signature_block(account).unwrap_or_default());
+            self.show_account_note();
         }
         self.changed();
+    }
+
+    /// The note under From as the state of the account chosen says: none while it is connected
+    pub fn show_account_note(&self) {
+        let status = shell().core.account_status(self.account.get()).ok();
+        self.account_note.show(status.as_ref());
+    }
+
+    /// The note under From, empty while none shows, for the UI test
+    #[cfg(feature = "e2e")]
+    pub fn account_note(&self) -> String {
+        if self.account_note.row.is_visible() {
+            self.account_note.text.text().into()
+        } else {
+            String::new()
+        }
     }
 
     /// The From list at the account's other `address` (None for its own)

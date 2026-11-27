@@ -1146,6 +1146,21 @@ Screenshots: `accounts-1-list`, `accounts-2-properties`, `accounts-unexpected`, 
 - the account leaves the tree
 - All Inboxes goes with the second account, and the tree is the one account's again: the Inbox first, then Flagged, no heading
 
+## 44a. An account that is not signed in
+
+Screenshots: `status-1-sign-in`, `status-2-cancelled`, `status-3-oauth`, `status-4-admin`, `status-5-other-address`, `status-6-cannot-connect`, `status-7-fixed`, `status-8-compose`, `status-9-outbox`
+
+- ImapKit refuses the account's password: Send/Recv asks once for the password; Cancel leaves a warning mark on the account's row (its Inbox when it is the only account) with the reason as its tooltip, a bar over its list (the account is not signed in, its mail may be out of date) with Enter Password, and the status bar saying the account needs a sign-in, not Done
+- the next Send/Recv asks nothing more, and the mark, the bar and the status bar stay
+- Compose from the account notes under From that it is not signed in; Send keeps the message in the Outbox, which gives the same reason
+- Enter Password with the new password signs it in: the mark and the bar go, the status bar says Done
+- the OAuth account's refresh token revoked: the bar offers Sign In Again, which signs in through the browser (the test's sign-in page) and takes the mark away
+- the token endpoint answers 503: no mark (not a refused sign-in)
+- the token endpoint answers AADSTS65001: the bar says the administrator must allow Inbox Classic, with Copy Link for Administrator, and no Sign In button
+- the browser signs in as another address: the bar names it and offers Try Again, which asks for the provider's account picker
+- the server closes every connection: after two failed syncs a quiet gray mark and a bar with Try Again; the server back, Try Again takes them away
+- the tray (the Dock on the Mac) shows the warning while an account needs a sign-in
+
 ## 45. Sign-in apps
 
 Screenshots: `signin-1-apps`, `signin-2-google-preset`, `signin-3-check` (not yet on the Mac, not yet on Linux), `signin-4-editor` (not yet on Linux), `signin-5-apps-added`, `signin-6-first-page` (not yet on the Mac, not yet on Linux), `signin-7-why` (not yet on the Mac, not yet on Linux), `signin-8-more` (not yet on the Mac, not yet on Linux), `signin-9-waiting`, `signin-10-added` (not yet on the Mac, not yet on Linux), `signin-11-in-use` (not yet on the Mac, not yet on Linux), `signin-12-toggled`, `signin-13-properties` (not yet on the Mac, not yet on Linux), `account-5b-browser-sign-in` (not yet on the Mac, not yet on Linux)

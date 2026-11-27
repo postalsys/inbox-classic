@@ -42,7 +42,6 @@ reader-downloading-detail = Pesan akan muncul di sini setelah unduhan selesai.
 reader-downloading-size = Ukuran pesan ini { $size }. Pesan akan muncul di sini setelah diunduh.
 reader-failed = Pesan tidak dapat diunduh
 reader-failed-network = Koneksi ke server email tidak dapat dibuat atau terputus ({ $reason }).
-reader-failed-sign-in = Server email tidak menerima proses masuk ({ $reason }). Periksa kata sandi atau masuk lagi di pengaturan akun.
 reader-failed-security = Koneksi ke server email tidak dapat diamankan ({ $reason }).
 reader-failed-other = Server email menjawab: { $reason }.
 reader-retry-note = Pengunduhan akan dicoba lagi saat akun tersambung kembali.

@@ -241,9 +241,11 @@ impl Worker {
         self.log_out().await;
     }
 
-    /// Connects when the server did not refuse a connection lately; a failure waits for the next open
+    /// Connects when the server did not refuse a connection lately and the account is signed in; a failure waits for
+    /// the next open
     async fn connect_reader(&mut self, store: &mut Store) {
-        if self.limited_lately() {
+        // nobody opened a message yet: a refused sign-in is not tried again for that
+        if self.limited_lately() || self.signed_out() {
             return;
         }
         if self.client(store).await.is_ok() {

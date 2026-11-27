@@ -39,7 +39,6 @@ reader-downloading-detail = 下載完成後，郵件就會顯示在這裡。
 reader-downloading-size = 郵件大小為{ $size }。下載完成後就會顯示在這裡。
 reader-failed = 無法下載郵件
 reader-failed-network = 無法連線到郵件伺服器，或連線已中斷（{ $reason }）。
-reader-failed-sign-in = 郵件伺服器不接受登入（{ $reason }）。請檢查密碼，或在帳戶設定中重新登入。
 reader-failed-security = 無法建立與郵件伺服器的安全連線（{ $reason }）。
 reader-failed-other = 郵件伺服器回應：{ $reason }。
 reader-retry-note = 帳戶重新連線時會再試一次。

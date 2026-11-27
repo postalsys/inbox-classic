@@ -6,6 +6,7 @@
 #include "webview.h"
 
 #include <commdlg.h>
+#include <windowsx.h>
 #include <shellapi.h>
 #include <shlwapi.h>
 
@@ -138,6 +139,19 @@ std::wstring CountedLabel(const std::wstring& name, uint64_t unread) {
     return unread > 0 ? name + L" (" + std::to_wstring(unread) + L")" : name;
 }
 
+// the room after a row's name that its account's mark is drawn over, in place of the count: spaces of `font` at least
+// `room` pixels wide, so the row's own text (its highlight, a click on it, its tooltip) reaches over the mark
+std::wstring MarkRoom(HWND tree, HFONT font, int room) {
+    HDC dc = GetDC(tree);
+    HGDIOBJ old = SelectObject(dc, font);
+    SIZE space = {};
+    GetTextExtentPoint32W(dc, L" ", 1, &space);
+    SelectObject(dc, old);
+    ReleaseDC(tree, dc);
+    int count = space.cx > 0 ? (room + space.cx - 1) / space.cx : 4;
+    return std::wstring(static_cast<size_t>(count), L' ');
+}
+
 PeSortField SortOf(int column) {
     switch (column) {
     case COL_FROM:
@@ -210,8 +224,10 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     parent_ = parent;
     core_ = core;
     tree_ = CreateChild(parent, WC_TREEVIEWW, nullptr,
-                        WS_TABSTOP | TVS_HASLINES | TVS_HASBUTTONS | TVS_LINESATROOT | TVS_SHOWSELALWAYS, IDC_TREE, {},
+                        WS_TABSTOP | TVS_HASLINES | TVS_HASBUTTONS | TVS_LINESATROOT | TVS_SHOWSELALWAYS | TVS_INFOTIP, IDC_TREE, {},
                         WS_EX_CLIENTEDGE);
+    // a click on an account's mark runs what its state asks for, with the hand over it
+    SetWindowSubclass(tree_, TreeProc, 0, reinterpret_cast<DWORD_PTR>(this));
     list_ = CreateChild(parent, WC_LISTVIEWW, nullptr,
                         WS_TABSTOP | LVS_REPORT | LVS_SHOWSELALWAYS | LVS_OWNERDATA, IDC_LIST, {},
                         WS_EX_CLIENTEDGE);
@@ -304,6 +320,12 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     undoneClose_ = CreateChild(parent, L"BUTTON", core::T(PE_TEXT_UI_CLOSE).c_str(), WS_TABSTOP | BS_OWNERDRAW, IDC_UNDONE_CLOSE, {});
     ShowWindow(undoneBar_, SW_HIDE);
     ShowWindow(undoneClose_, SW_HIDE);
+    // over the list while the account of the folder shown is not signed in or can not connect: the core's words (its
+    // name, for a screen reader) and a push button that does what helps
+    accountBar_ = CreateChild(parent, L"STATIC", L"", SS_OWNERDRAW | SS_NOPREFIX | WS_BORDER | WS_CLIPSIBLINGS, IDC_ACCOUNT_BAR, {});
+    accountButton_ = CreateChild(parent, L"BUTTON", L"", WS_TABSTOP | BS_PUSHBUTTON, IDC_ACCOUNT_BAR_BUTTON, {});
+    ShowWindow(accountBar_, SW_HIDE);
+    ShowWindow(accountButton_, SW_HIDE);
 
     LOGFONTW font = {};
     GetObjectW(UiFont(), sizeof(font), &font);
@@ -422,32 +444,64 @@ void Mailbox::Layout(const RECT& tree, const RECT& list, const RECT& reader) {
     reader_.Layout(reader);
 }
 
-// the bar of an action the server did not do at the top of `list`, as tall as its words wrapped to the width left of
-// the close button (a line at least); `list` keeps the room under it
-void Mailbox::LayoutUndoneBar(RECT& list) {
-    if (!IsWindowVisible(undoneBar_)) {
+// an information bar over the list (`bar`, owner drawn, with `words`) at the top of `list`: as tall as its words wrapped
+// left of `button` (`buttonWidth` wide, at its right in the middle; none when hidden), the height of the other bars at
+// least; `list` keeps the room under it
+void Mailbox::LayoutInfoBar(HWND bar, HWND button, int buttonWidth, const std::wstring& words, RECT& list) const {
+    if (!IsWindowVisible(bar)) {
         return;
     }
     int width = list.right - list.left;
-    int edge = GetSystemMetrics(SM_CXBORDER), pad = Scale(6), button = Scale(22);
-    RECT words = {0, 0, std::max(Scale(80), width - 3 * pad - iconSize_ - button), 0};
-    HDC dc = GetDC(undoneBar_);
+    int pad = Scale(6), inset = Scale(3), buttonHeight = Scale(22);
+    bool withButton = button && IsWindowVisible(button);
+    RECT wrapped = {0, 0, std::max(Scale(80), width - 3 * pad - iconSize_ - (withButton ? buttonWidth + inset : 0)), 0};
+    HDC dc = GetDC(bar);
     HGDIOBJ old = SelectObject(dc, normal_);
-    DrawTextW(dc, undoneText_.c_str(), -1, &words, DT_WORDBREAK | DT_NOPREFIX | DT_CALCRECT);
+    DrawTextW(dc, words.c_str(), -1, &wrapped, DT_WORDBREAK | DT_NOPREFIX | DT_CALCRECT);
     SelectObject(dc, old);
-    ReleaseDC(undoneBar_, dc);
-    int height = std::max<int>(Scale(22), words.bottom + Scale(8));
-    MoveWindow(undoneBar_, list.left, list.top, width, height, TRUE);
-    MoveWindow(undoneClose_, list.right - edge - button, list.top + edge, button, std::min(button, height - 2 * edge), TRUE);
-    SetWindowPos(undoneClose_, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+    ReleaseDC(bar, dc);
+    int height = std::max<int>(Scale(28), wrapped.bottom + Scale(12));
+    MoveWindow(bar, list.left, list.top, width, height, TRUE);
+    if (withButton) {
+        // over the bar, which does not draw over it (WS_CLIPSIBLINGS)
+        SetWindowPos(button, HWND_TOP, list.right - inset - buttonWidth, list.top + (height - buttonHeight) / 2, buttonWidth, buttonHeight,
+                     SWP_NOACTIVATE);
+    }
     list.top += height + Scale(2);
+}
+
+// such a bar drawn: the information bar's yellow, its picture (`icon` draws it at its left, top), its words wrapped in
+// the middle of its height, left of `button`
+void Mailbox::DrawInfoBar(const DRAWITEMSTRUCT& item, HWND button, const std::wstring& words,
+                          const std::function<void(HDC, int, int)>& icon) const {
+    RECT area = item.rcItem;
+    FillRect(item.hDC, &area, GetSysColorBrush(COLOR_INFOBK));
+    int pad = Scale(6);
+    icon(item.hDC, area.left + pad, (area.top + area.bottom - iconSize_) / 2);
+    area.left += pad + iconSize_ + pad;
+    area.right -= pad;
+    if (button && IsWindowVisible(button)) {
+        RECT box;
+        GetWindowRect(button, &box);
+        area.right -= (box.right - box.left) + Scale(3);
+    }
+    HGDIOBJ old = SelectObject(item.hDC, normal_);
+    RECT measured = area;
+    DrawTextW(item.hDC, words.c_str(), -1, &measured, DT_LEFT | DT_WORDBREAK | DT_NOPREFIX | DT_CALCRECT);
+    area.top += std::max(0, static_cast<int>((area.bottom - area.top) - (measured.bottom - measured.top))) / 2;
+    SetTextColor(item.hDC, GetSysColor(COLOR_INFOTEXT));
+    SetBkMode(item.hDC, TRANSPARENT);
+    DrawTextW(item.hDC, words.c_str(), -1, &area, DT_LEFT | DT_WORDBREAK | DT_NOPREFIX);
+    SelectObject(item.hDC, old);
 }
 
 // the search bar over the list while it is shown, the list under it
 void Mailbox::LayoutList() {
     RECT list = listArea_;
     int width = list.right - list.left;
-    LayoutUndoneBar(list);
+    // the bar of the account's state, then that of an action the server did not do (its close button square)
+    LayoutInfoBar(accountBar_, accountButton_, ButtonWidth({GetWindowString(accountButton_)}), barText_, list);
+    LayoutInfoBar(undoneBar_, undoneClose_, Scale(22), undoneText_, list);
     if (IsWindowVisible(searchBar_)) {
         // as the reading pane's bars, Create Rule left of Clear search
         list.top += PlaceBar(searchBar_, {searchClear_, searchRule_}, list.left, list.top, width) + Scale(2);
@@ -595,6 +649,8 @@ Mailbox::TreeRow Mailbox::RowFrom(const PeTreeRow& row) {
     made.newFolderAccount = row.new_folder_account;
     made.newFolderParent = row.new_folder_parent;
     made.icon = FolderIcon(row.icon);
+    made.mark = row.mark;
+    made.markTip = Text(row.mark_tooltip);
     return made;
 }
 
@@ -694,10 +750,14 @@ void Mailbox::Rebuild(const PeTree* tree, std::vector<TreeRow> rows) {
     if (SelectedName() != shown) {
         SendMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_TREE, 0), 0);
     }
+    UpdateAccountBar();
 }
 
 void Mailbox::FillTree(std::vector<TreeRow> rows) {
     treeRows_ = std::move(rows);
+    anyMark_ = std::ranges::any_of(treeRows_, [](const TreeRow& row) { return row.mark != PE_ACCOUNT_MARK_NONE; });
+    // the room of the marks measured again, the fonts being what they are now
+    markRooms_.clear();
     // the last item at each depth, the parent of the next deeper one
     std::vector<HTREEITEM> parents;
     for (size_t i = 0; i < treeRows_.size(); i++) {
@@ -840,16 +900,28 @@ void Mailbox::ShowRow(HTREEITEM item) {
     }
     bool collapsed = (TreeView_GetItemState(tree_, item, TVIS_EXPANDED) & TVIS_EXPANDED) == 0;
     uint64_t count = collapsed ? row->countCollapsed : row->count;
-    std::wstring label = CountedLabel(row->label, count);
+    bool bold = collapsed ? row->boldCollapsed : row->bold;
+    // an account's mark in place of the count, as the count would be: right after the name
+    std::wstring label = row->mark == PE_ACCOUNT_MARK_NONE
+                             ? CountedLabel(row->label, count)
+                             : row->label + MarkRoomOf(bold ? bold_ : UiFont());
     TVITEMW update = {};
     update.mask = TVIF_TEXT | TVIF_STATE | TVIF_IMAGE | TVIF_SELECTEDIMAGE;
     update.hItem = item;
     update.pszText = label.data();
     update.stateMask = TVIS_BOLD;
-    update.state = (collapsed ? row->boldCollapsed : row->bold) ? TVIS_BOLD : 0;
+    update.state = bold ? TVIS_BOLD : 0;
     update.iImage = row->icon;
     update.iSelectedImage = row->icon;
     TreeView_SetItem(tree_, &update);
+}
+
+std::wstring Mailbox::MarkRoomOf(HFONT font) {
+    auto [kept, made] = markRooms_.try_emplace(font);
+    if (made) {
+        kept->second = MarkRoom(tree_, font, iconSize_ + Scale(8));
+    }
+    return kept->second;
 }
 
 void Mailbox::ScheduleCounts() {
@@ -880,12 +952,13 @@ void Mailbox::UpdateCounts() {
     }
     HTREEITEM selected = TreeView_GetSelection(tree_);
     bool retitled = false;
+    anyMark_ = std::ranges::any_of(rows, [](const TreeRow& row) { return row.mark != PE_ACCOUNT_MARK_NONE; });
     for (size_t i = 0; i < rows.size(); i++) {
         TreeRow& row = treeRows_[i];
         const TreeRow& now = rows[i];
         if (row.label == now.label && row.title == now.title && row.count == now.count &&
             row.countCollapsed == now.countCollapsed && row.bold == now.bold && row.boldCollapsed == now.boldCollapsed &&
-            row.icon == now.icon) {
+            row.icon == now.icon && row.mark == now.mark && row.markTip == now.markTip) {
             continue;
         }
         retitled |= treeItems_[i] == selected && row.title != now.title;
@@ -1985,15 +2058,159 @@ void Mailbox::EndPending() {
 
 void Mailbox::TreeCustomDraw(NMTVCUSTOMDRAW* draw, LRESULT& result) {
     result = CDRF_DODEFAULT;
-    if (!listPending_ || highlightPainted_) {
+    auto item = reinterpret_cast<HTREEITEM>(draw->nmcd.dwItemSpec);
+    LPARAM index = draw->nmcd.lItemlParam;
+    const TreeRow* row = index >= 0 && static_cast<size_t>(index) < treeRows_.size() ? &treeRows_[static_cast<size_t>(index)] : nullptr;
+    switch (draw->nmcd.dwDrawStage) {
+    case CDDS_PREPAINT:
+        // the rows one by one only while some has a mark, or a list waits for the row chosen to be painted
+        if (anyMark_ || (listPending_ && !highlightPainted_)) {
+            result = CDRF_NOTIFYITEMDRAW;
+        }
+        break;
+    case CDDS_ITEMPREPAINT:
+        if (listPending_ && !highlightPainted_ && item == TreeView_GetSelection(tree_)) {
+            highlightPainted_ = true;
+        }
+        // the row is drawn as always, its mark over the room after its name
+        if (row && row->mark != PE_ACCOUNT_MARK_NONE) {
+            result = CDRF_NOTIFYPOSTPAINT;
+        }
+        break;
+    case CDDS_ITEMPOSTPAINT:
+        if (RECT mark; row && MarkRect(item, mark)) {
+            bool selected = (TreeView_GetItemState(tree_, item, TVIS_SELECTED) & TVIS_SELECTED) != 0;
+            DrawAccountMark(draw->nmcd.hdc, row->mark, mark.left, mark.top, mark.right - mark.left, selected);
+        }
+        break;
+    default:
+        break;
+    }
+}
+
+bool Mailbox::MarkRect(HTREEITEM item, RECT& rect) const {
+    const TreeRow* row = RowAt(item);
+    RECT text;
+    if (!row || row->mark == PE_ACCOUNT_MARK_NONE || !TreeView_GetItemRect(tree_, item, &text, TRUE)) {
+        return false;
+    }
+    // at the end of the room the label keeps for it, a little in from the highlight's edge
+    int size = iconSize_;
+    rect.right = text.right - Scale(3);
+    rect.left = rect.right - size;
+    rect.top = (text.top + text.bottom - size) / 2;
+    rect.bottom = rect.top + size;
+    return true;
+}
+
+HTREEITEM Mailbox::MarkAt(POINT client) const {
+    if (!anyMark_) {
+        return nullptr;
+    }
+    TVHITTESTINFO hit = {};
+    hit.pt = client;
+    HTREEITEM item = TreeView_HitTest(tree_, &hit);
+    RECT mark;
+    if (!item || !MarkRect(item, mark)) {
+        return nullptr;
+    }
+    InflateRect(&mark, Scale(2), Scale(2));
+    return PtInRect(&mark, client) ? item : nullptr;
+}
+
+LRESULT CALLBACK Mailbox::TreeProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR, DWORD_PTR data) {
+    auto* self = reinterpret_cast<Mailbox*>(data);
+    switch (message) {
+    case WM_LBUTTONDOWN:
+    case WM_LBUTTONDBLCLK:
+        // the mark itself: its account's action, the row not chosen; anywhere else the row as always
+        if (HTREEITEM item = self->MarkAt({GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)})) {
+            if (const TreeRow* row = self->RowAt(item); row && self->onStatusAction) {
+                self->onStatusAction(row->account);
+            }
+            return 0;
+        }
+        break;
+    case WM_SETCURSOR:
+        if (LOWORD(lParam) == HTCLIENT) {
+            POINT at;
+            GetCursorPos(&at);
+            ScreenToClient(hwnd, &at);
+            if (self->MarkAt(at)) {
+                SetCursor(LoadCursorW(nullptr, IDC_HAND));
+                return TRUE;
+            }
+        }
+        break;
+    case WM_NCDESTROY:
+        RemoveWindowSubclass(hwnd, TreeProc, 0);
+        break;
+    }
+    return DefSubclassProc(hwnd, message, wParam, lParam);
+}
+
+// ---- the bar of an account that is not signed in or can not connect ----
+
+int64_t Mailbox::SignInAccount() const {
+    const TreeRow* row = SelectedTreeRow();
+    return row && row->account ? row->account : barAccount_;
+}
+
+void Mailbox::AccountStateChanged() {
+    // the marks of the tree's rows (UpdateCounts compares them), then the bar
+    UpdateCounts();
+    UpdateAccountBar();
+}
+
+void Mailbox::UpdateAccountBar() {
+    // the account the core says the list of the row chosen speaks for, while it is not connected
+    const TreeRow* row = SelectedTreeRow();
+    int64_t account = row ? pe_status_account_for(core_, row->list, row->folder) : 0;
+    std::wstring text, button;
+    PeAccountMark mark = PE_ACCOUNT_MARK_NONE;
+    if (account) {
+        core::AccountStatus status(core_, account);
+        if (!status.Connected()) {
+            text = Text(status->bar);
+            button = Text(status->button);
+            mark = status->mark;
+        }
+    }
+    bool shown = !text.empty();
+    if ((IsWindowVisible(accountBar_) != FALSE) == shown && text == barText_ && mark == barMark_ &&
+        button == GetWindowString(accountButton_)) {
+        barAccount_ = shown ? account : 0;
         return;
     }
-    if (draw->nmcd.dwDrawStage == CDDS_PREPAINT) {
-        result = CDRF_NOTIFYITEMDRAW;
-    } else if (draw->nmcd.dwDrawStage == CDDS_ITEMPREPAINT &&
-               reinterpret_cast<HTREEITEM>(draw->nmcd.dwItemSpec) == TreeView_GetSelection(tree_)) {
-        highlightPainted_ = true;
+    barAccount_ = shown ? account : 0;
+    barText_ = text;
+    barMark_ = mark;
+    // the bar's words are its name for a screen reader; the button's own words say what it does, the bar's why
+    SetWindowTextW(accountBar_, text.c_str());
+    SetWindowTextW(accountButton_, button.c_str());
+    SetAccessibleDescription(accountButton_, text);
+    if ((!shown || button.empty()) && GetFocus() == accountButton_) {
+        SetFocus(list_);
     }
+    ShowWindow(accountBar_, shown ? SW_SHOW : SW_HIDE);
+    ShowWindow(accountButton_, shown && !button.empty() ? SW_SHOW : SW_HIDE);
+    LayoutList();
+    InvalidateRect(accountBar_, nullptr, TRUE);
+}
+
+int Mailbox::TestTreeMark(const std::wstring& text) const {
+    size_t line = text.find(L'\n');
+    std::wstring label = text.substr(0, line);
+    for (const TreeRow& row : treeRows_) {
+        if (row.label != label) {
+            continue;
+        }
+        if (line != std::wstring::npos && row.markTip != text.substr(line + 1)) {
+            return 1;
+        }
+        return 10 + static_cast<int>(row.mark);
+    }
+    return 0;
 }
 
 void Mailbox::DrawPending(HDC dc) const {
@@ -2524,6 +2741,7 @@ void Mailbox::FolderMenu() {
     // a row named after its account (or the only account's Inbox) opens the account's properties, to rename it there
     if (row->accountProperties) {
         AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+        AppendMenuW(menu, CanSignInAgain(core_, row->account) ? MF_STRING : MF_STRING | MF_GRAYED, IDM_SIGN_IN_AGAIN, DialogMenuItem(PE_TEXT_CMD_SIGN_IN_AGAIN).c_str());
         AppendMenuW(menu, MF_STRING, IDM_ACCOUNT_PROPERTIES, core::T(PE_TEXT_UI_ACCOUNT_PROPERTIES_OF).c_str());
     }
     TrackPopupMenu(menu, TPM_RIGHTBUTTON, screen.x, screen.y, 0, parent_, nullptr);
@@ -2536,6 +2754,8 @@ void Mailbox::AccountMenu(POINT screen) {
     bool someUnread = row && row->countCollapsed > 0;
     HMENU menu = CreatePopupMenu();
     AppendMenuW(menu, MF_STRING, IDM_ACCOUNT_SYNC, core::T(PE_TEXT_UI_ACCOUNT_SYNC).c_str());
+    // what the bar over its list offers while the account needs a sign-in
+    AppendMenuW(menu, row && CanSignInAgain(core_, row->account) ? MF_STRING : MF_STRING | MF_GRAYED, IDM_SIGN_IN_AGAIN, DialogMenuItem(PE_TEXT_CMD_SIGN_IN_AGAIN).c_str());
     AppendMenuW(menu, someUnread ? MF_STRING : MF_STRING | MF_GRAYED, IDM_ACCOUNT_MARK_ALL_READ, MenuItem(PE_TEXT_CMD_MARK_ALL_READ).c_str());
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(menu, row && row->newFolderAccount ? MF_STRING : MF_STRING | MF_GRAYED, IDM_NEW_FOLDER, MenuItem(PE_TEXT_CMD_NEW_FOLDER).c_str());
@@ -3167,6 +3387,19 @@ bool Mailbox::OnNotify(NMHDR* header, LRESULT& result) {
             if (!OnFolderSelected(place.folder, place.list)) {
                 SendMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_TREE, 0), 0);
             }
+            // the bar over the list for the account of the row chosen
+            UpdateAccountBar();
+        }
+        if (header->code == TVN_GETINFOTIPW) {
+            // a marked row's tooltip says why: the core's words
+            auto* tip = reinterpret_cast<NMTVGETINFOTIPW*>(header);
+            const TreeRow* row = tip->lParam >= 0 && static_cast<size_t>(tip->lParam) < treeRows_.size()
+                                     ? &treeRows_[static_cast<size_t>(tip->lParam)]
+                                     : nullptr;
+            if (row && row->mark != PE_ACCOUNT_MARK_NONE && tip->cchTextMax > 0) {
+                wcsncpy_s(tip->pszText, tip->cchTextMax, row->markTip.c_str(), _TRUNCATE);
+            }
+            return true;
         }
         if (header->code == TVN_ITEMEXPANDEDW) {
             // collapsed, a row shows the unread messages it hides; expanded, its folders show them again
@@ -3605,7 +3838,15 @@ bool Mailbox::OnDrawItem(const DRAWITEMSTRUCT& item) {
         return true;
     }
     if (item.hwndItem == undoneBar_) {
-        DrawUndoneBar(item);
+        // the mail with the error mark, then why
+        DrawInfoBar(item, undoneClose_, undoneText_,
+                    [this](HDC dc, int left, int top) { ImageList_Draw(listIcons_, LIST_MAIL_ERROR, dc, left, top, ILD_TRANSPARENT); });
+        return true;
+    }
+    if (item.hwndItem == accountBar_) {
+        // the mark of the account's state, then what it is
+        DrawInfoBar(item, accountButton_, barText_,
+                    [this](HDC dc, int left, int top) { DrawAccountMark(dc, barMark_, left, top, iconSize_, false); });
         return true;
     }
     if (item.hwndItem != findIcon_ && item.hwndItem != findClear_ && item.hwndItem != undoneClose_) {
@@ -3618,22 +3859,6 @@ bool Mailbox::OnDrawItem(const DRAWITEMSTRUCT& item) {
     int y = (item.rcItem.top + item.rcItem.bottom - iconSize_) / 2 + pushed;
     ImageList_Draw(listIcons_, icon, item.hDC, x, y, ILD_TRANSPARENT);
     return true;
-}
-
-// the mail with the error mark, then why, wrapped, on the information bar's yellow as the search bar has it
-void Mailbox::DrawUndoneBar(const DRAWITEMSTRUCT& item) const {
-    RECT area = item.rcItem;
-    FillRect(item.hDC, &area, GetSysColorBrush(COLOR_INFOBK));
-    int pad = Scale(6);
-    ImageList_Draw(listIcons_, LIST_MAIL_ERROR, item.hDC, area.left + pad, area.top + Scale(3), ILD_TRANSPARENT);
-    area.left += pad + iconSize_ + pad;
-    area.right -= Scale(22) + pad;
-    area.top += Scale(4);
-    HGDIOBJ old = SelectObject(item.hDC, normal_);
-    SetTextColor(item.hDC, GetSysColor(COLOR_INFOTEXT));
-    SetBkMode(item.hDC, TRANSPARENT);
-    DrawTextW(item.hDC, undoneText_.c_str(), -1, &area, DT_LEFT | DT_WORDBREAK | DT_NOPREFIX);
-    SelectObject(item.hDC, old);
 }
 
 void Mailbox::FocusFind() {
@@ -3718,6 +3943,12 @@ bool Mailbox::OnCommand(WORD id, WORD code) {
     if (id == IDC_UNDONE_CLOSE) {
         ShowUndone(L"");
         SetFocus(list_);
+        return true;
+    }
+    if (id == IDC_ACCOUNT_BAR_BUTTON && code == BN_CLICKED) {
+        if (barAccount_ && onStatusAction) {
+            onStatusAction(barAccount_);
+        }
         return true;
     }
     if (id == IDC_SEARCH_RULE) {
@@ -4029,6 +4260,10 @@ void Mailbox::OnEvent(const UiEvent& event) {
         break;
     case PE_EVENT_KIND_ACTED:
         OnActed(event);
+        break;
+    case PE_EVENT_KIND_ACCOUNT_STATE_CHANGED:
+        // an account signed out, back in, or can not connect: the marks of its rows and the bar over the list
+        AccountStateChanged();
         break;
     case PE_EVENT_KIND_ACTION_UNDONE:
         // the rows are back already (FolderChanged): why, over the list; the status bar no longer says it was done

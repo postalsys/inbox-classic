@@ -550,6 +550,16 @@ enum Help {
         NSHelpManager.shared.openHelpAnchor(anchor, inBook: book)
     }
 
+    /// opens the help at the topic `topic` itself (`password-not-accepted`), whose id is its anchor in the Help Book
+    static func open(topic: String) {
+        if let asked = TestHooks.help {
+            asked(topic)
+            return
+        }
+        let book = Bundle.main.object(forInfoDictionaryKey: "CFBundleHelpBookName") as? String
+        NSHelpManager.shared.openHelpAnchor(topic, inBook: book)
+    }
+
     /// Help in the menu (⌘?): the topic of the window in front
     static func open(for window: NSWindow?) {
         open(contexts[window?.identifier?.rawValue ?? ""] ?? "main")

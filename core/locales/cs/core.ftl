@@ -46,7 +46,6 @@ reader-downloading-detail = Zpráva se zde zobrazí po dokončení stahování.
 reader-downloading-size = Zpráva má velikost { $size }. Zobrazí se zde, až bude stažena.
 reader-failed = Zprávu se nepodařilo stáhnout
 reader-failed-network = Spojení s poštovním serverem se nepodařilo navázat nebo bylo přerušeno ({ $reason }).
-reader-failed-sign-in = Poštovní server nepřijal přihlášení ({ $reason }). V nastavení účtu zkontrolujte heslo nebo se znovu přihlaste.
 reader-failed-security = Nepodařilo se navázat zabezpečené spojení s poštovním serverem ({ $reason }).
 reader-failed-other = Poštovní server odpověděl: { $reason }.
 reader-retry-note = Po obnovení připojení účtu se aplikace pokusí zprávu stáhnout znovu.

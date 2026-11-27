@@ -47,7 +47,6 @@ reader-downloading-detail = El missatge apareixerà aquí quan s’acabi de baix
 reader-downloading-size = El missatge ocupa { $size }. Apareixerà aquí quan s’hagi baixat.
 reader-failed = No s’ha pogut baixar el missatge
 reader-failed-network = No s’ha pogut establir la connexió amb el servidor de correu o s’ha interromput ({ $reason }).
-reader-failed-sign-in = El servidor de correu no ha acceptat l’inici de sessió ({ $reason }). Comproveu la contrasenya o torneu a iniciar la sessió des de les propietats del compte.
 reader-failed-security = No s’ha pogut establir una connexió segura amb el servidor de correu ({ $reason }).
 reader-failed-other = El servidor de correu ha respost: { $reason }.
 reader-retry-note = Es tornarà a provar quan el compte es torni a connectar.

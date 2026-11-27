@@ -49,7 +49,6 @@ reader-downloading-detail = Správa sa tu zobrazí po dokončení sťahovania.
 reader-downloading-size = Správa má veľkosť { $size }. Zobrazí sa tu po stiahnutí.
 reader-failed = Správu sa nepodarilo stiahnuť
 reader-failed-network = Spojenie s poštovým serverom zlyhalo alebo bolo prerušené ({ $reason }).
-reader-failed-sign-in = Poštový server neprijal prihlásenie ({ $reason }). V nastaveniach konta skontrolujte heslo alebo sa znova prihláste.
 reader-failed-security = Pripojenie k poštovému serveru sa nepodarilo zabezpečiť ({ $reason }).
 reader-failed-other = Poštový server odpovedal: { $reason }.
 reader-retry-note = Skúsi sa to znova, keď sa konto opäť pripojí.

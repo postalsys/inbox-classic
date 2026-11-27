@@ -34,7 +34,6 @@ reader-downloading-detail = ダウンロードが完了すると、ここにメ�
 reader-downloading-size = このメッセージのサイズは{ $size }です。ダウンロードが完了すると、ここに表示されます。
 reader-failed = メッセージをダウンロードできませんでした
 reader-failed-network = メール サーバーに接続できなかったか、接続が中断されました（{ $reason }）。
-reader-failed-sign-in = メール サーバーがサインインを受け付けませんでした（{ $reason }）。パスワードを確認するか、アカウントの設定でもう一度サインインしてください。
 reader-failed-security = メール サーバーとの接続を保護できませんでした（{ $reason }）。
 reader-failed-other = メール サーバーの応答：{ $reason }。
 reader-retry-note = アカウントが再接続されたときに、もう一度試します。

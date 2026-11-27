@@ -49,7 +49,6 @@ reader-downloading-detail = Laiškas bus parodytas čia, kai atsisiuntimas baigs
 reader-downloading-size = Laiško dydis: { $size }. Jis bus parodytas čia, kai bus atsisiųstas.
 reader-failed = Laiško atsisiųsti nepavyko
 reader-failed-network = Nepavyko užmegzti ryšio su pašto serveriu arba ryšys nutrūko ({ $reason }).
-reader-failed-sign-in = Pašto serveris atmetė prisijungimą ({ $reason }). Patikrinkite slaptažodį paskyros ypatybėse arba prisijunkite iš naujo lange „Paskyros“.
 reader-failed-security = Su pašto serveriu nepavyko užmegzti saugaus ryšio ({ $reason }).
 reader-failed-other = Pašto serveris atsakė: { $reason }.
 reader-retry-note = Bus bandoma dar kartą, kai paskyra vėl prisijungs.

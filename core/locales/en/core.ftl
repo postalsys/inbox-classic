@@ -50,7 +50,7 @@ reader-downloading-detail = The message will appear here once the download is co
 reader-downloading-size = The message is { $size }. It will appear here once it is downloaded.
 reader-failed = The message could not be downloaded
 reader-failed-network = The connection to the mail server could not be made or was interrupted ({ $reason }).
-reader-failed-sign-in = The mail server did not accept the sign-in ({ $reason }). Check the password or sign in again in the account’s settings.
+reader-failed-signed-out = The mail server did not accept the account’s sign-in. The bar over the message list says why and how to sign in again.
 reader-failed-security = The connection to the mail server could not be made secure ({ $reason }).
 reader-failed-other = The mail server answered: { $reason }.
 reader-retry-note = It will be tried again when the account reconnects.
@@ -1088,3 +1088,61 @@ reaction-notification-text = { $count ->
     [one] to { $subject }
    *[other] to { $subject } ({ $count } new reactions in total)
 }
+# Account sign-in status: whether each account is signed in and can connect. { $account } is the account's name as
+# the folder list shows it ("Work"). The tooltip of the mark on the account's rows of the folder list:
+account-state-tooltip-refused = Not signed in: the sign-in was not accepted
+account-state-tooltip-admin = Not signed in: an administrator must approve Inbox Classic first
+account-state-tooltip-imap-off = Not signed in: IMAP is turned off for this mailbox
+account-state-tooltip-other-address = Not signed in: the browser signed in to another address
+account-state-tooltip-cannot-connect = Cannot connect to the mail server
+# who refused a password, in account-state-bar-imap-off and the like when the account signs in with a password, or
+# when the provider of a sign-in has no name
+account-state-mail-server = the mail server
+# the bar over the message list of the account's folders; { $provider } is who signs it in ("Microsoft", "Google",
+# the name of a sign-in app)
+account-state-bar-refused-browser = { $account } is not signed in: { $provider } did not accept its sign-in. Its mail may be out of date.
+account-state-bar-refused-password = { $account } is not signed in: the mail server did not accept its password. Its mail may be out of date.
+# { $domain } is the domain of the account's address, whose organization has to approve the app
+account-state-bar-admin = { $account } is not signed in: an administrator of { $domain } must approve Inbox Classic before it can sign in. Its mail may be out of date.
+account-state-bar-imap-off = { $account } is not signed in: { $provider } says IMAP is turned off for this mailbox. Turn it on in the mailbox’s settings, then send and receive again.
+# { $email } is the address the browser signed in to, { $expected } the account's own
+account-state-bar-other-address = { $account } is not signed in: the browser signed in to { $email }, not to { $expected }. Try again and choose { $expected }.
+account-state-bar-cannot-connect = { $account } cannot connect to its mail server. Its mail may be out of date.
+# the bar's button (and the account menu's item for it)
+account-state-button-sign-in = Sign In Again
+account-state-button-password = Enter Password
+account-state-button-admin-link = Copy Link for Administrator
+account-state-button-help = Help
+account-state-button-try-again = Try Again
+# the status bar once Copy Link for Administrator put the link on the clipboard
+account-state-admin-link-copied = The link is copied. Send it to your organization’s administrator.
+# under the password field when Enter Password asks for an account's password again
+account-state-app-password-hint = If your provider asks for an app password for mail programs, enter it here instead of your usual password.
+# the status bar, in place of "Done"
+account-status-sign-in = { $account } needs you to sign in
+account-status-cannot-connect = { $account } cannot connect
+# the status bar, in place of "Done", after work of a connected account failed: { $reason } is why
+account-status-failed = { $account }: { $reason }
+account-status-sign-in-many = { $count ->
+    [one] { $count } account needs you to sign in
+   *[other] { $count } accounts need you to sign in
+}
+account-status-cannot-connect-many = { $count ->
+    [one] { $count } account cannot connect
+   *[other] { $count } accounts cannot connect
+}
+# a desktop notification when an account stops being signed in, or cannot connect
+account-notify-title-sign-in = { $account } is not signed in
+account-notify-text-refused-browser = { $provider } did not accept the sign-in. Sign in again to get new mail.
+account-notify-text-refused-password = The mail server did not accept the password. Enter it again to get new mail.
+account-notify-text-admin = An administrator of { $domain } must approve Inbox Classic first.
+account-notify-text-imap-off = { $provider } says IMAP is turned off for this mailbox.
+account-notify-text-other-address = The browser signed in to { $email }. Try again and choose { $expected }.
+account-notify-title-cannot-connect = { $account } cannot connect
+account-notify-text-cannot-connect = The mail server cannot be reached. Inbox Classic keeps trying.
+# under From in the compose window while this account is chosen
+account-state-compose-sign-in = This account is not signed in; the message will wait in the Outbox.
+account-state-compose-cannot-connect = This account cannot connect now; the message will wait in the Outbox.
+# the reason a message waits in the Outbox
+account-state-outbox-sign-in = Waiting: { $account } is not signed in
+account-state-outbox-cannot-connect = Waiting: { $account } cannot connect

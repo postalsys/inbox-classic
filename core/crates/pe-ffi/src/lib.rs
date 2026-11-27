@@ -6,6 +6,7 @@
 //! - No panic crosses into C++: each export runs inside `guard`, a panic becomes an error result (NULL here). A crash
 //!   on a malformed message would come back on every start, so aborting is not an option.
 
+mod account_status;
 mod agents;
 mod book;
 mod compose_keys;
@@ -25,6 +26,7 @@ mod texts;
 #[cfg(windows)]
 mod windows;
 
+pub use account_status::*;
 pub use agents::*;
 pub use book::*;
 pub use core::*;
@@ -57,6 +59,20 @@ fn c_string(text: String) -> CString {
 /// Hands a string to C++, to be freed with `pe_string_free`
 fn into_c_string(text: String) -> *mut c_char {
     c_string(text).into_raw()
+}
+
+/// Frees the strings of a struct handed to C by value (`PeListBar`, `PeAccountStatus`), each made by
+/// [`into_c_string`]; NULL ones are skipped
+///
+/// # Safety
+/// Each pointer must be NULL or from [`into_c_string`], not freed before.
+unsafe fn free_strings(texts: &[*mut c_char]) {
+    for &text in texts {
+        if !text.is_null() {
+            // SAFETY: as the caller guarantees
+            drop(unsafe { CString::from_raw(text) });
+        }
+    }
 }
 
 /// `count` ids at `ids`, none when `ids` is NULL

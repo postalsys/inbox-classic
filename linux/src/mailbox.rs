@@ -10,8 +10,7 @@ use std::rc::Rc;
 use adw::prelude::*;
 use gtk::{gdk, gio, glib};
 use pe_core::{
-    Action, DraftKind, Event, FlagColor, MarkRead, MessageRef, Reselect, Reselected, Reselection, Selected, SignInWith,
-    Summary,
+    Action, DraftKind, Event, FlagColor, MarkRead, MessageRef, Reselect, Reselected, Reselection, Selected, Summary,
 };
 use pe_store::Folder;
 
@@ -73,7 +72,6 @@ struct AccountInfo {
     label: String,
     /// What the folder tree calls it
     title: String,
-    sign_in: Option<SignInWith>,
 }
 
 pub struct Mailbox {
@@ -198,6 +196,8 @@ pub struct Mailbox {
     /// The bar over the list that says the server did not do what was asked, and why
     undone_bar: gtk::Box,
     undone_text: gtk::Label,
+    /// The bar over the list while the account of what is listed needs a sign-in or can not connect
+    account_bar: Rc<crate::account_status::Bar>,
 }
 
 impl Mailbox {
@@ -249,7 +249,9 @@ impl Mailbox {
         overlay.add_overlay(&empty);
         let list_load = ListLoad::new(&list.widget);
         overlay.add_overlay(list_load.note());
+        let account_bar = crate::account_status::Bar::new();
         let list_pane = gtk::Box::new(gtk::Orientation::Vertical, 0);
+        list_pane.append(account_bar.widget());
         list_pane.append(&search_bar);
         list_pane.append(&undone_bar);
         list_pane.append(&overlay);
@@ -395,6 +397,7 @@ impl Mailbox {
             actions: RefCell::default(),
             undone_bar,
             undone_text,
+            account_bar,
         });
         mailbox.install_actions(application);
         mailbox.connect(&clear);
@@ -685,6 +688,7 @@ impl Mailbox {
                     this.move_beside(account, beside, below);
                 }
             }),
+            mark_clicked: Box::new(|account| spawn(crate::account_status::run(account))),
             menu: Box::new(move |widget, x, y, row| {
                 if let Some(this) = menu.upgrade() {
                     match row.menu {
@@ -737,6 +741,31 @@ impl Mailbox {
         }
         self.enable_new_folder();
         self.show_folder_name();
+        self.show_account_state();
+    }
+
+    /// The account the bar over the list and Tools > Sign In Again speak for, as the core says for what is listed;
+    /// None when it has nothing to say
+    pub fn status_account(&self) -> Option<i64> {
+        shell()
+            .core
+            .status_account_for(self.listed.get(), self.folder.get())
+            .ok()
+            .flatten()
+    }
+
+    /// The bar over the list and Sign In Again as the state of the account of what is listed says
+    fn show_account_state(&self) {
+        let account = self.status_account();
+        self.account_bar.show(account);
+        let can = account.is_some_and(crate::account_status::can_sign_in_again);
+        self.enable(Command::SignInAgain, can);
+    }
+
+    /// The bar over the list, for the UI test: the account it speaks for (0 while hidden), its words and its button's
+    #[cfg(feature = "e2e")]
+    pub fn account_bar(&self) -> (i64, String, String) {
+        self.account_bar.shown()
     }
 
     /// New Folder on where the row shown says it makes one (not All Inboxes, nor Flagged with several accounts)
@@ -778,7 +807,6 @@ impl Mailbox {
                 email: s.email.clone(),
                 label: pe_core::account_label(&s.name, &s.email),
                 title,
-                sign_in: SignInWith::of_auth_kind(&s.auth),
             });
             for folder in core.folders(account.id).unwrap_or_default() {
                 self.learn_folder(account.id, &folder);
@@ -914,6 +942,7 @@ impl Mailbox {
         }
         self.enable(Command::NewFolder, row.new_folder_account != 0);
         self.update_junk_button();
+        self.show_account_state();
         // a row chosen in the narrow window's popover closes it; a heading only opens or closes
         if row.selectable {
             self.folder_place.button.popdown();
@@ -976,11 +1005,6 @@ impl Mailbox {
 
     pub fn account_email(&self, account: i64) -> String {
         self.account(account).map(|a| a.email).unwrap_or_default()
-    }
-
-    /// What the account signs in with through the browser; None for a password
-    pub fn sign_in(&self, account: i64) -> Option<SignInWith> {
-        self.account(account).and_then(|a| a.sign_in)
     }
 
     /// The account of a folder, 0 when the window does not know the folder
@@ -2190,6 +2214,11 @@ impl Mailbox {
                 }
             }
             Event::SyncFinished { .. } => self.show_folder_name(),
+            // the marks of the account's rows, the bar and Sign In Again
+            Event::AccountStateChanged { .. } => {
+                self.update_counts();
+                self.show_account_state();
+            }
             Event::PictureReady { request } => crate::row_pictures::ready(*request),
             Event::ListReady { request } => self.list_ready(*request),
             Event::ListPageReady { request } => self.page_ready(*request),
@@ -2932,9 +2961,11 @@ impl Mailbox {
             Box::new(move |this| spawn(async move { this.new_folder_in(new_in, new_under).await })),
         );
         group.add_action(&self.properties_action(account));
+        group.add_action(&sign_in_action(account));
         let menu = gio::Menu::new();
         let first = gio::Menu::new();
         first.append(Some(&plain(Text::UiAccountSync)), Some("account.sync"));
+        first.append(Some(Command::SignInAgain.label()), Some("account.sign-in-again"));
         first.append(Some(&plain(Text::CmdMarkAllRead)), Some("account.mark-all-read"));
         menu.append_section(None, &first);
         let second = gio::Menu::new();
@@ -3042,7 +3073,9 @@ impl Mailbox {
         // a row named after its account (or the only account's Inbox) opens the account's properties, to rename it there
         if row.account_properties {
             group.add_action(&self.properties_action(row.account));
+            group.add_action(&sign_in_action(row.account));
             let properties = gio::Menu::new();
+            properties.append(Some(Command::SignInAgain.label()), Some("folder.sign-in-again"));
             properties.append(
                 Some(&crate::words::plain(crate::words::Text::UiAccountPropertiesOf)),
                 Some("folder.properties"),
@@ -4241,34 +4274,30 @@ fn menu_item(label: &str, command: Command) -> gio::MenuItem {
     item
 }
 
+/// The action `sign-in-again` of an account's menu: what its state offers (signing in again, the password, the
+/// administrator's link), off while there is no sign-in to give
+fn sign_in_action(account: i64) -> gio::SimpleAction {
+    let action = gio::SimpleAction::new("sign-in-again", None);
+    action.set_enabled(crate::account_status::can_sign_in_again(account));
+    action.connect_activate(move |_, _| spawn(crate::account_status::run(account)));
+    action
+}
+
 /// What an empty list says in its middle
 /// The bar over the list that says the server did not do what was asked and why, as the search bar looks: its
 /// words, and a button that dismisses it (the bar's last child)
 fn undone_bar() -> (gtk::Box, gtk::Label) {
-    let text = gtk::Label::new(None);
-    text.set_xalign(0.0);
-    text.set_hexpand(true);
-    // the whole sentence on more lines in a narrow window, not cut off
-    text.set_wrap(true);
-    text.set_wrap_mode(gtk::pango::WrapMode::WordChar);
-    text.set_widget_name("undone-text");
+    let bar = ui::InfoBar::new("undone-bar");
     let dismiss = crate::icons::kept(gtk::Button::from_icon_name("ic-dismiss-symbolic"));
     dismiss.add_css_class("flat");
     dismiss.set_valign(gtk::Align::Center);
     dismiss.set_tooltip_text(Some(&t!(UiClose)));
     dismiss.update_property(&[gtk::accessible::Property::Label(&t!(UiClose))]);
     dismiss.set_widget_name("undone-dismiss");
-    let bar = gtk::Box::new(gtk::Orientation::Horizontal, 8);
-    bar.add_css_class("info-bar");
-    bar.add_css_class("undone-bar");
-    bar.set_widget_name("undone-bar");
-    let icon = crate::icons::image("ic-warning-symbolic");
-    icon.set_valign(gtk::Align::Center);
-    bar.append(&icon);
-    bar.append(&text);
-    bar.append(&dismiss);
-    bar.set_visible(false);
-    (bar, text)
+    bar.widget.add_css_class("undone-bar");
+    crate::icons::set(&bar.icon, Some("ic-warning-symbolic"));
+    bar.widget.append(&dismiss);
+    (bar.widget, bar.text)
 }
 
 fn empty_list() -> (gtk::Box, gtk::Label, gtk::Label) {

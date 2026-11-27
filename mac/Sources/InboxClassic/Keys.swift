@@ -58,15 +58,15 @@ func keyButton(_ title: String, _ target: AnyObject, _ action: Selector, _ id: S
     return button
 }
 
-/// A note in the warning look: the triangle beside words that wrap
+/// A note in the warning look: the triangle beside words that wrap, or `picture` in `tint` (nil: its own colours)
 @MainActor
-func warningNote(_ words: String, id: String) -> NSStackView {
+func warningNote(_ words: String, id: String, picture: (NSImage?, NSColor?)? = nil) -> NSStackView {
     let label = wrappingLabel(words)
     label.textColor = .secondaryLabelColor
     label.setAccessibilityIdentifier(id)
     let sign = NSImageView()
-    sign.image = NSImage(systemSymbolName: "exclamationmark.triangle.fill", accessibilityDescription: nil)
-    sign.contentTintColor = .systemOrange
+    sign.image = picture?.0 ?? NSImage(systemSymbolName: "exclamationmark.triangle.fill", accessibilityDescription: nil)
+    sign.contentTintColor = picture == nil ? .systemOrange : picture?.1
     sign.setContentHuggingPriority(.required, for: .horizontal)
     let row = NSStackView(views: [sign, label])
     row.alignment = .top

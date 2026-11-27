@@ -41,7 +41,6 @@ reader-downloading-detail = 다운로드가 완료되면 여기에 메시지가 
 reader-downloading-size = 메시지 크기는 { $size }입니다. 다운로드되면 여기에 표시됩니다.
 reader-failed = 메시지를 다운로드할 수 없습니다
 reader-failed-network = 메일 서버에 연결할 수 없거나 연결이 끊어졌습니다({ $reason }).
-reader-failed-sign-in = 메일 서버가 로그인을 받아들이지 않았습니다({ $reason }). 계정 설정에서 암호를 확인하거나 다시 로그인하십시오.
 reader-failed-security = 메일 서버와 보안 연결을 설정할 수 없습니다({ $reason }).
 reader-failed-other = 메일 서버의 응답: { $reason }.
 reader-retry-note = 계정이 다시 연결되면 다시 시도합니다.

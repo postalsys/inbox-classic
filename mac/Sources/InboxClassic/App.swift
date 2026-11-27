@@ -378,8 +378,15 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         let info = response.notification.request.content.userInfo
         let folder = info["folder"] as? Int64 ?? 0
         let uid = info["uid"] as? UInt64 ?? 0
+        // an account that needs a sign-in: its sign-in, as the bar's button
+        let signIn = info["signIn"] as? Int64 ?? 0
         Task { @MainActor in
             self.main?.show()
+            if signIn != 0 {
+                done()
+                self.main?.runStatusAction(signIn)
+                return
+            }
             self.main?.showMessage(folder: folder, uid: uid)
             done()
         }
@@ -503,7 +510,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         assert(commands("message").allSatisfy { command in messageItems.contains { $0.tag == command.rawValue } })
         _ = submenu(Text.menuMessage.text, messageItems)
         // Settings is in the app's menu, as on every Mac
-        let toolItems: [NSMenuItem] = [item(for: .sync), item(for: .outbox), separator(), item(for: .addressBook),
+        let toolItems: [NSMenuItem] = [item(for: .sync), item(for: .signInAgain), item(for: .outbox), separator(), item(for: .addressBook),
                                        item(for: .addSenderToBook), item(for: .messageRules), item(for: .encryptionKeys),
                                        separator(), item(for: .aiAgents), separator(), item(for: .notify),
                                        item(for: .defaultApp), separator(), item(for: .composeSign),
@@ -602,6 +609,8 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         case .sync:
             main.syncAsked()
             core.syncAll()
+        case .signInAgain:
+            if let account = main.signInAgainAccount { main.runStatusAction(account) }
         case .markRead: main.mailbox.markSelected(seen: true)
         case .markUnread: main.mailbox.markSelected(seen: false)
         case .pictures: main.mailbox.loadPictures()
@@ -791,6 +800,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         }
         switch command {
         case .delete: return !typing && main.mailbox.hasSelection
+        case .signInAgain: return main.signInAgainAccount != nil
         case .unsubscribe: return main.mailbox.reader.canUnsubscribe
         case .markRead, .markUnread, .flag: return main.mailbox.hasSelection
         case .move, .copy: return main.mailbox.hasSelection

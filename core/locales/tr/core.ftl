@@ -47,7 +47,6 @@ reader-downloading-detail = İndirme tamamlanınca ileti burada görünecek.
 reader-downloading-size = İletinin boyutu: { $size }. İndirildiğinde burada görünecek.
 reader-failed = İleti indirilemedi
 reader-failed-network = Posta sunucusuyla bağlantı kurulamadı veya bağlantı kesildi ({ $reason }).
-reader-failed-sign-in = Posta sunucusu oturum açmayı kabul etmedi ({ $reason }). Hesap ayarlarından parolayı denetleyin veya tarayıcıda yeniden oturum açın.
 reader-failed-security = Posta sunucusuyla güvenli bağlantı kurulamadı ({ $reason }).
 reader-failed-other = Posta sunucusunun yanıtı: { $reason }.
 reader-retry-note = Hesap yeniden bağlandığında tekrar denenecek.

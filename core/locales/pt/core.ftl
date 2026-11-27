@@ -56,7 +56,6 @@ reader-downloading-detail = A mensagem aparecerá aqui quando a transferência t
 reader-downloading-size = A mensagem tem { $size }. Aparecerá aqui quando a transferência terminar.
 reader-failed = Não foi possível transferir a mensagem
 reader-failed-network = A ligação ao servidor de correio falhou ou foi interrompida ({ $reason }).
-reader-failed-sign-in = O servidor de correio não aceitou o início de sessão ({ $reason }). Verifique a palavra-passe ou inicie sessão novamente nas definições da conta.
 reader-failed-security = Não foi possível tornar segura a ligação ao servidor de correio ({ $reason }).
 reader-failed-other = O servidor de correio respondeu: { $reason }.
 reader-retry-note = A transferência será repetida quando a conta voltar a ligar-se ao servidor.

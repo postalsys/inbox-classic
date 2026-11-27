@@ -39,7 +39,10 @@ void FillOutbox(OutboxState* state, int select = 0) {
         // one an AI agent sent waits a moment, while it can still be deleted
         std::wstring status = core::T(PE_TEXT_UI_OUTBOX_STATUS_WAITING);
         SYSTEMTIME at;
-        if (queued->problem) {
+        if (queued->problem && pe_account_state(state->core, queued->account) != PE_ACCOUNT_STATE_CONNECTED) {
+            // held while its account is not signed in or can not connect: the core's words for why it waits
+            status = Text(queued->problem);
+        } else if (queued->problem) {
             status = core::T(PE_TEXT_UI_OUTBOX_STATUS_NOT_SENT, {{"reason", Text(queued->problem)}});
         } else if (queued->not_before && UnixToSystemTime(queued->not_before, true, at)) {
             // the user's while Undo Send can take it back, else an AI agent's wait

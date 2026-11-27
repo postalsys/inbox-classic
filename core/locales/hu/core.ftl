@@ -47,7 +47,6 @@ reader-downloading-detail = Az üzenet itt jelenik meg, amint a letöltés befej
 reader-downloading-size = Az üzenet mérete { $size }. Itt jelenik meg, amint letöltődött.
 reader-failed = Az üzenetet nem sikerült letölteni
 reader-failed-network = Nem sikerült kapcsolódni a levelezőkiszolgálóhoz, vagy a kapcsolat megszakadt ({ $reason }).
-reader-failed-sign-in = A levelezőkiszolgáló nem fogadta el a bejelentkezést ({ $reason }). Ellenőrizze a jelszót, vagy jelentkezzen be újra a fiók beállításaiban.
 reader-failed-security = Nem sikerült biztonságos kapcsolatot létesíteni a levelezőkiszolgálóval ({ $reason }).
 reader-failed-other = A levelezőkiszolgáló válasza: { $reason }.
 reader-retry-note = A fiók újbóli csatlakozásakor az alkalmazás ismét megpróbálja letölteni az üzenetet.

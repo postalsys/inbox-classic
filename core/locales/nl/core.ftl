@@ -47,7 +47,6 @@ reader-downloading-detail = Het bericht verschijnt hier zodra het downloaden is 
 reader-downloading-size = Het bericht is { $size }. Het verschijnt hier zodra het is gedownload.
 reader-failed = Het bericht kon niet worden gedownload
 reader-failed-network = De verbinding met de mailserver kon niet worden gemaakt of is verbroken ({ $reason }).
-reader-failed-sign-in = De mailserver heeft de aanmelding niet geaccepteerd ({ $reason }). Controleer het wachtwoord of meld je opnieuw aan in de accountinstellingen.
 reader-failed-security = De verbinding met de mailserver kon niet worden beveiligd ({ $reason }).
 reader-failed-other = De mailserver antwoordde: { $reason }.
 reader-retry-note = Het wordt opnieuw geprobeerd wanneer het account weer verbinding maakt.

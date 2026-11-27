@@ -21,8 +21,12 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
     private var syncTimer: Timer?
     /// accounts whose password prompt is open, so a second failure does not open another
     private var prompting: Set<Int64> = []
-    /// accounts whose last sync failed: their failure stays in the status bar
-    private var failing: Set<Int64> = []
+    /// how many accounts need a sign-in, as last read: the Dock's "!"
+    private var needingSignIn: UInt32 = 0
+    /// the syncs of each account that came to their end, and (under test) the requests whose event came: what the UI
+    /// test waits on
+    private(set) var syncsFinished: [Int64: Int] = [:]
+    private(set) var requestsDone: Set<UInt64> = []
     /// what the message rules did during a sync, kept in the status bar when the sync finishes
     private var rulesSaid: String?
     /// the last message sent, as the outgoing pane says it once the Outbox is empty
@@ -66,11 +70,13 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         mailbox.status = { [weak self] in self?.setStatus($0) }
         mailbox.openDraft = { [weak self] in self?.openDraft($0, account: $1) }
         mailbox.undoSend = { [weak self] in self?.undoSend() }
+        mailbox.statusAction = { [weak self] in self?.runStatusAction($0) }
         showOutbox()
         showCounts()
         updateLayout()
+        // the timer's syncs leave an account whose sign-in was refused alone for a while; the user's Send/Recv does not
         syncTimer = Timer.scheduledTimer(withTimeInterval: 10 * 60, repeats: true) { [weak self] _ in
-            MainActor.assumeIsolated { self?.core.syncAll() }
+            MainActor.assumeIsolated { self?.core.syncScheduled() }
         }
         showUnread()
     }
@@ -190,6 +196,18 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         statusIsSync = true
     }
 
+    /// the accounts that need a sign-in or can not connect, in the core's words for the status bar (nil while all are
+    /// connected), read again with the Dock's "!"
+    @discardableResult
+    private func readAccountsStatus() -> String? {
+        let summary = core.accountsSummary
+        if summary.needing != needingSignIn {
+            needingSignIn = summary.needing
+            showUnread()
+        }
+        return summary.text
+    }
+
     /// the selected folder in the title, what it holds in the status bar
     func showCounts() {
         countsText.stringValue = mailbox.counts
@@ -267,19 +285,28 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         }
         switch event.kind {
         case PE_EVENT_KIND_SYNC_STARTED:
-            failing.remove(event.account)
             setSyncStatus(Text.macChecking.text(["account": mailbox.accountName(event.account)]))
         case PE_EVENT_KIND_SYNC_FINISHED:
-            // a failure stays in the status bar until the account syncs without one; what the rules did, over Done
-            if failing.isEmpty {
-                setSyncStatus(rulesSaid ?? Text.uiDone.text, over: rulesSaid != nil)
+            syncsFinished[event.account, default: 0] += 1
+            // what the rules did; else the accounts that need a sign-in or can not connect, else Done. A failure the
+            // sync told stays (it came before this)
+            let accounts = readAccountsStatus()
+            if let said = rulesSaid ?? accounts {
+                setSyncStatus(said, over: true)
+            } else if event.failure == PE_FAILURE_KIND_NONE {
+                setSyncStatus(Text.uiDone.text)
             }
             rulesSaid = nil
+        case PE_EVENT_KIND_ACCOUNT_STATE_CHANGED:
+            accountStateChanged(event.account, prompt: event.count == 1)
         case PE_EVENT_KIND_RULES_APPLIED:
             let said = Text.uiRulesApplied.text(["count": event.count])
             setSyncStatus(said, over: true)
             rulesSaid = event.count > 0 ? said : nil
         case PE_EVENT_KIND_AUTOCONFIG_DONE, PE_EVENT_KIND_SIGN_IN_DONE, PE_EVENT_KIND_SIGN_IN_APP_CHECKED:
+            if TestHooks.testing {
+                requestsDone.insert(event.uid)
+            }
             Waiting.requestDone(event.uid)
         case PE_EVENT_KIND_READ_DONE, PE_EVENT_KIND_ACTED:
             Pending.finish(event)
@@ -350,12 +377,11 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         case PE_EVENT_KIND_KEY_PUBLISHED:
             KeyActions.published(core: core, event.uid)
         case PE_EVENT_KIND_FAILED:
-            failing.insert(event.account)
-            setSyncStatus(Text.macAccountSaid.text(["account": mailbox.accountName(event.account), "message": event.message]), over: true)
-            if event.failure == PE_FAILURE_KIND_AUTHENTICATION {
-                // after this event, so the prompt does not hold up the others
-                onMain { self.askPassword(event.account) }
-            }
+            // the accounts that need a sign-in or can not connect in the core's words; another failure in the server's
+            // (the dialog of a refused sign-in comes with AccountStateChanged)
+            let said = readAccountsStatus()
+                ?? Text.macAccountSaid.text(["account": mailbox.accountName(event.account), "message": event.message])
+            setSyncStatus(said, over: true)
         default:
             break
         }
@@ -388,8 +414,69 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
     }
 
     private func showUnread() {
+        // an account that needs the user to sign in says so over the count, as the tray's mark does on Windows
+        if needingSignIn > 0 {
+            NSApp.dockTile.badgeLabel = "!"
+            return
+        }
         let unread = core.inboxUnread
         NSApp.dockTile.badgeLabel = unread > 0 ? (unread > 999 ? "999+" : "\(unread)") : nil
+    }
+
+    /// the badge on the Dock icon now, for the UI test
+    var dockBadge: String? { NSApp.dockTile.badgeLabel }
+
+    // ---- whether each account is signed in and can connect ----
+
+    /// what an account shows of its sign-in changed: the status bar, the Dock and the compose windows from it (the
+    /// folder list and the bar are the mailbox's); with `prompt` the state's one dialog, or a notification while the
+    /// app is in the background
+    private func accountStateChanged(_ account: Int64, prompt: Bool) {
+        if let said = readAccountsStatus() {
+            setSyncStatus(said)
+        }
+        ComposeWindow.accountStateChanged(account)
+        guard prompt else { return }
+        let status = core.accountStatus(account)
+        // the UI test drives a window that may not be in front: it hears of the notification and gets the dialog
+        let inFront = window.isVisible && !window.isMiniaturized && NSApp.isActive && window.isKeyWindow
+        if inFront || TestHooks.testing {
+            TestHooks.notified?(status.notificationTitle, status.notificationText)
+            // after this event, so the dialog does not hold up the others
+            onMain { self.ask(account) }
+        } else {
+            notifyUser(title: status.notificationTitle, text: status.notificationText, info: ["signIn": account])
+        }
+    }
+
+    /// what the bar's button, the folder list's mark, Sign In Again and the notification do for `account`, as its state
+    /// says: sign in again in the browser, the password, the administrator's link, the help, or a sync now
+    func runStatusAction(_ account: Int64) {
+        let status = core.accountStatus(account)
+        switch status.action {
+        case PE_STATUS_ACTION_SIGN_IN_AGAIN:
+            signInAgain(core: core, account: account, email: mailbox.accountEmail(account))
+        case PE_STATUS_ACTION_ENTER_PASSWORD:
+            enterPassword(account, hint: status.passwordHint)
+        case PE_STATUS_ACTION_COPY_ADMIN_LINK:
+            NSPasteboard.general.clearContents()
+            NSPasteboard.general.setString(status.adminLink, forType: .string)
+            setStatus(Text.accountStateAdminLinkCopied.text)
+        case PE_STATUS_ACTION_HELP:
+            Help.open(topic: status.helpTopic)
+        case PE_STATUS_ACTION_SYNC_NOW:
+            syncAsked()
+            core.sync(account)
+        default:
+            break
+        }
+    }
+
+    /// Tools > Sign In Again: the account the bar over the list speaks for, while it needs a sign-in the user can give
+    var signInAgainAccount: Int64? {
+        let account = mailbox.barAccount
+        guard account != 0, core.accountState(account) != PE_ACCOUNT_STATE_CONNECTED else { return nil }
+        return core.accountStatus(account).canSignInAgain ? account : nil
     }
 
     // ---- notifications ----
@@ -408,46 +495,59 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
 
     /// a notification of the system; a click on it opens the message (`folder`, `uid`), or the window
     func notifyUser(title: String, text: String, folder: Int64, uid: UInt64) {
+        notifyUser(title: title, text: text, info: ["folder": folder, "uid": uid])
+    }
+
+    /// `info` tells the click what to open (AppDelegate's userNotificationCenter)
+    private func notifyUser(title: String, text: String, info: [String: Any]) {
         TestHooks.notified?(title, text)
         guard AppDelegate.shared.isBundled else { return }
         let center = UNUserNotificationCenter.current()
+        nonisolated(unsafe) let info = info
         center.requestAuthorization(options: [.alert, .sound]) { granted, _ in
             guard granted else { return }
             let content = UNMutableNotificationContent()
             content.title = title
             content.body = text
-            content.userInfo = ["folder": folder, "uid": uid]
+            content.userInfo = info
             center.add(UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil))
         }
     }
 
     // ---- accounts ----
 
-    /// an account that signs in through the browser signs in again
-    private func signInAgain(_ account: Int64) {
-        guard ask(Text.uiSignInRefused.text(["account": mailbox.accountName(account)]) + "\n\n" + Text.uiSignInAgainAsk.text,
-                  style: .information) else { return }
-        let request = SignIn.withBrowser(core: core, with: mailbox.signIn(account), email: mailbox.accountEmail(account))
-        guard request != 0 else { return }
-        var why: UnsafeMutablePointer<CChar>?
-        if pe_account_reauthorize(core.handle, account, request, &why) {
-            core.sync(account)
-            return
-        }
-        inform(Text.uiSignInAgainFailed.text(["reason": taken(why) ?? Text.uiUnknownReason.text]), style: .warning)
-    }
-
-    private func askPassword(_ account: Int64) {
+    /// the one dialog of an account's state (the core asks for it once, when the state comes about): the password,
+    /// whether to sign in again in the browser, or what happened with the button that helps. Cancel leaves the folder
+    /// list's mark, the bar over the list and the status bar to say it
+    private func ask(_ account: Int64) {
         guard prompting.insert(account).inserted else { return }
         defer { prompting.remove(account) }
-        if mailbox.signIn(account).provider != PE_O_AUTH_PROVIDER_NONE {
-            signInAgain(account)
-            return
+        let status = core.accountStatus(account)
+        switch status.prompt {
+        case PE_PROMPT_PASSWORD:
+            enterPassword(account, hint: status.passwordHint)
+        case PE_PROMPT_BROWSER_SIGN_IN:
+            if InboxClassicKit.ask(status.bar, yes: status.button, no: Text.uiCancel.text, style: .information) {
+                signInAgain(core: core, account: account, email: mailbox.accountEmail(account))
+            }
+        case PE_PROMPT_INFORM where !status.button.isEmpty:
+            if InboxClassicKit.ask(status.bar, yes: status.button, no: Text.uiOk.text, style: .information) {
+                runStatusAction(account)
+            }
+        case PE_PROMPT_INFORM:
+            inform(status.bar)
+        default:
+            break
         }
-        guard let password = passwordDialog(account: mailbox.accountName(account)) else { return }
+    }
+
+    /// the password of `account` asked for with `hint` under it, kept, and the account synced with it
+    private func enterPassword(_ account: Int64, hint: String) {
+        guard let password = passwordDialog(account: mailbox.accountName(account), hint: hint) else { return }
         let strings = CStrings()
         pe_account_set_password(core.handle, account, strings.add(password))
         strings.wipe()
+        syncAsked()
         core.sync(account)
     }
 

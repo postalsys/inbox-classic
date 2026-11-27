@@ -660,10 +660,11 @@ void SetSignInPageFile(const std::wstring& path) {
     g_signInPageFile = path;
 }
 
-uint64_t SignInWithBrowser(HWND owner, PeCore* core, SignInChoice with, const std::wstring& email) {
-    char* page = nullptr;
-    uint64_t request = pe_sign_in_begin(core, with.provider, with.app, core::Narrow(email).c_str(), &page);
-    core::String url(page);
+namespace {
+
+// a browser sign-in the core started (`request`, its page `url`): the page opened in the browser, and waited for until
+// it signs in; the request, or 0 when it did not (said, unless cancelled)
+uint64_t FinishBrowserSignIn(HWND owner, PeCore* core, uint64_t request, core::String url, const std::wstring& email) {
     // the core makes the page, and gives only an https page or one of a provider on this computer (a test server)
     std::wstring address = url ? Text(url.get()) : L"";
     if (!request || address.empty()) {
@@ -689,6 +690,35 @@ uint64_t SignInWithBrowser(HWND owner, PeCore* core, SignInChoice with, const st
         return 0;
     }
     return request;
+}
+
+}  // namespace
+
+uint64_t SignInWithBrowser(HWND owner, PeCore* core, SignInChoice with, const std::wstring& email) {
+    char* page = nullptr;
+    uint64_t request = pe_sign_in_begin(core, with.provider, with.app, core::Narrow(email).c_str(), &page);
+    return FinishBrowserSignIn(owner, core, request, core::String(page), email);
+}
+
+bool SignInAgainInBrowser(HWND owner, PeCore* core, int64_t account, const std::wstring& email) {
+    // with the account's own provider and address; after a sign-in to another address the provider's account picker
+    char* page = nullptr;
+    uint64_t request = pe_sign_in_again_begin(core, account, &page);
+    request = FinishBrowserSignIn(owner, core, request, core::String(page), email);
+    if (!request) {
+        return false;
+    }
+    char* why = nullptr;
+    PeReauthorized done = pe_account_reauthorize(core, account, request, &why);
+    core::String reason(why);
+    // signed in (the core syncs it), or to another address, which the bar over the list says with Try Again
+    if (done != PE_REAUTHORIZED_FAILED) {
+        return done == PE_REAUTHORIZED_SIGNED_IN;
+    }
+    std::wstring refused = core::T(PE_TEXT_UI_SIGN_IN_AGAIN_FAILED,
+                                   {{"reason", reason ? Text(reason.get()) : core::T(PE_TEXT_UI_UNKNOWN_REASON)}});
+    MessageBoxApp(owner, refused.c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
+    return false;
 }
 
 namespace {
@@ -819,10 +849,35 @@ int64_t NewAccountDialog(HWND owner, PeCore* core) {
     return 0;
 }
 
-bool PasswordDialog(HWND owner, const std::wstring& account, std::wstring& password) {
+namespace {
+
+// a note under a form's fields, in the words of the core, wrapped to the form's width
+// a warning note under a form's fields (WarningNote), the form's width less its margins
+class NotePart : public FormPart {
+public:
+    explicit NotePart(std::wstring text) : text_(std::move(text)) {}
+    int Height(int width) const override {
+        int icon = GetSystemMetrics(SM_CXSMICON);
+        int words = static_cast<int>(MeasureText(text_, width - 2 * Scale(10) - icon - Scale(6)).cy);
+        return std::max(icon, words) + Scale(4);
+    }
+    void Create(HWND form, const RECT& area) override { WarningNote(form, 0, text_, area.left, area.top + Scale(2), area.right); }
+    void Command(HWND, int, int) override {}
+    void Accept(HWND) override {}
+
+private:
+    std::wstring text_;
+};
+
+}  // namespace
+
+bool PasswordDialog(HWND owner, const std::wstring& account, const std::wstring& hint, std::wstring& password) {
     std::vector<FormField> fields = {{core::T(PE_TEXT_UI_FIELD_PASSWORD), L"", FormField::Kind::Password}};
     std::wstring intro = core::T(PE_TEXT_UI_ENTER_PASSWORD, {{"account", account}});
-    if (!FormDialog(owner, core::Plain(PE_TEXT_UI_LOGON), intro, fields)) {
+    // asked again after the server refused it: a provider that wants an app password for mail programs refuses the
+    // usual one, which the note under the field says
+    NotePart note(hint);
+    if (!FormDialog(owner, core::Plain(PE_TEXT_UI_LOGON), intro, fields, nullptr, nullptr, 0, hint.empty() ? nullptr : &note)) {
         return false;
     }
     password = fields[0].value;
@@ -873,6 +928,59 @@ void FillAccounts(AccountsState* state, int select = 0) {
 }
 
 
+// under the fields of an account that signs in through the browser: Sign In Again, for when the provider stopped
+// taking its sign-in (with what its state is then beside it), over the Security part
+class SignInAgainPart : public FormPart {
+public:
+    SignInAgainPart(PeCore* core, int64_t account, std::wstring email, FormPart& inner)
+        : core_(core), account_(account), email_(std::move(email)), inner_(inner) {}
+
+    int Height(int width) const override { return Scale(25) + Scale(6) + inner_.Height(width); }
+
+    void Create(HWND form, const RECT& area) override {
+        std::wstring label = core::T(PE_TEXT_ACCOUNT_STATE_BUTTON_SIGN_IN);
+        int buttonWidth = ButtonWidth({label});
+        CreateChild(form, L"BUTTON", label.c_str(), WS_TABSTOP, IDC_ACCOUNT_SIGN_IN_AGAIN,
+                    {area.right - buttonWidth, area.top, area.right, area.top + Scale(25)});
+        CreateChild(form, L"STATIC", L"", SS_LEFT | SS_NOPREFIX | SS_ENDELLIPSIS, IDC_ACCOUNT_SIGN_IN_STATE,
+                    {area.left, area.top + Scale(5), area.right - buttonWidth - Scale(8), area.top + Scale(22)});
+        ShowState(form);
+        inner_.Create(form, {area.left, area.top + Scale(25) + Scale(6), area.right, area.bottom});
+    }
+
+    void Command(HWND form, int id, int code) override {
+        if (id != IDC_ACCOUNT_SIGN_IN_AGAIN) {
+            inner_.Command(form, id, code);
+            return;
+        }
+        if (code == BN_CLICKED) {
+            // signed in: nothing more to say, while the sync that follows confirms it
+            if (SignInAgainInBrowser(form, core_, account_, email_)) {
+                SetWindowTextW(GetDlgItem(form, IDC_ACCOUNT_SIGN_IN_STATE), L"");
+                EnableWindow(GetDlgItem(form, IDC_ACCOUNT_SIGN_IN_AGAIN), FALSE);
+            } else {
+                ShowState(form);
+            }
+        }
+    }
+
+    void Accept(HWND form) override { inner_.Accept(form); }
+
+private:
+    // the tooltip of its mark in the folder list while it is not connected, else nothing; the button on while it
+    // needs a sign-in the user can give
+    void ShowState(HWND form) const {
+        core::AccountStatus status(core_, account_);
+        SetWindowTextW(GetDlgItem(form, IDC_ACCOUNT_SIGN_IN_STATE), Text(status->tooltip).c_str());
+        EnableWindow(GetDlgItem(form, IDC_ACCOUNT_SIGN_IN_AGAIN), status->can_sign_in_again);
+    }
+
+    PeCore* core_;
+    int64_t account_;
+    std::wstring email_;
+    FormPart& inner_;
+};
+
 // the settings of an account, changed: the server form for a password account, the name for one that signs in
 // through the browser (its servers are the sign-in's); a password typed in replaces the kept one
 bool AccountProperties(HWND owner, PeCore* core, int64_t account) {
@@ -921,7 +1029,8 @@ bool AccountProperties(HWND owner, PeCore* core, int64_t account) {
         // provider's
         std::vector<FormField> names = {fields[ACCOUNT_NAME], fields[NAME], fields[OTHER_ADDRESSES], fields[VERIFIERS]};
         std::wstring intro = core::T(PE_TEXT_UI_SIGNS_IN_WITH, {{"app", signsInWith}});
-        while (FormDialog(owner, title, intro, names, nullptr, nullptr, 0, keyPart.get())) {
+        SignInAgainPart part(core, account, Text(stored->email), *keyPart);
+        while (FormDialog(owner, title, intro, names, nullptr, nullptr, 0, &part)) {
             if (!SaveField(owner, core, account, names[2].value, pe_set_account_addresses) ||
                 !SaveField(owner, core, account, names[3].value, pe_set_account_verifiers)) {
                 continue;

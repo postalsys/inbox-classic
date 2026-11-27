@@ -35,3 +35,7 @@
 81 BITMAP "toolbar/secure-neutral-20.bmp"
 82 BITMAP "toolbar/secure-neutral-24.bmp"
 83 BITMAP "toolbar/secure-neutral-32.bmp"
+100 BITMAP "toolbar/marks-16.bmp"
+101 BITMAP "toolbar/marks-20.bmp"
+102 BITMAP "toolbar/marks-24.bmp"
+103 BITMAP "toolbar/marks-32.bmp"
