@@ -24,6 +24,8 @@ pub(crate) struct Reads {
     opened: Requests<std::result::Result<Option<Opened>, String>>,
     /// Selected messages in numbers
     summaries: Requests<Option<crate::Summary>>,
+    /// The messages of rows selected, with their numbers
+    selections: Requests<Option<(Vec<pe_store::MessageRef>, crate::Summary)>>,
 }
 
 impl Core {
@@ -91,6 +93,26 @@ impl Core {
         self.start_read(|reads| &reads.summaries, move |core| core.summary_of(&selected).ok())
     }
 
+    /// The messages at the rows `ranges` of the list `view` reads ([`ListView::refs_in_ranges`], from the list as it is
+    /// now) and their [`Core::summary`], off the window thread, for a selection too large to list and count at each
+    /// key that extends it: [`Event::ReadDone`] follows, then [`Core::selection_result`]
+    pub fn selection_start(self: &Arc<Self>, view: &crate::ListView, ranges: Vec<(u64, u64)>) -> Result<u64> {
+        let view = view.clone();
+        self.start_read(
+            |reads| &reads.selections,
+            move |core| {
+                let refs = view.refs_in_ranges(core, &ranges).ok()?;
+                let summary = core.summary(&refs).ok()?;
+                Some((refs, summary))
+            },
+        )
+    }
+
+    /// The messages and numbers a [`Core::selection_start`] read, once
+    pub fn selection_result(&self, request: u64) -> Option<(Vec<pe_store::MessageRef>, crate::Summary)> {
+        self.reads.selections.take(request).flatten()
+    }
+
     /// The numbers a [`Core::summary_start`] counted, once
     pub fn summary_result(&self, request: u64) -> Option<crate::Summary> {
         self.reads.summaries.take(request).flatten()
@@ -122,6 +144,7 @@ impl Core {
         self.reads.attachments.cancel(request);
         self.reads.opened.cancel(request);
         self.reads.summaries.cancel(request);
+        self.reads.selections.cancel(request);
     }
 }
 
@@ -173,14 +196,21 @@ the notes\r\n--b--\r\n";
             count: 2,
         };
         let counted = core.summary_start(all.clone()).unwrap();
+        let rows = core.selection_start(&list, vec![(0, 2)]).unwrap();
         assert!(asked.elapsed() < Duration::from_millis(100));
         std::thread::sleep(Duration::from_millis(100));
         assert!(events.try_recv().is_err(), "nothing read while the connection is held");
         drop(held);
-        let mut seen: Vec<u64> = (0..7).map(|_| done(&events)).collect();
+        let mut seen: Vec<u64> = (0..8).map(|_| done(&events)).collect();
         seen.sort();
-        assert_eq!(seen, [view, reply, reopened, data, file, missing, counted]);
+        assert_eq!(seen, [view, reply, reopened, data, file, missing, counted, rows]);
         assert_eq!(core.summary_result(counted), Some(core.summary_of(&all).unwrap()));
+        let refs = list.refs_in_ranges(&core, &[(0, 2)]).unwrap();
+        assert_eq!(refs.len(), 2);
+        assert_eq!(
+            core.selection_result(rows),
+            Some((refs.clone(), core.summary(&refs).unwrap()))
+        );
 
         let built = core.message_view_result(view).unwrap();
         let here = core.message_view(inbox, 1, false).unwrap().unwrap();

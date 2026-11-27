@@ -6,7 +6,7 @@
 //! it.
 
 use std::cell::{Cell, RefCell};
-use std::collections::HashSet;
+use std::collections::{BTreeSet, HashSet};
 use std::rc::Rc;
 
 use gtk::prelude::*;
@@ -15,12 +15,15 @@ use gtk::{gdk, gio, glib};
 use pe_store::{Message, MessageRef, Sort, SortField};
 
 use crate::app::shell;
+use crate::list_selection::{MessageSelection, Ranges};
 use crate::ui::set_class;
 
 /// The rows of a page, as the core's list loads read them
 const PAGE: u32 = pe_core::LIST_PAGE as u32;
 /// Pages kept while the list scrolls, the least recently used dropped first
 const PAGES_KEPT: usize = 8;
+/// The pages of rows GTK keeps out of sight remembered ([`MessageModel::hold`]): its focus and its anchor, with room
+const HELD: usize = 4;
 
 /// The widths the Subject and Folder columns start with; the Subject column takes what the others leave, so in a
 /// wide window it is wider
@@ -68,6 +71,12 @@ mod imp {
         pub ask: RefCell<Option<AskPage>>,
         /// Whether the page at an offset is on screen or next to it; None: every page wanted is asked for
         pub in_sight: RefCell<Option<InSight>>,
+        /// The offsets of the pages whose rows GTK was given since the list was last read (blank ones too): of
+        /// those, the ones it can still hold are told as changed when the list is read again
+        pub served: RefCell<BTreeSet<u32>>,
+        /// The offsets of the pages of the rows GTK keeps whether they are in sight or not: those last clicked or
+        /// given the focus (its selection's anchor and its focus), the newest last
+        pub held: RefCell<Vec<u32>>,
     }
 
     #[glib::object_subclass]
@@ -98,6 +107,7 @@ mod imp {
                 return None;
             }
             let offset = position / PAGE * PAGE;
+            self.served.borrow_mut().insert(offset);
             {
                 let mut pages = self.pages.borrow_mut();
                 if let Some(index) = pages.iter().position(|(at, _)| *at == offset) {
@@ -177,11 +187,16 @@ glib::wrapper! {
 }
 
 impl MessageModel {
-    /// Lists `total` rows of its view, `read` the page of them read already (its offset and rows)
-    fn reset(&self, total: u64, read: Option<(u64, Vec<Message>)>) {
+    /// Lists `total` rows of its view, `read` the page of them read already (its offset and rows). Never told as a
+    /// change of the whole list, for which GTK reads every row on the window thread (a second for a folder of 200,000
+    /// messages, once for each list view): the same list read again (`same_list`) tells only the rows GTK was given
+    /// and the change in length at its end; another list is every row removed, then the new ones added, of which GTK
+    /// reads only those it draws.
+    fn reset(&self, total: u64, read: Option<(u64, Vec<Message>)>, same_list: bool) {
         let imp = self.imp();
         let before = imp.total.get();
         let mut pages = imp.pages.borrow_mut();
+        let cached: Vec<u32> = pages.iter().map(|(at, _)| *at).collect();
         pages.clear();
         imp.asked.borrow_mut().clear();
         imp.wanted.borrow_mut().clear();
@@ -192,8 +207,52 @@ impl MessageModel {
         }
         drop(pages);
         let now = u32::try_from(total).unwrap_or(u32::MAX);
+        // the rows GTK reads while it is told fill the pages served anew
+        let served = std::mem::take(&mut *imp.served.borrow_mut());
+        // after each change told, the list is as long as that change leaves it: GTK reads it then
+        if !same_list {
+            // another list's rows: none of them is GTK's focus yet
+            imp.held.borrow_mut().clear();
+            if before > 0 {
+                imp.total.set(0);
+                self.items_changed(0, before, 0);
+            }
+            imp.total.set(now);
+            if now > 0 {
+                self.items_changed(0, 0, now);
+            }
+            return;
+        }
+        // of the rows GTK was given, those it can still hold: on screen or next to it, its focus and anchor, and the
+        // pages kept (a long scroll gave it far more, long dropped); a few spans whatever the scroll
+        let in_sight = imp.in_sight.borrow().clone();
+        let held = imp.held.borrow().clone();
+        let holds = |offset: &u32| {
+            held.contains(offset)
+                || cached.contains(offset)
+                || in_sight.as_ref().is_none_or(|in_sight| in_sight(*offset))
+        };
+        let served: BTreeSet<u32> = served.into_iter().filter(holds).collect();
+        for (start, count) in served_spans(&served, before.min(now)) {
+            self.items_changed(start, count, count);
+        }
         imp.total.set(now);
-        self.items_changed(0, before, now);
+        if now > before {
+            self.items_changed(before, 0, now - before);
+        } else if now < before {
+            self.items_changed(now, before - now, 0);
+        }
+    }
+
+    /// The row `position` kept by GTK out of sight too (clicked, or given the focus)
+    pub fn hold(&self, position: u32) {
+        let offset = position / PAGE * PAGE;
+        let mut held = self.imp().held.borrow_mut();
+        held.retain(|at| *at != offset);
+        if held.len() >= HELD {
+            held.remove(0);
+        }
+        held.push(offset);
     }
 
     /// The pages of the rows `first` to `last` (those on screen) asked for when they are neither here nor asked for:
@@ -256,8 +315,10 @@ pub struct MessageList {
     /// The two, one of them shown, the Columns one under its Sorted by button
     pub widget: gtk::Stack,
     sort_button: gtk::MenuButton,
-    pub selection: gtk::MultiSelection,
+    pub selection: MessageSelection,
     model: MessageModel,
+    /// The view of the list drawn: a reset of another list ([`pe_core::ListView::same_rows`]) starts it anew
+    listed: RefCell<Option<pe_core::ListView>>,
     pub columns: Columns,
     /// The sort being set from here (not by a click on a header)
     sorting: Cell<bool>,
@@ -281,7 +342,7 @@ pub struct MessageList {
 impl MessageList {
     pub fn new() -> Rc<MessageList> {
         let model: MessageModel = glib::Object::new();
-        let selection = gtk::MultiSelection::new(Some(model.clone()));
+        let selection = MessageSelection::new(&model);
         let view = gtk::ColumnView::new(Some(selection.clone()));
         view.add_css_class("message-list");
         view.set_widget_name("message-list");
@@ -336,7 +397,8 @@ impl MessageList {
             clock: clock.clone(),
             pictures: pictures.clone(),
         };
-        let rows_view = gtk::ListView::new(Some(selection.clone()), Some(crate::rows::factory(context)));
+        // the hidden one has no rows, so it reads none (set_columns gives them to the one shown)
+        let rows_view = gtk::ListView::new(None::<gtk::SelectionModel>, Some(crate::rows::factory(context)));
         rows_view.add_css_class("message-list");
         rows_view.add_css_class("message-rows");
         rows_view.set_widget_name("message-rows");
@@ -353,6 +415,7 @@ impl MessageList {
             sort_button,
             selection,
             model,
+            listed: RefCell::new(None),
             columns: Columns {
                 folder,
                 from,
@@ -376,8 +439,17 @@ impl MessageList {
         self.pictures.set(on);
     }
 
-    /// The Columns layout's list (`on`), or the Classic one
+    /// The Columns layout's list (`on`), or the Classic one: the rows and the selection the one shown's, the other
+    /// without them
     pub fn set_columns(&self, on: bool) {
+        let none = None::<gtk::SelectionModel>;
+        if on {
+            self.view.set_model(none.as_ref());
+            self.rows_view.set_model(Some(&self.selection));
+        } else {
+            self.rows_view.set_model(none.as_ref());
+            self.view.set_model(Some(&self.selection));
+        }
         self.widget
             .set_visible_child_name(if on { "columns" } else { "classic" });
     }
@@ -411,6 +483,9 @@ impl MessageList {
         // a row past the end (a place asked for before the list became shorter) is no place: GTK would refuse it
         if index >= self.model.n_items() {
             return;
+        }
+        if flags.contains(gtk::ListScrollFlags::FOCUS) {
+            self.model.hold(index);
         }
         if self.columns_shown() {
             self.rows_view.scroll_to(index, flags, None);
@@ -663,7 +738,14 @@ impl MessageList {
         reveal: bool,
     ) {
         self.clock.set(crate::rows::Clock::now());
-        self.model.reset(total, read);
+        let view = self.view().clone();
+        let same_list = self
+            .listed
+            .borrow()
+            .as_ref()
+            .is_some_and(|drawn| drawn.same_rows(&view));
+        *self.listed.borrow_mut() = Some(view);
+        self.model.reset(total, read, same_list);
         self.select_positions(select);
         // another list starts at its top (GTK keeps the place it had), unless a selection is shown
         if !same && select.is_empty() && self.model.n_items() > 0 {
@@ -709,12 +791,11 @@ impl MessageList {
                 return;
             };
             // nothing to do when the selection changed meanwhile (a click scrolls to its row itself)
-            let selected = list.selection.selection();
-            if rows == 0
-                || first >= rows
-                || selected.is_empty()
-                || (selected.minimum(), selected.maximum()) != (first, last)
-            {
+            let ends = {
+                let selected = list.selection.ranges();
+                (selected.first(), selected.last())
+            };
+            if rows == 0 || first >= rows || ends != (Some(first), Some(last)) {
                 return;
             }
             let Some(adjustment) = list.adjustment() else {
@@ -777,18 +858,20 @@ impl MessageList {
 
     /// Whether every selected row is in sight
     pub fn selection_in_sight(&self) -> bool {
-        let selected = self.selection.selection();
         let rows = self.model.n_items();
-        if selected.is_empty() || rows == 0 {
+        // nothing selected also when the list is empty
+        let (Some(first), Some(last)) = ({
+            let selected = self.selection.ranges();
+            (selected.first(), selected.last())
+        }) else {
             return false;
-        }
+        };
         let Some(adjustment) = self.adjustment() else {
             return true;
         };
         let row = adjustment.upper() / f64::from(rows);
         let top = adjustment.value();
-        f64::from(selected.minimum()) * row >= top - 0.5
-            && f64::from(selected.maximum() + 1) * row <= top + adjustment.page_size() + 0.5
+        f64::from(first) * row >= top - 0.5 && f64::from(last + 1) * row <= top + adjustment.page_size() + 0.5
     }
 
     /// The messages of the first `limit` rows as the list shows them now, for the e2e driver
@@ -802,43 +885,32 @@ impl MessageList {
 
     /// How many rows are selected
     pub fn selected_count(&self) -> u64 {
-        self.selection.selection().size()
+        self.selection.ranges().size()
     }
 
     /// The one selected row and its position; None when none or several are
     pub fn selected(&self) -> Option<(u32, Message)> {
-        let selected = self.selection.selection();
-        if selected.size() != 1 {
-            return None;
-        }
-        let position = selected.minimum();
+        let position = {
+            let selected = self.selection.ranges();
+            selected.first().filter(|_| selected.size() == 1)?
+        };
         let row = self.model.item(position).and_downcast::<MessageRow>()?;
         Some((position, row.with(Message::clone)?))
     }
 
     /// The selected positions as ranges, start included and end not, ascending
     pub fn selected_ranges(&self) -> Vec<(u64, u64)> {
-        let selected = self.selection.selection();
-        let mut ranges: Vec<(u64, u64)> = Vec::new();
-        let Some((mut iter, first)) = gtk::BitsetIter::init_first(&selected) else {
-            return ranges;
-        };
-        let mut at = Some(first);
-        while let Some(position) = at {
-            let position = u64::from(position);
-            match ranges.last_mut() {
-                Some((_, end)) if *end == position => *end += 1,
-                _ => ranges.push((position, position + 1)),
-            }
-            at = iter.next();
-        }
-        ranges
+        self.selection
+            .ranges()
+            .spans()
+            .iter()
+            .map(|&(start, end)| (u64::from(start), u64::from(end)))
+            .collect()
     }
 
     /// The last selected position
     pub fn last_selected(&self) -> Option<u32> {
-        let selected = self.selection.selection();
-        (!selected.is_empty()).then(|| selected.maximum())
+        self.selection.ranges().last()
     }
 
     /// Whether the row at `position` is selected
@@ -849,16 +921,15 @@ impl MessageList {
     /// Selects only the rows at `positions`
     pub fn select_positions(&self, positions: &[u64]) {
         let rows = self.model.n_items();
-        let wanted = gtk::Bitset::new_empty();
+        let mut wanted = Ranges::default();
         for position in positions {
             if let Ok(position) = u32::try_from(*position)
                 && position < rows
             {
-                wanted.add(position);
+                wanted.add(position, position + 1);
             }
         }
-        let all = gtk::Bitset::new_range(0, rows);
-        self.selection.set_selection(&wanted, &all);
+        self.selection.set_ranges(wanted);
     }
 
     /// Selects only the row `index`, scrolled to and with the focus
@@ -916,25 +987,43 @@ fn in_sight(model: &MessageModel, stack: &gtk::Stack, view: &gtk::ColumnView, ro
     })
 }
 
-/// A page of `model` read at `offset` drawn with the selection kept. A row selected while it was blank (clicked before
-/// its page came) is told as changed once it has its message: setting the same selection again tells nothing, and
-/// the window would never open the message it shows selected
-fn fill_keeping_selection(selection: &gtk::MultiSelection, model: &MessageModel, offset: u64, rows: Vec<Message>) {
-    let selected = selection.selection().copy();
+/// A page of `model` read at `offset` drawn with the selection kept (its rows change in place, which the selection
+/// keeps). The one row selected, when it was blank (clicked before its page came), is told as changed once it has
+/// its message: the selection itself did not change, and the window would never open the message it shows selected.
+/// Several selected are not told: they name no message to open, and the window would list and count them all again
+/// for each page scrolled to (after Select All, every message of the list).
+fn fill_keeping_selection(selection: &MessageSelection, model: &MessageModel, offset: u64, rows: Vec<Message>) {
     let Some((start, count)) = model.fill(offset, rows) else {
         return;
     };
-    selection.set_selection(&selected, &gtk::Bitset::new_range(start, count));
-    if let Some((position, n)) = selected_among(|row| selected.contains(row), start, count) {
-        selection.selection_changed(position, n);
+    // the selection let go of before it is told: what hears it may select
+    let told = told_on_fill(&selection.ranges(), start, count);
+    if let Some(row) = told {
+        selection.selection_changed(row, 1);
     }
 }
 
-/// The span of the selected rows among `count` rows from `start` (position, how many); None when none is
-fn selected_among(selected: impl Fn(u32) -> bool, start: u32, count: u32) -> Option<(u32, u32)> {
-    let first = (start..start + count).find(|&row| selected(row))?;
-    let last = (start..start + count).rev().find(|&row| selected(row))?;
-    Some((first, last - first + 1))
+/// The row a page of `count` rows from `start` tells as changed when it is drawn: the one row selected, when it is
+/// among them
+fn told_on_fill(selected: &Ranges, start: u32, count: u32) -> Option<u32> {
+    (selected.size() == 1)
+        .then(|| selected.first())
+        .flatten()
+        .filter(|row| (start..start + count).contains(row))
+}
+
+/// The rows of the pages at `offsets` (ascending) before row `rows`, as spans (position, how many), pages next to each
+/// other in one span
+fn served_spans(offsets: &BTreeSet<u32>, rows: u32) -> Vec<(u32, u32)> {
+    let mut spans: Vec<(u32, u32)> = Vec::new();
+    for &offset in offsets.iter().take_while(|&&offset| offset < rows) {
+        let count = PAGE.min(rows - offset);
+        match spans.last_mut() {
+            Some((start, n)) if *start + *n == offset => *n += count,
+            _ => spans.push((offset, count)),
+        }
+    }
+    spans
 }
 
 /// Whenever either list's scrolling changes (scrolled, or its length changed with the rows), the pages on screen not
@@ -1485,7 +1574,7 @@ mod tests {
             into.borrow_mut().push(offset);
             true
         }));
-        model.reset(total, Some((0, page(0))));
+        model.reset(total, Some((0, page(0))), false);
         (model, asked)
     }
 
@@ -1574,15 +1663,17 @@ mod tests {
         });
     }
 
-    /// A row clicked while it was blank opens once its page comes: the rows selected among those a page fills are told
-    /// as changed then
+    /// A row clicked while it was blank opens once its page comes: the one row selected is told as changed then;
+    /// several selected (Select All) are not, so a page scrolled to never lists and counts them all again
     #[test]
     fn a_row_selected_blank_is_told_when_its_page_comes() {
-        let one = |row| row == 1625 || row == 3000;
-        assert_eq!(super::selected_among(one, 1600, 100), Some((1625, 1)));
-        assert_eq!(super::selected_among(one, 0, 100), None);
-        let more = |row| row == 1625 || (1690..1710).contains(&row);
-        assert_eq!(super::selected_among(more, 1600, 100), Some((1625, 75)));
+        let mut one = Ranges::default();
+        one.select(1625, 1, true);
+        assert_eq!(told_on_fill(&one, 1600, 100), Some(1625));
+        assert_eq!(told_on_fill(&one, 0, 100), None);
+        let mut all = Ranges::default();
+        all.select(0, 200_000, true);
+        assert_eq!(told_on_fill(&all, 1600, 100), None);
     }
 
     /// GTK reads every row when the whole list changes: the first page stays, and only the pages on screen or next to
@@ -1621,6 +1712,110 @@ mod tests {
             assert!(asked.borrow().contains(&200), "asked for now ({:?})", asked.borrow());
             answer(&model, &asked);
             assert_eq!(uid(&model, 250), Some(251));
+        });
+    }
+
+    /// The changes `model` tells, as (position, removed, added), each with the list as long as it leaves it (GTK
+    /// reads the length then, and crashes on a list longer or shorter than its changes say)
+    fn changes(model: &MessageModel) -> Rc<RefCell<Vec<(u32, u32, u32)>>> {
+        let told: Rc<RefCell<Vec<(u32, u32, u32)>>> = Rc::default();
+        let into = told.clone();
+        let length = Rc::new(Cell::new(model.n_items()));
+        model.connect_items_changed(move |model, position, removed, added| {
+            let expected = length.get() - removed + added;
+            assert_eq!(
+                model.n_items(),
+                expected,
+                "the length after ({position}, {removed}, {added})"
+            );
+            length.set(expected);
+            into.borrow_mut().push((position, removed, added));
+        });
+        told
+    }
+
+    /// A folder of 200,000 messages read again (a message read, a sync) is never told as a change of the whole list,
+    /// for which GTK reads every row: only the pages GTK was given and the rows that came at the end; another list is
+    /// every row removed and the new ones added, of which GTK reads only those it draws
+    #[test]
+    fn a_list_read_again_tells_only_the_rows_drawn() {
+        with_context(|| {
+            let (model, _) = model(200_000, Rc::default());
+            for position in (0..30).chain(5_020..5_050).chain(5_090..5_110) {
+                let _ = model.item(position);
+            }
+            idle();
+            let told = changes(&model);
+            model.reset(200_003, Some((0, page(0))), true);
+            assert_eq!(
+                *told.take(),
+                vec![(0, 100, 100), (5_000, 200, 200), (200_000, 0, 3)],
+                "the pages drawn, then three new rows"
+            );
+            assert_eq!(uid(&model, 5), Some(6));
+            model.reset(150_000, None, true);
+            assert_eq!(
+                *told.take(),
+                vec![(0, 100, 100), (150_000, 50_003, 0)],
+                "the page drawn since, then the rows that went"
+            );
+            model.reset(9_000, Some((0, page(0))), false);
+            assert_eq!(*told.take(), vec![(0, 150_000, 0), (0, 0, 9_000)], "another list");
+            assert_eq!(model.n_items(), 9_000);
+        });
+    }
+
+    /// After a long scroll (or a drag of the scroll bar over the whole list) GTK was given rows of hundreds of pages
+    /// and holds only those on screen, its focus and anchor: a reload tells those, a few spans, never most of the
+    /// list
+    #[test]
+    fn a_reload_after_a_long_scroll_tells_only_what_gtk_holds() {
+        with_context(|| {
+            let (model, _) = model(200_000, Rc::default());
+            for position in (0..120_000).step_by(37) {
+                let _ = model.item(position);
+            }
+            // the pages wanted asked for on this thread, not left to the next test's
+            idle();
+            model.hold(30_005);
+            // scrolled to rows 119,950 to 119,990
+            *model.imp().in_sight.borrow_mut() = Some(Rc::new(|offset| (119_800..=120_000).contains(&offset)));
+            let told = changes(&model);
+            model.reset(200_000, Some((119_900, page(119_900))), true);
+            assert_eq!(
+                *told.take(),
+                vec![(0, 100, 100), (30_000, 100, 100), (119_800, 200, 200)]
+            );
+        });
+    }
+
+    /// The selection is row numbers, never the rows' objects, and follows the model's changes as the list's
+    /// selection does (MessageSelection, which needs GTK running): Select All of 200,000 rows reads none of them and
+    /// keeps through the list read again, the rows that came at its end not selected; a page drawn keeps the rows
+    /// selected on it; another list has none selected
+    #[test]
+    fn the_selection_follows_the_list_read_again() {
+        with_context(|| {
+            let (model, _) = model(200_000, Rc::default());
+            let selected = Rc::new(RefCell::new(Ranges::default()));
+            let follows = selected.clone();
+            model.connect_items_changed(move |_, position, removed, added| {
+                follows.borrow_mut().splice(position, removed, added);
+            });
+            selected.borrow_mut().select(0, model.n_items(), true);
+            assert!(model.imp().served.borrow().is_empty(), "no row read");
+            for position in 0..40 {
+                let _ = model.item(position);
+            }
+            idle();
+            model.reset(200_002, Some((0, page(0))), true);
+            assert_eq!(selected.borrow().spans(), [(0, 200_000)]);
+            selected.borrow_mut().select(150, 10, true);
+            model.fill(100, page(100));
+            assert_eq!(selected.borrow().spans(), [(150, 160)], "a page drawn");
+            assert_eq!(uid(&model, 150), Some(151));
+            model.reset(10, None, false);
+            assert!(selected.borrow().is_empty(), "another list: nothing selected");
         });
     }
 }

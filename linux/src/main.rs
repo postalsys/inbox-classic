@@ -26,6 +26,7 @@ mod hyprland;
 mod icons;
 mod keys;
 mod list_load;
+mod list_selection;
 mod mailbox;
 mod message_window;
 mod messages;

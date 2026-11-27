@@ -50,6 +50,29 @@ impl Order {
         }
     }
 
+    /// What a row's place is read from: its key and its ties, as columns ([`Order::cursor`] reads them)
+    pub fn columns(&self) -> String {
+        std::iter::once(self.key.as_str())
+            .chain(self.ties.iter().copied())
+            .collect::<Vec<_>>()
+            .join(", ")
+    }
+
+    /// How many columns [`Order::columns`] are: those a query selects after them start here
+    pub fn width(&self) -> usize {
+        1 + self.ties.len()
+    }
+
+    /// A row's place from the columns [`Order::columns`] selected first
+    pub fn cursor(&self, row: &rusqlite::Row) -> rusqlite::Result<Cursor> {
+        Ok(Cursor {
+            key: row.get(0)?,
+            ties: (1..self.width())
+                .map(|at| row.get(at))
+                .collect::<rusqlite::Result<_>>()?,
+        })
+    }
+
     /// What the rows are read in, walking away from a place: down the list (`after`) or up it
     pub fn walking(&self, after: bool) -> String {
         let direction = if after == self.ascending { "ASC" } else { "DESC" };
@@ -165,7 +188,98 @@ impl Rows {
     }
 }
 
+/// Up to this many rows are skipped on the order's index rather than the list's length asked for, to read from its end
+const NEAR: u64 = 1000;
+
+/// A list's length, asked for once, the first time it is needed (None: not kept, so not counted)
+struct Length<F> {
+    count: Option<F>,
+    length: Option<u64>,
+}
+
+impl<F: FnOnce() -> Result<Option<u64>>> Length<F> {
+    fn get(&mut self) -> Result<Option<u64>> {
+        if let Some(count) = self.count.take() {
+            self.length = count()?;
+        }
+        Ok(self.length)
+    }
+}
+
 impl Store {
+    /// The rows at the positions `ranges` (merged, ascending; start included, end not) of `rows` in `order`, read with
+    /// `read` from the columns `extra` (selected after the order's own, at the index it is given): each range walked
+    /// on the order's index from the nearest place known, the top, the last row of the range before it or the end
+    /// (when `length` says how long the list is, which it is asked once). Never every row of the list numbered to
+    /// find a few. More ranges than are worth reading one by one: the rows from the first one's start to the last
+    /// one's end, those the ranges hold kept.
+    pub(crate) fn rows_at<T>(
+        &self,
+        rows: &Rows,
+        order: &Order,
+        ranges: &[(u64, u64)],
+        length: impl FnOnce() -> Result<Option<u64>>,
+        extra: &str,
+        read: impl Fn(&rusqlite::Row, usize) -> rusqlite::Result<T>,
+    ) -> Result<Vec<T>> {
+        let (Some(&(first, _)), Some(&(_, last))) = (ranges.first(), ranges.last()) else {
+            return Ok(Vec::new());
+        };
+        let many = ranges.len() > crate::selection::FEW_RANGES;
+        let hull = [(first, last)];
+        let spans = if many { &hull[..] } else { ranges };
+        let columns = format!("{}, {extra}", order.columns());
+        let mut length = Length {
+            count: Some(length),
+            length: None,
+        };
+        // the last row read: its position and its place in the order
+        let mut known: Option<(u64, Cursor)> = None;
+        let mut found = Vec::new();
+        for &(start, end) in spans {
+            // down from the last row read, or from the top (a walk without a place)
+            let mut walk = Walk {
+                cursor: known.as_ref().map(|(_, cursor)| cursor.clone()),
+                after: true,
+                skip: known.as_ref().map_or(start, |(at, _)| start - at - 1),
+                limit: end - start,
+            };
+            // or up from the end when that is nearer
+            if walk.skip > NEAR
+                && let Some(total) = length.get()?
+            {
+                if start >= total {
+                    break;
+                }
+                if total - end.min(total) < walk.skip
+                    && let Some(from_end) = Walk::from(Anchor::End(total), start, end - start, |_| Ok(None))?
+                {
+                    walk = from_end;
+                }
+            }
+            let read: Vec<(Cursor, T)> = self.walk(rows, order, &walk, &columns, |row| {
+                Ok((order.cursor(row)?, read(row, order.width())?))
+            })?;
+            let Some((last, _)) = read.last() else {
+                break;
+            };
+            known = Some((start + read.len() as u64 - 1, last.clone()));
+            let short = (read.len() as u64) < walk.limit;
+            found.extend(read.into_iter().map(|(_, row)| row));
+            if short {
+                break;
+            }
+        }
+        if many {
+            return Ok((first..)
+                .zip(found)
+                .filter(|(position, _)| crate::selection::holds(ranges, *position))
+                .map(|(_, row)| row)
+                .collect());
+        }
+        Ok(found)
+    }
+
     /// How many rows of `rows` are above `place` in `order`: each range counted on the index
     pub(crate) fn count_before(&self, rows: &Rows, order: &Order, place: &Cursor) -> Result<u64> {
         let mut count = 0;

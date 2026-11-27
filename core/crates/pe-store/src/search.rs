@@ -196,7 +196,7 @@ pub(crate) fn walks_index(sort: Sort) -> bool {
 
 /// The messages `search` finds, one row each, as keyset.rs reads them (`in_order` as for a page, see
 /// [`Search::condition`])
-fn message_rows(search: &Search, in_order: bool) -> Rows {
+pub(crate) fn message_rows(search: &Search, in_order: bool) -> Rows {
     let (condition, values) = search.condition(in_order);
     Rows {
         with: String::new(),
@@ -208,9 +208,14 @@ fn message_rows(search: &Search, in_order: bool) -> Rows {
 
 /// The message of a row of `folder_id, uid`
 fn message_ref(row: &rusqlite::Row) -> rusqlite::Result<MessageRef> {
+    message_ref_at(row, 0)
+}
+
+/// The message of a row with `folder_id, uid` from its column `at`
+pub(crate) fn message_ref_at(row: &rusqlite::Row, at: usize) -> rusqlite::Result<MessageRef> {
     Ok(MessageRef {
-        folder: row.get(0)?,
-        uid: row.get::<_, i64>(1)? as u64,
+        folder: row.get(at)?,
+        uid: row.get::<_, i64>(at + 1)? as u64,
     })
 }
 
@@ -598,19 +603,15 @@ impl Store {
         let at = values.len();
         values.push(Value::Integer(folder));
         values.push(Value::Integer(uid as i64));
+        let order = Order::messages(sort);
         let mut statement = self.db.prepare_cached(&format!(
-            "SELECT {}, uid, id FROM messages WHERE folder_id = ?{} AND uid = ?{} AND {condition}",
-            crate::messages::sort_key(sort.field),
+            "SELECT {} FROM messages WHERE folder_id = ?{} AND uid = ?{} AND {condition}",
+            order.columns(),
             at + 1,
             at + 2
         ))?;
         statement
-            .query_row(params_from_iter(values), |row| {
-                Ok(Cursor {
-                    key: row.get(0)?,
-                    ties: vec![row.get(1)?, row.get(2)?],
-                })
-            })
+            .query_row(params_from_iter(values), |row| order.cursor(row))
             .optional()
     }
 

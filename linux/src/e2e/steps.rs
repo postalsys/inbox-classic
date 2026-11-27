@@ -1261,6 +1261,30 @@ pub async fn several_messages(d: &Driver) {
             rows()
         ),
     );
+    // the list read again while every row is selected (a message of it marked read elsewhere): every row stays
+    // selected, the selection's own row numbers, which a reload walks no row object for
+    let first = main.list_view().rows(core, 0, 1).unwrap_or_default();
+    if let Some(m) = first.first() {
+        let seen = m.info.seen();
+        // the status bar counts the list's messages (a grouped list has fewer rows) and the rows selected
+        let (messages, unread) = main.list_view().counts(core).unwrap_or_default();
+        let redrawn =
+            |unread: u64| main.status_texts().2 == pe_core::list_counts(messages, unread, u64::from(rows()), false);
+        let _ = core.set_seen(m.folder_id, m.info.uid, !seen);
+        let after = if seen { unread + 1 } else { unread.saturating_sub(1) };
+        let reloaded = wait_until(20, || redrawn(after) && !list_settling()).await;
+        d.check(
+            reloaded && main.list.selected_count() == u64::from(rows()),
+            &format!(
+                "the list read again keeps every row selected ({} of {}, {})",
+                main.list.selected_count(),
+                rows(),
+                main.status_texts().2
+            ),
+        );
+        let _ = core.set_seen(m.folder_id, m.info.uid, seen);
+        wait_until(20, || redrawn(unread) && !list_settling()).await;
+    }
     select_row(0).await;
     let shown = wait_until(10, || {
         main.reader.summary_shown().is_none() && !main.reader.header_text().starts_with(" |")
