@@ -1036,6 +1036,8 @@ public:
     void EditDraft(int64_t folder, uint64_t uid);
     // Next and Previous Message in Conversation, Open All and Fold All Messages: the conversation in the reading pane
     void ConversationCommand(WORD id);
+    // whether the reading pane shows a conversation (View's conversation commands act on it)
+    bool ShowsConversation() const;
     // Message > Watch Conversation (PE_ACTION_WATCH) and Ignore Conversation (PE_ACTION_IGNORE) on the selected
     // messages' conversations, or the mark taken away when all of them have it; the status bar says what was done
     void MarkConversations(PeAction action);

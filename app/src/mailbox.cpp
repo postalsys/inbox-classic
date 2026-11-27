@@ -979,6 +979,10 @@ void Mailbox::ConversationCommand(WORD id) {
     reader_.ConversationCommand(id);
 }
 
+bool Mailbox::ShowsConversation() const {
+    return reader_.ShowsConversation();
+}
+
 void Mailbox::OpenDraftRead(uint64_t request) {
     core::Draft draft(pe_draft_result(core_, request));
     if (!draft) {
