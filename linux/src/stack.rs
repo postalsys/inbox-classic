@@ -208,6 +208,9 @@ impl Stack {
             }
         }
         let conversation = view.conversation.is_some();
+        // a conversation's messages are cards on the window's gray, as GNOME's lists of cards; a message alone is on
+        // the page itself
+        ui::set_class(&self.widget, "view", !conversation);
         self.reset();
         // a message alone is always the same frame (its key 0, 0, as the core's alone() makes it), so the next one
         // loads into its web view
@@ -280,13 +283,19 @@ impl Stack {
             self.rows.borrow_mut().push((entry, row));
         }
         if start && let Some(frame) = self.selected_frame() {
-            // once laid out: the selected frame's top at the top, under the title when it is the first
+            // once laid out: the selected frame's top at the top
             let widget = self.widget.clone();
             let column = self.items.parent();
             glib::idle_add_local_once(move || {
                 if let Some(bounds) = column.and_then(|column| frame.widget.compute_bounds(&column)) {
                     let adjustment = widget.vadjustment();
-                    let top = f64::from(bounds.y()) - 8.0;
+                    // the title kept in view when the frame starts on the first screen
+                    let place = f64::from(bounds.y());
+                    let top = if place < adjustment.page_size() {
+                        0.0
+                    } else {
+                        place - 8.0
+                    };
                     adjustment.set_value(top.clamp(0.0, (adjustment.upper() - adjustment.page_size()).max(0.0)));
                 }
             });
@@ -563,6 +572,7 @@ struct Frame {
     widget: gtk::Box,
     found_in: gtk::Label,
     header: gtk::Box,
+    rule: gtk::Separator,
     arrow: gtk::Button,
     picture: RowPicture,
     name: gtk::Label,
@@ -626,7 +636,6 @@ impl Frame {
         let buttons = gtk::Box::new(gtk::Orientation::Horizontal, 2);
         buttons.set_valign(gtk::Align::Center);
         let header = gtk::Box::new(gtk::Orientation::Horizontal, 8);
-        header.add_css_class("frame-header");
         header.set_margin_start(4);
         header.set_margin_end(8);
         header.set_margin_top(6);
@@ -635,6 +644,11 @@ impl Frame {
         header.append(&picture.widget);
         header.append(&who);
         header.append(&buttons);
+        // the line between the header and what the message holds
+        let rule = gtk::Separator::new(gtk::Orientation::Horizontal);
+        rule.set_margin_start(12);
+        rule.set_margin_end(12);
+        rule.set_margin_bottom(6);
         let body_box = gtk::Box::new(gtk::Orientation::Vertical, 0);
         body_box.set_margin_start(4);
         body_box.set_margin_end(4);
@@ -646,6 +660,7 @@ impl Frame {
             widget,
             found_in,
             header,
+            rule,
             arrow,
             picture,
             name,
@@ -775,6 +790,7 @@ impl Frame {
             self.widget.append(&self.found_in);
         }
         self.widget.append(&self.header);
+        self.widget.append(&self.rule);
         self.widget.append(&self.body_box);
         if !entry.selected
             && let Some(view) = view.as_deref().filter(|v| !v.attachments.is_empty())
@@ -783,7 +799,9 @@ impl Frame {
             self.files.set_label(&format!("📎 {}", names.join(", ")));
             self.widget.append(&self.files);
         }
-        ui::set_class(&self.widget, "selected", entry.selected);
+        // a card in a conversation, the selected one faintly ringed in the accent; a message alone none
+        ui::set_class(&self.widget, "card", conversation);
+        ui::set_class(&self.widget, "selected", entry.selected && conversation);
         *self.entry.borrow_mut() = Some(entry);
         *self.view.borrow_mut() = view;
         // another document (the next message alone, its pictures now, built again): loaded into the web view there
@@ -825,8 +843,8 @@ impl Frame {
         self.buttons.prepend(clip);
         reactions.set_margin_start(50);
         self.widget.insert_child_after(reactions, Some(&self.header));
-        // its files under its header, before its body, as Tab reaches them
-        self.widget.insert_child_after(files, Some(reactions));
+        // its files under its header and the line under it, before its body, as Tab reaches them
+        self.widget.insert_child_after(files, Some(&self.rule));
     }
 
     /// The body made (near what is seen, or selected) or let go (far from it), its height kept

@@ -264,9 +264,10 @@ void Reader::Create(HWND parent, PeCore* core) {
     ShowWindow(reactions_, SW_HIDE);
     logo_ = CreateChild(parent, L"STATIC", L"", SS_OWNERDRAW, IDC_LOGO, {});
     ShowWindow(logo_, SW_HIDE);
-    // the paper clip at the right of the header, as Outlook Express has it: the files of the message in its menu
-    attachments_ = CreateBar(parent, CCS_NODIVIDER | CCS_NOPARENTALIGN | CCS_NORESIZE, IDC_ATTACHMENTS, BarIcons::Big);
-    // a label from the start, so the bar keeps a row for it under the icon ("2 files" once a message is shown)
+    // the paper clip at the right of the header, as Outlook Express has it: the files of the message in its menu, its
+    // label beside it, so it is no taller than the header's buttons
+    attachments_ = CreateBar(parent, CCS_NODIVIDER | CCS_NOPARENTALIGN | CCS_NORESIZE | TBSTYLE_LIST, IDC_ATTACHMENTS, BarIcons::Big);
+    // a label from the start, so the bar keeps room for it ("2 files" once a message is shown)
     AddButton(attachments_, IDC_ATTACHMENTS, core::T(PE_TEXT_WIN_FILES, {{"count", L"1"}}).c_str(), BTNS_WHOLEDROPDOWN, ICON_ATTACH);
     // the security bar of a signed or encrypted message, first under the header (and first for a screen reader, its
     // words its name), its Details button at its right end: Tab and Alt with its letter reach it

@@ -15,10 +15,12 @@
 namespace {
 
 constexpr wchar_t kClass[] = L"InboxClassicStack";
-// the geometry at 96 DPI: the margins, the room between the items, a row's height, a frame's header (without and with
-// the line saying where it is filed), the gap's row
+// the geometry at 96 DPI: the margins, the room between the items, the room inside a message of a conversation (where
+// the selected one's etched frame goes), a row's height, a frame's header (without and with the line saying where it is
+// filed), the gap's row
 constexpr int kMargin = 8;
 constexpr int kSpacing = 6;
+constexpr int kPad = 4;
 constexpr int kRow = 28;
 constexpr int kHeader = 44;
 constexpr int kFoundIn = 18;
@@ -29,6 +31,8 @@ constexpr int kFramePicture = 32;
 constexpr int kButtonHeight = 23;
 // a body before it was measured
 constexpr int kBodyDefault = 120;
+// a classic 3D edge (EDGE_SUNKEN, EDGE_ETCHED) is two pixels at any DPI
+constexpr int kEdge = 2;
 // the stack's own messages: the wheel the hook took (wParam the delta), a click the hook saw (lParam the window under
 // it), the layout for the heights measured in one tick; and the measuring timer
 constexpr UINT kWheel = WM_APP + 41;
@@ -101,7 +105,8 @@ void ConversationStack::Create(HWND parent, PeCore* core, Hooks hooks) {
         RegisterClassW(&type);
         registered = true;
     }
-    hwnd_ = CreateWindowExW(WS_EX_CONTROLPARENT, kClass, L"", WS_CHILD | WS_VSCROLL | WS_TABSTOP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, 0, 0,
+    // sunken, as the folder tree and the list beside it and Outlook Express's preview pane
+    hwnd_ = CreateWindowExW(WS_EX_CONTROLPARENT | WS_EX_CLIENTEDGE, kClass, L"", WS_CHILD | WS_VSCROLL | WS_TABSTOP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, 0, 0,
                             0, 0, parent, nullptr, GetModuleHandleW(nullptr), this);
     LOGFONTW font = {};
     GetObjectW(UiFont(), sizeof(font), &font);
@@ -223,8 +228,11 @@ void ConversationStack::Show(PeMessageView* view, bool pictures, bool start) {
     }
     Layout();
     if (start) {
+        // the selected message at the top; the title kept in view when the message starts on the first screen
         if (Frame* selected = SelectedFrame()) {
-            ScrollTo(selected->rect.top - Scale(kMargin));
+            RECT client;
+            GetClientRect(hwnd_, &client);
+            ScrollTo(selected->rect.top < client.bottom ? 0 : selected->rect.top - Scale(kMargin));
         }
     }
     Live();
@@ -281,7 +289,7 @@ int64_t ConversationStack::TestPreviews(const std::wstring& query) {
     if (!frame || !frame->body) {
         return -1;
     }
-    int bodyTop = frame->rect.top + frame->bodyTop;
+    int bodyTop = frame->bodyRect.top;
     if (query == L"scroll" || query.starts_with(L"scroll:")) {
         if (query.size() > 7) {
             ScrollTo(bodyTop + _wtoi(query.c_str() + 7));
@@ -310,11 +318,24 @@ Preview* ConversationStack::SelectedBody() {
     return frame ? frame->body.get() : nullptr;
 }
 
+int ConversationStack::PictureLeft(int boxLeft) const {
+    // in a conversation after the arrow, inside the room for the selected one's frame; alone at the margin, as the title
+    return conversation_ ? boxLeft + Scale(kPad + 4 + kArrow + 2) : Scale(kMargin);
+}
+
+int ConversationStack::HeaderRight(int boxRight) const {
+    return boxRight - (conversation_ ? Scale(kPad + 4) : Scale(kMargin));
+}
+
 void ConversationStack::Layout() {
     RECT client;
     GetClientRect(hwnd_, &client);
     int width = client.right - client.left;
-    int left = Scale(kMargin), inner = std::max(0, width - 2 * Scale(kMargin));
+    // a conversation's messages inside the margins; a message alone across the pane, as Outlook Express's preview: its
+    // header a gray band, its body under it from edge to edge
+    int left = conversation_ ? Scale(kMargin) : 0;
+    int inner = conversation_ ? std::max(0, width - 2 * Scale(kMargin)) : width;
+    int pad = conversation_ ? Scale(kPad) : 0;
     int y = Scale(kMargin);
     // the title: the subject, and under it how many messages and who wrote
     HDC dc = GetDC(hwnd_);
@@ -327,8 +348,10 @@ void ConversationStack::Layout() {
     SelectObject(dc, old);
     ReleaseDC(hwnd_, dc);
     titleHeight_ = titleLine + (summary_.empty() ? 0 : metrics.tmHeight + Scale(2));
-    y += titleHeight_ + Scale(kSpacing + 2);
-    for (const Item& item : items_) {
+    y += titleHeight_ + Scale(kSpacing);
+    int boxTop = y;
+    for (size_t i = 0; i < items_.size(); i++) {
+        const Item& item = items_[i];
         switch (item.kind) {
         case Item::GapItem: {
             Gap& gap = gaps_[item.place];
@@ -337,14 +360,15 @@ void ConversationStack::Layout() {
             break;
         }
         case Item::RowItem: {
+            // rows next to each other touch: one sunken white box, as a list, a line between them
             Row& row = rows_[item.place];
-            row.rect = {left, y, left + inner, y + Scale(kRow)};
-            // rows next to each other touch: one box, a line between them
-            y = row.rect.bottom;
-            bool nextIsRow = &item != &items_.back() && (&item + 1)->kind == Item::RowItem;
-            if (!nextIsRow) {
-                y += Scale(kSpacing);
-            }
+            row.first = i == 0 || items_[i - 1].kind != Item::RowItem;
+            row.last = i + 1 == items_.size() || items_[i + 1].kind != Item::RowItem;
+            y += row.first ? kEdge : 0;
+            boxTop = row.first ? y : boxTop;
+            row.boxTop = boxTop;
+            row.rect = {left + kEdge, y, left + inner - kEdge, y + Scale(kRow)};
+            y = row.rect.bottom + (row.last ? kEdge + Scale(kSpacing) : 0);
             break;
         }
         case Item::FrameItem: {
@@ -355,10 +379,11 @@ void ConversationStack::Layout() {
             Frame& frame = found->second;
             frame.header = Scale(kHeader) + (frame.entry.foundIn.empty() ? 0 : Scale(kFoundIn));
             int top = y;
-            int inside = top + frame.header;
+            frame.headerTop = top + pad;
+            int inside = frame.headerTop + frame.header;
             // its buttons at the right of its header
-            int right = left + inner - Scale(6);
-            int buttonTop = top + frame.header - Scale(kHeader) + (Scale(kHeader) - Scale(kButtonHeight)) / 2 - scroll_;
+            int right = HeaderRight(left + inner);
+            int buttonTop = inside - Scale(kHeader) + (Scale(kHeader) - Scale(kButtonHeight)) / 2 - scroll_;
             for (auto it = frame.buttons.rbegin(); it != frame.buttons.rend(); ++it) {
                 int buttonWidth = ButtonWidth({GetWindowString(it->first)}, Scale(56));
                 right -= buttonWidth;
@@ -372,34 +397,46 @@ void ConversationStack::Layout() {
                 }
             }
             // the selected one's Reactions line under its header
+            int textLeft = PictureLeft(left) + Scale(kFramePicture + 10);
             if (frame.entry.selected && hooks_.placeReactions) {
-                inside += hooks_.placeReactions(left + Scale(kArrow + kFramePicture + 10), inside - scroll_, inner - Scale(kArrow + kFramePicture + 16));
+                inside += hooks_.placeReactions(textLeft, inside - scroll_, HeaderRight(left + inner) - textLeft);
             }
             // its files under its header, before its body, as Tab reaches them
+            int stripLeft = conversation_ ? left + pad : Scale(kMargin);
+            int stripRight = conversation_ ? left + inner - pad : width - Scale(kMargin);
             if (frame.entry.selected && hooks_.placeFiles) {
-                int files = hooks_.placeFiles(left + Scale(4), inside - scroll_ + Scale(2), inner - Scale(8));
+                int files = hooks_.placeFiles(stripLeft, inside - scroll_ + Scale(2), stripRight - stripLeft);
                 if (files > 0) {
-                    inside += files + Scale(4);
+                    inside += files + Scale(6);
                 }
             }
-            frame.bodyTop = inside - top;
+            // its body: in a conversation in a sunken white well; alone under the band's line, from edge to edge
+            int edge = conversation_ ? kEdge : 1;
+            int inset = conversation_ ? pad + kEdge : 0;
             int body = frame.height > 0 ? frame.height : Scale(kBodyDefault);
+            frame.bodyRect = {left + inset, inside + edge, left + inner - inset, inside + edge + body};
             if (frame.host) {
-                MoveWindow(frame.host, left + Scale(4), inside - scroll_, std::max(0, inner - Scale(8)), body, TRUE);
+                MoveWindow(frame.host, frame.bodyRect.left, frame.bodyRect.top - scroll_, std::max(0, static_cast<int>(frame.bodyRect.right - frame.bodyRect.left)), body,
+                           TRUE);
                 RECT hostClient;
                 GetClientRect(frame.host, &hostClient);
                 if (frame.body) {
                     frame.body->Resize(hostClient);
                 }
             }
-            inside += body + Scale(4);
-            frame.rect = {left, top, left + inner, inside};
-            y = inside + Scale(kSpacing);
+            inside += edge + body + (conversation_ ? kEdge : 0);
+            // a message not selected names its files under its body
+            if (!frame.entry.selected && !frame.files.empty()) {
+                inside += Scale(kFoundIn + 2);
+            }
+            frame.rect = {left, top, left + inner, inside + pad};
+            y = frame.rect.bottom + Scale(kSpacing);
             break;
         }
         }
     }
-    total_ = y + Scale(kMargin);
+    // a message alone ends at its body's end (the white under it is the pane's own)
+    total_ = conversation_ ? y + Scale(kMargin) : y - Scale(kSpacing);
     SCROLLINFO scroll = {sizeof(scroll), SIF_RANGE | SIF_PAGE | SIF_POS};
     scroll.nMin = 0;
     scroll.nMax = std::max(0, total_ - 1);
@@ -592,9 +629,9 @@ const ConversationStack::Entry* ConversationStack::Hit(POINT point, bool* arrow,
     }
     for (const auto& [key, frame] : frames_) {
         if (y >= frame.rect.top && y < frame.rect.bottom && point.x >= frame.rect.left && point.x < frame.rect.right) {
-            int header = frame.rect.top + frame.header;
+            int header = frame.headerTop + frame.header;
             if (arrow) {
-                *arrow = y < header && point.x < frame.rect.left + Scale(kArrow + 4);
+                *arrow = y < header && point.x < PictureLeft(frame.rect.left);
             }
             return &frame.entry;
         }
@@ -639,8 +676,15 @@ void ConversationStack::InvalidateRow(int row) {
     InvalidateRect(hwnd_, &box, FALSE);
 }
 
-void ConversationStack::PaintPicture(HDC dc, const RECT& box, const Entry& entry) {
+void ConversationStack::PaintPicture(HDC dc, const RECT& box, const Entry& entry, bool framed) {
     int size = box.right - box.left;
+    // a header's picture on the gray: on white in a thin sunken frame, as a picture in a classic dialog
+    if (framed) {
+        RECT edge = box;
+        InflateRect(&edge, 1, 1);
+        DrawEdge(dc, &edge, BDR_SUNKENOUTER, BF_RECT);
+        FillRect(dc, &box, GetSysColorBrush(COLOR_WINDOW));
+    }
     if (entry.selected && selectedPicture_ && selectedPictureSize_ > 0) {
         if (!pictureDc_) {
             pictureDc_ = CreateCompatibleDC(dc);
@@ -651,28 +695,21 @@ void ConversationStack::PaintPicture(HDC dc, const RECT& box, const Entry& entry
         SelectObject(pictureDc_, old);
         return;
     }
-    // else its picture, or the initials, quiet, on a square a shade off the background, as the list draws them
+    // else its picture, or the initials, quiet, on a square a shade off the white, as the list draws them
     DrawSenderPicture(dc, box, pictures_->Get(entry.picture, size), pictureDc_, entry.initials, bold_,
-                      MixColors(GetSysColor(COLOR_WINDOW), GetSysColor(COLOR_BTNFACE), 255), GetSysColor(COLOR_GRAYTEXT));
+                      framed ? GetSysColor(COLOR_WINDOW) : GetSysColor(COLOR_BTNFACE), GetSysColor(COLOR_GRAYTEXT));
 }
 
-void ConversationStack::PaintRow(HDC dc, const Row& row, int offset, bool first, bool last) {
+void ConversationStack::PaintRow(HDC dc, const Row& row, int offset) {
     RECT box = row.rect;
     OffsetRect(&box, 0, -offset);
+    // a line between the rows of a box (Paint draws its sunken edge); the row under the mouse a shade of gray, no accent
     bool hot = hot_ >= 0 && static_cast<size_t>(hot_) < rows_.size() && &rows_[hot_] == &row;
-    SetDCBrushColor(dc, hot ? MixColors(GetSysColor(COLOR_WINDOW), GetSysColor(COLOR_HIGHLIGHT), 24) : GetSysColor(COLOR_WINDOW));
+    SetDCBrushColor(dc, hot ? MixColors(GetSysColor(COLOR_WINDOW), GetSysColor(COLOR_BTNFACE), 128) : GetSysColor(COLOR_WINDOW));
     FillRect(dc, &box, static_cast<HBRUSH>(GetStockObject(DC_BRUSH)));
-    // one box for the rows next to each other, a line between them
-    HBRUSH edge = GetSysColorBrush(COLOR_BTNSHADOW);
-    RECT side = {box.left, box.top, box.left + 1, box.bottom};
-    FillRect(dc, &side, edge);
-    side = {box.right - 1, box.top, box.right, box.bottom};
-    FillRect(dc, &side, edge);
-    RECT line = {box.left, box.top, box.right, box.top + 1};
-    FillRect(dc, &line, first ? edge : GetSysColorBrush(COLOR_BTNFACE));
-    if (last) {
-        line = {box.left, box.bottom - 1, box.right, box.bottom};
-        FillRect(dc, &line, edge);
+    if (!row.first) {
+        RECT line = {box.left, box.top, box.right, box.top + 1};
+        FillRect(dc, &line, GetSysColorBrush(COLOR_BTNFACE));
     }
     const Entry& entry = row.entry;
     int x = box.left + Scale(4);
@@ -681,7 +718,7 @@ void ConversationStack::PaintRow(HDC dc, const Row& row, int offset, bool first,
     x += Scale(kArrow + 2);
     int picture = Scale(kRowPicture);
     PaintPicture(dc, {x, box.top + (box.bottom - box.top - picture) / 2, x + picture, box.top + (box.bottom - box.top - picture) / 2 + picture},
-                 entry);
+                 entry, false);
     x += picture + Scale(8);
     // the date at the right
     std::wstring date = entry.date > 0 ? ListDate(entry.date) : L"";
@@ -731,41 +768,46 @@ void ConversationStack::PaintFrame(HDC dc, const Frame& frame, int offset) {
     RECT box = frame.rect;
     OffsetRect(&box, 0, -offset);
     bool selected = frame.entry.selected;
-    SetDCBrushColor(dc, GetSysColor(COLOR_WINDOW));
-    FillRect(dc, &box, static_cast<HBRUSH>(GetStockObject(DC_BRUSH)));
-    // the classic look, no accent: the header of the selected message (and of a message alone) a gray bar as Outlook
-    // Express's preview header, the others on white; a message of a conversation in a thin sunken box
-    RECT header = {box.left, box.top, box.right, box.top + frame.header};
-    if (selected || !conversation_) {
-        FillRect(dc, &header, GetSysColorBrush(COLOR_BTNFACE));
-    }
+    // the classic look, no accent, on the pane's gray: a message alone a header band as Outlook Express's preview pane,
+    // its body under a line; a conversation's message its header on the gray and its body in a sunken white well, the
+    // selected one in an etched frame, as a group box
     if (conversation_ && selected) {
-        DrawEdge(dc, &box, BDR_SUNKENOUTER, BF_RECT);
-    } else if (conversation_) {
-        FrameRect(dc, &box, GetSysColorBrush(COLOR_BTNSHADOW));
+        DrawEdge(dc, &box, EDGE_ETCHED, BF_RECT);
     }
-    RECT line = {box.left + (conversation_ ? 1 : 0), header.bottom - 1, box.right - (conversation_ ? 1 : 0), header.bottom};
-    FillRect(dc, &line, GetSysColorBrush(selected || !conversation_ ? COLOR_BTNSHADOW : COLOR_BTNFACE));
+    RECT body = frame.bodyRect;
+    OffsetRect(&body, 0, -offset);
+    if (conversation_) {
+        RECT well = body;
+        InflateRect(&well, kEdge, kEdge);
+        DrawEdge(dc, &well, EDGE_SUNKEN, BF_RECT);
+        // white where no body window is yet (one let go far from what is seen draws nothing)
+        if (!frame.host) {
+            FillRect(dc, &body, GetSysColorBrush(COLOR_WINDOW));
+        }
+    } else {
+        RECT line = {box.left, body.top - 1, box.right, body.top};
+        FillRect(dc, &line, GetSysColorBrush(COLOR_BTNSHADOW));
+    }
     const Entry& entry = frame.entry;
-    int top = box.top;
+    int top = frame.headerTop - offset;
     HGDIOBJ old = SelectObject(dc, UiFont());
     SetBkMode(dc, TRANSPARENT);
     if (!entry.foundIn.empty()) {
         SetTextColor(dc, GetSysColor(COLOR_GRAYTEXT));
-        DrawLine(dc, entry.foundIn, {box.left + Scale(12), top + Scale(2), box.right - Scale(8), top + Scale(kFoundIn)}, DT_LEFT | DT_END_ELLIPSIS);
+        DrawLine(dc, entry.foundIn, {PictureLeft(box.left), top + Scale(2), HeaderRight(box.right), top + Scale(kFoundIn)},
+                 DT_LEFT | DT_END_ELLIPSIS);
         top += Scale(kFoundIn);
     }
-    int x = box.left + Scale(6);
+    int x = PictureLeft(box.left);
     if (conversation_) {
-        DrawMarlettGlyph(dc, {x, top, x + Scale(kArrow), top + Scale(kHeader)}, L'6', Scale(12), GetSysColor(COLOR_GRAYTEXT));
+        DrawMarlettGlyph(dc, {x - Scale(kArrow + 2), top, x - Scale(2), top + Scale(kHeader)}, L'6', Scale(12), GetSysColor(COLOR_BTNTEXT));
     }
-    x += Scale(kArrow + 2);
     int picture = Scale(kFramePicture);
     int pictureTop = top + (Scale(kHeader) - picture) / 2;
-    PaintPicture(dc, {x, pictureTop, x + picture, pictureTop + picture}, entry);
+    PaintPicture(dc, {x, pictureTop, x + picture, pictureTop + picture}, entry, true);
     x += picture + Scale(10);
     // the room left of its buttons
-    int right = box.right - Scale(8);
+    int right = HeaderRight(box.right);
     for (const auto& [button, command] : frame.buttons) {
         RECT place;
         GetWindowRect(button, &place);
@@ -774,7 +816,7 @@ void ConversationStack::PaintFrame(HDC dc, const Frame& frame, int offset) {
     }
     int lineHeight = Scale(kHeader) / 2 - Scale(4);
     SelectObject(dc, bold_);
-    SetTextColor(dc, GetSysColor(COLOR_WINDOWTEXT));
+    SetTextColor(dc, GetSysColor(COLOR_BTNTEXT));
     DrawLine(dc, entry.from, {x, top + Scale(4), right, top + Scale(4) + lineHeight}, DT_LEFT | DT_END_ELLIPSIS);
     SelectObject(dc, UiFont());
     SetTextColor(dc, GetSysColor(COLOR_GRAYTEXT));
@@ -785,8 +827,8 @@ void ConversationStack::PaintFrame(HDC dc, const Frame& frame, int offset) {
     DrawLine(dc, detail, {x, top + Scale(4) + lineHeight, right, top + Scale(4) + 2 * lineHeight + Scale(2)}, DT_LEFT | DT_END_ELLIPSIS);
     // a frame not selected names its files under its body; a click selects it, and its strip offers them
     if (!selected && !frame.files.empty()) {
-        DrawLine(dc, L"\U0001F4CE " + frame.files, {box.left + Scale(10), box.bottom - Scale(22), box.right - Scale(8), box.bottom - Scale(4)},
-                 DT_LEFT | DT_END_ELLIPSIS);
+        int line = body.bottom + (conversation_ ? kEdge : 0) + Scale(2);
+        DrawLine(dc, L"\U0001F4CE " + frame.files, {body.left + Scale(2), line, body.right, line + Scale(kFoundIn)}, DT_LEFT | DT_END_ELLIPSIS);
     }
     SelectObject(dc, old);
 }
@@ -798,12 +840,18 @@ void ConversationStack::Paint(HDC target, const RECT& dirty) {
     HDC dc = CreateCompatibleDC(target);
     HBITMAP bitmap = CreateCompatibleBitmap(target, client.right, client.bottom);
     HGDIOBJ oldBitmap = SelectObject(dc, bitmap);
-    FillRect(dc, &client, GetSysColorBrush(COLOR_WINDOW));
+    // the pane's gray; under a message alone its body's white to the bottom
+    FillRect(dc, &client, GetSysColorBrush(COLOR_BTNFACE));
+    if (!conversation_ && !frames_.empty()) {
+        const Frame& alone = frames_.begin()->second;
+        RECT white = {0, alone.bodyRect.top - scroll_, client.right, client.bottom};
+        FillRect(dc, &white, GetSysColorBrush(COLOR_WINDOW));
+    }
     SetBkMode(dc, TRANSPARENT);
     int left = Scale(kMargin), right = client.right - Scale(kMargin);
     int y = Scale(kMargin) - scroll_;
     HGDIOBJ old = SelectObject(dc, title_);
-    SetTextColor(dc, GetSysColor(COLOR_WINDOWTEXT));
+    SetTextColor(dc, GetSysColor(COLOR_BTNTEXT));
     TEXTMETRICW metrics = {};
     GetTextMetricsW(dc, &metrics);
     DrawLine(dc, subject_, {left, y, right, y + metrics.tmHeight}, DT_LEFT | DT_END_ELLIPSIS);
@@ -816,6 +864,7 @@ void ConversationStack::Paint(HDC target, const RECT& dirty) {
         const Item& item = items_[i];
         switch (item.kind) {
         case Item::GapItem: {
+            // "n more messages" between two etched lines
             const Gap& gap = gaps_[item.place];
             RECT box = gap.rect;
             OffsetRect(&box, 0, -scroll_);
@@ -823,16 +872,20 @@ void ConversationStack::Paint(HDC target, const RECT& dirty) {
             DrawLine(dc, gap.words, box, DT_CENTER);
             int words = LineWidth(dc, UiFont(), gap.words);
             int middle = (box.top + box.bottom) / 2;
-            RECT before = {box.left, middle, (box.left + box.right - words) / 2 - Scale(8), middle + 1};
-            RECT after = {(box.left + box.right + words) / 2 + Scale(8), middle, box.right, middle + 1};
-            FillRect(dc, &before, GetSysColorBrush(COLOR_BTNFACE));
-            FillRect(dc, &after, GetSysColorBrush(COLOR_BTNFACE));
+            RECT before = {box.left, middle, (box.left + box.right - words) / 2 - Scale(8), middle + kEdge};
+            RECT after = {(box.left + box.right + words) / 2 + Scale(8), middle, box.right, middle + kEdge};
+            DrawEdge(dc, &before, EDGE_ETCHED, BF_TOP);
+            DrawEdge(dc, &after, EDGE_ETCHED, BF_TOP);
             break;
         }
         case Item::RowItem: {
-            bool first = i == 0 || items_[i - 1].kind != Item::RowItem;
-            bool last = i + 1 == items_.size() || items_[i + 1].kind != Item::RowItem;
-            PaintRow(dc, rows_[item.place], scroll_, first, last);
+            // the rows next to each other one sunken white box, as a list
+            const Row& row = rows_[item.place];
+            if (row.last) {
+                RECT well = {row.rect.left - kEdge, row.boxTop - kEdge - scroll_, row.rect.right + kEdge, row.rect.bottom + kEdge - scroll_};
+                DrawEdge(dc, &well, EDGE_SUNKEN, BF_RECT);
+            }
+            PaintRow(dc, row, scroll_);
             break;
         }
         case Item::FrameItem:

@@ -43,6 +43,12 @@ extension UITest {
         check(took < 5, "at once (\(String(format: "%.1f", took)) s)")
         let live = stack.frameViews.filter { $0.body != nil }.count
         check(live > 0 && live < count, "only the bodies near what is seen are made (\(live) of \(count))")
+        // the bodies in sight show their messages, each as tall as its document
+        let inSight = {
+            stack.frameViews.filter { $0.visibleRect.height > 0 }
+        }
+        check(await waitUntil(20) { inSight().allSatisfy { $0.body != nil && $0.fittedForTest } },
+              "the bodies in sight are as tall as their messages (\(inSight().map { "\($0.bodyForTest), \(stack.placeForTest($0))" }.joined(separator: "; ")))")
         await shot(main.window, "threads-7-long")
         // the previous message selected, then every one folded but it
         let selected = main.mailbox.reader.uid

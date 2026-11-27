@@ -2081,7 +2081,33 @@ impl Core {
     /// The view a [`Core::message_view_start`] built, once: None while it is built, for an unknown request, or when
     /// the source was not in the store
     pub fn message_view_result(&self, request: u64) -> Option<MessageView> {
-        self.views.take(request).flatten().map(|view| self.learned(view))
+        let view = self.views.take(request).flatten().map(|view| self.learned(view))?;
+        self.tell_arrived(&view);
+        Some(view)
+    }
+
+    /// The open messages a conversation's view waits for that were downloaded while it was built: told again
+    /// ([`Event::MessageReady`]), as their own came while the window still had the view before, which did not wait
+    /// for them, so the window builds the conversation again with them
+    fn tell_arrived(&self, view: &MessageView) {
+        let Some(conversation) = &view.conversation else {
+            return;
+        };
+        let arrived: Vec<pe_store::MessageRef> = {
+            let store = self.store();
+            conversation
+                .waiting
+                .iter()
+                .filter(|at| store.has_source(at.folder, at.uid).unwrap_or(false))
+                .copied()
+                .collect()
+        };
+        for at in arrived {
+            let _ = self.post(Event::MessageReady {
+                folder: at.folder,
+                uid: at.uid,
+            });
+        }
     }
 
     /// Drops a view no longer waited for (its reader shows another message, or closed); another reader's view of

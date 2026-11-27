@@ -109,12 +109,11 @@ final class ConversationStack: NSScrollView {
         hasHorizontalScroller = false
         autohidesScrollers = true
         drawsBackground = true
-        // the cards of the messages on a soft gray, as Mail has them
-        backgroundColor = .windowBackgroundColor
         borderType = .noBorder
         // the web views of the bodies drawn only inside the pane, never over the status bar under it
         contentView.wantsLayer = true
         contentView.layer?.masksToBounds = true
+        paintBackground()
         setAccessibilityIdentifier("reader.stack")
         column.translatesAutoresizingMaskIntoConstraints = false
         documentView = column
@@ -153,9 +152,34 @@ final class ConversationStack: NSScrollView {
         contentView.postsBoundsChangedNotifications = true
         NotificationCenter.default.addObserver(self, selector: #selector(scrolled), name: NSView.boundsDidChangeNotification,
                                                object: contentView)
+        // and laid out again (frames added, bodies measured): a frame given its place only now is made when near
+        column.postsFrameChangedNotifications = true
+        NotificationCenter.default.addObserver(self, selector: #selector(scrolled), name: NSView.frameDidChangeNotification,
+                                               object: column)
     }
 
     required init?(coder: NSCoder) { fatalError() }
+
+    /// a conversation's messages are cards on a soft gray, as Mail has them (the window's own background is white
+    /// since macOS 26, so the gray is the stack's own, a shade under the cards in either appearance); a message alone
+    /// is on the page itself
+    private static let cardsBackground = NSColor(name: nil) { appearance in
+        appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua ? NSColor(white: 0.09, alpha: 1) : NSColor(white: 0.955, alpha: 1)
+    }
+    private var fill: NSColor = cardsBackground
+
+    /// the fill on the clip view's own layer too: a layer-backed clip view does not draw the scroll view's background
+    private func paintBackground() {
+        backgroundColor = fill
+        effectiveAppearance.performAsCurrentDrawingAppearance {
+            contentView.layer?.backgroundColor = fill.cgColor
+        }
+    }
+
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        paintBackground()
+    }
 
     /// Left and Right with the stack in front: every message folded but the selected one, or every one open, as
     /// Left and Right close and open a conversation's row in the list
@@ -175,8 +199,8 @@ final class ConversationStack: NSScrollView {
     /// kept; `start` scrolls to the selected message (a conversation shown anew), else the stack stays where it was
     func show(_ view: MessageView, info: PeMessageInfo, entries: [ConversationEntry], pictures allowed: Bool, start: Bool) {
         let conversation = info.conversation_count > 0
-        // a conversation's messages are cards on a soft gray; a message alone is on the page itself, as Mail has it
-        backgroundColor = conversation ? .windowBackgroundColor : .textBackgroundColor
+        fill = conversation ? Self.cardsBackground : .textBackgroundColor
+        paintBackground()
         subject.stringValue = conversation ? text(info.conversation_subject) : text(info.subject)
         summary.stringValue = text(info.conversation_line)
         summary.isHidden = summary.stringValue.isEmpty
@@ -259,9 +283,10 @@ final class ConversationStack: NSScrollView {
         }
     }
 
-    /// the frame scrolled to its top, under the title when it is the first one
+    /// the frame scrolled to its top; the title kept in view when the frame starts on the first screen
     private func scrollTo(_ frame: NSView) {
-        let top = max(0, frame.convert(frame.bounds, to: column).minY - 8)
+        let place = frame.convert(frame.bounds, to: column).minY
+        let top = place < contentView.bounds.height ? 0 : place - 8
         let room = max(0, column.bounds.height - contentView.bounds.height)
         contentView.scroll(to: NSPoint(x: 0, y: min(top, room)))
         reflectScrolledClipView(contentView)
@@ -308,6 +333,13 @@ final class ConversationStack: NSScrollView {
     }
 
     var frameViews: [StackFrame] { items.arrangedSubviews.compactMap { $0 as? StackFrame } }
+
+    /// where `frame` is in the column and what the stack counts as near what is seen, for a failed check
+    func placeForTest(_ frame: StackFrame) -> String {
+        let place = frame.convert(frame.bounds, to: column)
+        let seen = contentView.documentVisibleRect
+        return "at \(Int(place.minY)) to \(Int(place.maxY)), seen \(Int(seen.minY)) to \(Int(seen.maxY))"
+    }
     var rowViews: [FoldedRow] { rows }
     var gapViews: [NSButton] {
         items.arrangedSubviews.compactMap { $0 as? NSButton }.filter { $0.accessibilityIdentifier() == "stack.middle" }
@@ -341,6 +373,7 @@ final class StackFrame: NSView {
     private var pictures = false
     /// the document's height last measured, in points: the frame keeps it while its body is let go
     private var height: CGFloat = 120
+    private var fitted = false
     private var extras: (reactions: NSView, files: NSView, filesMenu: NSView)?
     /// a card with an outline (a message of a conversation), or on the page itself (a message alone)
     private var framed = true
@@ -390,7 +423,10 @@ final class StackFrame: NSView {
         who.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         buttons.spacing = 2
         buttons.setContentHuggingPriority(.required, for: .horizontal)
-        let header = NSStackView(views: [arrow, face, who, buttons])
+        // the buttons in the trailing gravity, at the header's trailing edge as Mail's
+        let header = NSStackView()
+        header.setViews([arrow, face, who], in: .leading)
+        header.setViews([buttons], in: .trailing)
         header.alignment = .centerY
         header.spacing = 8
         header.edgeInsets = NSEdgeInsets(top: 8, left: 6, bottom: 8, right: 8)
@@ -619,6 +655,7 @@ final class StackFrame: NSView {
     }
 
     private func fit(_ points: CGFloat) {
+        fitted = true
         let points = max(48, ceil(points))
         guard abs(points - height) >= 1 else { return }
         height = points
@@ -642,6 +679,15 @@ final class StackFrame: NSView {
     }
 
     var arrowForTest: NSButton { arrow }
+
+    /// whether its body was measured once (it keeps its height when let go)
+    var fittedForTest: Bool { fitted }
+
+    /// what its body is, for a failed check: made or not, measured or not, its height
+    var bodyForTest: String {
+        let shown = view == nil ? "no view" : view?.info == nil ? "no info" : "a view"
+        return "\(body == nil ? "none" : "made"), \(fitted ? "measured" : "not measured"), \(Int(height)), \(shown)"
+    }
 
     /// the sender's picture drawn in its header (a brand's logo, a contact's picture); nil for the initials
     var pictureForTest: NSImage? { face.image }

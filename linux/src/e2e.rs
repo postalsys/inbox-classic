@@ -749,8 +749,22 @@ async fn draw_web_view(
         .snapshot_future(webkit::SnapshotRegion::Visible, webkit::SnapshotOptions::NONE)
         .await
         .ok()?;
+    // only what is seen of it, as GTK draws it: clipped by the scrolled windows and cards around it (a body of the
+    // reading pane's stack scrolled out of sight)
+    let mut seen = bounds;
+    let mut ancestor = view.parent();
+    while let Some(widget) = ancestor {
+        if (widget.is::<gtk::ScrolledWindow>() || widget.overflow() == gtk::Overflow::Hidden)
+            && let Some(clip) = widget.compute_bounds(window)
+        {
+            seen = seen.intersection(&clip)?;
+        }
+        ancestor = widget.parent();
+    }
+    snapshot.push_clip(&seen);
     snapshot.append_texture(&texture, &bounds);
-    Some(bounds)
+    snapshot.pop();
+    Some(seen)
 }
 
 /// Where a popover is drawn over its window: under the middle of what it points at, inside the window
@@ -2382,7 +2396,14 @@ async fn other_addresses(d: &Driver) {
     })
     .await;
     d.check(found.is_some(), "the message sent to the other address is there");
-    pause(800).await;
+    // Reply answers the message the reader shows: it waits for that one, not for a time
+    let reader = &main.reader;
+    let asked = main.list.selected().map(|(_, m)| (m.folder_id, m.info.uid));
+    let shown = match asked {
+        Some((folder, uid)) => wait_until(30, || reader.shows(folder, uid)).await,
+        None => false,
+    };
+    d.check(shown, "the reader shows it");
     run_command(Command::Reply);
     let Some(r) = wait_compose(10).await else {
         d.check(false, "Reply opens a compose window");

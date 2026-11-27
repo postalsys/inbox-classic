@@ -111,15 +111,20 @@ private:
         bool settled = false;
         // its buttons, in order, and the commands they are
         std::vector<std::pair<HWND, WORD>> buttons;
-        // where it is in the stack (its top at 0 of the stack's whole height), its header's height
+        // where it is in the stack (its top at 0 of the stack's whole height), its header's top and height, and where
+        // its body is, as Layout placed them
         RECT rect = {};
+        int headerTop = 0;
         int header = 0;
-        // its body's top within it
-        int bodyTop = 0;
+        RECT bodyRect = {};
     };
     struct Row {
         Entry entry;
         RECT rect = {};
+        // the first and the last of the rows next to each other, one sunken box; the box's top, on the last
+        bool first = false;
+        bool last = false;
+        int boxTop = 0;
     };
     struct Gap {
         size_t index = 0;
@@ -141,8 +146,10 @@ private:
     void PlaceChildren();
     void Paint(HDC dc, const RECT& dirty);
     void PaintFrame(HDC dc, const Frame& frame, int offset);
-    void PaintRow(HDC dc, const Row& row, int offset, bool first, bool last);
-    void PaintPicture(HDC dc, const RECT& box, const Entry& entry);
+    void PaintRow(HDC dc, const Row& row, int offset);
+    void PaintPicture(HDC dc, const RECT& box, const Entry& entry, bool framed);
+    int PictureLeft(int boxLeft) const;
+    int HeaderRight(int boxRight) const;
     void ScrollTo(int y);
     // the bodies near what is seen made, those far from it let go
     void Live();

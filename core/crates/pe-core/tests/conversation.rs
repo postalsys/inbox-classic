@@ -2,11 +2,14 @@
 //! the unread ones and the selected one open, each open message a view of its own, and what a click on a message, its
 //! arrow, Next and Previous, Open All and Fold All do.
 
-use pe_core::{Action, Core, Options, PasswordStore, Selected};
+use pe_core::{Action, Core, Event, Options, PasswordStore, Selected};
 use pe_store::{AccountSettings, Auth, FolderInfo, MessageInfo, MessageRef, Security, Store};
+use std::sync::{Arc, Mutex};
 
 struct World {
-    core: Core,
+    core: Arc<Core>,
+    /// the core's events, as the windows get them
+    events: Arc<Mutex<Vec<Event>>>,
     dir: pe_testkit::TempDir,
     inbox: i64,
     sent: i64,
@@ -145,22 +148,36 @@ fn world(name: &str) -> World {
     );
     put(inbox, 3, 400, "<e@x>", "<a@x>", "Bob <bob@example.com>", None, false);
     drop(store);
+    let events: Arc<Mutex<Vec<Event>>> = Arc::default();
+    let told = events.clone();
     let core = Core::open_with(
         &path,
         Options {
             passwords: PasswordStore::Memory,
             ..Default::default()
         },
-        |_| {},
+        move |event| told.lock().unwrap().push(event),
     )
     .unwrap();
     World {
-        core,
+        core: Arc::new(core),
+        events,
         dir,
         inbox,
         sent,
         drafts,
     }
+}
+
+/// Waits up to 10 seconds for an event `wanted` finds; false when none came
+fn wait(w: &World, wanted: impl Fn(&Event) -> bool) -> bool {
+    for _ in 0..200 {
+        if w.events.lock().unwrap().iter().any(&wanted) {
+            return true;
+        }
+        std::thread::sleep(std::time::Duration::from_millis(50));
+    }
+    false
 }
 
 fn at(folder: i64, uid: u64) -> MessageRef {
@@ -436,4 +453,40 @@ fn a_message_unread_since_the_conversation_was_shown_opens() {
     w.core.conversation_toggle(focus, 0);
     let view = w.core.conversation_view(focus, false, false).unwrap();
     assert!(documents(&view)[0].is_none());
+}
+
+/// An open message downloaded while its conversation's view was built on a worker is told again when the window
+/// takes the view: its own MessageReady came while the window still had the view before, which did not wait for it
+#[test]
+fn a_message_that_arrives_while_its_conversation_is_built_is_told_again() {
+    pe_core::i18n::set_language("en");
+    let w = world("conversation-arrived");
+    let bob = at(w.inbox, 3);
+    let request = w.core.conversation_view_start(at(w.inbox, 2), false, false).unwrap();
+    assert!(wait(&w, |e| *e == Event::ViewReady { request }), "the view is built");
+    // Bob's answer is downloaded now, after the view that waits for it was built
+    let store = Store::open(w.dir.path().join("store.db")).unwrap();
+    store
+        .set_source(
+            bob.folder,
+            bob.uid,
+            raw("<e@x>", "<a@x>", "Bob <bob@example.com>", "Count me in.").as_bytes(),
+        )
+        .unwrap();
+    drop(store);
+    w.events.lock().unwrap().clear();
+    let view = w.core.message_view_result(request).unwrap();
+    assert_eq!(
+        view.conversation.as_ref().unwrap().waiting,
+        [bob],
+        "it waits for Bob's answer, built before it came"
+    );
+    assert!(
+        wait(&w, |e| *e
+            == Event::MessageReady {
+                folder: bob.folder,
+                uid: bob.uid
+            }),
+        "and Bob's answer is told again, so the window builds the conversation again"
+    );
 }
