@@ -351,18 +351,22 @@ final class UITest {
         guard let rep else { return }
         let image = NSImage(size: frame.bounds.size)
         image.addRepresentation(rep)
-        // the web views draw in their own process: their pictures, put where they are
-        var pictures: [(NSImage, NSRect)] = []
+        // the web views draw in their own process: their pictures, put where they are, only their parts not scrolled
+        // out of sight (a body of the stack taller than the pane)
+        var pictures: [(NSImage, NSRect, NSRect)] = []
         for web in views(WKWebView.self, in: frame) where !web.isHiddenOrHasHiddenAncestor && web.bounds.width > 0 {
             if let picture = try? await web.takeSnapshot(configuration: nil) {
-                pictures.append((picture, web.convert(web.bounds, to: frame)))
+                pictures.append((picture, web.convert(web.bounds, to: frame), web.convert(web.visibleRect, to: frame)))
             }
         }
         let composed = NSImage(size: frame.bounds.size)
         composed.lockFocus()
         image.draw(in: frame.bounds)
-        for (picture, rect) in pictures {
+        for (picture, rect, seen) in pictures {
+            NSGraphicsContext.saveGraphicsState()
+            NSBezierPath(rect: seen).addClip()
             picture.draw(in: rect)
+            NSGraphicsContext.restoreGraphicsState()
         }
         // a list's header floats over its rows, its material blurring what scrolled under it, which a cached
         // drawing leaves out: the header drawn again over an opaque background, so no row shows through it

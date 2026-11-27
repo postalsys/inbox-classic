@@ -23,9 +23,7 @@ const STYLE: &str = "
 .message-rows > row { border-bottom: 1px solid alpha(@borders, 0.5); }
 .row-picture { border-radius: 16px; background-color: alpha(currentColor, 0.09); }
 .row-initials { font-size: 12px; font-weight: 600; color: alpha(currentColor, 0.6); }
-.stack-frame { border: 1px solid alpha(currentColor, 0.15); border-radius: 10px; background: @view_bg_color; }
-.stack-frame.selected { border-color: @accent_bg_color; box-shadow: inset 4px 0 @accent_bg_color; }
-.stack-frame.selected .frame-header { background: alpha(@accent_bg_color, 0.08); }
+.stack-frame.card.selected { box-shadow: 0 0 0 1px alpha(@accent_color, 0.5), 0 1px 3px 1px alpha(black, 0.07); }
 .stack-chip { padding: 0 5px; border-radius: 4px; background: alpha(currentColor, 0.08); }
 .stack-middle { color: @accent_color; }
 .card-picture { border-radius: 32px; background-color: alpha(currentColor, 0.09); }
@@ -44,7 +42,6 @@ const STYLE: &str = "
 menubutton.reaction-chip > button { min-height: 0; padding: 1px 10px; border-radius: 999px; font-weight: normal; background-color: alpha(currentColor, 0.08); }
 menubutton.reaction-chip > button:hover { background-color: alpha(currentColor, 0.14); }
 menubutton.reaction-chip > button:checked { background-color: alpha(currentColor, 0.2); }
-.attachment-strip { background-color: @headerbar_bg_color; border-bottom: 1px solid alpha(@borders, 0.6); }
 .attachment-strip flowbox { padding: 0 6px 6px; }
 flowboxchild.attachment-file { padding: 4px 10px 4px 4px; border-radius: 6px; }
 flowboxchild.attachment-file:hover { background-color: alpha(currentColor, 0.07); }
