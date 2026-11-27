@@ -1,6 +1,6 @@
 {
   "round": 9,
-  "status": "reviewed_awaiting_baseline_commit",
+  "status": "complete",
   "starting_commit": "c135330965efb301008b51dd99f539ee89687465",
   "starting_review_baseline": "44bd9b2d33db99329a587683ad6061fbcfa7bee7",
   "previous_round": 8,
@@ -3498,12 +3498,13 @@
   },
   "validation_policy": "No tests, builds, CI queries or manually triggered workflows. Translation static checks and caller inspection only.",
   "evidence_checkpoint": "/Users/andris/Projects/PostalExpress/build/i18n-round9-20261127",
-  "next_batch": "Commit reviewed content on master, advance REVIEWED to it, confirm zero pending, archive round9, commit metadata. Do not push.",
+  "next_batch": "None. Start a new round for later changes. These review commits must remain local unless the user authorizes a push.",
   "publication": {
     "authorized": false,
-    "instruction": "Commit to local master; do not push",
+    "instruction": "Commit to master; do not push",
     "target": "local master",
-    "pushed": false
+    "pushed": false,
+    "reviewed_content_commit": "f2ecb709bede76eb4e1d4373ecae634e6f862bf5"
   },
   "parallel_review": true,
   "created_at": "2026-11-27T06:12:43.875780+00:00",
@@ -4094,5 +4095,18 @@
     "No tests, builds, native GUI checks or CI queries were run.",
     "Static checks and contextual editing do not establish native-speaker approval.",
     "560 pre-existing help reference/literal differences exactly match round8; no new differences."
-  ]
+  ],
+  "completed_at": "2026-11-27T06:36:32.807799+00:00",
+  "reviewed_content_commit": "f2ecb709bede76eb4e1d4373ecae634e6f862bf5",
+  "reviewed_baseline": "f2ecb709bede76eb4e1d4373ecae634e6f862bf5",
+  "final_baseline_check": {
+    "command": "node scripts/i18n-review.mjs --check",
+    "exit_code": 0,
+    "summary": "0 messages and 0 help passages wait for a review; 0 new or changed without a mark",
+    "log_sha256": "b1c34ba0bdb98083b3495bd5142c475b9a57f7e00a57bfe38fadbde7c1539398"
+  },
+  "archive": {
+    "state": "docs/translation-review-round9-state.json",
+    "progress": "docs/translation-review-round9-progress.md"
+  }
 }

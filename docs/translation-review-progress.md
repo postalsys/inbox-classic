@@ -3,9 +3,9 @@
 ## Resume here
 
 - Authoritative checkout: `/Users/andris/Projects/PostalExpress`, branch `master`.
-- Review and static validation complete. Content/baseline commits and the zero-pending baseline check remain.
+- Round complete. Reviewed content and current baseline: `f2ecb709bede76eb4e1d4373ecae634e6f862bf5`. No pending work; commits remain local.
 - Starting local and fetched origin/master: `c135330965efb301008b51dd99f539ee89687465`.
-- Previous reviewed baseline: `44bd9b2d33db99329a587683ad6061fbcfa7bee7`; advance only after the reviewed content commit exists.
+- Previous reviewed baseline: `44bd9b2d33db99329a587683ad6061fbcfa7bee7`; advanced after the fully reviewed content commit.
 - User authorized English and translation editing in parallel, committing to master, and explicitly **no push**.
 - Current repository glossary and help-writing rules remain the authorized guidance. No tests, builds, native GUI checks or CI queries.
 
@@ -27,7 +27,7 @@ retained. Current glossary guidance replaces the old 20-message explanation. No 
 Every queued entry/topic and the Latvian neighbor are recorded. Initial snapshots match the starting commit; final
 ledgers, English sources and runtime references match the files. No unresolved entries or remaining review marks.
 The late-arrival audit found no new files, languages or upstream changes. All pre-baseline unmarked differences are
-accounted for by exact completed scope; the reviewed baseline remains unchanged until the content commit.
+accounted for by exact completed scope; the reviewed baseline now points to the completed content commit.
 
 ## Static verification
 
@@ -45,3 +45,9 @@ These are static checks and contextual editing, not native-speaker approval or r
 The tracked state records exact IDs/topics, final file hashes and evidence hashes. Detailed snapshots, per-language
 ledgers, source cross-review, final static report, HTML review and late-arrival audit are in
 `build/i18n-round9-20261127`; generated evidence is not committed. Round 8 remains archived separately.
+
+## Completion
+
+The content is committed on local master. REVIEWED points to that commit; the final baseline check reports zero
+pending messages, zero pending help passages and zero unmarked changes. Round 9 is archived. No tests, builds or CI
+were run. The user explicitly prohibited pushing, so the content and completion commits remain local.
