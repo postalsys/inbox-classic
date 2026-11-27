@@ -831,19 +831,13 @@ impl Store {
         values.push(Value::Integer(thread));
         self.db
             .prepare_cached(&format!(
-                "{} SELECT {}, t, n FROM g WHERE t = ?{}",
+                "{} SELECT {}, n FROM g WHERE t = ?{}",
                 rows.with,
-                order.key,
+                order.columns(),
                 values.len()
             ))?
             .query_row(params_from_iter(values), |row| {
-                Ok((
-                    Cursor {
-                        key: row.get(0)?,
-                        ties: vec![row.get(1)?],
-                    },
-                    row.get(2)?,
-                ))
+                Ok((order.cursor(row)?, row.get(order.width())?))
             })
             .optional()
     }
@@ -1221,6 +1215,30 @@ impl Store {
         sort: Sort,
         ranges: &[(u64, u64)],
     ) -> Result<Vec<MessageRef>> {
+        let none_open = search.threads.as_ref().is_some_and(|open| open.is_empty());
+        // the rows come in the order of the ranges given: walked when that is the list's (as the windows give them)
+        let in_order = ranges.windows(2).all(|pair| pair[0].1 <= pair[1].0);
+        match search.kept_conversations() {
+            // one row a conversation, walked on the order's index ([`Store::rows_at`])
+            Some(kept) if none_open && in_order => {
+                let length = || Ok(Some(self.count_kept_conversations(&kept)?));
+                let threads: Vec<i64> = self.rows_at(
+                    &kept_rows(&kept, sort, true),
+                    &Order::conversations(sort),
+                    &crate::selection::merged(ranges.to_vec()),
+                    length,
+                    "t",
+                    |row, at| row.get(at),
+                )?;
+                let rows = threads.into_iter().map(RowRefs::Conversation).collect();
+                self.refs_of(search, rows)
+            }
+            _ => self.thread_refs_paged(search, sort, ranges),
+        }
+    }
+
+    /// [`Store::thread_refs_in_ranges`] of a list with conversations open, or not kept: each range read as a page
+    fn thread_refs_paged(&self, search: &Search, sort: Sort, ranges: &[(u64, u64)]) -> Result<Vec<MessageRef>> {
         let mut rows = Vec::new();
         for &(start, end) in ranges {
             rows.extend(self.search(search, sort, start, end - start)?);
@@ -1240,6 +1258,12 @@ impl Store {
                 _ => RowRefs::Message(row.at),
             })
             .collect();
+        self.refs_of(search, rows)
+    }
+
+    /// The messages of `rows`, in their order, each once: a conversation's all of its messages in the list, as they
+    /// arrived
+    fn refs_of(&self, search: &Search, rows: Vec<RowRefs>) -> Result<Vec<MessageRef>> {
         let collapsed: Vec<i64> = rows
             .iter()
             .filter_map(|row| match row {
@@ -2229,6 +2253,73 @@ mod tests {
                             count.contains("COVERING INDEX conversations_"),
                             "{scope:?} {sort:?}: {count}"
                         );
+                    }
+                }
+            }
+        }
+    }
+
+    /// A grouped list kept with no conversation open finds the messages of its rows from the conversations' sort keys,
+    /// the same as reading each range as a page: every order both ways, conversations of one message and of several,
+    /// ties in the key, the list's start and end, past it, far from both, and more ranges than are read one by one
+    #[test]
+    fn grouped_rows_found_by_key_are_those_paged() {
+        let (store, _, inbox, _) = setup();
+        let names = ["anna", "Anna", "bob", ""];
+        let mut mail_of = Vec::new();
+        for uid in 1..=2600u64 {
+            // every third answers the one before it: conversations of one, two and more messages
+            let answers = if uid % 3 == 0 {
+                vec![format!("<{}@x>", uid - 1)]
+            } else {
+                Vec::new()
+            };
+            let answers: Vec<&str> = answers.iter().map(String::as_str).collect();
+            let mut m = mail(
+                uid,
+                (uid / 4) as i64 * 100,
+                &format!("<{uid}@x>"),
+                &answers,
+                uid % 5 == 0,
+            );
+            m.from_name = names[uid as usize % names.len()].into();
+            m.subject = ["plan", "Plan", "report", ""][uid as usize / 7 % 4].into();
+            m.size = Some(uid % 11);
+            mail_of.push(m);
+        }
+        store.add_messages(inbox, &mail_of).unwrap();
+        let many: Vec<(u64, u64)> = (0..100).map(|i| (i * 3, i * 3 + 1)).collect();
+        let wanted: Vec<Vec<(u64, u64)>> = vec![
+            vec![(0, 1)],
+            vec![(0, 7)],
+            vec![(1200, 1203)],
+            vec![(1600, 1601)],
+            vec![(10, 12), (1100, 1110), (1700, 1750)],
+            vec![(1700, 5000)],
+            vec![(9000, 9001)],
+            many,
+        ];
+        for scope in [crate::Scope::Folder(inbox), crate::Scope::AllInboxes] {
+            let search = Search {
+                scope,
+                threads: Some(Vec::new()),
+                ..Default::default()
+            };
+            assert!(search.kept_conversations().is_some());
+            for field in [
+                SortField::Date,
+                SortField::Received,
+                SortField::From,
+                SortField::To,
+                SortField::Subject,
+                SortField::Size,
+            ] {
+                for ascending in [true, false] {
+                    let sort = Sort { field, ascending };
+                    for ranges in &wanted {
+                        let paged = store.thread_refs_paged(&search, sort, ranges).unwrap();
+                        let by_key = store.refs_in_ranges(&search, sort, ranges).unwrap();
+                        assert_eq!(by_key, paged, "{scope:?} {sort:?} {ranges:?}");
                     }
                 }
             }

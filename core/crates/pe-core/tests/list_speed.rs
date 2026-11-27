@@ -365,6 +365,8 @@ const PAGE: u64 = 40;
 const SUMMARY: u64 = 60;
 /// A list with conversations open, which counts each conversation's rows
 const OPEN: u64 = 150;
+/// The messages of a Shift+click over most of a big folder, every row between read
+const SPAN: u64 = 250;
 /// A search, which reads every message its words find
 const SEARCH: u64 = 300;
 
@@ -403,6 +405,13 @@ fn time_list(
     // read from the end
     report.time(&format!("{name}: the last page"), quick, || {
         page(core, events, list, rows.saturating_sub(pe_core::LIST_PAGE))
+    });
+    // the messages of rows selected whose pages the view has not read (a Shift+click far down, the list changed
+    // since): found from their sort keys on the order's index, never with every row of the list numbered
+    let search = list.search().unwrap();
+    let middle_rows = [(rows / 2, rows / 2 + 3), (rows / 2 + 500, rows / 2 + 501)];
+    report.time(&format!("{name}: messages of rows in the middle"), far, || {
+        core.refs_in_ranges(&search, list.sort(), &middle_rows).unwrap().len()
     });
     report.time(&format!("{name}: counts"), quick, || list.clone().counts(core).unwrap());
     let middle = list.rows(core, rows / 2, 1).unwrap().remove(0).at();
@@ -527,6 +536,24 @@ fn list_calls_within_budget() {
             (true, _) => (QUICK, PAGE, SUMMARY),
         };
         time_list(&mut report, &core, &events, name, &list, (quick, page, summary));
+    }
+
+    // a Shift+click over most of the big Inbox, and a hundred rows picked apart with Ctrl+click, their pages not
+    // read: the messages of the rows, walked on the order's index (grouped, each conversation's messages)
+    for (name, grouped) in [("Inbox 100k", false), ("Inbox 100k grouped", true)] {
+        let list = view(Scope::Folder(big_inbox), "", grouped, newest);
+        let search = list.search().unwrap();
+        let rows = list.row_count(&core).unwrap();
+        let span = [(1000, rows - 1000)];
+        report.time(
+            &format!("{name}: messages of a Shift+click over most of it"),
+            SPAN,
+            || core.refs_in_ranges(&search, newest, &span).unwrap().len(),
+        );
+        let picked: Vec<(u64, u64)> = (0..100).map(|i| (1000 + i * 300, 1001 + i * 300)).collect();
+        report.time(&format!("{name}: messages of 100 rows picked apart"), PAGE, || {
+            core.refs_in_ranges(&search, newest, &picked).unwrap().len()
+        });
     }
 
     // every conversation of the big Inbox open (View > Expand All)

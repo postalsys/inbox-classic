@@ -38,6 +38,10 @@ larger:5M    smaller:100k";
 /// The commands whose keys a text field has too: the field with the focus has them first
 const TEXT_KEYS: [Command; 3] = [Command::Delete, Command::SelectAll, Command::Undo];
 
+/// More rows selected than this are listed and counted off the window thread ([`Mailbox::read_selection`]), the
+/// messages a reload selects again counted so too
+const LARGE_SELECTION: u64 = 1000;
+
 /// What waits for a list being read to be drawn ([`Mailbox::after_list`])
 type AfterList = Box<dyn FnOnce(&Mailbox)>;
 
@@ -185,6 +189,9 @@ pub struct Mailbox {
     summary_request: Cell<u64>,
     /// Select All's summary is the core's count, not the number alone shown meanwhile
     all_counted: Cell<bool>,
+    /// The messages of a selection of more rows than [`LARGE_SELECTION`] being read with their summary off the window
+    /// thread, 0 for none: `refs` and `summary` are theirs once it is done (or once a command needs them)
+    selection_read: Cell<u64>,
     /// The actions asked of the core and not done yet, each with the row selected after it when it takes the
     /// selection out of the list
     actions: RefCell<HashMap<u64, Option<u32>>>,
@@ -384,6 +391,7 @@ impl Mailbox {
             all: RefCell::default(),
             summary_request: Cell::new(0),
             all_counted: Cell::new(false),
+            selection_read: Cell::new(0),
             actions: RefCell::default(),
             undone_bar,
             undone_text,
@@ -1121,6 +1129,7 @@ impl Mailbox {
         } else if let Some(all) = &*self.all.borrow() {
             reselect.selected = all.clone();
         } else if self.several() {
+            self.settle_selection();
             reselect.selected = Selected::Listed(self.refs.borrow().clone());
         } else if let Some(picked) = self.picked_not_shown() {
             // a row clicked while the list was read (the pane is not told then): that row, not the message before
@@ -1270,7 +1279,20 @@ impl Mailbox {
         {
             *self.refs.borrow_mut() = refs;
         }
-        *self.summary.borrow_mut() = shell().core.summary(&self.refs.borrow()).unwrap_or_default();
+        let many = self.refs.borrow().len() as u64 > LARGE_SELECTION;
+        if many {
+            // counted off the window thread (summary_ready), their number meanwhile
+            let selected = Selected::Listed(self.refs.borrow().clone());
+            *self.summary.borrow_mut() = Summary {
+                count: selected.count(),
+                ..Summary::default()
+            };
+            if let Ok(request) = shell().core.summary_start(selected) {
+                self.summary_request.set(request);
+            }
+        } else {
+            *self.summary.borrow_mut() = shell().core.summary(&self.refs.borrow()).unwrap_or_default();
+        }
         if rows > 1 {
             self.reader.summary(&self.summary.borrow());
         }
@@ -1374,6 +1396,10 @@ impl Mailbox {
         // the rows chosen now, not every message of the list
         self.forget_all();
         let core = &shell().core;
+        if self.list.selected_count() > LARGE_SELECTION {
+            self.read_selection();
+            return;
+        }
         if self.list.selected_count() > 1 {
             let refs = self.list.refs_in_ranges(&self.list.selected_ranges());
             *self.summary.borrow_mut() = core.summary(&refs).unwrap_or_default();
@@ -1529,6 +1555,7 @@ impl Mailbox {
     /// The selected messages: the one selected, or the several; after Select All every message of the list, listed
     /// now (for what needs each message)
     pub fn selected_refs(&self) -> Vec<MessageRef> {
+        self.settle_selection();
         match &*self.all.borrow() {
             Some(all) => shell().core.selected_refs(all).unwrap_or_default(),
             None => self.refs.borrow().clone(),
@@ -1537,6 +1564,7 @@ impl Mailbox {
 
     /// The selected messages as the core's actions take them: listed, or every message of the list (Select All)
     fn selection(&self) -> Selected {
+        self.settle_selection();
         match &*self.all.borrow() {
             Some(all) => all.clone(),
             None => Selected::Listed(self.refs.borrow().clone()),
@@ -1545,17 +1573,74 @@ impl Mailbox {
 
     /// How many messages are selected
     fn selection_count(&self) -> u64 {
+        self.settle_selection();
         match &*self.all.borrow() {
             Some(all) => all.count(),
             None => self.refs.borrow().len() as u64,
         }
     }
 
-    /// The selection is no longer every message of the list: its summary is not waited for
+    /// The selection is no longer every message of the list, nor the one being read: their summary and messages are
+    /// not waited for
     fn forget_all(&self) {
-        if self.all.borrow_mut().take().is_some() {
-            self.cancel_summary();
+        self.all.borrow_mut().take();
+        self.cancel_summary();
+        let request = self.selection_read.replace(0);
+        if request != 0 {
+            shell().cancel_request(request);
+            shell().core.read_cancel(request);
         }
+    }
+
+    /// A selection of many rows (Shift+click far down, Shift+arrows held): their messages listed and counted off the
+    /// window thread, as Select All's are, so that each key that extends it costs the window nothing; the number of
+    /// rows shown meanwhile
+    fn read_selection(&self) {
+        let ranges = self.list.selected_ranges();
+        let Ok(request) = shell().core.selection_start(&self.list.view(), ranges) else {
+            return;
+        };
+        self.selection_read.set(request);
+        self.refs.borrow_mut().clear();
+        *self.summary.borrow_mut() = Summary {
+            count: self.list.selected_count(),
+            ..Summary::default()
+        };
+        if !self.reader.shows_summary() {
+            self.clear_reader(false);
+        }
+        self.reader.summary(&self.summary.borrow());
+        self.selection_shown();
+    }
+
+    /// The messages of the selection read off the window thread ([`Self::read_selection`]): the menus and the
+    /// reading pane follow them
+    fn selection_ready(&self, request: u64) {
+        if request == 0 || request != self.selection_read.get() {
+            return;
+        }
+        self.settle_selection();
+        self.reader.summary(&self.summary.borrow());
+        self.selection_shown();
+    }
+
+    /// The selection being read off the window thread taken now, for what needs its messages: read here when it is
+    /// not done yet
+    fn settle_selection(&self) {
+        let request = self.selection_read.replace(0);
+        if request == 0 {
+            return;
+        }
+        let core = &shell().core;
+        let (refs, summary) = core.selection_result(request).unwrap_or_else(|| {
+            shell().cancel_request(request);
+            core.read_cancel(request);
+            let refs = self.list.refs_in_ranges(&self.list.selected_ranges());
+            let summary = core.summary(&refs).unwrap_or_default();
+            (refs, summary)
+        });
+        *self.refs.borrow_mut() = refs;
+        *self.summary.borrow_mut() = summary;
     }
 
     /// The summary of Select All being counted dropped, and a command waiting for it ([`Self::summary_counted`])
@@ -2108,7 +2193,10 @@ impl Mailbox {
             Event::PictureReady { request } => crate::row_pictures::ready(*request),
             Event::ListReady { request } => self.list_ready(*request),
             Event::ListPageReady { request } => self.page_ready(*request),
-            Event::ReadDone { request } => self.summary_ready(*request),
+            Event::ReadDone { request } => {
+                self.summary_ready(*request);
+                self.selection_ready(*request);
+            }
             Event::Acted { request, said } => self.acted(*request, said),
             Event::ActionUndone { text, .. } => {
                 self.show_undone(text);
@@ -2164,7 +2252,8 @@ impl Mailbox {
         self.undone_bar.set_visible(true);
     }
 
-    /// The summary of Select All counted off the window thread: the menus and the reading pane follow it
+    /// The summary of Select All (or of many messages a reload selected again) counted off the window thread: the
+    /// menus and the reading pane follow it
     fn summary_ready(&self, request: u64) {
         if request == 0 || request != self.summary_request.get() {
             return;
@@ -2173,10 +2262,7 @@ impl Mailbox {
         let Some(summary) = shell().core.summary_result(request) else {
             return;
         };
-        if self.all.borrow().is_none() {
-            return;
-        }
-        self.all_counted.set(true);
+        self.all_counted.set(self.all.borrow().is_some());
         *self.summary.borrow_mut() = summary;
         self.reader.summary(&self.summary.borrow());
         self.selection_shown();
@@ -2583,6 +2669,7 @@ impl Mailbox {
     /// Move to Folder (or Copy to Folder, `copy`): asks where, in the folder tree of every account, and sends the
     /// selected messages there; to another account they go in the background
     pub async fn move_selected(&self, copy: bool) {
+        self.settle_selection();
         let first = match &*self.all.borrow() {
             Some(_) => self.own_folder(),
             None => self.refs.borrow().first().map(|r| r.folder),
@@ -2723,10 +2810,18 @@ impl Mailbox {
     /// Once the summary of Select All is counted, when it is being counted (its `ReadDone`, the busy pointer after a
     /// moment): false when it could not be counted or the selection changed meanwhile, which drops the command
     async fn summary_counted(&self) -> bool {
-        if self.all.borrow().is_none() {
-            return true;
-        }
+        // many rows being read: their messages and numbers are needed now
+        self.settle_selection();
         let request = self.summary_request.get();
+        if self.all.borrow().is_none() {
+            if request == 0 {
+                return true;
+            }
+            let counted = ui::wait_read(&self.window, request).await;
+            // taken here whichever of this and its ReadDone comes first
+            self.summary_ready(request);
+            return counted;
+        }
         if request != 0 && !ui::wait_read(&self.window, request).await {
             return false;
         }

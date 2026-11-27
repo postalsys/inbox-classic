@@ -385,6 +385,14 @@ impl ListView {
         self.hide_ignored
     }
 
+    /// Whether `other` lists the rows of this list, as far as a window keeps its place: the same folder, words, Show,
+    /// order and grouping (a conversation opened or closed, ignored ones hidden or the conversation order changed are
+    /// the same list read again; another folder, other words or another Show begin a list of their own, as `since`)
+    pub fn same_rows(&self, other: &ListView) -> bool {
+        (self.scope, &self.text, self.show, self.sort, self.grouped)
+            == (other.scope, &other.text, other.show, other.sort, other.grouped)
+    }
+
     /// The Conversation order setting: an expanded conversation's other messages newest first, or as they arrived
     pub fn set_newest_first(&mut self, newest_first: bool) {
         self.newest_first = newest_first;
@@ -1220,6 +1228,43 @@ mod tests {
         assert!(view.set_grouped(false));
         assert_eq!(view.search().unwrap().threads, None, "ungrouped");
         assert!(!view.is_expanded(7), "grouping closes them");
+    }
+
+    /// A conversation opened, ignored ones hidden or the conversation order changed are the same rows read again (the
+    /// window keeps its place); another folder, other words, another Show, order or grouping are another list
+    #[test]
+    fn same_rows_or_another_list() {
+        let mut view = ListView::new();
+        view.set_scope(Some(Scope::Folder(1)));
+        view.set_grouped(true);
+        let before = view.clone();
+        view.expand(7);
+        view.set_hide_ignored(true);
+        view.set_newest_first(true);
+        assert!(view.same_rows(&before));
+        let changes: [fn(&mut ListView); 5] = [
+            |v| {
+                v.set_scope(Some(Scope::AllInboxes));
+            },
+            |v| {
+                v.set_text("report");
+            },
+            |v| v.set_show(Show::Unread),
+            |v| {
+                v.set_sort(Sort {
+                    field: pe_store::SortField::From,
+                    ascending: true,
+                })
+            },
+            |v| {
+                v.set_grouped(false);
+            },
+        ];
+        for change in changes {
+            let mut other = before.clone();
+            change(&mut other);
+            assert!(!other.same_rows(&before), "{other:?}");
+        }
     }
 
     #[test]

@@ -6,6 +6,7 @@ use std::collections::{BTreeMap, HashMap};
 use rusqlite::params_from_iter;
 use rusqlite::types::Value;
 
+use crate::keyset::Order;
 use crate::messages::split_flags;
 use crate::{FolderId, Result, Search, Sort, Store};
 
@@ -92,7 +93,26 @@ pub(crate) fn numbered_marks(values: &mut Vec<Value>, ids: &[i64]) -> String {
 }
 
 /// More ranges than this are read as one span and picked out of it ([`Store::refs_in_ranges`])
-const FEW_RANGES: usize = 64;
+pub(crate) const FEW_RANGES: usize = 64;
+
+/// `ranges` in order, those that overlap or touch as one
+pub(crate) fn merged(mut ranges: Vec<(u64, u64)>) -> Vec<(u64, u64)> {
+    ranges.sort_unstable();
+    let mut merged: Vec<(u64, u64)> = Vec::with_capacity(ranges.len());
+    for (start, end) in ranges {
+        match merged.last_mut() {
+            Some(previous) if start <= previous.1 => previous.1 = previous.1.max(end),
+            _ => merged.push((start, end)),
+        }
+    }
+    merged
+}
+
+/// Whether one of `ranges` (merged) holds `position`: only the last one starting at or before it can
+pub(crate) fn holds(ranges: &[(u64, u64)], position: u64) -> bool {
+    let starts_before = ranges.partition_point(|(start, _)| *start <= position);
+    starts_before > 0 && position < ranges[starts_before - 1].1
+}
 
 /// More ids than this go into a statement as one value ([`id_list`])
 const INLINE_IDS: usize = 500;
@@ -128,6 +148,30 @@ impl Store {
         if search.threads.is_some() {
             return self.thread_refs_in_ranges(search, sort, &ranges);
         }
+        if search.places_by_key() {
+            return self.refs_by_key(search, sort, ranges);
+        }
+        self.refs_numbered(search, sort, ranges)
+    }
+
+    /// [`Store::refs_in_ranges`] of a list one row a message: walked on the order's index ([`Store::rows_at`]), the
+    /// end known from the counts the folders keep (a search's would be one more pass over what it finds)
+    fn refs_by_key(&self, search: &Search, sort: Sort, ranges: Vec<(u64, u64)>) -> Result<Vec<MessageRef>> {
+        let rows = crate::search::message_rows(search, crate::search::walks_index(sort));
+        let length = || Ok(self.count_kept(search)?.map(|(count, _)| count));
+        self.rows_at(
+            &rows,
+            &Order::messages(sort),
+            &merged(ranges),
+            length,
+            "folder_id, uid",
+            crate::search::message_ref_at,
+        )
+    }
+
+    /// [`Store::refs_in_ranges`] from every row of the list numbered: for the lists whose places are not counted on
+    /// the order's index ([`Search::places_by_key`])
+    fn refs_numbered(&self, search: &Search, sort: Sort, ranges: Vec<(u64, u64)>) -> Result<Vec<MessageRef>> {
         let (positioned, mut values) = search.positioned(sort);
         if ranges.len() > FEW_RANGES {
             return self.refs_in_many_ranges(&positioned, values, ranges);
@@ -163,17 +207,9 @@ impl Store {
         &self,
         positioned: &str,
         mut values: Vec<Value>,
-        mut ranges: Vec<(u64, u64)>,
+        ranges: Vec<(u64, u64)>,
     ) -> Result<Vec<MessageRef>> {
-        ranges.sort_unstable();
-        let mut merged: Vec<(u64, u64)> = Vec::with_capacity(ranges.len());
-        for (start, end) in ranges {
-            match merged.last_mut() {
-                Some(previous) if start <= previous.1 => previous.1 = previous.1.max(end),
-                _ => merged.push((start, end)),
-            }
-        }
-        let ranges = merged;
+        let ranges = merged(ranges);
         let first = ranges[0].0;
         let last = ranges[ranges.len() - 1].1;
         values.push(Value::Integer(first as i64));
@@ -196,9 +232,7 @@ impl Store {
         let mut found = Vec::new();
         for row in rows {
             let (position, at) = row?;
-            // the ranges are apart now, so only the last one starting at or before the row can hold it
-            let starts_before = ranges.partition_point(|(start, _)| *start <= position);
-            if starts_before > 0 && position < ranges[starts_before - 1].1 {
+            if holds(&ranges, position) {
                 found.push(at);
             }
         }
@@ -425,7 +459,7 @@ impl Store {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{AccountSettings, FolderInfo, MessageInfo, Scope};
+    use crate::{AccountSettings, FolderInfo, MessageInfo, Scope, SortField};
 
     fn setup() -> (Store, FolderId, FolderId) {
         let store = Store::open_in_memory().unwrap();
@@ -530,6 +564,89 @@ mod tests {
         let mut wanted: Vec<MessageRef> = (0..3000).map(|i| at(inbox, 6000 - i * 2)).collect();
         wanted.insert(6, at(inbox, 6000 - 11));
         assert_eq!(refs, wanted);
+    }
+
+    /// Rows found by their sort keys from the nearest place known are those the whole list numbered gives: every
+    /// order, both ways, with ties in the key and messages without one, at the list's start and end, past it, in the
+    /// middle far from both, several ranges and more than one statement would name
+    #[test]
+    fn rows_found_by_key_are_those_numbered() {
+        let store = Store::open_in_memory().unwrap();
+        let account = store.add_account(&AccountSettings::example("a@example.com")).unwrap();
+        let folder = |path: &str| FolderInfo {
+            path: path.into(),
+            name: path.into(),
+            selectable: true,
+            ..Default::default()
+        };
+        store
+            .set_folders(account, &[folder("INBOX"), folder("Archive")])
+            .unwrap();
+        let folders = store.folders(account).unwrap();
+        let (inbox, archive) = (folders[0].id, folders[1].id);
+        let names = ["anna", "Anna", "bob", "Carla", ""];
+        let subjects = ["report", "Re: report", "Plan", "plan", ""];
+        let message = |uid: u64| MessageInfo {
+            uid,
+            // seven messages a date, every fiftieth without one
+            date: (!uid.is_multiple_of(50)).then_some((uid / 7) as i64 * 100),
+            internal_date: (!uid.is_multiple_of(3)).then_some((uid / 5) as i64 * 100),
+            from_name: names[uid as usize % names.len()].into(),
+            subject: subjects[uid as usize / 3 % subjects.len()].into(),
+            recipients: names[uid as usize / 2 % names.len()].into(),
+            size: Some(uid % 13),
+            ..Default::default()
+        };
+        let all: Vec<MessageInfo> = (1..=3000).map(message).collect();
+        store.add_messages(inbox, &all).unwrap();
+        // the same UIDs in another folder: ties broken by the row
+        let other: Vec<MessageInfo> = (1..=500).map(message).collect();
+        store.add_messages(archive, &other).unwrap();
+        let lists = [
+            Search {
+                scope: Scope::Folder(inbox),
+                ..Default::default()
+            },
+            Search::default(),
+        ];
+        let fields = [
+            SortField::Date,
+            SortField::Received,
+            SortField::From,
+            SortField::To,
+            SortField::Subject,
+            SortField::Size,
+        ];
+        let many: Vec<(u64, u64)> = (0..150).map(|i| (i * 2, i * 2 + 1)).collect();
+        let many_to_the_end: Vec<(u64, u64)> = (0..100).map(|i| (3300 + i * 3, 3300 + i * 3 + 2)).collect();
+        let wanted: Vec<Vec<(u64, u64)>> = vec![
+            vec![(0, 1)],
+            vec![(0, 5)],
+            vec![(2995, 3000)],
+            vec![(2999, 3005)],
+            vec![(3495, 3600)],
+            vec![(1500, 1503)],
+            vec![(2500, 2501)],
+            vec![(10, 12), (1200, 1210), (2990, 2995)],
+            vec![(1400, 1401), (1402, 1404), (3400, 3401)],
+            vec![(9, 5), (5, 9), (7, 12)],
+            vec![(4000, 4010)],
+            many,
+            many_to_the_end,
+        ];
+        for search in &lists {
+            for field in fields {
+                for ascending in [true, false] {
+                    let sort = Sort { field, ascending };
+                    for ranges in &wanted {
+                        let ranges: Vec<(u64, u64)> = ranges.iter().copied().filter(|(s, e)| s < e).collect();
+                        let numbered = store.refs_numbered(search, sort, ranges.clone()).unwrap();
+                        let by_key = store.refs_in_ranges(search, sort, &ranges).unwrap();
+                        assert_eq!(by_key, numbered, "{:?} {sort:?} {ranges:?}", search.scope);
+                    }
+                }
+            }
+        }
     }
 
     #[test]
