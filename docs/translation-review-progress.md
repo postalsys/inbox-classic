@@ -2,9 +2,11 @@
 
 ## Resume here
 
-Authoritative checkout: `/Users/andris/Projects/PostalExpress`, local `master`. The selected-message wording review
-is complete; commit the content, advance `core/locales/REVIEWED`, confirm zero pending changes, and archive this round.
-Commit locally without pushing. Round 9 remains archived separately.
+Authoritative checkout: `/Users/andris/Projects/PostalExpress`, local `master`. **Round 10 is complete.**
+All reviewed English and translation changes are committed in `82a928b66c7309c3068f9f7438d43e6ed85d4d8b`;
+`core/locales/REVIEWED` points to that commit. The final check reports zero pending and zero unaccounted changes.
+This round is archived in `translation-review-round10-state.json` and `translation-review-round10-progress.md`.
+Nothing was pushed by this review session. Round 9 remains archived separately.
 
 ## Reviewed wording
 
@@ -37,3 +39,6 @@ marks remain. These checks do not constitute native-speaker approval.
 
 No tests, builds, GUI runs or CI checks were run, as requested. Evidence is saved under the ignored
 `build/i18n-round10-20261127/` directory, including `final-audit.json` and `late-arrival-audit.json`.
+
+The final remote refresh still shows master at `c135330965efb301008b51dd99f539ee89687465` and PR #275 open.
+The completed translation content remains on local master. The remaining menu-help follow-up is described above.

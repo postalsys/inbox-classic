@@ -1,6 +1,6 @@
 {
   "round": 10,
-  "status": "reviewed_awaiting_baseline_commit",
+  "status": "complete",
   "starting_commit": "a34e9038c4d763ee45cb9990871283a10cbd97e8",
   "starting_review_baseline": "f2ecb709bede76eb4e1d4373ecae634e6f862bf5",
   "previous_round": 9,
@@ -2705,11 +2705,12 @@
   "publication": {
     "authorized": false,
     "instruction": "Commit to local master; do not push",
-    "pushed": false
+    "pushed": false,
+    "content_commit": "82a928b66c7309c3068f9f7438d43e6ed85d4d8b"
   },
   "validation_policy": "No tests, builds or CI. Exact paragraph diffs, static translation checks and late-arrival audit only.",
   "evidence_checkpoint": "/Users/andris/Projects/PostalExpress/build/i18n-round10-20261127",
-  "next_batch": "Commit wording changes, advance REVIEWED, confirm zero pending, archive round10 and commit metadata. Do not push.",
+  "next_batch": "No pending strings on local master. After PR #275 is integrated, enable the existing conversation View menu help paragraph on Windows in all 35 languages and update the glossary. Do not push without authorization.",
   "created_at": "2026-11-27T07:39:29.671423+00:00",
   "source_behavior_notes": [
     {
@@ -3001,7 +3002,9 @@
       ],
       "translation_changes": 0,
       "followup": "After the code fix is integrated, enable the existing conversation View menu help paragraph on Windows in all 35 languages and update the glossary platform note."
-    }
+    },
+    "final_remote_checked_at": "2026-11-27T08:36:48.317507+00:00",
+    "source_branches_unchanged": true
   },
   "source_branches": {
     "master": "a34e9038c4d763ee45cb9990871283a10cbd97e8",
@@ -3085,5 +3088,34 @@
     "catalog_values_changed": 0,
     "help_files_changed": 35,
     "pending": 0
+  },
+  "prebaseline_coverage": {
+    "command": "node scripts/i18n-review.mjs --since a34e9038c4d763ee45cb9990871283a10cbd97e8",
+    "exit_code": 0,
+    "pending_marked_catalog_messages": 0,
+    "pending_marked_help_passages": 0,
+    "unmarked_changed_help_passages": 34,
+    "all_accounted_for": true,
+    "explanation": "One reviewed action paragraph in each of 34 target languages; the checker excludes the English source. Exact before/after hashes authenticate all 35 changed files and the unchanged remainder.",
+    "unknown": [],
+    "log_sha256": "acb79a629e0c8801e4ce362d92aa0558b247583e7f40cba8885ec26dbc76ccdd"
+  },
+  "reviewed_content_commit": "82a928b66c7309c3068f9f7438d43e6ed85d4d8b",
+  "reviewed_baseline": "82a928b66c7309c3068f9f7438d43e6ed85d4d8b",
+  "completed_at": "2026-11-27T08:36:48.317507+00:00",
+  "final_baseline_check": {
+    "command": "node scripts/i18n-review.mjs --check",
+    "exit_code": 0,
+    "summary": "0 messages and 0 help passages wait for a review; 0 new or changed without a mark",
+    "log_sha256": "b1c34ba0bdb98083b3495bd5142c475b9a57f7e00a57bfe38fadbde7c1539398"
+  },
+  "known_limitations": [
+    "No tests, builds, GUI runs or CI checks were run, as requested.",
+    "Contextual editing and static checks do not constitute native-speaker approval.",
+    "PR #275 remains open; the Windows-specific menu help follow-up is recorded separately from the completed wording review."
+  ],
+  "archive": {
+    "state": "docs/translation-review-round10-state.json",
+    "progress": "docs/translation-review-round10-progress.md"
   }
 }
