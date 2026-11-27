@@ -78,6 +78,9 @@ mod reactions;
 /// Step 45a: settings and accounts to another computer
 mod setup;
 
+/// Step 4c: an account that needs a sign-in or can not connect
+mod account_status;
+
 /// Step 28, continued: an invitation answered, a change of many messages and Undo Since
 mod agent_bulk;
 /// Step 28, continued: the AI Agents log of reads, its language and Clear Log, and programs started from a terminal
@@ -93,6 +96,8 @@ thread_local! {
 
 struct Ports {
     imap: u16,
+    /// IMAP over TLS, for the account that signs in through ImapKit's OAuth provider
+    imaps: u16,
     smtp: u16,
     rest: u16,
     cert: String,
@@ -102,6 +107,8 @@ struct Ports {
     second_rest: u16,
     /// The harness's OpenPGP checks and key server
     pgp: u16,
+    /// The issuer of ImapKit's OAuth provider
+    oauth: String,
 }
 
 struct Driver {
@@ -283,6 +290,7 @@ fn start_harness() -> Result<((Child, ChildStdin), Ports), String> {
         (child, stdin),
         Ports {
             imap: port("imap"),
+            imaps: port("imaps"),
             smtp: port("smtp"),
             rest: port("rest"),
             cert: ports["cert"].as_str().unwrap_or_default().to_string(),
@@ -290,13 +298,15 @@ fn start_harness() -> Result<((Child, ChildStdin), Ports), String> {
             second_smtp: second("smtp"),
             second_rest: second("rest"),
             pgp: port("pgp"),
+            oauth: ports["oauth"].as_str().unwrap_or_default().to_string(),
         },
     ))
 }
 
-/// A request to ImapKit's REST API: its body, decoded from chunks when it came in them
-fn http(port: u16, method: &str, path: &str, body: Option<&str>) -> Result<String, String> {
-    let mut stream = std::net::TcpStream::connect(("127.0.0.1", port)).map_err(|e| e.to_string())?;
+/// A request to a server on this computer, `host` (127.0.0.1, localhost) at `port`: its head and the rest as they
+/// came, whatever its status
+fn exchange(host: &str, port: u16, method: &str, path: &str, body: Option<&str>) -> Result<(String, String), String> {
+    let mut stream = std::net::TcpStream::connect((host, port)).map_err(|e| e.to_string())?;
     stream.set_read_timeout(Some(Duration::from_secs(20))).ok();
     let body = body.unwrap_or("");
     let request = format!(
@@ -309,14 +319,20 @@ fn http(port: u16, method: &str, path: &str, body: Option<&str>) -> Result<Strin
     stream.read_to_end(&mut response).map_err(|e| e.to_string())?;
     let text = String::from_utf8_lossy(&response);
     let (head, rest) = text.split_once("\r\n\r\n").ok_or("no header")?;
+    Ok((head.to_string(), rest.to_string()))
+}
+
+/// A request to ImapKit's REST API: its body, decoded from chunks when it came in them
+fn http(port: u16, method: &str, path: &str, body: Option<&str>) -> Result<String, String> {
+    let (head, rest) = exchange("127.0.0.1", port, method, path, body)?;
     if !head.starts_with("HTTP/1.1 2") {
         return Err(head.lines().next().unwrap_or_default().to_string());
     }
     if !head.to_ascii_lowercase().contains("transfer-encoding: chunked") {
-        return Ok(rest.to_string());
+        return Ok(rest);
     }
     let mut decoded = String::new();
-    let mut rest = rest;
+    let mut rest = rest.as_str();
     while let Some((size, after)) = rest.split_once("\r\n") {
         let size = usize::from_str_radix(size.trim(), 16).unwrap_or(0);
         if size == 0 || after.len() < size {
@@ -1226,12 +1242,14 @@ async fn scenario(d: Rc<Driver>) {
             "sync" => sync::settings_sync(&d).await,
             "languages" => steps::languages(&d).await,
             "reactions" => reactions::reactions(&d).await,
+            "account-status" => account_status::account_status(&d).await,
             _ => {}
         }
         steps::closing(&d).await;
         return;
     }
     reading(&d).await;
+    account_status::account_status(&d).await;
     writing(&d).await;
     steps::not_downloaded(&d).await;
     steps::large_message(&d).await;
@@ -2208,6 +2226,15 @@ async fn attachment_reminder(d: &Driver) {
 }
 
 /// Whether the menu item of a toggle command has its check mark
+/// Whether the main window's command can be chosen now
+fn command_enabled(command: Command) -> bool {
+    shell()
+        .main()
+        .window()
+        .lookup_action(command.name())
+        .is_some_and(|a| a.is_enabled())
+}
+
 fn action_on(command: Command) -> bool {
     main_window()
         .downcast_ref::<gtk::ApplicationWindow>()
@@ -2785,21 +2812,33 @@ async fn wrong_password(d: &Driver) {
     steps::seed_second(d);
     command(Command::NewAccount);
     add_account(d, "Work", "testuser2", "not-the-password", false, true).await;
-    let logon = wait_dialog(30, "logon").await;
+    let mut logon = wait_dialog(30, "logon").await;
+    // with no window of the app in front the core's prompt came as a notification: its click asks
+    let notified = crate::notify::SENT.with(|sent| !sent.borrow().is_empty());
+    if logon.is_none()
+        && notified
+        && let Some(work) = shell().core.accounts().ok().and_then(|a| a.last().map(|a| a.id))
+    {
+        d.write("   (no window of the app was in front: the notification's click asks for the password)");
+        shell()
+            .application
+            .activate_action("account-status", Some(&work.to_variant()));
+        logon = wait_dialog(30, "logon").await;
+    }
     d.check(logon.is_some(), "a refused password is asked for again");
     if let Some(logon) = logon {
-        // the sync's end, which the status bar tells, may come a moment after the logon dialog
+        // the sync's end, which the status bar tells, may come a moment after the logon dialog: the core's words of
+        // the account that needs a sign-in, in place of Done
         let said = wait_until(10, || {
-            shell()
-                .main()
-                .status_texts()
-                .0
-                .to_lowercase()
-                .contains("authentication")
+            let expected = shell().core.accounts_status_text().ok().flatten();
+            expected.is_some_and(|expected| shell().main().status_texts().0 == expected)
         })
         .await;
         let status = shell().main().status_texts().0;
-        d.check(said, &format!("the status bar says why ({status})"));
+        d.check(
+            said,
+            &format!("the status bar says the account needs a sign-in ({status})"),
+        );
         d.shot(&logon, "trouble-1-password").await;
         // the right password, and the account syncs
         set_text(logon.upcast_ref(), "form-0", "testpass2");

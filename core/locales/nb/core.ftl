@@ -48,7 +48,6 @@ reader-downloading-detail = Meldingen vises her når nedlastingen er ferdig.
 reader-downloading-size = Meldingen er på { $size }. Den vises her når den er lastet ned.
 reader-failed = Meldingen kunne ikke lastes ned
 reader-failed-network = Tilkoblingen til e-postserveren mislyktes eller ble brutt ({ $reason }).
-reader-failed-sign-in = E-postserveren godtok ikke påloggingen ({ $reason }). Kontroller passordet, eller logg på igjen i kontoinnstillingene.
 reader-failed-security = Kunne ikke opprette en sikker tilkobling til e-postserveren ({ $reason }).
 reader-failed-other = E-postserveren svarte: { $reason }.
 reader-retry-note = Inbox Classic prøver igjen når kontoen er tilkoblet.

@@ -17,6 +17,7 @@ constexpr IconStrip kSecureVerifiedStrips[] = {{50, 16, 0xE8F5E9}, {51, 20, 0xE8
 constexpr IconStrip kSecureGoodStrips[] = {{60, 16, 0xE6EEFA}, {61, 20, 0xE6EEFA}, {62, 24, 0xE6EEFA}, {63, 32, 0xE6EEFA}};
 constexpr IconStrip kSecureWarningStrips[] = {{70, 16, 0xFFF4E0}, {71, 20, 0xFFF4E0}, {72, 24, 0xFFF4E0}, {73, 32, 0xFFF4E0}};
 constexpr IconStrip kSecureNeutralStrips[] = {{80, 16, 0xF2F2F2}, {81, 20, 0xF2F2F2}, {82, 24, 0xF2F2F2}, {83, 32, 0xF2F2F2}};
+constexpr IconStrip kMarkStrips[] = {{100, 16, 0xFFFFFF}, {101, 20, 0xFFFFFF}, {102, 24, 0xFFFFFF}, {103, 32, 0xFFFFFF}};
 
 enum ToolbarIcon : int {
     ICON_MAIL_ADD = 0,
@@ -116,4 +117,8 @@ enum SecureIcon : int {
     SECURE_SHIELD_CHECKMARK = 1,
     SECURE_RIBBON = 2,
     SECURE_WARNING = 3,
+};
+
+enum MarkIcon : int {
+    MARK_CLOUD_OFF = 0,
 };

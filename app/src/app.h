@@ -104,8 +104,14 @@ void SelectRow(HWND list, int row);
 // the icon strips of app/res/toolbar (icons.h): their image list at the size closest to the DPI, loaded once
 // the security bar's are drawn over the fill of its tone, in the color of its words
 // the attachment strip's are a file of each kind the core names
-enum class IconSet { Toolbar, Format, Folders, List, Files, SecureVerified, SecureGood, SecureWarning, SecureNeutral };
+// the quiet marks of the folder tree (Marks) are drawn in the gray of disabled text
+enum class IconSet { Toolbar, Format, Folders, List, Files, SecureVerified, SecureGood, SecureWarning, SecureNeutral, Marks };
 HIMAGELIST IconList(IconSet set);
+// the system's warning sign (the yellow triangle) at `size` pixels, shared (not destroyed), loaded once a size
+HICON WarningIcon(int size);
+// the mark of an account that is not signed in (the warning sign) or can not connect (a gray cloud with a line through
+// it) in a square of `size` at `left`, `top`; the gray one on a plate on a selected row, as the list's marks
+void DrawAccountMark(HDC dc, PeAccountMark mark, int left, int top, int size, bool selected);
 // text for a menu item: a & in it stays a & rather than making the next character a shortcut
 std::wstring MenuText(std::wstring text);
 // a menu item of the catalogs (`&` marking its letter) with its shortcut, the key names in the language in use:
@@ -325,6 +331,11 @@ struct SignInChoice {
 };
 // signs in with `with` for `email` in the browser; the finished sign-in request, 0 when it did not work
 uint64_t SignInWithBrowser(HWND owner, PeCore* core, SignInChoice with, const std::wstring& email);
+// Sign In Again of an account that signs in through the browser (`email` its address, for the wait's words): its own
+// provider and address (the provider's account picker after a sign-in to another address), its new sign-in kept and
+// the account synced; false when it did not sign in (said, unless cancelled or signed in to another address, which the
+// account's state says)
+bool SignInAgainInBrowser(HWND owner, PeCore* core, int64_t account, const std::wstring& email);
 // test runs (--sign-in-page-file): the sign-in page is written to this file for the test to open, not to the browser
 void SetSignInPageFile(const std::wstring& path);
 // test runs (--opened-files-log): an attachment opened is written to this file, a line of its path, not opened; a
@@ -335,7 +346,10 @@ bool AccountsDialog(HWND owner, PeCore* core);
 // the Properties of one account, as File > Accounts > Properties opens them (the account row's menu); true when saved
 bool AccountPropertiesDialog(HWND owner, PeCore* core, int64_t account);
 // asks for the password of an account; false when cancelled
-bool PasswordDialog(HWND owner, const std::wstring& account, std::wstring& password);
+// `hint` under the field (the core's word on app passwords), none when empty
+bool PasswordDialog(HWND owner, const std::wstring& account, const std::wstring& hint, std::wstring& password);
+// whether Sign In Again applies to `account` (it needs a sign-in the user can give); false for 0
+bool CanSignInAgain(const PeCore* core, int64_t account);
 
 // ---- signinapps.cpp ----
 
@@ -497,6 +511,8 @@ void SecurityDetailsDialog(HWND owner, PeProtectionTone tone, bool encrypted, co
 // opens the help window at the topic of `context` (pe_help_context: `main`, `account-form`, `options`...), or brings
 // it to the front and shows that topic there
 void OpenHelp(const char* context = "main");
+// opens the help window at the topic `topic` (an id of help/topics.toml the core named), as OpenHelp does
+void OpenHelpTopic(const std::string& topic);
 void CloseHelp();
 // F1 in `window`: the help at the topic of its context, or of the window that owns it (the main window's when none has
 // one); nothing in the help itself
@@ -535,11 +551,14 @@ enum class ComposeClose { Closed, Saving, Kept };
 ComposeClose CloseComposeWindows();
 // whether any compose window is open
 bool ComposeWindowsOpen();
+// `account` signed out, back in, or can not connect: the note under From of the compose windows writing from it follows
+void ComposeAccountStateChanged(int64_t account);
 // ---- tray.cpp ----
 
 // what the tray icon sends the main window, and what a message of it asks for
 constexpr UINT WM_TRAY = WM_APP + 60;
-enum class TrayAction { None, Handled, Open, Menu };
+// Account: a click on a notification about an account's sign-in (TrayNotifyAccount)
+enum class TrayAction { None, Handled, Open, Menu, Account };
 // the icon in the notification area, from the window's creation until it is gone
 void TrayCreate(HWND main);
 void TrayRemove(HWND main);
@@ -550,9 +569,16 @@ void TrayCount(HWND main, uint64_t unread);
 int64_t TrayBadge();
 // a Windows notification from the icon; a click on it asks for the message `uid` of `folder` (Open)
 void TrayNotify(HWND main, const std::wstring& title, const std::wstring& text, int64_t folder, uint64_t uid);
+// a Windows notification about `account` (it needs a sign-in); a click on it asks for what its state asks (Account)
+void TrayNotifyAccount(HWND main, const std::wstring& title, const std::wstring& text, int64_t account);
+// the accounts' sign-in and connection: with `signIn` accounts needing a sign-in, a warning sign on the icon; the
+// core's words (`status`, empty while every account is connected) on a line of its tooltip
+void TrayAttention(HWND main, uint32_t signIn, const std::wstring& status);
+// for the UI test: whether the icon carries the warning sign
+bool TrayAttentionShown();
 // a message of the main window that may be the tray's: what it asks for; for Open, the message of a clicked
-// notification in `folder` and `uid` (0 for none)
-TrayAction TrayMessage(HWND main, UINT message, WPARAM wParam, LPARAM lParam, int64_t& folder, uint64_t& uid);
+// notification in `folder` and `uid` (0 for none); for Account, the account of the notification clicked
+TrayAction TrayMessage(HWND main, UINT message, WPARAM wParam, LPARAM lParam, int64_t& folder, uint64_t& uid, int64_t& account);
 
 // a plain preference of the app (HKEY_CURRENT_USER\Software\Postal Systems\InboxClassic), `fallback` when it is
 // not set
@@ -1001,6 +1027,19 @@ public:
     int64_t SelectedAccount() const;
     // the account whose properties the selected row's menu opens: a heading's, or a row named after its account
     int64_t PropertiesAccount() const;
+    // the account Sign In Again acts on: the chosen row's, else the one the bar over the list speaks for; 0 for none
+    int64_t SignInAccount() const;
+    // what an account's state asks of the user (the bar's button, a click on a row's mark), run by the main window
+    std::function<void(int64_t account)> onStatusAction;
+    // AccountStateChanged: the tree's marks and the bar over the list read again
+    void AccountStateChanged();
+    // the bar over the list, shown for the account the core says the chosen row's list speaks for
+    // (pe_status_account_for), or hidden
+    void UpdateAccountBar();
+    // the UI test's look at the mark of the first tree row labelled as the text (its unread count left out): 10 plus
+    // its PeAccountMark, 0 when there is no such row; with a line break and a tooltip after the label, 1 when the row's
+    // tooltip is another
+    int TestTreeMark(const std::wstring& text) const;
     // File > Folder > New Folder applies to the row selected in the tree
     bool CanNewFolder() const;
     // the selected account row, or the selected Inbox under All Inboxes, moved `step` places in the accounts' order (-1
@@ -1115,6 +1154,10 @@ private:
         int64_t newFolderAccount = 0;
         int64_t newFolderParent = 0;
         int icon = 0;
+        // the sign-in state of its account on the rows that stand for it (PeTreeRow mark), drawn in place of the
+        // count, and its tooltip
+        PeAccountMark mark = PE_ACCOUNT_MARK_NONE;
+        std::wstring markTip;
     };
     static TreeRow RowFrom(const PeTreeRow& row);
     // the rows of a reading of the folder list, in their order
@@ -1290,8 +1333,24 @@ private:
     void EndPending();
     // over the list while it waits: the window colour at PE_LIST_DIM, and "Loading..." once it waited PE_LIST_LOADING_MS
     void DrawPending(HDC dc) const;
-    // the tree's NM_CUSTOMDRAW while a list waits: whether the row chosen was painted highlighted
+    // the tree's NM_CUSTOMDRAW: the marks of the accounts that are not signed in or can not connect, drawn over the
+    // room their rows keep after the label; while a list waits, whether the row chosen was painted highlighted
     void TreeCustomDraw(NMTVCUSTOMDRAW* draw, LRESULT& result);
+    // where the mark of a row is drawn, in the tree's pixels; false for a row without one
+    bool MarkRect(HTREEITEM item, RECT& rect) const;
+    // the row whose mark is at `client` (the tree's pixels), nullptr for none
+    HTREEITEM MarkAt(POINT client) const;
+    // the tree's mouse over a mark: the hand, and a click runs its account's action rather than choosing the row
+    static LRESULT CALLBACK TreeProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR, DWORD_PTR data);
+    // an information bar over the list (the account's state, an action the server did not do): placed at the top of
+    // `list`, which keeps the room under it, with its button at its right; drawn with its picture and words
+    void LayoutInfoBar(HWND bar, HWND button, int buttonWidth, const std::wstring& words, RECT& list) const;
+    void DrawInfoBar(const DRAWITEMSTRUCT& item, HWND button, const std::wstring& words, const std::function<void(HDC, int, int)>& icon) const;
+    // some row of the tree has an account's mark: only then is each row's drawing and a click looked at for one
+    bool anyMark_ = false;
+    // the spaces a marked row's name keeps for its mark, by the font it is drawn in (measured once a tree's filling)
+    std::unordered_map<HFONT, std::wstring> markRooms_;
+    std::wstring MarkRoomOf(HFONT font);
     // a folder changed: the list read again once for the changes of PE_LIST_GATHER_MS (TIMER_RELOAD), unless it is up
     // to date by then
     void ScheduleReload();
@@ -1380,9 +1439,6 @@ private:
     // the one folder the words typed name (in:sent), empty for every folder
     std::wstring findPlace_;
     void LayoutList();
-    // the bar of an action the server did not do (ShowUndone): placed at the top of `list`, which is left the rest; drawn
-    void LayoutUndoneBar(RECT& list);
-    void DrawUndoneBar(const DRAWITEMSTRUCT& item) const;
     void FitSubjectColumn();
     // the tooltips of the icon columns' headers (what the paper clip, the flag and the lock stand for), over where
     // those headers are now
@@ -1488,6 +1544,13 @@ private:
     // the actions started and not done yet, by request: the row to select once done when the messages left the list
     // (-1: they stay, the list read again with the selection kept)
     std::unordered_map<uint64_t, int> actions_;
+    // the bar over the list while the account of the folder shown is not signed in or can not connect: the account,
+    // its mark and words, and its button
+    HWND accountBar_ = nullptr;
+    HWND accountButton_ = nullptr;
+    int64_t barAccount_ = 0;
+    PeAccountMark barMark_ = PE_ACCOUNT_MARK_NONE;
+    std::wstring barText_;
     // the bar over the list when the server did not do an action: its words and its close button
     HWND undoneBar_ = nullptr;
     HWND undoneClose_ = nullptr;
@@ -1647,6 +1710,10 @@ enum ControlId : WORD {
     IDC_UNDONE_CLOSE,
     // the Reactions line under the message header: who reacted with which emoji, a menu on each
     IDC_REACTIONS,
+    // over the list while the account of the folder shown is not signed in or can not connect: what is wrong, and the
+    // button that does what helps (Sign In Again, Enter Password, Try Again...)
+    IDC_ACCOUNT_BAR = 247,
+    IDC_ACCOUNT_BAR_BUTTON,
 };
 
 // the items of the Flag submenu: IDM_FLAG_COLOR + 1 (red) to + 7 (gray), and Clear Flag
@@ -1874,6 +1941,8 @@ enum ComposeKeysControlId : WORD {
     IDC_COMPOSE_KEYS,
     // the line over them that says an AI agent wrote the draft
     IDC_COMPOSE_AGENT_NOTE,
+    // the note under From while the account it goes from is not signed in or can not connect (355)
+    IDC_COMPOSE_ACCOUNT_NOTE,
     // Recipients' Keys: what it says at its top, the list, the selected recipient's buttons, the key that waits for a
     // decision and its two answers, why Send Without Encryption is off, and the buttons at the bottom (Send is IDOK)
     IDC_RKEYS_INTRO = 360,
@@ -1928,6 +1997,9 @@ enum KeysControlId : WORD {
     IDC_ACCOUNT_AUTOCRYPT,
     // Encryption Keys: Import from Clipboard (a free number, as 900 and on are the menus')
     IDC_KEYS_PASTE = 920,
+    // Account Properties of an account that signs in through the browser: Sign In Again, and what its state is
+    IDC_ACCOUNT_SIGN_IN_AGAIN,
+    IDC_ACCOUNT_SIGN_IN_STATE,
 };
 
 // the controls of Export and Import Settings and Accounts (setup.cpp), which the UI test finds by them

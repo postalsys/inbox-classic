@@ -1494,6 +1494,20 @@ final class InfoBar: NSView {
         row?.edgeInsets = NSEdgeInsets(top: 6, left: 8, bottom: 6, right: 8)
     }
 
+    /// how tall the bar is at `width` with its text wrapped (`wrapText`) on as many lines as it needs beside the icon
+    /// and the button: the edges, the icon and three gaps of the row are 56 points. The label wraps at that room too
+    func fittingHeight(width: CGFloat) -> CGFloat {
+        var room = width - 56
+        if let action, !action.isHidden {
+            room -= action.fittingSize.width
+        }
+        room = max(room.rounded(.down), 120)
+        textLabel.preferredMaxLayoutWidth = room
+        let text = textLabel.cell?.cellSize(forBounds: NSRect(x: 0, y: 0, width: room, height: 10_000)).height ?? 16
+        let button = action.map { $0.isHidden ? 0 : $0.fittingSize.height } ?? 0
+        return ceil(max(text, button, 16)) + 12
+    }
+
     /// a small button, as the pictures bar's, for a bar stacked with it
     func smallButton() {
         action?.makeSmall()

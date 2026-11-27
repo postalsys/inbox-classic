@@ -257,8 +257,12 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
     private let grid = NSGridView()
     /// the rows of the field grid
     private enum Row {
-        static let from = 0, to = 1, cc = 2, bcc = 3, keys = 4, subject = 5, attach = 6
+        static let from = 0, fromNote = 1, to = 2, cc = 3, bcc = 4, keys = 5, subject = 6, attach = 7
     }
+    /// under From while the account chosen is not signed in or can not connect: the message will wait in the Outbox
+    private let fromNote = NSStackView()
+    /// what it says, empty while it is hidden (the UI test)
+    private(set) var fromNoteText = ""
     private var inReplyTo = ""
     private var references = ""
     private var quote = ""
@@ -470,6 +474,7 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
             button.widthAnchor.constraint(equalToConstant: pickWidth).isActive = true
         }
         grid.addRow(with: [label(Text.uiFieldFrom.text), from])
+        grid.addRow(with: [NSGridCell.emptyContentView, makeFromNote()])
         grid.addRow(with: [picks[0], toRow])
         grid.addRow(with: [picks[1], cc])
         grid.addRow(with: [picks[2], bcc])
@@ -489,6 +494,9 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
         for row in Row.to...Row.attach {
             grid.cell(atColumnIndex: 1, rowIndex: row).xPlacement = .fill
         }
+        grid.row(at: Row.fromNote).rowAlignment = .none
+        grid.row(at: Row.fromNote).yPlacement = .center
+        showFromNote()
         // the chips are no text: the row's label in the middle of them
         grid.row(at: Row.keys).yPlacement = .center
         grid.row(at: Row.keys).rowAlignment = .none
@@ -566,7 +574,7 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
         let field = [to, cc, bcc][index]
         field.stringValue = addressFieldAdding(field.stringValue, labels)
         if index > 0 {
-            grid.row(at: index + 1).isHidden = false
+            grid.row(at: Row.to + index).isHidden = false
             (index == 1 ? ccButton : bccButton).isHidden = true
         }
         changed()
@@ -635,6 +643,33 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
         }
         changed()
         refreshSecurity()
+        showFromNote()
+    }
+
+    /// the note under From: what the folder list marks the account with, beside the core's words
+    private func makeFromNote() -> NSView {
+        fromNote.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        return fromNote
+    }
+
+    /// the note under From as the chosen account's state says, hidden while it is connected
+    private func showFromNote() {
+        let status = core.accountStatus(account)
+        fromNoteText = status.composeNote
+        fromNote.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        if !fromNoteText.isEmpty {
+            fromNote.addArrangedSubview(warningNote(fromNoteText, id: "compose.fromNote", picture: AccountMark.picture(status.mark)))
+        }
+        if grid.numberOfRows > Row.fromNote {
+            grid.row(at: Row.fromNote).isHidden = fromNoteText.isEmpty
+        }
+    }
+
+    /// `account`'s sign-in or connection changed: the note under From of the windows writing from it
+    static func accountStateChanged(_ account: Int64) {
+        for compose in open where compose.account == account {
+            compose.showFromNote()
+        }
     }
 
     // ---- the editor ----

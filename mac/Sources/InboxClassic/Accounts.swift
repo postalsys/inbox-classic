@@ -99,8 +99,21 @@ enum SignIn {
     static func withBrowser(core: Core, with: SignInChoice, email: String) -> UInt64 {
         var page: UnsafeMutablePointer<CChar>?
         let request = email.withCString { pe_sign_in_begin(core.handle, with.provider, with.app, $0, &page) }
+        return finish(core: core, request: request, page: taken(page) ?? "", email: email, title: Text.uiAddAccountTitle.text)
+    }
+
+    /// signs `account` in again in the browser, with its own provider and address (Sign In Again, Try Again; after
+    /// the browser signed in to another address the provider shows its account picker); the finished sign-in request
+    /// for `pe_account_reauthorize`, 0 when it did not work
+    static func again(core: Core, account: Int64, email: String) -> UInt64 {
+        var page: UnsafeMutablePointer<CChar>?
+        let request = pe_sign_in_again_begin(core.handle, account, &page)
+        return finish(core: core, request: request, page: taken(page) ?? "", email: email, title: Text.cmdSignInAgain.title)
+    }
+
+    /// the sign-in `request` begun: its page opened in the browser (or written for the test), waited for
+    private static func finish(core: Core, request: UInt64, page address: String, email: String, title: String) -> UInt64 {
         // the core makes the page, and gives only an https page or one of a provider on this computer (a test server)
-        let address = taken(page) ?? ""
         guard request != 0, !address.isEmpty else {
             inform(Text.uiSignInNotStarted.text, style: .error)
             return 0
@@ -111,7 +124,7 @@ enum SignIn {
             NSWorkspace.shared.open(url)
         }
         let text = email.isEmpty ? Text.uiSignInInBrowserYours.text : Text.uiSignInInBrowser.text(["account": email])
-        guard Waiting.wait(for: request, text: text, title: Text.uiAddAccountTitle.text,
+        guard Waiting.wait(for: request, text: text, title: title,
                            cancel: { pe_sign_in_cancel(core.handle, $0) })
         else { return 0 }
         var why: UnsafeMutablePointer<CChar>?
@@ -122,6 +135,20 @@ enum SignIn {
         // back in front, the browser had it
         NSApp.activate()
         return request
+    }
+}
+
+/// `account`, which signs in through the browser, signed in again (the core syncs it then). What went wrong is said,
+/// but a browser that came back with another address, which the bar over the list says
+@MainActor
+func signInAgain(core: Core, account: Int64, email: String) {
+    let request = SignIn.again(core: core, account: account, email: email)
+    guard request != 0 else { return }
+    var why: UnsafeMutablePointer<CChar>?
+    let result = pe_account_reauthorize(core.handle, account, request, &why)
+    let reason = taken(why)
+    if result == PE_REAUTHORIZED_FAILED {
+        inform(Text.uiSignInAgainFailed.text(["reason": reason ?? Text.uiUnknownReason.text]), style: .warning)
     }
 }
 
@@ -615,10 +642,11 @@ func newAccountDialog(core: Core) -> Int64 {
     return 0
 }
 
-/// the password of `account`, asked for; nil when cancelled
+/// the password of `account`, asked for, with `hint` under the request when given; nil when cancelled
 @MainActor
-func passwordDialog(account: String) -> String? {
-    formDialog(title: Text.uiLogon.text, intro: Text.uiEnterPassword.text(["account": account]),
+func passwordDialog(account: String, hint: String = "") -> String? {
+    let intro = Text.uiEnterPassword.text(["account": account]) + (hint.isEmpty ? "" : "\n\n" + hint)
+    return formDialog(title: Text.uiLogon.text, intro: intro,
                fields: [FormField(label: Text.uiFieldPassword.text, kind: .password)])?[0].value
 }
 
@@ -729,6 +757,8 @@ private final class AccountsWindow: NSObject, NSTableViewDataSource, NSTableView
     private let table = NSTableView()
     private var accounts: [Account] = []
     private var changed = false
+    /// Sign In Again, for an account that signs in through the browser
+    private var signInAgainButton: NSButton!
 
     init(core: Core) {
         self.core = core
@@ -760,6 +790,7 @@ private final class AccountsWindow: NSObject, NSTableViewDataSource, NSTableView
         let buttons = NSStackView(views: [
             button(Text.macAddButton.text, #selector(add), "accounts.add"),
             button(Text.macPropertiesButton.text, #selector(properties), "accounts.properties"),
+            button(Command.signInAgain.label, #selector(signInAgainClicked), "accounts.signInAgain"),
             button(Text.macSignatureButton.text, #selector(signature), "accounts.signature"),
             button(Text.macSecurityButton.text, #selector(security), "accounts.security"),
             button(Text.uiRemove.text, #selector(remove), "accounts.remove"),
@@ -767,6 +798,8 @@ private final class AccountsWindow: NSObject, NSTableViewDataSource, NSTableView
         ])
         buttons.orientation = .vertical
         buttons.alignment = .leading
+        signInAgainButton = buttons.arrangedSubviews.compactMap { $0 as? NSButton }
+            .first { $0.accessibilityIdentifier() == "accounts.signInAgain" }
         let close = button(Text.uiClose.text, #selector(closeClicked), "accounts.close")
         close.keyEquivalent = "\r"
         // the help button over Close, at the bottom of the column
@@ -798,6 +831,18 @@ private final class AccountsWindow: NSObject, NSTableViewDataSource, NSTableView
         if !accounts.isEmpty {
             table.selectRowIndexes(IndexSet(integer: min(select, accounts.count - 1)), byExtendingSelection: false)
         }
+        updateButtons()
+    }
+
+    /// Sign In Again while the account needs a sign-in the user can give, as its state says
+    private func updateButtons() {
+        signInAgainButton?.isEnabled = selected.map {
+            core.accountState($0.id) != PE_ACCOUNT_STATE_CONNECTED && core.accountStatus($0.id).canSignInAgain
+        } ?? false
+    }
+
+    func tableViewSelectionDidChange(_ notification: Notification) {
+        updateButtons()
     }
 
     func numberOfRows(in tableView: NSTableView) -> Int { accounts.count }
@@ -831,6 +876,13 @@ private final class AccountsWindow: NSObject, NSTableViewDataSource, NSTableView
             changed = true
             fill(select: table.selectedRow)
         }
+    }
+
+    /// what the account's state offers: the browser's sign-in, or the password
+    @objc private func signInAgainClicked() {
+        guard let account = selected else { return }
+        AppDelegate.shared.main?.runStatusAction(account.id)
+        updateButtons()
     }
 
     @objc private func signature() {

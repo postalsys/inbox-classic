@@ -330,11 +330,8 @@ RecipientKeysAnswer RecipientKeysDialog(HWND owner, PeCore* core, const Recipien
     ListView_InsertColumn(state.list, 1, &column);
     CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_UI_RECIPIENT_FIND_KEY).c_str(), WS_TABSTOP | BS_PUSHBUTTON, IDC_RKEYS_FIND, {});
     CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_UI_RECIPIENT_REMOVE).c_str(), WS_TABSTOP | BS_PUSHBUTTON, IDC_RKEYS_REMOVE, {});
-    int icon = GetSystemMetrics(SM_CXSMICON);
-    // a system icon is shared: not destroyed
-    auto warning = static_cast<HICON>(LoadImageW(nullptr, IDI_WARNING, IMAGE_ICON, icon, icon, LR_SHARED));
     HWND sign = CreateChild(dialog, L"STATIC", nullptr, SS_ICON | SS_REALSIZECONTROL, 0, {});
-    SendMessageW(sign, STM_SETICON, reinterpret_cast<WPARAM>(warning), 0);
+    SendMessageW(sign, STM_SETICON, reinterpret_cast<WPARAM>(WarningIcon(GetSystemMetrics(SM_CXSMICON))), 0);
     CreateChild(dialog, L"STATIC", L"", SS_LEFT | SS_NOPREFIX, IDC_RKEYS_PENDING, {});
     CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_UI_CONTACT_KEY_USE_NEW).c_str(), WS_TABSTOP | BS_PUSHBUTTON, IDC_RKEYS_USE_NEW, {});
     CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_UI_CONTACT_KEY_KEEP).c_str(), WS_TABSTOP | BS_PUSHBUTTON, IDC_RKEYS_KEEP, {});

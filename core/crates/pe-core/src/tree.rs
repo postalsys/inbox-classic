@@ -8,7 +8,7 @@
 use pe_imap::SpecialUse;
 use pe_store::{AccountId, Folder, FolderId};
 
-use crate::{Core, Result, account_titles, all_inboxes_shown, emptiable, text};
+use crate::{Core, Result, TreeMark, account_titles, all_inboxes_shown, emptiable, text};
 
 /// What a row of the folder list is
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -129,6 +129,11 @@ pub struct TreeRow {
     /// A word for its icon: a special folder's (`inbox`, `sent`, `drafts`, `deleted`, `junk`, `archive`, `flagged`,
     /// `all`), `account` for a heading, empty for any other folder
     pub icon: &'static str,
+    /// The account's sign-in state ([`crate::AccountStatus`]) on the rows that stand for the account: its heading, its
+    /// Inbox under All Inboxes, and the Inbox of the only account; [`TreeMark::None`] on every other row
+    pub mark: TreeMark,
+    /// What the mark means, for its tooltip and a screen reader; empty without a mark
+    pub mark_tooltip: String,
 }
 
 impl TreeRow {
@@ -176,6 +181,8 @@ impl TreeRow {
             new_folder_account: account,
             new_folder_parent: 0,
             icon,
+            mark: TreeMark::None,
+            mark_tooltip: String::new(),
         }
     }
 }
@@ -277,6 +284,8 @@ fn folder_row(folder: &Folder, depth: usize) -> TreeRow {
         // the Inbox holds no folders in the list: a folder made from it goes at the top
         new_folder_parent: if is_inbox(folder) { 0 } else { folder.id },
         icon: icon(folder),
+        mark: TreeMark::None,
+        mark_tooltip: String::new(),
     }
 }
 
@@ -425,9 +434,12 @@ fn several_accounts(
     rows
 }
 
+/// Each account's mark and its tooltip, for the rows that stand for the account; an account without one has none
+pub(crate) type Marks = std::collections::HashMap<AccountId, (TreeMark, String)>;
+
 /// The rows of the folder list of `accounts` (each with its folders, in the accounts' order) and the number of
-/// flagged messages
-pub(crate) fn rows(accounts: Vec<(pe_store::Account, Vec<Folder>)>, flagged: u64) -> Vec<TreeRow> {
+/// flagged messages, the accounts' rows marked as `marks` says
+pub(crate) fn rows(accounts: Vec<(pe_store::Account, Vec<Folder>)>, flagged: u64, marks: &Marks) -> Vec<TreeRow> {
     if accounts.is_empty() {
         return Vec::new();
     }
@@ -444,7 +456,8 @@ pub(crate) fn rows(accounts: Vec<(pe_store::Account, Vec<Folder>)>, flagged: u64
         .into_iter()
         .map(|(account, folders)| (account.id, ordered(folders)))
         .collect();
-    let mut rows = if all_inboxes_shown(ordered.len()) {
+    let several = all_inboxes_shown(ordered.len());
+    let mut rows = if several {
         several_accounts(&ordered, &titles, flagged_row)
     } else {
         one_account(&ordered[0].1, ordered[0].0, flagged_row)
@@ -455,6 +468,19 @@ pub(crate) fn rows(accounts: Vec<(pe_store::Account, Vec<Folder>)>, flagged: u64
     for row in rows.iter_mut().filter(|row| row.list.gathers()) {
         row.unread = row.hidden;
         row.hidden = 0;
+    }
+    for row in rows.iter_mut() {
+        // the rows that stand for the account: its heading and its Inbox under All Inboxes, or the only account's
+        // Inbox (the one folder that offers its Properties then)
+        let stands_for_account = match row.kind {
+            TreeRowKind::Account | TreeRowKind::AccountInbox => true,
+            TreeRowKind::Folder => !several && row.account_properties,
+            _ => false,
+        };
+        if let Some((mark, tooltip)) = marks.get(&row.account).filter(|_| stands_for_account) {
+            row.mark = *mark;
+            row.mark_tooltip = tooltip.clone();
+        }
     }
     rows
 }
@@ -493,7 +519,8 @@ impl Core {
     /// The folder list of the main window, row by row in its order ([`TreeRow`])
     pub fn folder_tree(&self) -> Result<Vec<TreeRow>> {
         let accounts = self.accounts_with_folders()?;
-        Ok(rows(accounts, self.flagged_count()?))
+        let ids: Vec<AccountId> = accounts.iter().map(|(account, _)| account.id).collect();
+        Ok(rows(accounts, self.flagged_count()?, &self.tree_marks(&ids)))
     }
 
     /// Every folder in the order the folder list shows them, each with its counts: the order Next Unread goes in
@@ -504,7 +531,7 @@ impl Core {
             .flat_map(|(_, folders)| folders.iter().map(|folder| (folder.id, folder.clone())))
             .collect();
         // the rows' order, without counting the flagged messages it does not need
-        Ok(rows(accounts, 0)
+        Ok(rows(accounts, 0, &Marks::new())
             .into_iter()
             .filter_map(|row| folders.remove(&row.folder))
             .collect())
@@ -566,7 +593,7 @@ mod tests {
     #[test]
     fn one_account_starts_with_its_inbox_and_has_no_heading() {
         pe_i18n::set_language("en");
-        let rows = rows(vec![(account(1, "ann@example.org"), folders(1, 0))], 4);
+        let rows = rows(vec![(account(1, "ann@example.org"), folders(1, 0))], 4, &Marks::new());
         assert_eq!(
             shape(&rows),
             [
@@ -599,7 +626,7 @@ mod tests {
         let mut deep = folders(1, 0);
         deep.push(folder(7, 1, "Projects/Alpha/Beta", None, 2));
         deep.push(folder(8, 1, "Projects/Gamma", None, 1));
-        let rows = rows(vec![(account(1, "ann@example.org"), deep)], 0);
+        let rows = rows(vec![(account(1, "ann@example.org"), deep)], 0, &Marks::new());
         let at = |label: &str| rows.iter().find(|row| row.label == label).unwrap();
         assert_eq!(
             (at("Projects").hidden, at("Alpha").hidden, at("Beta").hidden),
@@ -611,13 +638,14 @@ mod tests {
     #[test]
     fn a_selection_survives_an_account_coming_and_going() {
         pe_i18n::set_language("en");
-        let one = rows(vec![(account(1, "ann@example.org"), folders(1, 0))], 0);
+        let one = rows(vec![(account(1, "ann@example.org"), folders(1, 0))], 0, &Marks::new());
         let two = rows(
             vec![
                 (account(1, "ann@example.org"), folders(1, 0)),
                 (account(2, "ann@work.example"), folders(2, 10)),
             ],
             0,
+            &Marks::new(),
         );
         let at = |rows: &[TreeRow], key: &str| rows.iter().position(|row| row.key == key);
         // a folder keeps its key under All Inboxes or All Sent and as one account's own
@@ -662,6 +690,7 @@ mod tests {
                 (account(2, "ann@work.example"), folders(2, 10)),
             ],
             0,
+            &Marks::new(),
         );
         assert_eq!(
             shape(&rows),
@@ -711,7 +740,7 @@ mod tests {
     #[test]
     fn the_only_accounts_inbox_offers_its_properties() {
         pe_i18n::set_language("en");
-        let one = rows(vec![(account(1, "ann@example.org"), folders(1, 0))], 0);
+        let one = rows(vec![(account(1, "ann@example.org"), folders(1, 0))], 0, &Marks::new());
         let offering: Vec<&str> = one
             .iter()
             .filter(|row| row.account_properties)
@@ -725,8 +754,46 @@ mod tests {
     fn an_account_without_an_inbox_yet() {
         pe_i18n::set_language("en");
         let only = vec![folder(1, 1, "Archive", Some("\\Archive"), 0)];
-        let rows = rows(vec![(account(1, "a@example.org"), only)], 0);
+        let rows = rows(vec![(account(1, "a@example.org"), only)], 0, &Marks::new());
         assert_eq!(shape(&rows), ["Flagged Flagged", "Folder Archive"]);
-        assert!(super::rows(Vec::new(), 0).is_empty());
+        assert!(super::rows(Vec::new(), 0, &Marks::new()).is_empty());
+    }
+
+    #[test]
+    fn the_rows_of_an_account_carry_its_state() {
+        pe_i18n::set_language("en");
+        let marks: Marks = [(2, (TreeMark::SignIn, "not signed in".to_string()))].into();
+        let marked = |rows: &[TreeRow]| -> Vec<String> {
+            rows.iter()
+                .filter(|row| row.mark != TreeMark::None)
+                .map(|row| format!("{:?} {} {:?} {}", row.kind, row.label, row.mark, row.mark_tooltip))
+                .collect()
+        };
+        // several accounts: the heading and the Inbox under All Inboxes, nothing else of it
+        let two = rows(
+            vec![
+                (account(1, "ann@example.org"), folders(1, 0)),
+                (account(2, "ann@work.example"), folders(2, 10)),
+            ],
+            0,
+            &marks,
+        );
+        assert_eq!(
+            marked(&two),
+            [
+                "AccountInbox work.example SignIn not signed in",
+                "Account work.example SignIn not signed in"
+            ]
+        );
+        // one account: its Inbox, which stands for it
+        let one = rows(vec![(account(2, "ann@work.example"), folders(2, 10))], 0, &marks);
+        assert_eq!(marked(&one), ["Folder Inbox SignIn not signed in"]);
+        let cannot: Marks = [(2, (TreeMark::CannotConnect, "cannot connect".to_string()))].into();
+        let one = rows(vec![(account(2, "ann@work.example"), folders(2, 10))], 0, &cannot);
+        assert_eq!(marked(&one), ["Folder Inbox CannotConnect cannot connect"]);
+        // an account without a mark has none
+        let fine = rows(vec![(account(1, "ann@example.org"), folders(1, 0))], 0, &marks);
+        assert!(marked(&fine).is_empty());
+        assert!(fine.iter().all(|row| row.mark_tooltip.is_empty()));
     }
 }

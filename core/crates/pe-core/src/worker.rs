@@ -20,6 +20,7 @@ use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender, error::TryRecvError}
 
 use pe_i18n::{Text, tr, tr_args};
 
+use crate::status::{SignInReason, Status};
 use crate::{Event, EventSink, FailureKind, Secrets};
 
 mod background;
@@ -185,17 +186,27 @@ struct Failure {
     message: String,
     /// Told to the user already ([`Event::ActionUndone`]): nothing more to say
     told: bool,
+    /// The account's sign-in was refused, and why: what [`Worker::reset_after`] makes the account's state. None for a
+    /// failure that says nothing of the account's sign-in (an SMTP server that refused it is the Outbox's)
+    sign_in: Option<SignInReason>,
 }
 
 impl From<pe_imap::Error> for Failure {
     fn from(error: pe_imap::Error) -> Self {
-        let kind = match error.kind() {
-            ErrorKind::Network | ErrorKind::Closed => FailureKind::Network,
-            ErrorKind::Security => FailureKind::Security,
-            ErrorKind::Authentication => FailureKind::Authentication,
-            _ => FailureKind::Other,
+        let (kind, sign_in) = match error.kind() {
+            ErrorKind::Network | ErrorKind::Closed => (FailureKind::Network, None),
+            ErrorKind::Security => (FailureKind::Security, None),
+            // IMAP turned off for the mailbox (pe_imap counts it as a refused sign-in) needs the mailbox's settings
+            ErrorKind::Authentication if error.is_imap_disabled() => {
+                (FailureKind::Authentication, Some(SignInReason::ImapOff))
+            }
+            ErrorKind::Authentication => (FailureKind::Authentication, Some(SignInReason::Refused)),
+            _ => (FailureKind::Other, None),
         };
-        Failure::said(kind, error.to_string())
+        Failure {
+            sign_in,
+            ..Failure::said(kind, error.to_string())
+        }
     }
 }
 
@@ -206,6 +217,7 @@ impl Failure {
             kind: FailureKind::Other,
             message: String::new(),
             told: true,
+            sign_in: None,
         }
     }
 
@@ -237,6 +249,7 @@ impl Failure {
             kind,
             message,
             told: false,
+            sign_in: None,
         }
     }
 }
@@ -266,6 +279,7 @@ impl From<pe_sync::Error> for Failure {
             pe_sync::Error::Imap(error) => error.into(),
             other => Failure {
                 told: false,
+                sign_in: None,
                 kind: FailureKind::Other,
                 message: other.to_string(),
             },
@@ -273,6 +287,8 @@ impl From<pe_sync::Error> for Failure {
     }
 }
 
+/// A failure of the SMTP server: a sign-in it refused (`sign_in` None) is the Outbox's, told as the reason its
+/// messages wait, not the account being signed out (its IMAP sign-in may work)
 impl From<pe_smtp::Error> for Failure {
     fn from(error: pe_smtp::Error) -> Self {
         let kind = match error.kind() {
@@ -289,6 +305,7 @@ impl From<crate::ComposeError> for Failure {
     fn from(error: crate::ComposeError) -> Self {
         Failure {
             told: false,
+            sign_in: None,
             kind: FailureKind::Other,
             message: error.to_string(),
         }
@@ -327,6 +344,42 @@ mod failure_tests {
         );
         assert_eq!(said(FailureKind::Other, "the server refused X"), "the server refused X");
     }
+
+    #[test]
+    fn a_refused_smtp_sign_in_is_the_outboxs_not_the_accounts() {
+        let refused = Failure::from(pe_smtp::Error::AuthenticationUnavailable);
+        assert_eq!((refused.kind, refused.sign_in), (FailureKind::Authentication, None));
+    }
+
+    #[test]
+    fn what_imap_says_of_a_refused_sign_in() {
+        let login = |code: Option<&str>, text: &str| {
+            Failure::from(pe_imap::Error::AuthenticationFailed {
+                code: code.map(Into::into),
+                text: text.into(),
+            })
+        };
+        let refused = login(None, "Invalid credentials");
+        assert_eq!(
+            (refused.kind, refused.sign_in),
+            (FailureKind::Authentication, Some(SignInReason::Refused))
+        );
+        assert_eq!(
+            login(None, "Your account is not enabled for IMAP use.").sign_in,
+            Some(SignInReason::ImapOff)
+        );
+        // said in a BYE too
+        let bye = Failure::from(pe_imap::Error::Closed(Some(
+            "IMAP access is disabled for your domain.".into(),
+        )));
+        assert_eq!(
+            (bye.kind, bye.sign_in),
+            (FailureKind::Authentication, Some(SignInReason::ImapOff))
+        );
+        // a busy server refuses no sign-in: a connection that failed, the account's token kept
+        let busy = login(Some("UNAVAILABLE"), "Try later");
+        assert_eq!((busy.kind, busy.sign_in), (FailureKind::Network, None));
+    }
 }
 
 impl Worker {
@@ -357,6 +410,7 @@ async fn build(
     .await
     .map_err(|_| Failure {
         told: false,
+        sign_in: None,
         kind: FailureKind::Other,
         message: tr(Text::ErrorNotBuilt),
     })?
@@ -374,9 +428,8 @@ pub(crate) fn unix_now() -> i64 {
 fn kept(failure: Failure, waiting: usize) -> Failure {
     let note = tr_args(Text::ErrorOutboxWaits, &[("count", waiting.into())]);
     Failure {
-        told: false,
-        kind: failure.kind,
         message: format!("{} ({note})", failure.message),
+        ..failure
     }
 }
 
@@ -459,6 +512,8 @@ pub(crate) struct Context {
     pub(crate) restored: crate::selection::Restored,
     /// The certificates read so far, shared with the core: the background pass decrypts with the user's keys
     pub(crate) pgp_certs: Arc<crate::keys::CertCache>,
+    /// Whether each account is signed in and can connect (status.rs)
+    pub(crate) status: Arc<Status>,
 }
 
 pub(crate) struct Worker {
@@ -580,6 +635,9 @@ impl Worker {
             if let Err(failure) = outcome {
                 self.fail(failure);
             }
+            if sync {
+                self.sync_state(failure);
+            }
             // after the failure and the changes it found, so the window knows the sync is done
             if sync {
                 self.emit(Event::SyncFinished {
@@ -589,6 +647,16 @@ impl Worker {
             }
         }
         self.log_out().await;
+    }
+
+    /// What a sync that ended with `failure` says of the account: synced without one, or one more sync that could not
+    /// connect (a refused sign-in said so already, in [`Worker::reset_after`])
+    fn sync_state(&self, failure: Option<FailureKind>) {
+        match failure {
+            None => self.ctx.status.synced(self.account),
+            Some(FailureKind::Network | FailureKind::Security) => self.ctx.status.unreachable(self.account),
+            Some(_) => {}
+        }
     }
 
     /// Archives messages already out of the store's `folder`: on Gmail their labels taken off (kept for Undo), elsewhere
@@ -615,6 +683,7 @@ impl Worker {
         let (path, made) = pe_sync::archive_folder(client, store, account).await?;
         let path = path.map_err(|refusal| Failure {
             told: false,
+            sign_in: None,
             kind: FailureKind::Other,
             message: crate::folder_refusal(&refusal),
         })?;
@@ -624,6 +693,7 @@ impl Worker {
         let Some(to) = store.find_folder(self.account, &path)? else {
             return Err(Failure {
                 told: false,
+                sign_in: None,
                 kind: FailureKind::Other,
                 message: tr(Text::NotArchivedHere),
             });
@@ -786,6 +856,12 @@ impl Worker {
         if let Some((mut client, _)) = self.connection.take() {
             let _ = client.logout().await;
         }
+    }
+
+    /// Whether the account needs the user to sign in: what nobody asked for (the reader's first connection, the
+    /// background work) waits for that rather than trying a refused password again
+    fn signed_out(&self) -> bool {
+        self.ctx.status.signed_out(self.account)
     }
 
     /// The access token is no good: the next connect of either worker refreshes it
@@ -1040,24 +1116,32 @@ impl Worker {
         (self.ctx.events)(event);
     }
 
-    /// What a failure leaves no good: the connection (the next command connects again), and a refused access token
-    fn reset_after(&mut self, failure: &Failure) {
+    /// What a failure leaves no good: the connection (the next command connects again), a refused access token, and
+    /// the account's sign-in when it was refused, which its state says from now on. Whether that changed the state.
+    fn reset_after(&mut self, failure: &Failure) -> bool {
         if failure.kind != FailureKind::Other {
             self.connection = None;
         }
         if failure.kind == FailureKind::Authentication {
             self.forget_token();
         }
+        match &failure.sign_in {
+            Some(reason) => self.ctx.status.refused(self.account, reason.clone()),
+            None => false,
+        }
     }
 
+    /// Tells the windows of a failure ([`Event::Failed`], for the status bar), after the account's state took a
+    /// refused sign-in in ([`Event::AccountStateChanged`], whose `prompt` asks for the dialog). A refusal that changed
+    /// nothing of the state (the same password refused again) is not told again.
     fn fail(&mut self, failure: Failure) {
-        self.reset_after(&failure);
-        if failure.told {
+        let changed = self.reset_after(&failure);
+        if failure.told || (failure.sign_in.is_some() && !changed) {
             return;
         }
-        // a refused password is told once, not again for each command until the user gives another
-        if failure.kind == FailureKind::Authentication && !self.ctx.secrets.first_refusal(self.account) {
-            return;
+        // the status bar's words for the account while it is connected
+        if failure.sign_in.is_none() {
+            self.ctx.status.failed(self.account, failure.message.clone());
         }
         self.emit(Event::Failed {
             account: self.account,
@@ -1069,6 +1153,11 @@ impl Worker {
     async fn handle(&mut self, store: &mut Store, command: Command) -> Outcome {
         match command {
             Command::Sync => {
+                // not signed in: the sync tries the sign-in first, and the Outbox goes once it worked
+                let signed_out = self.signed_out();
+                if signed_out {
+                    self.sync_all(store).await?;
+                }
                 // what waits in the Outbox goes first; a send that fails does not stop the sync
                 if let Err(failure) = self.send_outbox(store).await {
                     self.fail(failure);
@@ -1076,6 +1165,9 @@ impl Worker {
                 // and messages left on their way to another account
                 if let Err(failure) = self.transfer(store).await {
                     self.fail(failure);
+                }
+                if signed_out {
+                    return Ok(());
                 }
                 self.sync_all(store).await
             }
@@ -1178,6 +1270,7 @@ impl Worker {
                 let path = pe_sync::new_folder_path(store, self.account, parent, &name, namespace.as_ref())?.map_err(
                     |refusal| Failure {
                         told: false,
+                        sign_in: None,
                         kind: FailureKind::Other,
                         message: crate::folder_refusal(&refusal),
                     },
@@ -1431,6 +1524,7 @@ impl Worker {
         if let Err(failure) = outcome {
             self.fail(Failure {
                 told: false,
+                sign_in: None,
                 kind: failure.kind,
                 message: tr_args(Text::ErrorDraftNotRemoved, &[("reason", (&failure.message).into())]),
             });
@@ -1482,6 +1576,7 @@ impl Worker {
     ) -> Result<upload::Upload, Failure> {
         let drafts = crate::compose::drafts_folder(store, self.account)?.ok_or_else(|| Failure {
             told: false,
+            sign_in: None,
             kind: FailureKind::Other,
             message: tr(Text::ErrorNoDrafts),
         })?;
@@ -1539,13 +1634,15 @@ impl Worker {
         if queued.is_empty() {
             return Ok(());
         }
+        // the Outbox of an account that is not signed in waits for the sign-in, as Compose's note says; the Outbox's
+        // rows say why ([`crate::Core::outbox`])
+        if self.signed_out() {
+            return Ok(());
+        }
         let account = store.account(self.account)?;
-        let mut config = smtp_config(&account, self.credentials(store, &account).await?);
-        config.trust = self.ctx.trust.clone();
-        let mut smtp = match pe_smtp::Client::connect(config).await {
+        let mut smtp = match self.smtp_connect(store, &account).await {
             Ok(smtp) => smtp,
-            Err(error) => {
-                let failure = scope_hint(Failure::from(error), &account);
+            Err(failure) => {
                 for message in &queued {
                     store.set_problem(message.id, &failure.message)?;
                 }
@@ -1613,6 +1710,56 @@ impl Worker {
         }
     }
 
+    /// A connection to the SMTP server, signed in ([`Worker::signed_in`])
+    async fn smtp_connect(
+        &mut self,
+        store: &mut Store,
+        account: &pe_store::Account,
+    ) -> Result<pe_smtp::Client, Failure> {
+        let trust = self.ctx.trust.clone();
+        let connect = |credentials| {
+            let mut config = smtp_config(account, credentials);
+            config.trust = trust.clone();
+            pe_smtp::Client::connect(config)
+        };
+        let refused = |error: &pe_smtp::Error| error.kind() == pe_smtp::ErrorKind::Authentication;
+        match self.signed_in(store, account, connect, refused).await {
+            Ok(smtp) => Ok(smtp),
+            Err(SignInError::Credentials(failure)) => Err(failure),
+            Err(SignInError::Server(error)) => Err(scope_hint(Failure::from(error), account)),
+        }
+    }
+
+    /// What `connect` makes with the account's credentials (an IMAP or SMTP connection, signed in). An access token
+    /// kept from before that the server refuses (`refused`) is made again from the refresh token, once, before the
+    /// refusal counts: a server may end a token's time early, or a sign-in elsewhere may have revoked it, while the
+    /// refresh token is still good.
+    async fn signed_in<T, E, F>(
+        &mut self,
+        store: &mut Store,
+        account: &pe_store::Account,
+        mut connect: impl FnMut(Credentials) -> F,
+        refused: impl Fn(&E) -> bool,
+    ) -> Result<T, SignInError<E>>
+    where
+        F: std::future::Future<Output = Result<T, E>>,
+    {
+        let mut retried = false;
+        loop {
+            let (credentials, fresh) = self
+                .credentials(store, account)
+                .await
+                .map_err(SignInError::Credentials)?;
+            match connect(credentials).await {
+                Err(error) if !fresh && !retried && refused(&error) => {
+                    *self.access_token.lock().await = None;
+                    retried = true;
+                }
+                connected => return connected.map_err(SignInError::Server),
+            }
+        }
+    }
+
     /// The copy of a message sent, in Sent Items, through the uploader (upload.rs)
     fn save_sent(&mut self, store: &Store, raw: Vec<u8>, date: i64) -> Outcome {
         if let Some(sent) = store.special_folder(self.account, "\\Sent")? {
@@ -1625,11 +1772,18 @@ impl Worker {
         Ok(())
     }
 
-    /// The password of the account, as credentials for IMAP and SMTP
-    /// How to log in: the password, or for an OAuth account an access token made from its refresh token
-    async fn credentials(&mut self, store: &mut Store, account: &pe_store::Account) -> Result<Credentials, Failure> {
+    /// How to log in, for IMAP and SMTP: the password, or for an OAuth account an access token made from its refresh
+    /// token; and whether they are fresh: false for an access token kept from before, which the server may refuse
+    /// though the refresh token is still good (revoked, its time cut short)
+    async fn credentials(
+        &mut self,
+        store: &mut Store,
+        account: &pe_store::Account,
+    ) -> Result<(Credentials, bool), Failure> {
+        // nothing to sign in with: the user gives a password or signs in again
         let no_secret = |text: Text| Failure {
             told: false,
+            sign_in: Some(SignInReason::Refused),
             kind: FailureKind::Authentication,
             message: tr(text),
         };
@@ -1640,7 +1794,7 @@ impl Worker {
                 .secrets
                 .get(self.account)
                 .ok_or_else(|| no_secret(Text::ErrorNoPassword))?;
-            return Ok(Credentials::Password { user, password });
+            return Ok((Credentials::Password { user, password }, true));
         };
         let now = pe_oauth::now();
         // held while refreshing, so the other worker waits for this token rather than refreshing too
@@ -1649,10 +1803,11 @@ impl Worker {
         if let Some((token, expires_at)) = &*access_token
             && *expires_at > now
         {
-            return Ok(Credentials::OAuth2 {
+            let credentials = Credentials::OAuth2 {
                 user,
                 access_token: token.clone(),
-            });
+            };
+            return Ok((credentials, false));
         }
         let provider = self
             .ctx
@@ -1660,6 +1815,7 @@ impl Worker {
             .resolve(provider, store, &self.ctx.secrets)
             .ok_or_else(|| Failure {
                 told: false,
+                sign_in: None,
                 kind: FailureKind::Other,
                 message: tr_args(
                     Text::ErrorProviderMissing,
@@ -1673,29 +1829,47 @@ impl Worker {
         {
             return Err(Failure {
                 told: false,
+                sign_in: None,
                 kind: FailureKind::Other,
                 message: tr(Text::ErrorProviderServers),
             });
         }
-        let refresh_token = self
-            .ctx
-            .secrets
-            .get(self.account)
-            .ok_or_else(|| no_secret(Text::ErrorNoSignIn))?;
-        let tokens = pe_oauth::refresh(&provider, &refresh_token)
-            .await
-            .map_err(|error| Failure {
-                told: false,
-                kind: if error.needs_sign_in() {
-                    FailureKind::Authentication
-                } else {
-                    FailureKind::Network
-                },
-                message: error.to_string(),
-            })?;
+        // a new sign-in may come while a refresh is under way (reauthorize): then its refresh token is the one to use,
+        // and the old one's answer neither refuses the account nor writes over it
+        let mut tries = 0;
+        let (tokens, refresh_token, generation) = loop {
+            tries += 1;
+            let generation = self.ctx.secrets.generation(self.account);
+            let refresh_token = self
+                .ctx
+                .secrets
+                .get(self.account)
+                .ok_or_else(|| no_secret(Text::ErrorNoSignIn))?;
+            match pe_oauth::refresh(&provider, &refresh_token).await {
+                Ok(tokens) => break (tokens, refresh_token, generation),
+                Err(_) if tries < 2 && self.ctx.secrets.generation(self.account) != generation => continue,
+                Err(error) => {
+                    let sign_in = match &error {
+                        _ if !error.needs_sign_in() => None,
+                        pe_oauth::OAuthError::NeedsAdmin(_) => Some(SignInReason::AdminConsent),
+                        _ => Some(SignInReason::Refused),
+                    };
+                    return Err(Failure {
+                        told: false,
+                        // the provider did not answer the question: the refresh token is kept, tried again later
+                        kind: match sign_in {
+                            Some(_) => FailureKind::Authentication,
+                            None => FailureKind::Network,
+                        },
+                        sign_in,
+                        message: error.to_string(),
+                    });
+                }
+            }
+        };
         if let Some(new) = tokens.refresh_token.as_deref().filter(|new| *new != refresh_token) {
-            // the provider rotated it: the old one may stop working
-            if let Err(error) = self.ctx.secrets.set(self.account, new) {
+            // the provider rotated it: the old one may stop working; kept unless a new sign-in came meanwhile
+            if let Err(error) = self.ctx.secrets.set_unless_changed(self.account, new, generation) {
                 self.emit(Event::Failed {
                     account: self.account,
                     kind: FailureKind::Other,
@@ -1704,10 +1878,11 @@ impl Worker {
             }
         }
         *access_token = Some((tokens.access_token.clone(), tokens.expires_at));
-        Ok(Credentials::OAuth2 {
+        let credentials = Credentials::OAuth2 {
             user,
             access_token: tokens.access_token,
-        })
+        };
+        Ok((credentials, true))
     }
 
     async fn sync_all(&mut self, store: &mut Store) -> Outcome {
@@ -2024,29 +2199,61 @@ impl Worker {
         if self.connection.is_none() {
             // read at each connect, so changed settings are used from the next connection on
             let account = store.account(self.account)?;
-            let mut config = imap_config(&account, self.credentials(store, &account).await?);
-            config.trust = self.ctx.trust.clone();
-            if let Some(limit) = self.role.response_limit() {
-                config.timeouts.response = config.timeouts.response.min(limit);
-            }
-            let connected = Client::connect(config).await;
-            // a server that took the connection and then closed it, or said it has too many: the main worker,
-            // connected already, does this worker's work; one that can not be reached fails it here at once
-            if let Err(error) = &connected
-                && (error.is_connection_limit() || matches!(error, pe_imap::Error::Closed(_)))
-            {
-                self.connect_failed = Some(Instant::now());
-                if error.is_connection_limit() {
-                    self.limited = self.connect_failed;
-                }
-            }
-            self.connection = Some(connected.map_err(|error| scope_hint(Failure::from(error), &account))?);
+            let connected = match self.connect(store, &account).await {
+                Ok(client) => client,
+                // nothing to sign in with, or the provider did not give an access token
+                Err(SignInError::Credentials(failure)) => return Err(failure),
+                Err(SignInError::Server(error)) => return Err(self.not_connected(error, &account)),
+            };
+            self.ctx.status.connected(self.account);
+            self.connection = Some(connected);
             self.wake_seen = wake;
             self.connections_made += 1;
             self.host = account.settings.imap_host;
         }
         Ok(&mut self.connection.as_mut().expect("connected").0)
     }
+
+    /// What a connection the server did not give means: one that took the connection and then closed it, or said it
+    /// has too many, lets the main worker (connected already) do this worker's work; one that can not be reached fails
+    /// here at once
+    fn not_connected(&mut self, error: pe_imap::Error, account: &pe_store::Account) -> Failure {
+        if error.is_connection_limit() || matches!(error, pe_imap::Error::Closed(_)) {
+            self.connect_failed = Some(Instant::now());
+            if error.is_connection_limit() {
+                self.limited = self.connect_failed;
+            }
+        }
+        let failure = Failure::from(error);
+        scope_hint(failure, account)
+    }
+
+    /// A new IMAP connection, signed in ([`Worker::signed_in`])
+    async fn connect(
+        &mut self,
+        store: &mut Store,
+        account: &pe_store::Account,
+    ) -> Result<(Client, UnboundedReceiver<ImapEvent>), SignInError<pe_imap::Error>> {
+        let trust = self.ctx.trust.clone();
+        let limit = self.role.response_limit();
+        let connect = |credentials| {
+            let mut config = imap_config(account, credentials);
+            config.trust = trust.clone();
+            if let Some(limit) = limit {
+                config.timeouts.response = config.timeouts.response.min(limit);
+            }
+            Client::connect(config)
+        };
+        // IMAP turned off is no token to make again
+        let refused = |error: &pe_imap::Error| error.kind() == ErrorKind::Authentication && !error.is_imap_disabled();
+        self.signed_in(store, account, connect, refused).await
+    }
+}
+
+/// Why [`Worker::signed_in`] did not sign in: no credentials to sign in with, or the server's answer
+enum SignInError<E> {
+    Credentials(Failure),
+    Server(E),
 }
 
 /// Which messages [`Worker::index_texts`] fetches the text of: the store's `messages_to_index` or

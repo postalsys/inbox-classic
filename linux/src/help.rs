@@ -22,19 +22,27 @@ const YELP_NAME: &str = "inbox-classic";
 
 /// The help of a window's context (`main`, `compose`, `options`: help/topics.toml), in Yelp or the viewer
 pub fn show(context: &str) {
-    let topic = pe_html::help_context(context);
+    show_topic(pe_html::help_context(context));
+}
+
+/// The help topic `id` (`password-not-accepted`), in Yelp or the viewer
+pub fn show_topic(id: &str) {
+    if id.is_empty() {
+        return;
+    }
     if yelp_help() {
-        let uri = format!("help:{YELP_NAME}/{topic}");
+        let uri = format!("help:{YELP_NAME}/{id}");
         let parent = shell().main().window().clone().upcast::<gtk::Window>();
+        let topic = id.to_string();
         gtk::UriLauncher::new(&uri).launch(Some(&parent), gtk::gio::Cancellable::NONE, move |result| {
             // Yelp did not start after all: the viewer then
             if result.is_err() {
-                open(topic);
+                open(&topic);
             }
         });
         return;
     }
-    open(topic);
+    open(id);
 }
 
 /// The help of the dialog a message window shows (Security Details), or the window's

@@ -43,7 +43,6 @@ reader-downloading-detail = Die Nachricht wird angezeigt, sobald der Download ab
 reader-downloading-size = Die Nachricht ist { $size } groß. Sie erscheint hier, sobald sie heruntergeladen ist.
 reader-failed = Die Nachricht konnte nicht heruntergeladen werden
 reader-failed-network = Die Verbindung zum Mailserver ist fehlgeschlagen oder wurde unterbrochen ({ $reason }).
-reader-failed-sign-in = Der Mailserver hat die Anmeldung nicht angenommen ({ $reason }). Prüfen Sie das Passwort oder melden Sie sich in den Kontoeinstellungen erneut an.
 reader-failed-security = Es konnte keine sichere Verbindung zum Mailserver hergestellt werden ({ $reason }).
 reader-failed-other = Der Mailserver antwortete: { $reason }.
 reader-retry-note = Der Download wird erneut versucht, sobald die Verbindung zum Konto wiederhergestellt ist.

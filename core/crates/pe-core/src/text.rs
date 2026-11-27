@@ -406,7 +406,7 @@ pub fn reader_page(state: ReaderState) -> String {
             // what happened, and for a sign-in what to do; what happens next is beside Try Again
             let text = match kind {
                 FailureKind::Network => Text::ReaderFailedNetwork,
-                FailureKind::Authentication => Text::ReaderFailedSignIn,
+                FailureKind::Authentication => Text::ReaderFailedSignedOut,
                 FailureKind::Security => Text::ReaderFailedSecurity,
                 FailureKind::Other => Text::ReaderFailedOther,
             };
@@ -520,7 +520,11 @@ mod tests {
             kind: crate::FailureKind::Authentication,
             reason: "AUTHENTICATIONFAILED",
         });
-        assert!(refused.contains("did not accept the sign-in"));
+        let said = pe_i18n::tr_args(
+            pe_i18n::Text::ReaderFailedSignedOut,
+            &[("reason", "AUTHENTICATIONFAILED".into())],
+        );
+        assert!(refused.contains(&said), "{refused}");
     }
 
     #[test]

@@ -2640,3 +2640,87 @@ fn an_agent_reads_and_watches_resources() {
     });
     mcp.stop();
 }
+
+/// An account whose password the server stopped taking: the agent sees it in list_accounts and get_overview, reads
+/// what is stored, and gets a clear refusal for a message that would have to be fetched (only the user can sign in)
+#[test]
+fn an_agent_is_told_an_account_is_not_signed_in() {
+    let _watchdog = watchdog();
+    let Some(server) = ImapKit::start(json!({})) else {
+        return;
+    };
+    let uid = server.add_message("INBOX", &rfc822("Not fetched yet", "Body"), &[]);
+    let dir = TempDir::new("mcp-signed-out");
+    let (sender, events) = channel();
+    let options = pe_core::Options {
+        trust: pe_net::Trust::Pinned(vec![server.cert.clone()]),
+        passwords: pe_core::PasswordStore::Memory,
+        ..Default::default()
+    };
+    let core = Arc::new(
+        Core::open_with(dir.path().join("store.db"), options, move |event| {
+            let _ = sender.send(event);
+        })
+        .unwrap(),
+    );
+    // nothing downloaded ahead: the message has to be fetched to be read
+    core.set_download_ahead(pe_store::Ahead::Never).unwrap();
+    let mut settings = server.account_settings();
+    settings.smtp_security = pe_store::Security::StartTls;
+    let account = core.add_account(&settings, PASSWORD).unwrap();
+    let (others, rest) = channel();
+    answer_questions(core.clone(), events, others);
+    core.sync(account).unwrap();
+    loop {
+        match rest.recv_timeout(pe_testkit::patience()).expect("the sync finishes") {
+            Event::SyncFinished { failure: None, .. } => break,
+            Event::Failed { message, .. } => panic!("{message}"),
+            _ => {}
+        }
+    }
+    std::thread::spawn(move || while rest.recv().is_ok() {});
+    let socket = dir.path().join("agents").join("mcp.sock");
+    let mut mcp = McpServer::listen_unix(core.clone(), &socket).unwrap();
+
+    // the password changed on the server: the next sync is refused
+    server.request("PUT", "/v1/users/testuser", Some(json!({ "password": "changed" })));
+    core.woke();
+    core.sync(account).unwrap();
+    assert!(
+        eventually(60, || matches!(
+            core.account_state(account),
+            pe_core::AccountState::SignInNeeded(_)
+        )),
+        "the account needs a sign-in"
+    );
+
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap();
+    runtime.block_on(async {
+        let mut agent = Client::connect(&socket, "/test/bin/agent", "Test Agent").await;
+        agent.initialize().await;
+        let accounts = agent.call("list_accounts", json!({})).await.unwrap();
+        let listed = &accounts["accounts"][0];
+        assert_eq!(listed["state"], "sign_in_needed", "{accounts}");
+        assert!(listed["note"].as_str().unwrap().contains("sign in again"), "{accounts}");
+        let overview = agent.call("get_overview", json!({})).await.unwrap();
+        assert_eq!(overview["accounts"][0]["state"], "sign_in_needed", "{overview}");
+
+        // what is stored is listed; the message not fetched yet is refused with why
+        let folders = agent.call("list_folders", json!({ "account": account })).await.unwrap();
+        let inbox = special(&folders, "inbox");
+        let listed = agent.call("list_messages", json!({ "folder": inbox })).await.unwrap();
+        assert_eq!(listed["total"], 1, "{listed}");
+        let refused = agent
+            .call("get_message", json!({ "folder": inbox, "uid": uid }))
+            .await
+            .unwrap_err();
+        assert!(
+            refused.contains("not signed in") && refused.contains("agents can not start a sign-in"),
+            "{refused}"
+        );
+    });
+    mcp.stop();
+}

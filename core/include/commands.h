@@ -8,6 +8,7 @@ enum PeCommandId : unsigned short {
     IDM_NEW_ACCOUNT = 100,
     IDM_EXIT = 101,
     IDM_SYNC = 102,
+    IDM_SIGN_IN_AGAIN = 184,
     IDM_UNDO = 135,
     IDM_SELECT_ALL = 134,
     IDM_MARK_READ = 103,
@@ -204,6 +205,7 @@ inline PeText CommandText(PeCommandId id) {
     case IDM_NEW_ACCOUNT: return PE_TEXT_CMD_NEW_ACCOUNT;
     case IDM_EXIT: return PE_TEXT_CMD_EXIT;
     case IDM_SYNC: return PE_TEXT_CMD_SYNC;
+    case IDM_SIGN_IN_AGAIN: return PE_TEXT_CMD_SIGN_IN_AGAIN;
     case IDM_UNDO: return PE_TEXT_CMD_UNDO;
     case IDM_SELECT_ALL: return PE_TEXT_CMD_SELECT_ALL;
     case IDM_MARK_READ: return PE_TEXT_CMD_MARK_READ;

@@ -139,6 +139,9 @@ fn ask_downloads(call: &Call, messages: &[pe_store::Message]) -> Result<Vec<(Fol
         .filter(|m| !m.cached)
         .map(|m| (m.folder_id, m.info.uid))
         .collect();
+    for &(folder, _) in &missing {
+        super::fetch_refused(call, folder)?;
+    }
     for &(folder, uid) in &missing {
         call.core.open_message(folder, uid).map_err(engine)?;
     }

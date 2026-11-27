@@ -7,6 +7,7 @@
 #[macro_use]
 mod words;
 
+mod account_status;
 mod accounts;
 mod address_book;
 mod agents;

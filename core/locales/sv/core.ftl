@@ -48,7 +48,6 @@ reader-downloading-detail = Meddelandet visas här när hämtningen är klar.
 reader-downloading-size = Meddelandet är { $size }. Det visas här när det har hämtats.
 reader-failed = Det gick inte att hämta meddelandet
 reader-failed-network = Anslutningen till e-postservern misslyckades eller avbröts ({ $reason }).
-reader-failed-sign-in = E-postservern godtog inte inloggningen ({ $reason }). Kontrollera lösenordet eller logga in igen i kontoinställningarna.
 reader-failed-security = Anslutningen till e-postservern kunde inte göras säker ({ $reason }).
 reader-failed-other = E-postservern svarade: { $reason }.
 reader-retry-note = Ett nytt försök görs när kontot ansluter igen.

@@ -49,6 +49,7 @@ pub mod setup;
 mod shown;
 mod sign_in_apps;
 mod snippet;
+mod status;
 pub mod sync;
 mod targets;
 mod text;
@@ -95,6 +96,10 @@ use secrets::Secrets;
 use sign_in_apps::{Discoveries, with_provider};
 pub use sign_in_apps::{
     SecretChange, SignInAppEntry, SignInAppForm, SignInWith, builtin_name, builtin_off_text, register_hint,
+};
+pub use status::{
+    AccountState, AccountStatus, AccountsSummary, CANNOT_CONNECT_AFTER, Prompt, SignInReason, StatusAction, TreeMark,
+    backoff,
 };
 pub use text::{
     DOWNLOAD_LIMITS_MB, ReaderState, SEND_DELAYS, TEXT_SIZE_MEDIUM, TEXT_ZOOMS, account_label, account_shown_name,
@@ -286,6 +291,18 @@ pub enum Event {
     OutboxChanged {
         account: AccountId,
     },
+    /// What `account` shows of its sign-in and connection changed ([`Core::account_status`]): it needs a sign-in now
+    /// or no longer, for another reason, or it can not connect or can again. The windows read its status, the status
+    /// bar's text ([`Core::accounts_status_text`]) and the folder tree again. It comes before the `Failed` of the
+    /// same refusal.
+    AccountStateChanged {
+        account: AccountId,
+        /// The app shows its one dialog for the state now ([`AccountStatus::prompt`]), and while in the background a
+        /// notification ([`AccountStatus::notification_title`]): the first time each kind of refusal comes since the
+        /// account was last signed in or given a new password or sign-in. The only place the dialog comes from:
+        /// `Failed` with `Authentication` is for the status bar alone.
+        prompt: bool,
+    },
     /// Work for an account failed; `kind` says what to do about it
     Failed {
         account: AccountId,
@@ -376,8 +393,6 @@ pub enum Error {
     Unavailable(String),
     /// A folder name or a folder that can not be used
     Folder(pe_sync::FolderRefusal),
-    /// Signing in again came back from another account than this one: the address it signed in to
-    OtherAccount(String),
     /// What was entered can not be used, and why
     Invalid(String),
     /// A sign-in app the accounts with these addresses sign in with
@@ -406,7 +421,6 @@ impl fmt::Display for Error {
             Error::Compose(error) => write!(f, "{error}"),
             Error::Unavailable(reason) => write!(f, "{reason}"),
             Error::Folder(refusal) => f.write_str(&folder_refusal(refusal)),
-            Error::OtherAccount(email) => f.write_str(&tr_args(Text::ErrorOtherAccount, &[("email", email.into())])),
             Error::Invalid(reason) => f.write_str(reason),
             Error::InUse(accounts) => f.write_str(&tr_args(
                 Text::ErrorInUse,
@@ -473,6 +487,15 @@ impl OAuthProviders {
             None => pe_oauth::Provider::builtin(kind),
         }
     }
+}
+
+/// How [`Core::reauthorize`] ended
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Reauthorized {
+    /// The account has the new sign-in, and syncs with it
+    SignedIn,
+    /// The browser signed in to another address: the account's state says so, nothing else changed
+    OtherAddress,
 }
 
 /// What Next Unread does next, see [`Core::next_unread_step`]
@@ -633,6 +656,8 @@ pub struct Core {
     shown: shown::Shown,
     /// The syncs and actions under way (activity.rs)
     activity: Arc<activity::Activity>,
+    /// Whether each account is signed in and can connect (status.rs)
+    status: Arc<status::Status>,
 }
 
 impl Core {
@@ -683,6 +708,17 @@ impl Core {
         let open = closed.clone();
         let (mail_changes, _) = tokio::sync::broadcast::channel(MAIL_CHANGES);
         let changed = mail_changes.clone();
+        let events: EventSink = Arc::new(move |event| {
+            tracked.saw(&event);
+            if !open.load(Ordering::Acquire) {
+                if let Some(change) = MailChange::of(&event) {
+                    // nobody listening is no failure
+                    let _ = changed.send(change);
+                }
+                events(event);
+            }
+        });
+        let status = Arc::new(status::Status::new(events.clone()));
         let core = Core {
             wake,
             synced: Arc::new(worker::Synced::new(Default::default())),
@@ -704,16 +740,7 @@ impl Core {
             pgp_certs: Default::default(),
             pgp_marks: Default::default(),
             trust,
-            events: Arc::new(move |event| {
-                tracked.saw(&event);
-                if !open.load(Ordering::Acquire) {
-                    if let Some(change) = MailChange::of(&event) {
-                        // nobody listening is no failure
-                        let _ = changed.send(change);
-                    }
-                    events(event);
-                }
-            }),
+            events,
             closed,
             agent_asks: Mutex::default(),
             agent_tickets: Mutex::default(),
@@ -745,6 +772,7 @@ impl Core {
             previews: Default::default(),
             shown: Default::default(),
             activity,
+            status,
         };
         if pdfs_turned_off {
             let events = core.events.clone();
@@ -810,6 +838,8 @@ impl Core {
     }
 
     fn keep_password(&self, account: AccountId, password: &str) {
+        // a refusal of the new one asks for the dialog again
+        self.status.secret_changed(account);
         if let Err(error) = self.secrets.set(account, password) {
             // the password still works for this run
             let _ = self.post(Event::Failed {
@@ -986,6 +1016,7 @@ impl Core {
         }
         self.opening.forget(id);
         self.tokens.lock().unwrap_or_else(|p| p.into_inner()).remove(&id);
+        self.status.forget(id);
         self.store().remove_account(id)?;
         self.secrets.remove(id);
         Ok(())
@@ -1526,9 +1557,28 @@ impl Core {
     /// [`Event::SignInDone`] comes with once the browser came back or the time ran out. A sign-in app that is turned
     /// off can still sign in again an account that uses it; [`Core::add_signed_in_account`] refuses a new one.
     pub fn sign_in_begin(&self, with: SignInWith, email: &str) -> Result<(u64, String)> {
+        self.sign_in_begin_with(with, email, pe_oauth::Prompt::Usual)
+    }
+
+    /// Starts signing in again for `account`, which signs in through the browser, as [`Core::sign_in_begin`] does
+    /// with its own provider and address: the page to open and the request, whose [`Event::SignInDone`] the app
+    /// answers with [`Core::reauthorize`] (then a sync). After the browser signed in to another address
+    /// ([`SignInReason::OtherAddress`]) the provider is asked for its account picker. [`Error::NotFound`] for an account
+    /// with a password.
+    pub fn sign_in_again_begin(&self, account: AccountId) -> Result<(u64, String)> {
+        let settings = self.store().account(account)?.settings;
+        let with = SignInWith::of_auth_kind(&settings.auth).ok_or(Error::NotFound)?;
+        let prompt = match self.status.state(account) {
+            AccountState::SignInNeeded(SignInReason::OtherAddress(_)) => pe_oauth::Prompt::ChooseAccount,
+            _ => pe_oauth::Prompt::Usual,
+        };
+        self.sign_in_begin_with(with, &settings.email, prompt)
+    }
+
+    fn sign_in_begin_with(&self, with: SignInWith, email: &str, prompt: pe_oauth::Prompt) -> Result<(u64, String)> {
         let provider = self.sign_in_provider(with)?;
-        let sign_in =
-            pe_oauth::SignIn::begin(provider.clone(), email).map_err(|e| Error::Unavailable(e.to_string()))?;
+        let sign_in = pe_oauth::SignIn::begin_with(provider.clone(), email, prompt)
+            .map_err(|e| Error::Unavailable(e.to_string()))?;
         let url = sign_in.url.clone();
         let request = self.next_request.fetch_add(1, Ordering::Relaxed);
         let work = async move {
@@ -1599,13 +1649,17 @@ impl Core {
         )
     }
 
-    /// Gives an OAuth account the refresh token of a new sign-in, after the old one was refused; refused when the
-    /// browser signed in to another account
-    pub fn reauthorize(&self, account: AccountId, request: u64) -> Result<()> {
+    /// Gives an OAuth account the refresh token of the finished sign-in `request` (Sign In Again), and syncs it.
+    /// [`Reauthorized::OtherAddress`] when the browser signed in to another account: nothing changes but the account's
+    /// state, whose bar says so ([`SignInReason::OtherAddress`]; its Try Again asks the provider for its account
+    /// picker), so the app has nothing more to say. An error when the sign-in is not there or the store failed.
+    pub fn reauthorize(&self, account: AccountId, request: u64) -> Result<Reauthorized> {
         let signed_in = self.take_sign_in(request)?;
         let current = self.store().account(account)?.settings;
         if !signed_in.identity.email.eq_ignore_ascii_case(&current.email) {
-            return Err(Error::OtherAccount(signed_in.identity.email));
+            self.status
+                .refused(account, SignInReason::OtherAddress(signed_in.identity.email));
+            return Ok(Reauthorized::OtherAddress);
         }
         let refresh_token = signed_in.refresh_token;
         let auth = pe_store::Auth::OAuth2(signed_in.with.auth_name());
@@ -1613,10 +1667,24 @@ impl Core {
         self.store().update_account(account, &settings)?;
         self.stop_worker(account);
         self.keep_password(account, &refresh_token);
-        Ok(())
+        self.sync(account)?;
+        Ok(Reauthorized::SignedIn)
     }
 
-    /// Syncs the folder list and every folder of an account, in the background
+    /// The sync the apps' timer asks for every 10 minutes: as [`Core::sync`], but an account whose sign-in was
+    /// refused is tried only once the back-off since the refusal is over ([`backoff`]: 10 minutes, 30, an hour, then
+    /// every 4 hours), so a refused password is not tried again and again. Ok(false) when it was skipped for that.
+    /// An account that can not connect is synced as always.
+    pub fn sync_scheduled(&self, account: AccountId) -> Result<bool> {
+        self.store().account(account).map_err(|_| Error::NotFound)?;
+        if !self.status.scheduled_due(account) {
+            return Ok(false);
+        }
+        self.sync(account).map(|()| true)
+    }
+
+    /// Syncs the folder list and every folder of an account, in the background: the user's own Send/Recv, tried at
+    /// once whatever the account's state (the timer's is [`Core::sync_scheduled`])
     pub fn sync(&self, account: AccountId) -> Result<()> {
         self.activity.sync_asked(account);
         if let Err(error) = self.send_command(account, Command::Sync) {
@@ -2502,7 +2570,8 @@ impl Core {
         for message in &mut queued {
             message.not_before = message.not_before.filter(|&at| at > now);
         }
-        Ok(queued)
+        // a message of an account that is not signed in or can not connect waits for that, whatever was said before
+        self.with_current_reasons(queued)
     }
 
     /// Takes a message out of the Outbox without sending it
@@ -3030,6 +3099,7 @@ impl Core {
             partials: self.partials.clone(),
             restored: self.restored.clone(),
             pgp_certs: self.pgp_certs.clone(),
+            status: self.status.clone(),
         }
     }
 

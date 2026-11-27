@@ -41,7 +41,6 @@ reader-downloading-detail = 下载完成后，邮件将显示在这里。
 reader-downloading-size = 此邮件大小为{ $size }。下载完成后将显示在这里。
 reader-failed = 无法下载邮件
 reader-failed-network = 无法连接到邮件服务器，或连接已中断（{ $reason }）。
-reader-failed-sign-in = 邮件服务器未接受登录（{ $reason }）。请检查密码，或在帐户设置中重新登录。
 reader-failed-security = 无法与邮件服务器建立安全连接（{ $reason }）。
 reader-failed-other = 邮件服务器回复：{ $reason }。
 reader-retry-note = 帐户重新连接时将再次尝试。

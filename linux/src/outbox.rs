@@ -24,8 +24,12 @@ fn fill(list: &gtk::ListBox, ids: &RefCell<Vec<i64>>, select: usize, buttons: &[
         } else {
             &message.subject
         };
-        // one an AI agent sent waits a moment, while it can still be deleted; the user's while Undo takes it back
+        // one from an account that needs a sign-in or can not connect says so as the core words it ("Waiting: Work is
+        // not signed in"), a send that failed says why; one an AI agent sent waits a moment, while it can still be
+        // deleted; the user's while Undo takes it back
+        let waits_for_account = shell().core.account_state(message.account_id) != pe_core::AccountState::Connected;
         let status = match (&message.problem, message.not_before) {
+            (Some(problem), _) if waits_for_account => problem.clone(),
             (Some(problem), _) => t!(UiOutboxStatusNotSent, reason = problem),
             (None, Some(at)) if message.undoable => t!(UiOutboxStatusUndo, time = &ui::format_time(at)),
             (None, Some(at)) => t!(UiOutboxStatusAgent, time = &ui::format_time(at)),

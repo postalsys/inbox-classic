@@ -22,6 +22,7 @@ pub(super) fn get_overview(call: &Call) -> Outcome {
                 "account": a.account,
                 "name": a.name,
                 "email": a.email,
+                "state": super::account_state(call.core, a.account).0,
                 "inbox": { "messages": a.counts.inbox, "unread": a.counts.inbox_unread },
                 "flagged": a.counts.flagged,
                 "drafts": a.counts.drafts,

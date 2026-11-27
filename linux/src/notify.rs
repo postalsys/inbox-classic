@@ -6,22 +6,49 @@
 use std::collections::HashMap;
 use std::sync::mpsc;
 
-use gtk::gio;
 use gtk::prelude::*;
+use gtk::{gio, glib};
 
 /// A notification that a click on opens the message `uid` of `folder`
 pub fn new_mail(application: &adw::Application, title: &str, text: &str, folder: i64, uid: u64) {
+    send(
+        application,
+        "new-mail",
+        title,
+        text,
+        "app.show-message",
+        &(folder, uid).to_variant(),
+    );
+}
+
+/// A notification that `account` needs the user to sign in, in the core's words: a click on it brings the window back
+/// and does what the account's state offers (`app.account-status`)
+pub fn sign_in_needed(application: &adw::Application, account: i64, title: &str, text: &str) {
+    let id = format!("account-status-{account}");
+    send(
+        application,
+        &id,
+        title,
+        text,
+        "app.account-status",
+        &account.to_variant(),
+    );
+}
+
+/// The notification `id` (one of an id takes the place of the one before), a click on it running `action` with
+/// `target`
+fn send(application: &adw::Application, id: &str, title: &str, text: &str, action: &str, target: &glib::Variant) {
     #[cfg(feature = "e2e")]
     SENT.with(|sent| sent.borrow_mut().push((title.to_string(), text.to_string())));
     let notification = gio::Notification::new(title);
     notification.set_body(Some(text));
-    notification.set_default_action_and_target_value("app.show-message", Some(&(folder, uid).to_variant()));
-    application.send_notification(Some("new-mail"), &notification);
+    notification.set_default_action_and_target_value(action, Some(target));
+    application.send_notification(Some(id), &notification);
 }
 
 #[cfg(feature = "e2e")]
 thread_local! {
-    /// The notifications of new mail sent, as (title, text), for the UI test
+    /// The notifications sent, as (title, text), for the UI test
     pub static SENT: std::cell::RefCell<Vec<(String, String)>> = const { std::cell::RefCell::new(Vec::new()) };
 }
 

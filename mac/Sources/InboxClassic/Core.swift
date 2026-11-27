@@ -261,11 +261,43 @@ final class Core {
         return (rows, index >= 0 ? Int(index) : nil)
     }
 
+    /// the user's own Send/Recv (and the sync after a new password or sign-in): it goes whatever the account's state
     func sync(_ account: Int64) { pe_sync(handle, account) }
 
     func syncAll() {
         accounts().forEach { sync($0.id) }
     }
+
+    /// the 10-minute timer's sync: an account whose sign-in was refused is left alone for a while (the core's back-off)
+    func syncScheduled() {
+        accounts().forEach { pe_sync_scheduled(handle, $0.id) }
+    }
+
+    // ---- whether each account is signed in and can connect ----
+
+    /// what `account` shows of its sign-in and connection, in the core's words
+    func accountStatus(_ account: Int64) -> AccountStatus {
+        let status = pe_account_status(handle, account)
+        defer { pe_account_status_free(status) }
+        return AccountStatus(status)
+    }
+
+    /// the state of `account` alone, without its words: for the menus
+    func accountState(_ account: Int64) -> PeAccountState { pe_account_state(handle, account) }
+
+    /// the status bar's words for every account in place of "Done" (nil while all are connected), and how many
+    /// accounts need a sign-in (the Dock's "!")
+    var accountsSummary: (text: String?, needing: UInt32) {
+        var needing: UInt32 = 0
+        let text = taken(pe_accounts_summary(handle, &needing))
+        return (text, needing)
+    }
+
+    /// the status bar's words for every account, nil while all are connected
+    var accountsStatusText: String? { taken(pe_accounts_status_text(handle)) }
+
+    /// the account the bar over the list of a tree row's `list` (with `folder`) speaks for, 0 for no bar
+    func statusAccount(list: PeTreeList, folder: Int64) -> Int64 { pe_status_account_for(handle, list, folder) }
 
     var inboxUnread: UInt64 { pe_inbox_unread(handle) }
     /// the messages the Flagged folder lists
@@ -925,6 +957,52 @@ struct Account {
     }
 }
 
+/// Whether an account is signed in and can connect (`pe_account_status`), with everything the windows show for it in
+/// the core's words; every string empty while it is connected
+struct AccountStatus {
+    let state: PeAccountState
+    let reason: PeSignInReason
+    /// what the bar's button, the mark and Sign In Again do
+    let action: PeStatusAction
+    /// the one dialog of the state, when `AccountStateChanged` comes with a count of 1
+    let prompt: PePrompt
+    /// Sign In Again applies: a sign-in the user can give
+    let canSignInAgain: Bool
+    let mark: PeAccountMark
+    let tooltip: String
+    /// the bar over the list of its folders, and its button (empty: none)
+    let bar: String
+    let button: String
+    let notificationTitle: String
+    let notificationText: String
+    let composeNote: String
+    let adminLink: String
+    let helpTopic: String
+    /// under the password field of the password dialog
+    let passwordHint: String
+
+    init(_ status: PeAccountStatus) {
+        state = status.state
+        reason = status.reason
+        action = status.action
+        prompt = status.prompt
+        canSignInAgain = status.can_sign_in_again
+        mark = status.mark
+        tooltip = text(status.tooltip)
+        bar = text(status.bar)
+        button = text(status.button)
+        notificationTitle = text(status.notification_title)
+        notificationText = text(status.notification_text)
+        composeNote = text(status.compose_note)
+        adminLink = text(status.admin_link)
+        helpTopic = text(status.help_topic)
+        passwordHint = text(status.password_hint)
+    }
+
+    var connected: Bool { state == PE_ACCOUNT_STATE_CONNECTED }
+    var needsSignIn: Bool { state == PE_ACCOUNT_STATE_SIGN_IN_NEEDED }
+}
+
 /// A row of the folder list (`pe_folder_tree`): what it is, what it says and what it allows
 struct TreeRow {
     let kind: PeTreeRowKind
@@ -964,6 +1042,10 @@ struct TreeRow {
     let newFolderParent: Int64
     /// its icon's word (`Icons.treeIcon`)
     let icon: String
+    /// the sign-in state of its account on the rows that stand for it (its heading, its Inbox under All Inboxes, the
+    /// only account's Inbox), and what the mark's tooltip says
+    let mark: PeAccountMark
+    let markTooltip: String
 
     init(_ row: PeTreeRow) {
         kind = row.kind
@@ -990,6 +1072,8 @@ struct TreeRow {
         newFolderAccount = row.new_folder_account
         newFolderParent = row.new_folder_parent
         icon = text(row.icon)
+        mark = row.mark
+        markTooltip = text(row.mark_tooltip)
     }
 
     func count(collapsed: Bool) -> UInt64 { collapsed ? countCollapsed : countOpen }
@@ -1000,6 +1084,7 @@ struct TreeRow {
     func drawsLike(_ other: TreeRow) -> Bool {
         label == other.label && title == other.title && countOpen == other.countOpen
             && countCollapsed == other.countCollapsed && boldOpen == other.boldOpen && boldCollapsed == other.boldCollapsed
+            && mark == other.mark && markTooltip == other.markTooltip
     }
 }
 

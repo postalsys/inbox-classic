@@ -33,6 +33,7 @@ fn appendable(flags: &str) -> Vec<&str> {
 fn gone(message: &str) -> Failure {
     Failure {
         told: false,
+        sign_in: None,
         kind: FailureKind::Other,
         message: message.into(),
     }
@@ -186,6 +187,7 @@ impl Worker {
             };
             self.fail(Failure {
                 told: false,
+                sign_in: None,
                 kind: FailureKind::Other,
                 message: tr_args(
                     text,

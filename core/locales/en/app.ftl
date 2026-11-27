@@ -21,6 +21,7 @@ menu-insert = &Insert
 cmd-new-account = &New Account...
 cmd-exit = E&xit
 cmd-sync = Send and Recei&ve All
+cmd-sign-in-again = Sign &In Again...
 cmd-mark-read = &Mark as Read
 cmd-mark-unread = Mark as U&nread
 cmd-pictures = Download &Pictures

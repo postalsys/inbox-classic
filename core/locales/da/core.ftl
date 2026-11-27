@@ -63,7 +63,6 @@ reader-downloading-detail = Meddelelsen vises her, når den er hentet.
 reader-downloading-size = Meddelelsen fylder { $size }. Den vises her, når den er hentet.
 reader-failed = Meddelelsen kunne ikke hentes
 reader-failed-network = Forbindelsen til mailserveren kunne ikke oprettes eller blev afbrudt ({ $reason }).
-reader-failed-sign-in = Mailserveren godtog ikke login ({ $reason }). Kontrollér adgangskoden, eller log på igen i kontoens indstillinger.
 reader-failed-security = Der kunne ikke oprettes en sikker forbindelse til mailserveren ({ $reason }).
 reader-failed-other = Mailserveren svarede: { $reason }.
 reader-retry-note = Inbox Classic prøver igen, når forbindelsen til kontoen er genoprettet.

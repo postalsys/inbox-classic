@@ -218,3 +218,80 @@ async fn microsoft_comes_back_to_localhost() {
         assert_eq!(waiting.await.unwrap().unwrap().access_token, "testtoken");
     }
 }
+
+/// A token endpoint that gives every request the same answer: `status`, with `body` as `content_type`
+async fn answering(status: u16, content_type: &'static str, body: &'static str) -> u16 {
+    let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let port = listener.local_addr().unwrap().port();
+    tokio::spawn(async move {
+        loop {
+            let (mut socket, _) = listener.accept().await.unwrap();
+            let mut request = Vec::new();
+            let mut chunk = [0u8; 4096];
+            loop {
+                let read = socket.read(&mut chunk).await.unwrap();
+                request.extend_from_slice(&chunk[..read]);
+                let text = String::from_utf8_lossy(&request);
+                let complete = text.split_once("\r\n\r\n").is_some_and(|(head, body)| {
+                    let length: usize = head
+                        .lines()
+                        .find_map(|l| l.strip_prefix("Content-Length: "))
+                        .map_or(0, |l| l.parse().unwrap());
+                    body.len() >= length
+                });
+                if complete || read == 0 {
+                    break;
+                }
+            }
+            let response = format!(
+                "HTTP/1.1 {status} X\r\nContent-Type: {content_type}\r\nContent-Length: {}\r\n\r\n{body}",
+                body.len()
+            );
+            socket.write_all(response.as_bytes()).await.unwrap();
+        }
+    });
+    port
+}
+
+/// A refresh the provider could not answer keeps the account signed in (tried again later); one it refused asks for a
+/// new sign-in, and one its organization did not approve names the administrator
+#[tokio::test]
+async fn refreshes_tell_a_refused_grant_from_a_provider_that_is_down() {
+    let down = [
+        (500, "text/html", "<html><body>Internal Server Error</body></html>"),
+        (502, "text/html", "<html><body>Bad Gateway</body></html>"),
+        (503, "application/json", r#"{"error":"temporarily_unavailable"}"#),
+        (500, "application/json", r#"{"error":"server_error"}"#),
+        (200, "text/html", "<html>a captive portal</html>"),
+    ];
+    for (status, content_type, body) in down {
+        let port = answering(status, content_type, body).await;
+        let error = refresh(&provider(port), "r1").await.unwrap_err();
+        assert!(
+            !error.needs_sign_in() && matches!(error, OAuthError::Unavailable(_)),
+            "{status} {body}: {error:?}"
+        );
+    }
+    let port = answering(
+        400,
+        "application/json",
+        r#"{"error":"invalid_grant","error_description":"Token has been expired or revoked."}"#,
+    )
+    .await;
+    let error = refresh(&provider(port), "r1").await.unwrap_err();
+    assert!(
+        error.needs_sign_in() && matches!(error, OAuthError::Refused(_)),
+        "{error:?}"
+    );
+    let port = answering(
+        400,
+        "application/json",
+        r#"{"error":"invalid_grant","error_description":"AADSTS65001: The user or administrator has not consented."}"#,
+    )
+    .await;
+    let error = refresh(&provider(port), "r1").await.unwrap_err();
+    assert!(
+        error.needs_sign_in() && matches!(error, OAuthError::NeedsAdmin(_)),
+        "{error:?}"
+    );
+}

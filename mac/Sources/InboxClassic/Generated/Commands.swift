@@ -6,6 +6,7 @@ enum Command: Int, CaseIterable {
     case newAccount = 100
     case exit = 101
     case sync = 102
+    case signInAgain = 184
     case undo = 135
     case selectAll = 134
     case markRead = 103
@@ -93,6 +94,7 @@ enum Command: Int, CaseIterable {
         case .newAccount: return "file"
         case .exit: return "file"
         case .sync: return "tools"
+        case .signInAgain: return "tools"
         case .undo: return "edit"
         case .selectAll: return "edit"
         case .markRead: return "edit"
@@ -182,6 +184,7 @@ enum Command: Int, CaseIterable {
         case .newAccount: return "main"
         case .exit: return "main"
         case .sync: return "main"
+        case .signInAgain: return "main"
         case .undo: return "main"
         case .selectAll: return "main"
         case .markRead: return "main"
@@ -276,6 +279,7 @@ enum Command: Int, CaseIterable {
         case .newAccount: return .cmdNewAccount
         case .exit: return .cmdExit
         case .sync: return .cmdSync
+        case .signInAgain: return .cmdSignInAgain
         case .undo: return .cmdUndo
         case .selectAll: return .cmdSelectAll
         case .markRead: return .cmdMarkRead
@@ -365,6 +369,7 @@ enum Command: Int, CaseIterable {
         case .newAccount: return nil
         case .exit: return ("q", [.command])
         case .sync: return ("n", [.command, .shift])
+        case .signInAgain: return nil
         case .undo: return ("z", [.command])
         case .selectAll: return ("a", [.command])
         case .markRead: return ("u", [.command, .shift])
@@ -454,6 +459,7 @@ enum Command: Int, CaseIterable {
         case .newAccount: return false
         case .exit: return false
         case .sync: return false
+        case .signInAgain: return false
         case .undo: return false
         case .selectAll: return false
         case .markRead: return false
@@ -543,6 +549,7 @@ enum Command: Int, CaseIterable {
         case .newAccount: return false
         case .exit: return false
         case .sync: return false
+        case .signInAgain: return false
         case .undo: return false
         case .selectAll: return false
         case .markRead: return true
@@ -632,6 +639,7 @@ enum Command: Int, CaseIterable {
         case .newAccount: return false
         case .exit: return false
         case .sync: return false
+        case .signInAgain: return false
         case .undo: return false
         case .selectAll: return false
         case .markRead: return false
@@ -721,6 +729,7 @@ enum Command: Int, CaseIterable {
         case .newAccount: return false
         case .exit: return false
         case .sync: return false
+        case .signInAgain: return false
         case .undo: return true
         case .selectAll: return true
         case .markRead: return true
@@ -810,6 +819,7 @@ enum Command: Int, CaseIterable {
         case .newAccount: return nil
         case .exit: return nil
         case .sync: return nil
+        case .signInAgain: return nil
         case .undo: return nil
         case .selectAll: return nil
         case .markRead: return nil

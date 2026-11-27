@@ -51,7 +51,6 @@ reader-downloading-detail = Wiadomość pojawi się tutaj po zakończeniu pobier
 reader-downloading-size = Rozmiar wiadomości: { $size }. Pojawi się tutaj po pobraniu.
 reader-failed = Nie udało się pobrać wiadomości
 reader-failed-network = Nie udało się połączyć z serwerem poczty lub połączenie zostało przerwane ({ $reason }).
-reader-failed-sign-in = Serwer poczty nie zaakceptował logowania ({ $reason }). Sprawdź hasło lub zaloguj się ponownie w ustawieniach konta.
 reader-failed-security = Nie udało się zabezpieczyć połączenia z serwerem poczty ({ $reason }).
 reader-failed-other = Serwer poczty odpowiedział: { $reason }.
 reader-retry-note = Program spróbuje ponownie po nawiązaniu połączenia z kontem.

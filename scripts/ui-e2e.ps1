@@ -1079,6 +1079,13 @@ try {
     # page to a file, where the test opens it as the browser would
     $signInPage = Join-Path $Out 'sign-in-page.txt'
     Remove-Item -Force -ErrorAction SilentlyContinue $signInPage
+    # the page a browser sign-in opened (written to $signInPage in place of the browser), once it is there
+    function SignInPage { WaitFor { if (Test-Path $signInPage) { $p = (Get-Content -Raw $signInPage).Trim(); if ($p) { $p } } } 20 }
+    # that page opened as the browser would: the provider signs in and sends the browser back to the app; its answer
+    function OpenSignInPage([string]$page) {
+        Remove-Item -Force $signInPage
+        try { Invoke-WebRequest -UseBasicParsing $page } catch { Write-Host "   (the sign-in page answered: $($_.Exception.Message))" }
+    }
     # an attachment opened is written to a file in place of being opened, so nothing is started; a link the browser
     # would open too
     $openedLog = Join-Path $Out 'opened-files.txt'
@@ -7394,9 +7401,11 @@ public static class Dragger {
     $logon = WaitForm 'Logon' 30
     Check ($null -ne $logon) 'a refused password is asked for again'
     if ($logon) {
-        $status = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
-        $status = WindowText $status
-        Check ($status -match 'authentication') "the status bar says why ($status)"
+        # the core's words for an account that needs a sign-in, where the server's would be
+        $statusBar = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
+        $needs = $en['account-status-sign-in'].Replace('{ $account }', 'Work')
+        $status = WaitFor { $t = StatusPart $statusBar 0; if ($t -eq $needs) { $t } } 20
+        Check ($null -ne $status) "the status bar says the account needs a sign-in ($(StatusPart $statusBar 0))"
         Shot $main 'trouble-1-password'
         # the right password, and the account syncs
         SetText $logon 100 'testpass2'
@@ -7796,7 +7805,7 @@ public static class Dragger {
     if ($menu) {
         $hmenu = [Native.Win]::SendMessage($menu, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero)
         $labels = @([Native.Win]::MenuLabels($hmenu))
-        Check (($labels -join '|') -eq 'Send and Receive|Mark All Read||New Folder...||Move Up|Move Down||Properties...') "with Send and Receive, Mark All Read, New Folder, Move Up, Move Down and Properties ($($labels -join ', '))"
+        Check (($labels -join '|') -eq 'Send and Receive|Sign In Again...|Mark All Read||New Folder...||Move Up|Move Down||Properties...') "with Send and Receive, Sign In Again, Mark All Read, New Folder, Move Up, Move Down and Properties ($($labels -join ', '))"
         Check ((([Native.Win]::GetMenuState($hmenu, $IDM_ACCOUNT_MARK_ALL_READ, 0) -band 0x3) -eq 0)) 'Mark All Read is on while the account has unread mail'
         Check ((([Native.Win]::GetMenuState($hmenu, 913, 0) -band 0x3) -ne 0) -and (([Native.Win]::GetMenuState($hmenu, 914, 0) -band 0x3) -eq 0)) 'for the first account Move Up is greyed, Move Down is not'
         Shot $main 'account-menu' $menu
@@ -8047,15 +8056,14 @@ public static class Dragger {
             Key $menu $VK_RETURN
         }
         # the app writes the page instead of opening the browser; opened here, ImapKit approves and redirects back
-        $page = WaitFor { if (Test-Path $signInPage) { Get-Content -Raw $signInPage } } 20
+        $page = SignInPage
         Check ($page -and $page.StartsWith("$($ports.oauth)/authorize?") -and $page -match 'login_hint=alice%40example.com') "signing in opens the sign-in app's page for the address typed"
         if ($page) {
             $waiting = WaitWindow 'InboxClassicWait' $null 5
             if ($waiting) { Shot $waiting 'signin-9-waiting' }
             $beforeTree = [int][Native.Win]::SendMessage($tree, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero)
-            $answer = Invoke-WebRequest -UseBasicParsing $page.Trim()
-            Check ($answer.Content -match 'You are signed in') 'the provider sends the browser back to the app, which says it is signed in'
-            Remove-Item -Force $signInPage
+            $answer = OpenSignInPage $page
+            Check ($answer -and $answer.Content -match 'You are signed in') 'the provider sends the browser back to the app, which says it is signed in'
             $grown = WaitFor { $n = [int][Native.Win]::SendMessage($tree, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero); if ($n -ge $beforeTree + 6) { $n } } 40
             Check ($null -ne $grown) 'the account signed in to is added, and its folders sync with the token'
             Shot $main 'signin-10-added'
@@ -8149,6 +8157,341 @@ public static class Dragger {
             Shot $browser 'account-5b-browser-sign-in'
             Click $browser 2
             [void](WaitFor { -not [Native.Win]::IsWindow($browser) } 10)
+        }
+    }
+
+    # ---- account sign-in status ----
+
+    Step 'account sign-in status'
+    # app/src/app.h: the bar over the list and its button, the note under From, Account Properties' Sign In Again and
+    # the words beside it; main.cpp: the marks of the tree's rows (10 none, 11 a sign-in, 12 can not connect), the
+    # tray icon's warning sign (11 shown) and the last notification
+    $IDC_ACCOUNT_BAR = 247; $IDC_ACCOUNT_BAR_BUTTON = 248; $IDC_COMPOSE_ACCOUNT_NOTE = 355
+    $IDC_ACCOUNT_SIGN_IN_AGAIN = 921; $IDC_ACCOUNT_SIGN_IN_STATE = 922; $IDM_ACCOUNT_PROPERTIES = 912
+    $kTestTreeMark = 0x4D41524B; $kTestTrayAttention = 0x41545454; $kTestNotification = 0x4E4F5445
+    $MARK_NONE = 10; $MARK_SIGN_IN = 11; $MARK_CANNOT_CONNECT = 12
+    $WM_SYSCOMMAND = 0x0112; $SC_MINIMIZE = 0xF020; $WM_TRAY = 0x8000 + 60; $NIN_BALLOONUSERCLICK = 0x0405
+    # ImapKit's REST API: the first server (the first account's and the account signed in through its OAuth
+    # provider), the second (Work's)
+    $api = "http://127.0.0.1:$($ports.rest)/v1"; $api2 = "http://127.0.0.1:$($ports.second.rest)/v1"
+    $alice = 'alice@example.com'
+    function Rest([string]$method, [string]$url, $body = @{}) {
+        Invoke-RestMethod -Method $method -ContentType 'application/json' -Body ($body | ConvertTo-Json -Depth 5 -Compress) $url
+    }
+    # the server says BYE to the sessions of `user`: the app connects, and signs in, again for its next work
+    function DropSessions([string]$server, [string]$user) {
+        foreach ($session in @(Invoke-RestMethod "$server/sessions" | ForEach-Object { $_ })) {
+            if ($session.user -eq $user) { try { [void](Rest 'DELETE' "$server/sessions/$($session.session)") } catch { } }
+        }
+    }
+    # a message of the catalog as the app shows it, the whole of it (Pattern, anchored at its end); '^$' for none
+    function Says([string]$id, [hashtable]$values = @{}) { if ($id) { (Pattern $en[$id] $values) + '$' } else { '^$' } }
+    function Mark([string]$row) { [int][Native.Win]::SendText($main, $kTestTreeMark, $row) }
+    function MarkTip([string]$row, [string]$tip) { [Native.Win]::SendText($main, $kTestTreeMark, "$row`n$tip") -ne 1 }
+    function Bar { if (Visible $main $IDC_ACCOUNT_BAR) { GetText $main $IDC_ACCOUNT_BAR } else { '' } }
+    function BarButton { if (Visible $main $IDC_ACCOUNT_BAR_BUTTON) { GetText $main $IDC_ACCOUNT_BAR_BUTTON } else { '' } }
+    function TrayWarning { [Native.Win]::SendText($main, $kTestTrayAttention, '') -eq 11 }
+    $mainStatus = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
+    function Said { StatusPart $mainStatus 0 }
+    # the forms titled so, open now
+    function Forms([string]$title) {
+        $found = @(); $w = [IntPtr]::Zero
+        while (($w = [Native.Win]::FindWindowEx([IntPtr]::Zero, $w, 'InboxClassicForm', $title)) -ne [IntPtr]::Zero) {
+            if ([Native.Win]::IsWindowVisible($w)) { $found += $w }
+        }
+        , $found
+    }
+    # a browser sign-in followed through: the page the app opened, opened as the browser would
+    function FollowSignIn {
+        $page = SignInPage
+        if ($page) { [void](OpenSignInPage $page) }
+        $page
+    }
+    # a row of the tree chosen as a click chooses it
+    function ChooseRow([IntPtr]$row) {
+        [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $row)
+        Settled
+    }
+    # the left button at the right end of a row's text, where its account's mark is drawn (in place of the count)
+    function ClickMark([IntPtr]$row) {
+        [void][Native.Win]::SetWindowPos($main, [IntPtr](-1), 0, 0, 0, 0, 0x13)
+        [void][Native.Win]::SetForegroundWindow($main)
+        Start-Sleep -Milliseconds 300
+        $box = [Native.Win]::RemoteRect($tree, 0x1104, [IntPtr]1, $row.ToInt64())
+        [Native.Win]::MouseClick([int]$box.Right - 10, [int](($box.Top + $box.Bottom) / 2))
+        [void][Native.Win]::SetWindowPos($main, [IntPtr](-2), 0, 0, 0, 0, 0x13)
+    }
+    # the account's state as every place shows it: the tree's mark and its tooltip, the bar and its button, the status
+    # bar, each a pattern of Says (waited for: the core tells the windows a moment after the sync that found it)
+    function Shows([string]$row, [int]$mark, [string]$tip, [string]$bar, [string]$button, [string]$said, [string]$what) {
+        $ok = WaitFor { (Mark $row) -eq $mark -and (Bar) -match $bar -and (BarButton) -match $button -and (Said) -match $said } 40
+        Check ([bool]$ok) "$what (mark $(Mark $row), bar '$(Bar)', button '$(BarButton)', status bar '$(Said)')"
+        if ($tip) { Check (MarkTip $row $tip) "its rows in the folder list are marked, with the tooltip '$tip'" }
+    }
+    $connected = { param($row, $what) Shows $row $MARK_NONE '' '^$' '^$' (Says 'ui-done') $what }
+
+    # a password account beside the one signed in through the browser: Work again, on the second server (the step of
+    # the accounts removed it), removed again at the end of this step
+    $work = 'Work'
+    Command $main $IDM_NEW_ACCOUNT
+    AddAccount $work 'testuser2' 'testpass2' $false $true
+    $all = WaitFor { $a = NamedRow ([IntPtr]::Zero) 'All Inboxes'; if ($a -ne [IntPtr]::Zero -and (NamedRow $a $work) -ne [IntPtr]::Zero) { $a } } 40
+    $workInbox = NamedRow $all $work
+    $workHeading = NamedRow ([IntPtr]::Zero) $work
+    $aliceInbox = @(ChildRows $all | Where-Object { (Bare $_) -notin @('inboxclassic.test', $work) }) | Select-Object -First 1
+    $aliceName = if ($aliceInbox) { Bare $aliceInbox } else { '' }
+    Check ($workInbox -ne [IntPtr]::Zero -and $aliceInbox -and (Mark $work) -eq $MARK_NONE -and -not (Visible $main $IDC_ACCOUNT_BAR)) "every account starts connected: no mark, no bar ($aliceName)"
+    $workSignIn = Says 'account-status-sign-in' @{ account = $work }
+    $workBar = Says 'account-state-bar-refused-password' @{ account = $work }
+
+    try {
+        # -- a password the server stopped taking --
+        ChooseRow $workInbox
+        [void](Rest 'PUT' "$api2/users/testuser2" @{ password = 'changed-on-the-server' })
+        DropSessions $api2 'testuser2'
+        Command $main $IDM_SYNC
+        $logon = WaitForm 'Logon' 40
+        Check ($null -ne $logon) 'a refused password is asked for, once'
+        Check ($logon -and (Statics $logon) -match [regex]::Escape($en['account-state-app-password-hint'])) 'under the field, a note about app passwords'
+        Shows $work $MARK_SIGN_IN $en['account-state-tooltip-refused'] $workBar (Says 'account-state-button-password') $workSignIn `
+            'meanwhile the tree marks Work, the bar over its list says why with Enter Password, the status bar says it in place of Done'
+        Check ((PushButton $main $IDC_ACCOUNT_BAR_BUTTON)) "the bar's button is a push button, which Tab reaches"
+        Check (TrayWarning) 'the tray icon carries a warning sign'
+        Start-Sleep -Seconds 2
+        Check ((Forms 'Logon').Count -eq 1) "one dialog, not one for each connection ($((Forms 'Logon').Count))"
+        if ($logon) { Shot $main 'status-1-sign-in' $logon }
+        if ($logon) {
+            Click $logon 2
+            [void](WaitFor { -not [Native.Win]::IsWindow($logon) } 10)
+        }
+        Shows $work $MARK_SIGN_IN '' $workBar (Says 'account-state-button-password') $workSignIn 'Cancel leaves the mark, the bar and the status bar to say it'
+        Shot $main 'status-2-cancelled'
+        Command $main $IDM_SYNC
+        $again = WaitForm 'Logon' 8
+        Check ($null -eq $again) 'Send/Recv again asks nothing more: the mark and the bar say it'
+        if ($again) { Click $again 2; [void](WaitFor { -not [Native.Win]::IsWindow($again) } 10) }
+        # All Inboxes shows the bar of the account that needs a sign-in
+        ChooseRow $all
+        Check ([bool](WaitFor { (Bar) -match $workBar } 10)) "on All Inboxes the bar is Work's ($(Bar))"
+        # the account's menu in the tree has Sign In Again
+        $menu = TreeRowMenu $main $tree $workHeading
+        Check ($menu.labels -contains $en['cmd-sign-in-again']) "the account's right-click menu has Sign In Again ($($menu.labels -join ', '))"
+        if ($menu.menu) { Key $menu.menu $VK_ESCAPE; [void](WaitFor { [Native.Win]::FindWindow('#32768', [NullString]::Value) -eq [IntPtr]::Zero } 5) }
+        ChooseRow $workInbox
+
+        # writing from it: a note under From; sent, the message waits in the Outbox saying why, and goes once the
+        # account is signed in again
+        $held = 'Written while Work was signed out'
+        $compose = WaitCompose { Command $main $IDM_NEW_MAIL }
+        Check ($null -ne $compose) 'New Mail opens a compose window'
+        if ($compose) {
+            Check ((GetText $compose $IDC_FROM) -match "^$work ") "it goes from Work, the account of the folder shown ($(GetText $compose $IDC_FROM))"
+            $note = WaitFor { if (Visible $compose $IDC_COMPOSE_ACCOUNT_NOTE) { GetText $compose $IDC_COMPOSE_ACCOUNT_NOTE } } 10
+            Check ($note -eq $en['account-state-compose-sign-in']) "a note under From says the account is not signed in ($note)"
+            SetText $compose $IDC_TO 'Erin <erin@example.com>'
+            SetText $compose $IDC_SUBJECT $held
+            [void](TypeInEditor $compose 'This waits until Work is signed in again.')
+            Shot $compose 'status-8-compose'
+            Command $compose $IDC_SEND
+            Check ([bool](WaitFor { -not [Native.Win]::IsWindow($compose) } 20)) 'Send closes the message'
+        }
+        # once the wait of Undo Send is over: held, as the account is not signed in
+        Check ($null -ne (WaitFor { $t = StatusPart $mainStatus 1; if ($t -match 'Outbox') { $t } } 60)) "it waits in the Outbox ($(StatusPart $mainStatus 1))"
+        Command $main $IDM_OUTBOX
+        $outbox = WaitWindow 'InboxClassicOutbox' 'Outbox'
+        Check ($null -ne $outbox) 'Tools > Outbox lists it'
+        if ($outbox) {
+            $outboxList = [Native.Win]::GetDlgItem($outbox, 450)
+            [void](WaitFor { (ListCount $outboxList) -ge 1 } 10)
+            $reason = [Native.Win]::RemoteListText($outboxList, 0, 3)
+            Check ($reason -match (Says 'account-state-outbox-sign-in' @{ account = $work })) "the Outbox says why it waits ($reason)"
+            Shot $outbox 'status-9-outbox'
+            [void][Native.Win]::PostMessage($outbox, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+            [void](WaitFor { -not [Native.Win]::IsWindow($outbox) })
+        }
+        $workGot = { (Messages 'INBOX' $rest2) | Where-Object { (RawText $_) -match "Subject: $held" } | Select-Object -First 1 }
+        Check ($null -eq (& $workGot)) 'and nothing was sent meanwhile'
+
+        # the right password: a click on the mark itself asks for it, without choosing the row
+        [void](Rest 'PUT' "$api2/users/testuser2" @{ password = 'testpass2' })
+        $chosen = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]9, [IntPtr]::Zero)
+        ClickMark $workHeading
+        $logon = WaitForm 'Logon' 20
+        Check ($null -ne $logon) 'a click on the mark asks for the password'
+        Check ([Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]9, [IntPtr]::Zero) -eq $chosen) 'and leaves the row chosen before chosen'
+        if ($logon) {
+            SetText $logon 100 'testpass2'
+            Click $logon 1
+        }
+        & $connected $work 'with the right password the account syncs: the mark and the bar go, the status bar says Done'
+        Check (-not (TrayWarning)) 'and the tray icon is plain again'
+        Check ($null -ne (WaitFor { & $workGot } 40)) 'and what waited in the Outbox goes'
+
+        # -- the sign-in of the browser account revoked while the window is minimized: a notification, whose click
+        # brings the dialog --
+        ChooseRow $aliceInbox
+        [void][Native.Win]::PostMessage($main, $WM_SYSCOMMAND, [IntPtr]$SC_MINIMIZE, [IntPtr]::Zero)
+        [void](WaitFor { [Native.Win]::IsIconic($main) } 10)
+        [void][Native.Win]::SendText($main, $kTestNotification, '')
+        [void](Rest 'POST' "$api/oauth/tokens/revoke" @{ user = $alice; type = 'refresh' })
+        [void](Rest 'POST' "$api/oauth/tokens/expire" @{ user = $alice })
+        DropSessions $api $alice
+        Command $main $IDM_SYNC
+        $heading = $en['account-notify-title-sign-in'].Replace('{ $account }', $aliceName)
+        $notified = WaitFor { [Native.Win]::SendText($main, $kTestNotification, $heading) -eq 1 } 40
+        Check ([bool]$notified) "in the background, a notification says it ($heading)"
+        Check ($null -eq (OwnBox $main)) 'and no dialog meanwhile'
+        [void][Native.Win]::PostMessage($main, $WM_TRAY, [IntPtr]::Zero, [IntPtr]$NIN_BALLOONUSERCLICK)
+        [void](WaitFor { -not [Native.Win]::IsIconic($main) } 10)
+        $aliceBar = Says 'account-state-bar-refused-browser' @{ account = $aliceName; provider = 'ImapKit' }
+        $ask = BoxOf $main 30
+        Check ($null -ne $ask -and (Statics $ask) -match [regex]::Escape($en['ui-sign-in-again-ask'])) "a click on it shows the window and the one dialog, which offers to sign in again ($(if ($ask) { Statics $ask }))"
+        if ($ask) {
+            Click $ask 7
+            [void](WaitFor { -not [Native.Win]::IsWindow($ask) } 10)
+        }
+        ChooseRow $aliceInbox
+        $aliceSignIn = Says 'account-status-sign-in' @{ account = $aliceName }
+        Shows $aliceName $MARK_SIGN_IN $en['account-state-tooltip-refused'] $aliceBar (Says 'account-state-button-sign-in') $aliceSignIn `
+            'No leaves the mark, and the bar offers Sign In Again'
+        Shot $main 'status-3-oauth'
+        Click $main $IDC_ACCOUNT_BAR_BUTTON
+        $page = FollowSignIn
+        Check ($page -and $page.StartsWith("$($ports.oauth)/authorize?") -and $page -notmatch 'prompt=select_account') 'Sign In Again opens the sign-in page of its provider'
+        & $connected $aliceName 'signed in again, the account syncs: the mark and the bar go'
+
+        # -- the provider down for a moment: no sign-in is asked for --
+        [void](Rest 'POST' "$api/oauth/token-faults" @{ grant = 'refresh_token'; status = 503; error = 'temporarily_unavailable'; count = 100 })
+        [void](Rest 'POST' "$api/oauth/tokens/expire" @{ user = $alice })
+        DropSessions $api $alice
+        Command $main $IDM_SYNC
+        $failed = WaitFor { if ((Said) -match "^$([regex]::Escape($aliceName)): ") { Said } } 40
+        Check ($null -ne $failed) "the failure is said in the status bar ($(Said))"
+        Check ((Mark $aliceName) -ne $MARK_SIGN_IN -and $null -eq (OwnBox $main)) 'but a provider that is down asks for no sign-in'
+        [void](Rest 'DELETE' "$api/oauth/token-faults")
+        Command $main $IDM_SYNC
+        & $connected $aliceName 'once it is back, the account syncs'
+
+        # -- an organization whose administrator has to approve the app --
+        [void](Rest 'POST' "$api/oauth/token-faults" @{ grant = 'refresh_token'; error = 'invalid_grant'; status = 400; count = 100
+                description = 'AADSTS65001: The user or administrator has not consented to use the application.' })
+        [void](Rest 'POST' "$api/oauth/tokens/expire" @{ user = $alice })
+        DropSessions $api $alice
+        Command $main $IDM_SYNC
+        $adminBar = Says 'account-state-bar-admin' @{ account = $aliceName; domain = 'example.com' }
+        # the dialog that says it, with the bar's button beside OK
+        $told = WaitWindow 'InboxClassicAnswers' 'Inbox Classic' 40
+        Check ($null -ne $told -and (Statics $told) -match $adminBar.TrimStart('^').TrimEnd('$') -and (WindowText ([Native.Win]::GetDlgItem($told, 100))) -eq $en['account-state-button-admin-link']) "a dialog says only an administrator can help, with Copy Link for Administrator ($(if ($told) { Statics $told }))"
+        # OK closes it, and no other comes after it (each one seen closed, its words said)
+        $dialogs = @()
+        for ($next = $told; $next -and $dialogs.Count -lt 3; $next = WaitWindow 'InboxClassicAnswers' 'Inbox Classic' 5) {
+            $dialogs += Statics $next
+            Click $next 1
+            [void](WaitFor { -not [Native.Win]::IsWindow($next) } 10)
+        }
+        Check ($dialogs.Count -eq 1) "OK closes it, and it is the one dialog ($($dialogs -join ' | '))"
+        Shows $aliceName $MARK_SIGN_IN $en['account-state-tooltip-admin'] $adminBar (Says 'account-state-button-admin-link') $aliceSignIn 'the bar offers the link for the administrator'
+        Shot $main 'status-4-admin'
+        try { Set-Clipboard -Value 'nothing yet' } catch { }
+        Click $main $IDC_ACCOUNT_BAR_BUTTON
+        # the clipboard read again while the app may still hold it open
+        $link = WaitFor { $c = try { Get-Clipboard -Raw } catch { $null }; if ($c -and $c -match 'imapkit-approve') { $c.Trim() } } 10
+        Check ($link -match '^https://' -and (Said) -eq $en['account-state-admin-link-copied']) "the button copies the administrator's link, and the status bar says so ($link; $(Said))"
+        # approved: Sign In Again of Account Properties signs in
+        [void](Rest 'DELETE' "$api/oauth/token-faults")
+        Command $main $IDM_ACCOUNT_PROPERTIES
+        $properties = WaitFor { $f = PropertiesForm; if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, $IDC_ACCOUNT_SIGN_IN_AGAIN) -ne [IntPtr]::Zero) { $f } } 20
+        Check ($null -ne $properties) 'Account Properties of the browser account has Sign In Again'
+        if ($properties) {
+            Check ((GetText $properties $IDC_ACCOUNT_SIGN_IN_STATE) -eq $en['account-state-tooltip-admin']) "beside it, why the account is not signed in ($(GetText $properties $IDC_ACCOUNT_SIGN_IN_STATE))"
+            Click $properties $IDC_ACCOUNT_SIGN_IN_AGAIN
+            Check ($null -ne (FollowSignIn)) 'it opens the sign-in page'
+            Check ([bool](WaitFor { (GetText $properties $IDC_ACCOUNT_SIGN_IN_STATE) -eq '' -and -not [Native.Win]::IsWindowEnabled([Native.Win]::GetDlgItem($properties, $IDC_ACCOUNT_SIGN_IN_AGAIN)) } 30)) 'signed in, Properties no longer says why, and Sign In Again is off'
+            Click $properties 2
+            [void](WaitFor { -not [Native.Win]::IsWindow($properties) } 10)
+        }
+        & $connected $aliceName 'and the account syncs again'
+
+        # -- the browser signed in to another address --
+        [void](Rest 'POST' "$api/users" @{ name = 'bob@example.com'; password = 'pw' })
+        [void](Rest 'POST' "$api/oauth/tokens/revoke" @{ user = $alice; type = 'refresh' })
+        [void](Rest 'POST' "$api/oauth/tokens/expire" @{ user = $alice })
+        DropSessions $api $alice
+        Command $main $IDM_SYNC
+        # the dialog of a refused sign-in, asked again since the last sign-in: No
+        $ask = BoxOf $main 20
+        if ($ask) { Click $ask 7; [void](WaitFor { -not [Native.Win]::IsWindow($ask) } 10) }
+        [void](WaitFor { (Mark $aliceName) -eq $MARK_SIGN_IN } 30)
+        [void](Rest 'POST' "$api/oauth/token-faults" @{ grant = 'authorization_code'; claims = @{ email = 'bob@example.com' }; count = 1 })
+        Click $main $IDC_ACCOUNT_BAR_BUTTON
+        [void](FollowSignIn)
+        Shows $aliceName $MARK_SIGN_IN $en['account-state-tooltip-other-address'] `
+            (Says 'account-state-bar-other-address' @{ account = $aliceName; email = 'bob@example.com'; expected = $alice }) `
+            (Says 'account-state-button-try-again') $aliceSignIn 'signed in to another address: the bar names both, with Try Again'
+        Check ($null -eq (OwnBox $main)) 'and no dialog over it'
+        Shot $main 'status-5-other-address'
+        Click $main $IDC_ACCOUNT_BAR_BUTTON
+        $page = FollowSignIn
+        Check ($page -match 'prompt=select_account') "Try Again asks the provider for its account picker ($page)"
+        & $connected $aliceName 'the right address chosen, the account syncs'
+
+        # -- the server down: after two syncs in a row the quiet mark --
+        ChooseRow $workInbox
+        [void](Rest 'POST' "$api2/script/rules" @{ on = 'greeting'; close = 'reset' })
+        DropSessions $api2 'testuser2'
+        for ($try = 0; $try -lt 4 -and (Mark $work) -ne $MARK_CANNOT_CONNECT; $try++) {
+            Command $main $IDM_SYNC
+            [void](WaitFor { (Mark $work) -eq $MARK_CANNOT_CONNECT } 15)
+        }
+        Shows $work $MARK_CANNOT_CONNECT $en['account-state-tooltip-cannot-connect'] (Says 'account-state-bar-cannot-connect' @{ account = $work }) `
+            (Says 'account-state-button-try-again') (Says 'account-status-cannot-connect' @{ account = $work }) `
+            'a server that can not be reached: the gray mark, the bar with Try Again, the status bar'
+        Check ($null -eq (OwnBox $main) -and (Forms 'Logon').Count -eq 0 -and -not (TrayWarning)) 'no dialog, and no warning on the tray icon'
+        Shot $main 'status-6-cannot-connect'
+        [void](Rest 'DELETE' "$api2/script/rules")
+        Click $main $IDC_ACCOUNT_BAR_BUTTON
+        & $connected $work 'the server back, Try Again syncs: the mark and the bar go, the status bar says Done'
+        Shot $main 'status-7-fixed'
+        # every account connected again: no mark on any row, no bar, Done (the core has nothing to say)
+        ChooseRow $all
+        Check ((Mark $work) -eq $MARK_NONE -and (Mark $aliceName) -eq $MARK_NONE -and (Mark 'inboxclassic.test') -eq $MARK_NONE -and
+            -not (Visible $main $IDC_ACCOUNT_BAR) -and (Said) -eq $en['ui-done']) "at the end every account is connected: no mark, no bar, Done ($(Said))"
+    } finally {
+        # what this step changed on the servers, put back whatever happened above
+        foreach ($undo in @(
+                { Rest 'PUT' "$api2/users/testuser2" @{ password = 'testpass2' } },
+                { Rest 'DELETE' "$api2/script/rules" },
+                { Rest 'DELETE' "$api/oauth/token-faults" },
+                { Rest 'DELETE' "$api/users/bob@example.com" })) {
+            try { [void](& $undo) } catch { }
+        }
+        CloseStrays 'account sign-in status' -Writing
+        # Work removed again, so the steps after see the accounts they saw before
+        # the Accounts window Properties was opened from earlier may still be going: the one that lists the accounts
+        Command $main $IDM_ACCOUNTS
+        $accounts = $null
+        $accountList = WaitFor {
+            $w = WaitWindow 'InboxClassicAccounts' 'Accounts' 2
+            if ($w) {
+                $l = [Native.Win]::GetDlgItem($w, 400)
+                if ($l -ne [IntPtr]::Zero -and (ListCount $l) -ge 3) { $script:statusAccounts = $w; $l }
+            }
+        } 20
+        $accounts = $script:statusAccounts
+        if ($accounts -and $accountList) {
+            # Work's row by its name, not its place
+            $workRow = @(0..((ListCount $accountList) - 1) | Where-Object { [Native.Win]::RemoteListText($accountList, $_, 0) -like '*Work*' })[0]
+            if ($null -ne $workRow) { KeyToRow $accountList $workRow }
+            Key $accountList $VK_DELETE
+            $sure = WaitWindow '#32770' 'Remove Account' 15
+            Check ($null -ne $workRow -and $null -ne $sure) "Work's row is found and Remove asks (row $workRow)"
+            if ($sure) { Click $sure 6 }
+            # an account that was syncing a moment ago is let go of first
+            Check ([bool](WaitFor { (ListCount $accountList) -eq 2 } 30)) "Work is removed again after this step ($(ListCount $accountList) accounts)"
+            Click $accounts 404
+            [void](WaitFor { -not [Native.Win]::IsWindow($accounts) })
+        } else {
+            Check $false 'File > Accounts lists the three accounts, to remove Work again'
         }
     }
 

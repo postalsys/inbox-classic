@@ -116,6 +116,21 @@ using SetupPrefNames = std::unique_ptr<PeSetupPrefNames, Deleter<pe_setup_pref_n
 std::wstring Widen(std::string_view utf8);
 std::string Narrow(std::wstring_view utf16);
 
+// whether an account is signed in and can connect, with the words the windows show for it (pe_account_status); its
+// strings are never NULL, and freed with it
+class AccountStatus {
+public:
+    AccountStatus(const PeCore* core, int64_t account) : status_(pe_account_status(core, account)) {}
+    ~AccountStatus() { pe_account_status_free(status_); }
+    AccountStatus(const AccountStatus&) = delete;
+    AccountStatus& operator=(const AccountStatus&) = delete;
+    const PeAccountStatus* operator->() const { return &status_; }
+    bool Connected() const { return status_.state == PE_ACCOUNT_STATE_CONNECTED; }
+
+private:
+    PeAccountStatus status_;
+};
+
 std::wstring Version();
 
 // a word of the catalogs (core/locales) in the language in use, `&` marking a menu letter as the catalog has it

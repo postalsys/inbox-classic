@@ -8,6 +8,7 @@
 #include <wrl/client.h>
 
 #include <algorithm>
+#include <functional>
 #include <string>
 
 namespace {
@@ -22,9 +23,15 @@ HICON g_badge = nullptr;
 // what SetOverlayIcon said the last time
 HRESULT g_badgeResult = S_OK;
 uint64_t g_unread = 0;
-// the message a click on the last notification opens
+// the message a click on the last notification opens, or the account whose sign-in it was about
 int64_t g_noteFolder = 0;
 uint64_t g_noteUid = 0;
+int64_t g_noteAccount = 0;
+// the accounts' state: how many need a sign-in (the warning sign on the icon while above 0) and the core's words for
+// all of them, and the icon with the sign
+uint32_t g_signIn = 0;
+std::wstring g_accountsStatus;
+HICON g_attentionIcon = nullptr;
 
 NOTIFYICONDATAW Data(HWND main) {
     NOTIFYICONDATAW data = {sizeof(data)};
@@ -35,21 +42,19 @@ NOTIFYICONDATAW Data(HWND main) {
 
 std::wstring UnreadText(uint64_t unread);
 
-// the icon's tooltip
+// the icon's tooltip: the unread count, and what is wrong with an account
 void SetTip(NOTIFYICONDATAW& data) {
     data.uFlags |= NIF_TIP | NIF_SHOWTIP;
-    wcsncpy_s(data.szTip, (L"Inbox Classic\n" + UnreadText(g_unread)).c_str(), _TRUNCATE);
-}
-
-std::wstring UnreadText(uint64_t unread) {
-    if (unread == 0) {
-        return core::T(PE_TEXT_WIN_NO_UNREAD);
+    std::wstring tip = L"Inbox Classic\n" + UnreadText(g_unread);
+    if (!g_accountsStatus.empty()) {
+        tip += L"\n" + g_accountsStatus;
     }
-    return core::T(PE_TEXT_WIN_UNREAD_MESSAGES, {{"count", std::to_wstring(unread)}});
+    wcsncpy_s(data.szTip, tip.c_str(), _TRUNCATE);
 }
 
-// the count, white on a red disc, for the taskbar button: a small icon of the window's DPI (16 pixels at 100%)
-HICON Badge(HWND main, uint64_t count) {
+// a small icon of the window's DPI (16 pixels at 100%) drawn by `draw` into a clear 32-bit bitmap (`dc`, its pixels
+// `bits`, `size` square); nullptr when it could not be made
+HICON SmallIcon(HWND main, const std::function<void(HDC dc, uint32_t* bits, int size)>& draw) {
     int size = GetSystemMetricsForDpi(SM_CXSMICON, GetDpiForWindow(main));
     BITMAPINFO info = {};
     info.bmiHeader = {sizeof(BITMAPINFOHEADER), size, -size, 1, 32, BI_RGB};
@@ -63,46 +68,82 @@ HICON Badge(HWND main, uint64_t count) {
         return nullptr;
     }
     HGDIOBJ oldBitmap = SelectObject(dc, color);
-    HBRUSH red = CreateSolidBrush(RGB(0xC4, 0x2B, 0x1C));
-    HGDIOBJ oldBrush = SelectObject(dc, red);
-    HGDIOBJ oldPen = SelectObject(dc, GetStockObject(NULL_PEN));
-    Ellipse(dc, 0, 0, size + 1, size + 1);
-    std::wstring text = count > 99 ? L"99+" : std::to_wstring(count);
-    HFONT font = CreateFontW(-size * (text.size() > 2 ? 6 : 8) / 10, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
-                             CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, DEFAULT_PITCH, L"Segoe UI");
-    HGDIOBJ oldFont = SelectObject(dc, font);
-    SetTextColor(dc, RGB(0xFF, 0xFF, 0xFF));
-    SetBkMode(dc, TRANSPARENT);
-    RECT area = {0, 0, size, size};
-    DrawTextW(dc, text.c_str(), -1, &area, DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
+    draw(dc, static_cast<uint32_t*>(bits), size);
     GdiFlush();
-    // GDI leaves the alpha at 0: what it drew on is opaque, the rest stays clear
-    auto* pixel = static_cast<uint32_t*>(bits);
-    for (int i = 0; i < size * size; i++) {
-        if (pixel[i] & 0x00FFFFFF) {
-            pixel[i] |= 0xFF000000;
-        }
-    }
-    SelectObject(dc, oldFont);
-    SelectObject(dc, oldPen);
-    SelectObject(dc, oldBrush);
     SelectObject(dc, oldBitmap);
-    DeleteObject(font);
-    DeleteObject(red);
     DeleteDC(dc);
     HBITMAP mask = CreateBitmap(size, size, 1, 1, nullptr);
     ICONINFO icon = {TRUE, 0, 0, mask, color};
-    HICON badge = CreateIconIndirect(&icon);
+    HICON made = CreateIconIndirect(&icon);
     DeleteObject(mask);
     DeleteObject(color);
-    return badge;
+    return made;
+}
+
+// the app's small icon with the system's warning sign over its bottom right corner, as Explorer marks a file: for the
+// notification area while an account needs a sign-in
+HICON AttentionIcon(HWND main) {
+    return SmallIcon(main, [](HDC dc, uint32_t*, int size) {
+        // both drawn with their own transparency onto the clear bitmap, which keeps it
+        DrawIconEx(dc, 0, 0, AppIcon(true), size, size, 0, nullptr, DI_NORMAL);
+        int sign = (size * 5 + 4) / 8;
+        DrawIconEx(dc, size - sign, size - sign, WarningIcon(size), sign, sign, 0, nullptr, DI_NORMAL);
+    });
+}
+
+// the icon of the notification area as the accounts are: with the warning sign while one needs a sign-in
+HICON TrayIcon(HWND main) {
+    if (g_signIn == 0) {
+        return AppIcon(true);
+    }
+    if (!g_attentionIcon) {
+        g_attentionIcon = AttentionIcon(main);
+    }
+    return g_attentionIcon ? g_attentionIcon : AppIcon(true);
+}
+
+std::wstring UnreadText(uint64_t unread) {
+    if (unread == 0) {
+        return core::T(PE_TEXT_WIN_NO_UNREAD);
+    }
+    return core::T(PE_TEXT_WIN_UNREAD_MESSAGES, {{"count", std::to_wstring(unread)}});
+}
+
+// the count, white on a red disc, for the taskbar button
+HICON Badge(HWND main, uint64_t count) {
+    return SmallIcon(main, [count](HDC dc, uint32_t* pixel, int size) {
+        HBRUSH red = CreateSolidBrush(RGB(0xC4, 0x2B, 0x1C));
+        HGDIOBJ oldBrush = SelectObject(dc, red);
+        HGDIOBJ oldPen = SelectObject(dc, GetStockObject(NULL_PEN));
+        Ellipse(dc, 0, 0, size + 1, size + 1);
+        std::wstring text = count > 99 ? L"99+" : std::to_wstring(count);
+        HFONT font = CreateFontW(-size * (text.size() > 2 ? 6 : 8) / 10, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
+                                 OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, DEFAULT_PITCH, L"Segoe UI");
+        HGDIOBJ oldFont = SelectObject(dc, font);
+        SetTextColor(dc, RGB(0xFF, 0xFF, 0xFF));
+        SetBkMode(dc, TRANSPARENT);
+        RECT area = {0, 0, size, size};
+        DrawTextW(dc, text.c_str(), -1, &area, DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
+        GdiFlush();
+        // GDI leaves the alpha at 0: what it drew on is opaque, the rest stays clear
+        for (int i = 0; i < size * size; i++) {
+            if (pixel[i] & 0x00FFFFFF) {
+                pixel[i] |= 0xFF000000;
+            }
+        }
+        SelectObject(dc, oldFont);
+        SelectObject(dc, oldPen);
+        SelectObject(dc, oldBrush);
+        DeleteObject(font);
+        DeleteObject(red);
+    });
 }
 
 void Add(HWND main) {
     NOTIFYICONDATAW data = Data(main);
     data.uFlags = NIF_MESSAGE | NIF_ICON;
     data.uCallbackMessage = WM_TRAY;
-    data.hIcon = AppIcon(true);
+    data.hIcon = TrayIcon(main);
     SetTip(data);
     Shell_NotifyIconW(NIM_ADD, &data);
     data.uVersion = NOTIFYICON_VERSION_4;
@@ -140,6 +181,10 @@ void TrayRemove(HWND main) {
         g_badge = nullptr;
     }
     g_taskbar.Reset();
+    if (g_attentionIcon) {
+        DestroyIcon(g_attentionIcon);
+        g_attentionIcon = nullptr;
+    }
 }
 
 void TrayCount(HWND main, uint64_t unread) {
@@ -163,9 +208,32 @@ int64_t TrayBadge() {
     return g_badge ? static_cast<int64_t>(g_unread) : 0;
 }
 
+void TrayAttention(HWND main, uint32_t signIn, const std::wstring& status) {
+    if (signIn == g_signIn && status == g_accountsStatus) {
+        return;
+    }
+    g_signIn = signIn;
+    g_accountsStatus = status;
+    NOTIFYICONDATAW data = Data(main);
+    data.uFlags = NIF_ICON;
+    data.hIcon = TrayIcon(main);
+    SetTip(data);
+    Shell_NotifyIconW(NIM_MODIFY, &data);
+}
+
+bool TrayAttentionShown() {
+    return g_signIn > 0 && g_attentionIcon != nullptr;
+}
+
+void TrayNotifyAccount(HWND main, const std::wstring& title, const std::wstring& text, int64_t account) {
+    TrayNotify(main, title, text, 0, 0);
+    g_noteAccount = account;
+}
+
 void TrayNotify(HWND main, const std::wstring& title, const std::wstring& text, int64_t folder, uint64_t uid) {
     g_noteFolder = folder;
     g_noteUid = uid;
+    g_noteAccount = 0;
     NOTIFYICONDATAW data = Data(main);
     data.uFlags = NIF_INFO;
     wcsncpy_s(data.szInfoTitle, title.c_str(), _TRUNCATE);
@@ -175,7 +243,7 @@ void TrayNotify(HWND main, const std::wstring& title, const std::wstring& text, 
     Shell_NotifyIconW(NIM_MODIFY, &data);
 }
 
-TrayAction TrayMessage(HWND main, UINT message, WPARAM, LPARAM lParam, int64_t& folder, uint64_t& uid) {
+TrayAction TrayMessage(HWND main, UINT message, WPARAM, LPARAM lParam, int64_t& folder, uint64_t& uid, int64_t& account) {
     if (message == g_taskbarCreated && g_taskbarCreated) {
         Add(main);
         ShowBadge(main);
@@ -201,6 +269,10 @@ TrayAction TrayMessage(HWND main, UINT message, WPARAM, LPARAM lParam, int64_t& 
     case WM_CONTEXTMENU:
         return TrayAction::Menu;
     case NIN_BALLOONUSERCLICK:
+        if (g_noteAccount) {
+            account = g_noteAccount;
+            return TrayAction::Account;
+        }
         folder = g_noteFolder;
         uid = g_noteUid;
         return TrayAction::Open;

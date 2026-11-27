@@ -23,10 +23,8 @@ void Wipe(std::string& secret) {
 
 int WarningNote(HWND dialog, int id, const std::wstring& text, int left, int top, int right) {
     int icon = GetSystemMetrics(SM_CXSMICON);
-    // a system icon is shared: not destroyed
-    auto warning = static_cast<HICON>(LoadImageW(nullptr, IDI_WARNING, IMAGE_ICON, icon, icon, LR_SHARED));
     HWND sign = CreateChild(dialog, L"STATIC", nullptr, SS_ICON | SS_REALSIZECONTROL, 0, {left, top, left + icon, top + icon});
-    SendMessageW(sign, STM_SETICON, reinterpret_cast<WPARAM>(warning), 0);
+    SendMessageW(sign, STM_SETICON, reinterpret_cast<WPARAM>(WarningIcon(icon)), 0);
     int textLeft = left + icon + Scale(6);
     int height = std::max(icon, static_cast<int>(MeasureText(text, right - textLeft).cy));
     CreateChild(dialog, L"STATIC", text.c_str(), SS_LEFT | SS_NOPREFIX, id, {textLeft, top, right, top + height});

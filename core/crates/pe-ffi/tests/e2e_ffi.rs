@@ -644,9 +644,62 @@ fn reads_mail_through_the_c_api() {
     assert!(unsafe { pe_account_set_password(core, account, wrong.as_ptr()) });
     let other = unsafe { pe_account_add(core, &settings, wrong.as_ptr()) };
     assert!(unsafe { pe_sync(core, other) });
+    // the account's state first, asking for the dialog (count 1), then the Failed for the status bar
+    let changed = wait(&events, |e| {
+        e.kind == PeEventKind::AccountStateChanged && e.account == other
+    });
+    assert_eq!(changed.count, 1, "the app shows its dialog");
+    assert_eq!(unsafe { pe_account_state(core, other) }, PeAccountState::SignInNeeded);
     let failed = wait(&events, |e| e.kind == PeEventKind::Failed);
     assert_eq!((failed.account, failed.failure), (other, PeFailureKind::Authentication));
     assert!(failed.message.unwrap().contains("authentication"));
+
+    // with the words the windows show
+    let status = unsafe { pe_account_status(core, other) };
+    assert_eq!(
+        (status.state, status.reason, status.action, status.prompt, status.mark),
+        (
+            PeAccountState::SignInNeeded,
+            PeSignInReason::Refused,
+            PeStatusAction::EnterPassword,
+            PePrompt::Password,
+            PeAccountMark::SignIn
+        )
+    );
+    assert!(status.can_sign_in_again);
+    assert_eq!(text(status.button), tr(Text::AccountStateButtonPassword));
+    assert!(!text(status.bar).is_empty() && text(status.admin_link).is_empty());
+    assert!(!text(status.password_hint).is_empty());
+    unsafe { pe_account_status_free(status) };
+    // the bar over All Inboxes speaks for an account that needs a sign-in
+    assert_ne!(unsafe { pe_status_account_for(core, PeTreeList::AllInboxes, 0) }, 0);
+    let mut needing = 0;
+    let summary = unsafe { pe_accounts_summary(core, &mut needing) };
+    assert!(!text(summary).is_empty() && needing >= 1);
+    unsafe { pe_string_free(summary) };
+    // the first account was given the wrong password too, and may have tried it by now: one or two need a sign-in
+    let said = unsafe { pe_accounts_status_text(core) };
+    assert!(!text(said).is_empty());
+    unsafe { pe_string_free(said) };
+    assert!(unsafe { pe_accounts_needing_sign_in(core) } >= 1);
+    // the timer leaves it alone after the refusal; the user's own sync goes
+    assert!(!unsafe { pe_sync_scheduled(core, other) });
+    // its heading (two accounts) carries the mark with its tooltip
+    let tree = unsafe { pe_folder_tree(core) };
+    let marked: Vec<(PeTreeRowKind, String)> = (0..unsafe { pe_tree_count(tree) })
+        .map(|i| unsafe { &*pe_tree_get(tree, i) })
+        .filter(|row| row.mark != PeAccountMark::None)
+        .map(|row| (row.kind, text(row.mark_tooltip)))
+        .collect();
+    unsafe { pe_tree_free(tree) };
+    assert!(
+        marked.contains(&(PeTreeRowKind::Account, tr(Text::AccountStateTooltipRefused))),
+        "{marked:?}"
+    );
+    // a sign-in again is for an account that signs in through the browser
+    let mut url: *mut c_char = null_mut();
+    assert_eq!(unsafe { pe_sign_in_again_begin(core, other, &mut url) }, 0);
+    assert!(url.is_null());
 
     unsafe { pe_core_close(core) };
     // no events after close: the context can go

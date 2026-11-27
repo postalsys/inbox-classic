@@ -380,6 +380,16 @@ fn challenge(verifier: &str) -> String {
     URL_SAFE_NO_PAD.encode(ring::digest::digest(&ring::digest::SHA256, verifier.as_bytes()))
 }
 
+/// How the provider's sign-in page is asked to behave
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum Prompt {
+    /// As the provider does by itself (Google always asks for consent, for a refresh token every time)
+    #[default]
+    Usual,
+    /// The provider's account picker first (`prompt=select_account`, OpenID Connect Core 3.1.2.1)
+    ChooseAccount,
+}
+
 /// A sign-in that waits for the browser
 pub struct SignIn {
     provider: Provider,
@@ -396,6 +406,13 @@ pub struct SignIn {
 impl SignIn {
     /// Starts listening for the redirect and makes the page to open for `email`
     pub fn begin(provider: Provider, email: &str) -> Result<SignIn, OAuthError> {
+        SignIn::begin_with(provider, email, Prompt::Usual)
+    }
+
+    /// [`SignIn::begin`], the provider asked to show its page as `prompt` says: [`Prompt::ChooseAccount`] after the
+    /// browser signed in to another account than the one wanted, so the provider shows its account picker in place of
+    /// signing in to the account it remembers
+    pub fn begin_with(provider: Provider, email: &str, prompt: Prompt) -> Result<SignIn, OAuthError> {
         // the page the browser opens: https, or a provider on this computer (a test server), never anything else
         if http::parse_url(&provider.authorize_url).is_none() || provider.authorize_url.contains('#') {
             return Err(OAuthError::Unavailable(format!(
@@ -426,10 +443,14 @@ impl SignIn {
         if !email.is_empty() {
             params.push(("login_hint", email.to_string()));
         }
+        let choose = prompt == Prompt::ChooseAccount;
         if provider.kind == ProviderKind::Google {
-            // a refresh token, every time
+            // a refresh token, every time; Google takes several prompts at once
             params.push(("access_type", "offline".into()));
-            params.push(("prompt", "consent".into()));
+            let prompt = if choose { "select_account consent" } else { "consent" };
+            params.push(("prompt", prompt.into()));
+        } else if choose {
+            params.push(("prompt", "select_account".into()));
         }
         let pairs: Vec<(&str, &str)> = params.iter().map(|(k, v)| (*k, v.as_str())).collect();
         let url = format!("{}?{}", provider.authorize_url, form_encode(&pairs));
@@ -503,8 +524,23 @@ async fn token_request(
 
 /// Where an administrator of a Microsoft 365 organization approves the client for everyone in it
 pub fn admin_consent_url(client_id: &str) -> String {
+    admin_consent_url_in(client_id, "organizations")
+}
+
+/// [`admin_consent_url`] for the organization `tenant` (its id, or a domain of it, such as the domain of the address
+/// of the account), so the administrator who opens it signs in to that organization; any organization when `tenant`
+/// is no domain or id
+pub fn admin_consent_url_in(client_id: &str, tenant: &str) -> String {
+    let tenant = tenant.trim().to_ascii_lowercase();
+    let valid = !tenant.is_empty()
+        && tenant.len() <= 253
+        && !tenant.starts_with(['.', '-'])
+        && tenant
+            .bytes()
+            .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'.' || b == b'-');
+    let tenant = if valid { tenant.as_str() } else { "organizations" };
     format!(
-        "{MICROSOFT_LOGIN}/organizations/adminconsent?{}",
+        "{MICROSOFT_LOGIN}/{tenant}/adminconsent?{}",
         form_encode(&[("client_id", client_id)])
     )
 }
@@ -517,6 +553,43 @@ pub(crate) fn needs_admin(description: &str) -> bool {
         .any(|code| description.contains(code))
 }
 
+/// What an error answer of a token endpoint (RFC 6749 5.2) asks of the user
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum TokenError {
+    /// Signing in again: the grant (the refresh token, the code) is no good, or the user has to consent again
+    Refused,
+    /// Only the organization's administrator can help (Microsoft Entra admin consent)
+    NeedsAdmin,
+    /// Nothing to do but try again later: the provider is down or busy, or the answer is not about the grant
+    Unavailable,
+}
+
+/// Errors that mean the user has to sign in again: the grant is no good, or the user has to consent or sign in at the
+/// provider first (OpenID Connect Core 3.1.2.6)
+const SIGN_IN_ERRORS: [&str; 4] = [
+    "invalid_grant",
+    "consent_required",
+    "interaction_required",
+    "login_required",
+];
+
+/// Tells a refused grant (400 or 401 with `invalid_grant` or a consent error) from a provider that did not answer the
+/// question: a 5xx, `temporarily_unavailable` or `server_error`, a rate limit or any other error. Only a refused
+/// grant asks the user to sign in again; for the rest the refresh token is kept and tried again later.
+fn token_error(status: u16, error: &str, description: &str) -> TokenError {
+    if !matches!(status, 400 | 401) {
+        return TokenError::Unavailable;
+    }
+    if needs_admin(description) {
+        return TokenError::NeedsAdmin;
+    }
+    if SIGN_IN_ERRORS.contains(&error) {
+        TokenError::Refused
+    } else {
+        TokenError::Unavailable
+    }
+}
+
 /// The tokens of `provider`'s token endpoint's answer (RFC 6749 5.1), or its error (5.2); for a sign-in (no
 /// `refreshed` token) with who signed in
 pub fn parse_tokens(
@@ -526,7 +599,11 @@ pub fn parse_tokens(
     now: i64,
     provider: &Provider,
 ) -> Result<Tokens, OAuthError> {
-    let json: Value = serde_json::from_slice(body).map_err(|_| OAuthError::Refused(format!("HTTP {status}")))?;
+    // an error page of a proxy, a portal or the provider's own front (HTML, a 502): no answer of the provider's, so
+    // nothing is said about the sign-in; the next try may get one
+    let Ok(json) = serde_json::from_slice::<Value>(body) else {
+        return Err(OAuthError::Unavailable(format!("HTTP {status}")));
+    };
     let text = |key: &str| {
         json.get(key)
             .and_then(Value::as_str)
@@ -534,21 +611,26 @@ pub fn parse_tokens(
             .map(str::to_string)
     };
     if status != 200 {
-        if text("error_description").is_some_and(|d| needs_admin(&d)) {
-            return Err(OAuthError::NeedsAdmin(admin_consent_url(&provider.client_id)));
-        }
-        let reason = [text("error"), text("error_description")]
+        let error = text("error").unwrap_or_default();
+        let description = text("error_description").unwrap_or_default();
+        let reason = [error.as_str(), description.as_str()]
             .into_iter()
-            .flatten()
+            .filter(|part| !part.is_empty())
             .collect::<Vec<_>>()
             .join(": ");
-        return Err(OAuthError::Refused(if reason.is_empty() {
+        let reason = if reason.is_empty() {
             format!("HTTP {status}")
         } else {
             reason
-        }));
+        };
+        return Err(match token_error(status, &error, &description) {
+            TokenError::NeedsAdmin => OAuthError::NeedsAdmin(admin_consent_url(&provider.client_id)),
+            TokenError::Refused => OAuthError::Refused(reason),
+            TokenError::Unavailable => OAuthError::Unavailable(reason),
+        });
     }
-    let access_token = text("access_token").ok_or_else(|| OAuthError::Refused("no access token".into()))?;
+    // a 200 without a token is no answer either
+    let access_token = text("access_token").ok_or_else(|| OAuthError::Unavailable("no access token".into()))?;
     let expires_in = json
         .get("expires_in")
         .and_then(Value::as_i64)
@@ -693,14 +775,71 @@ mod tests {
         assert!(matches!(admin, OAuthError::NeedsAdmin(_)) && admin.needs_sign_in());
         assert!(admin.to_string().ends_with(&admin_consent_url("client id")));
         assert!(admin.to_string().ends_with("adminconsent?client_id=client%20id"));
-        assert!(matches!(
-            parse_tokens(200, b"<html>", None, 0, &p),
-            Err(OAuthError::Refused(_))
-        ));
-        assert!(matches!(
-            parse_tokens(200, br#"{"token_type":"Bearer"}"#, None, 0, &p),
-            Err(OAuthError::Refused(_))
-        ));
+        // no answer of the provider's: the refresh token is kept, and tried again later
+        for (status, body) in [
+            (200, &b"<html>"[..]),
+            (200, br#"{"token_type":"Bearer"}"#),
+            (502, b"<html><body>Bad Gateway</body></html>"),
+            (500, br#"{"error":"server_error"}"#),
+            (
+                503,
+                br#"{"error":"temporarily_unavailable","error_description":"try later"}"#,
+            ),
+            (400, br#"{"error":"temporarily_unavailable"}"#),
+            (400, br#"{"error":"server_error"}"#),
+            (429, br#"{"error":"invalid_grant"}"#),
+            (
+                500,
+                br#"{"error":"invalid_grant","error_description":"AADSTS65001: x"}"#,
+            ),
+            (400, br#"{"error":"invalid_request"}"#),
+        ] {
+            let error = parse_tokens(status, body, Some("r"), 0, &p).unwrap_err();
+            assert!(
+                matches!(error, OAuthError::Unavailable(_)) && !error.needs_sign_in(),
+                "{status} {}: {error:?}",
+                String::from_utf8_lossy(body)
+            );
+        }
+        // a refused grant or consent asks for a new sign-in
+        for (status, body) in [
+            (401, &br#"{"error":"invalid_grant"}"#[..]),
+            (400, br#"{"error":"consent_required"}"#),
+            (
+                400,
+                br#"{"error":"interaction_required","error_description":"AADSTS50076: MFA"}"#,
+            ),
+        ] {
+            let error = parse_tokens(status, body, Some("r"), 0, &p).unwrap_err();
+            assert!(
+                matches!(error, OAuthError::Refused(_)) && error.needs_sign_in(),
+                "{status}: {error:?}"
+            );
+        }
+        let admin = parse_tokens(
+            400,
+            br#"{"error":"invalid_client","error_description":"AADSTS90094: The grant requires admin permission."}"#,
+            Some("r"),
+            0,
+            &p,
+        );
+        assert!(matches!(admin, Err(OAuthError::NeedsAdmin(_))));
+    }
+
+    #[test]
+    fn admin_consent_for_the_accounts_organization() {
+        assert_eq!(
+            admin_consent_url_in("client id", "Contoso.example"),
+            "https://login.microsoftonline.com/contoso.example/adminconsent?client_id=client%20id"
+        );
+        for no_tenant in ["", "con toso", "a/b", "../x", "-x", "x?y"] {
+            assert_eq!(
+                admin_consent_url_in("c", no_tenant),
+                admin_consent_url("c"),
+                "{no_tenant}"
+            );
+        }
+        assert!(admin_consent_url("c").starts_with("https://login.microsoftonline.com/organizations/adminconsent?"));
     }
 
     fn test_provider(token_url: &str) -> Provider {
@@ -782,9 +921,30 @@ mod tests {
         )));
         assert!(url.contains("&login_hint=me%40example.com"));
         assert!(!url.contains(&sign_in.verifier), "the verifier stays here");
+        assert!(!url.contains("prompt="), "{url}");
         // no address typed: none suggested
         let blank = SignIn::begin(test_provider("https://login.example.com/token"), "").unwrap();
         assert!(!blank.url.contains("login_hint"), "{}", blank.url);
+        // after the browser signed in to another account: the provider's account picker
+        let choose = SignIn::begin_with(
+            test_provider("https://login.example.com/token"),
+            "me@example.com",
+            Prompt::ChooseAccount,
+        )
+        .unwrap();
+        assert!(choose.url.contains("&prompt=select_account"), "{}", choose.url);
+        let google = Provider {
+            kind: ProviderKind::Google,
+            ..test_provider("https://login.example.com/token")
+        };
+        let usual = SignIn::begin(google.clone(), "").unwrap();
+        assert!(usual.url.contains("&prompt=consent"), "{}", usual.url);
+        let choose = SignIn::begin_with(google, "", Prompt::ChooseAccount).unwrap();
+        assert!(
+            choose.url.contains("&prompt=select_account%20consent"),
+            "{}",
+            choose.url
+        );
         // a sign-in page that is neither https nor on this computer is never opened
         for page in [
             "http://login.example.com/authorize",

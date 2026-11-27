@@ -547,7 +547,13 @@ void ClearHelpContext(HWND window) {
 
 void OpenHelp(const char* context) {
     core::String topic(pe_help_context(context));
-    if (!topic) {
+    if (topic) {
+        OpenHelpTopic(topic.get());
+    }
+}
+
+void OpenHelpTopic(const std::string& topic) {
+    if (topic.empty()) {
         return;
     }
     if (g_window.hwnd) {
@@ -558,7 +564,7 @@ void OpenHelp(const char* context) {
     } else if (!CreateHelpWindow()) {
         return;
     }
-    Open(topic.get());
+    Open(topic);
 }
 
 void HelpKey(HWND window) {

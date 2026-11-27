@@ -193,6 +193,13 @@ pub enum PeEventKind {
     /// Settings sync's state changed, a probe or the computers have their answer, or a sync brought news: the Sync
     /// settings read `pe_settings_sync_state` again, the windows take `pe_settings_sync_news`
     SettingsSyncChanged = 42,
+    /// What `account` shows of its sign-in and connection changed: read `pe_account_status`, the status bar
+    /// (`pe_accounts_status_text` or `pe_accounts_summary`), the bar over the list (`pe_status_account_for`) and the
+    /// folder tree (`pe_folder_tree`) again. With `count` 1 the app shows its one dialog for the state now
+    /// (`PeAccountStatus` `prompt`), and while in the background a notification: the only place that dialog comes
+    /// from (a `Failed` with AUTHENTICATION is for the status bar alone). It comes before the `Failed` of the same
+    /// refusal.
+    AccountStateChanged = 43,
 }
 
 #[repr(C)]
@@ -246,7 +253,7 @@ pub struct PeEvent {
     /// `preview_token`, for `PreviewsPrepared`. NULL otherwise
     pub detail: *const c_char,
     /// How many messages, for `NewMail`, `RulesApplied` and `ActionUndone`; the seconds left, for `SendWaiting`; how
-    /// many addresses got a key, for `KeysFound`; 0 otherwise
+    /// many addresses got a key, for `KeysFound`; 1 when the app shows its dialog, for `AccountStateChanged`; 0 otherwise
     pub count: u64,
 }
 
@@ -314,6 +321,7 @@ impl Callback {
             Event::ReadDone { request } => (PeEventKind::ReadDone, 0, 0, *request),
             Event::ActionUndone { account, folder, .. } => (PeEventKind::ActionUndone, *account, *folder, 0),
             Event::Acted { request, .. } => (PeEventKind::Acted, 0, 0, *request),
+            Event::AccountStateChanged { account, .. } => (PeEventKind::AccountStateChanged, *account, 0, 0),
         };
         let count = match &event {
             Event::NewMail { count, .. } => *count as u64,
@@ -321,6 +329,7 @@ impl Callback {
             Event::RulesApplied { count, .. } => *count as u64,
             Event::ActionUndone { count, .. } => *count,
             Event::KeysFound { learned, .. } => *learned as u64,
+            Event::AccountStateChanged { prompt, .. } => u64::from(*prompt),
             _ => 0,
         };
         let (failure, message, detail) = match event {
@@ -1027,12 +1036,8 @@ pub unsafe extern "C" fn pe_list_bar(core: *const PeCore, folder: i64, uid: u64)
 /// `bar` must come from `pe_list_bar`, freed once.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_list_bar_free(bar: PeListBar) {
-    for text in [bar.text, bar.button] {
-        if !text.is_null() {
-            // SAFETY: made by into_c_string and not freed before, as the caller guarantees
-            drop(unsafe { CString::from_raw(text) });
-        }
-    }
+    // SAFETY: as the caller guarantees
+    unsafe { crate::free_strings(&[bar.text, bar.button]) }
 }
 
 /// The message to write to leave the mailing list of `folder`/`uid` by mail (the list asks for one): its request is
@@ -1416,6 +1421,12 @@ pub struct PeTreeRow {
     /// Its icon's word: `inbox`, `sent`, `drafts`, `deleted`, `junk`, `archive`, `flagged`, `all`, `account` for a
     /// heading, or empty for any other folder
     pub icon: *const c_char,
+    /// The sign-in state of `account` on the rows that stand for it (its heading, its Inbox under All Inboxes, the
+    /// only account's Inbox): a warning while it needs a sign-in, another mark while it can not connect, NONE on every
+    /// other row. The tree is read again on `AccountStateChanged`.
+    pub mark: crate::PeAccountMark,
+    /// The mark's tooltip (and what a screen reader says of it); empty without a mark
+    pub mark_tooltip: *const c_char,
 }
 
 /// The rows of the folder list; free with `pe_tree_free`
@@ -1475,6 +1486,8 @@ pub unsafe extern "C" fn pe_folder_tree(core: *const PeCore) -> *mut PeTree {
                     new_folder_account: row.new_folder_account,
                     new_folder_parent: row.new_folder_parent,
                     icon: strings.add(row.icon),
+                    mark: row.mark.into(),
+                    mark_tooltip: strings.add(&row.mark_tooltip),
                 }),
                 rows,
             ))
@@ -2011,7 +2024,9 @@ pub unsafe extern "C" fn pe_message_list_free(list: *mut PeMessageList) {
 
 // ---- background work ----
 
-/// Syncs an account in the background: `SyncStarted`, what changed, `SyncFinished`
+/// Syncs an account in the background: `SyncStarted`, what changed, `SyncFinished`. The user's own Send/Recv (and
+/// the sync after a new password or sign-in): it goes at once whatever the account's state. The timer's syncs use
+/// `pe_sync_scheduled`.
 ///
 /// # Safety
 /// `core` must be a live handle.
@@ -4891,25 +4906,6 @@ pub unsafe extern "C" fn pe_account_add_signed_in(core: *const PeCore, request: 
     let name = unsafe { arg(name) }.unwrap_or_default().to_string();
     // SAFETY: as the caller guarantees
     unsafe { with(core, 0, |core| core.add_signed_in_account(request, &name).unwrap_or(0)) }
-}
-
-/// Gives an account signed in through the browser the result of a new sign-in, after the old one was refused.
-/// False with the reason in `error` (NULL or a pointer to a string to free with `pe_string_free`), as when the
-/// browser signed in to another account.
-///
-/// # Safety
-/// `core` must be a live handle, `error` NULL or a valid pointer.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_account_reauthorize(
-    core: *const PeCore,
-    account: i64,
-    request: u64,
-    error: *mut *mut c_char,
-) -> bool {
-    // SAFETY: as the caller guarantees
-    let outcome = unsafe { with(core, Err(None), |core| core.reauthorize(account, request).map_err(Some)) };
-    // SAFETY: as the caller guarantees
-    unsafe { refused(error, outcome, "the sign-in could not be used") }.is_some()
 }
 
 // ---- sign-in apps ----

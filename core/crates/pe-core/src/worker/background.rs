@@ -65,8 +65,13 @@ impl Worker {
     }
 
     /// Batches until there is no work left, or one fails (tried again with the next work). When this worker can not
-    /// connect, the main worker does them, a slice at a time between its commands.
+    /// connect, the main worker does them, a slice at a time between its commands. Nothing while the account needs a
+    /// sign-in.
     async fn work_through(&mut self, store: &mut Store) {
+        // a refused sign-in is not tried again for work nobody waits for: the next sync that signs in brings more
+        if self.signed_out() {
+            return;
+        }
         // the keys read again for this pass: one imported since is used
         self.decrypt_ring = None;
         if !self.limited_lately() {
@@ -78,7 +83,10 @@ impl Worker {
                     Ok(true) => continue,
                     Ok(false) => return,
                     Err(_) if self.refused_since(started) => break,
-                    Err(failure) => return self.reset_after(&failure),
+                    Err(failure) => {
+                        self.reset_after(&failure);
+                        return;
+                    }
                 }
             }
         }

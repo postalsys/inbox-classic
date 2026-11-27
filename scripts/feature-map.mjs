@@ -336,6 +336,36 @@ const sections = [
                 ]
             },
             {
+                shot: 'status-1-sign-in',
+                name: 'An account that is not signed in',
+                what: "When an account's server refuses its sign-in (a password rejected, a Microsoft or Google token expired or revoked), the account's row in the folder tree (its Inbox when it is the only account) shows a warning mark with the reason, a bar over its list says its mail may be out of date with Sign In Again or Enter Password, and the status bar says it needs a sign-in instead of Done. The app asks once; after Cancel the mark, the bar and the status bar keep saying it, the tray (the Dock on the Mac) shows a warning and a notification comes while the window is in the background. Scheduled checks then wait longer each time (10 minutes, 30 minutes, an hour, then every 4 hours), so a wrong password does not lock the mailbox; Send/Recv tries at once. A provider outage is not taken for a refused sign-in.",
+                how: 'Click the mark in the folder tree, the button in the bar, Tools > Sign In Again or the account\'s right-click menu.',
+                checked: [
+                    'A refused password shows the mark, the bar and the status bar, and asks once',
+                    'After Cancel they stay, and Send/Recv asks nothing more',
+                    'Enter Password signs it in and the mark goes',
+                    'A revoked token offers Sign In Again, which signs in through the browser',
+                    'A 503 from the token endpoint shows no mark'
+                ]
+            },
+            {
+                shot: 'status-4-admin',
+                name: 'A sign-in that signing in again can not fix',
+                what: "When Microsoft says the organization's administrator must allow Inbox Classic, the bar says so and offers the link for the administrator instead of Sign In Again; when the provider has IMAP turned off for the mailbox, the bar says that and offers Help. When the browser signs in as another address than the account's, the bar names it and Try Again asks the provider for its account picker.",
+                how: 'The bar over the account\'s list.',
+                checked: [
+                    'Admin consent offers Copy Link for Administrator and no Sign In button',
+                    'Another address is named, and Try Again asks for the account picker'
+                ]
+            },
+            {
+                shot: 'status-6-cannot-connect',
+                name: 'An account that can not connect',
+                what: 'When an account can not reach its server for two checks in a row, a quiet gray mark replaces its count in the folder tree, a bar says it can not connect with Try Again, and the status bar says so instead of Done. It goes by itself once the server answers again.',
+                how: 'Click the mark or Try Again in the bar.',
+                checked: ['Two failed checks show the gray mark and the bar', 'With the server back, Try Again takes them away']
+            },
+            {
                 shot: 'find-1-results',
                 name: 'Search',
                 what: 'The search field at the right of the toolbar finds messages in every folder of every account by the words of their subject, people, file names and text, as you type, from a full-text index on this computer (SQLite FTS5): words match where they start, accents and case do not matter. The results are one list with a Folder column. The text of every message is fetched for the index in the background, only its text part, without marking it read. A click anywhere in the field starts typing; Esc, the × at its end, emptying it or choosing a folder shows the folder again.',

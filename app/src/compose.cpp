@@ -186,6 +186,10 @@ struct Compose : Writing {
     // the line over them that says which AI agent wrote the draft (its words its name, for a screen reader); there for
     // the window's life when the draft opened was an agent's
     HWND agentLine = nullptr;
+    // the note under From while the account it goes from is not signed in or can not connect (its words its name, for
+    // a screen reader), and the mark of that state before them; hidden while the account is connected
+    HWND accountNote = nullptr;
+    PeAccountMark noteMark = PE_ACCOUNT_MARK_NONE;
     // the tooltip of a toolbar button, while it shows
     std::wstring tip;
     HFONT bold = nullptr;
@@ -319,6 +323,7 @@ bool IsButtonRow(int row) {
 }
 
 int PlaceAgentLine(Compose* state, int left, int top, int right);
+int PlaceAccountNote(Compose* state, int left, int top, int right);
 int PlaceSecurityLine(Compose* state, int left, int top, int right);
 void PlaceKeyTips(Compose* state);
 void RefreshSecurity(HWND hwnd, Compose* state);
@@ -371,6 +376,10 @@ void Layout(HWND hwnd, Compose* state) {
         int fieldRight = fields[i] == state->to ? toRight : right;
         MoveWindow(fields[i], pad + labelWidth, y, fieldRight - pad - labelWidth, height, TRUE);
         y += rowHeight + Scale(4);
+        // under From, where the words of the fields start: the account it goes from is not signed in
+        if (fields[i] == state->from) {
+            y = PlaceAccountNote(state, pad + labelWidth, y, right);
+        }
     }
     int buttonLeft = toRight + Scale(4);
     for (auto [button, wanted] : {std::pair{state->ccButton, !state->showCc}, std::pair{state->bccButton, !state->showBcc}}) {
@@ -570,67 +579,120 @@ int PlaceSecurityLine(Compose* state, int left, int top, int right) {
     return top + height + Scale(4);
 }
 
-// ---- the line that says an AI agent wrote the draft ----
+// ---- the lines under the fields: an account that is not signed in, an AI agent's draft ----
 
-constexpr UINT kAgentWords = DT_WORDBREAK | DT_NOPREFIX | DT_LEFT;
+constexpr UINT kNoteWords = DT_WORDBREAK | DT_NOPREFIX | DT_LEFT;
 
+// how a note line looks: its fill and words (system colours), a frame around it, and how far in its picture and words
+// are from its edges
+struct NoteLook {
+    int fill;
+    int ink;
+    bool frame;
+    int insetX;
+    int insetY;
+};
+// as a dialog's warning note: on the window's own background
+constexpr NoteLook kAccountNoteLook = {COLOR_BTNFACE, COLOR_BTNTEXT, false, 0, 0};
+// the information bar's colors of the Windows scheme, as the reading pane's bars have them
+constexpr NoteLook kAgentLineLook = {COLOR_INFOBK, COLOR_INFOTEXT, true, 8, 5};
+
+// where the words go in the line `area` of `look`: after its picture (`icon` square)
+RECT NoteWordsArea(const RECT& area, const NoteLook& look, int icon) {
+    return {area.left + Scale(look.insetX) + icon + Scale(6), area.top + Scale(look.insetY), area.right - Scale(look.insetX),
+            area.bottom - Scale(look.insetY)};
+}
+
+// the note `line` from `left` to `right` at `top`, as tall as its words wrapped beside its picture; where what follows
+// starts. Hidden while it has no words
+int PlaceNoteLine(HWND line, const NoteLook& look, int icon, int left, int top, int right) {
+    std::wstring words = GetWindowString(line);
+    ShowWindow(line, words.empty() ? SW_HIDE : SW_SHOW);
+    if (words.empty()) {
+        return top;
+    }
+    RECT bounds = NoteWordsArea({left, top, right, top}, look, icon);
+    bounds.bottom = bounds.top;
+    HDC dc = GetDC(line);
+    HGDIOBJ old = SelectObject(dc, reinterpret_cast<HFONT>(SendMessageW(line, WM_GETFONT, 0, 0)));
+    DrawTextW(dc, words.c_str(), -1, &bounds, DT_CALCRECT | kNoteWords);
+    SelectObject(dc, old);
+    ReleaseDC(line, dc);
+    int height = std::max<int>(icon, bounds.bottom - bounds.top) + 2 * Scale(look.insetY);
+    MoveWindow(line, left, top, right - left, height, TRUE);
+    InvalidateRect(line, nullptr, FALSE);
+    return top + height + Scale(4);
+}
+
+// a note line drawn: its fill (and frame), its picture (`picture` draws it at its left, top), then its words, one line
+// of them in the middle of the picture's height
+void DrawNoteLine(const DRAWITEMSTRUCT& item, const NoteLook& look, int icon, const std::function<void(HDC, int, int)>& picture) {
+    RECT area = item.rcItem;
+    FillRect(item.hDC, &area, GetSysColorBrush(look.fill));
+    if (look.frame) {
+        FrameRect(item.hDC, &area, GetSysColorBrush(COLOR_BTNSHADOW));
+    }
+    picture(item.hDC, area.left + Scale(look.insetX), area.top + Scale(look.insetY));
+    RECT words = NoteWordsArea(area, look, icon);
+    std::wstring text = GetWindowString(item.hwndItem);
+    HGDIOBJ old = SelectObject(item.hDC, reinterpret_cast<HFONT>(SendMessageW(item.hwndItem, WM_GETFONT, 0, 0)));
+    RECT measured = words;
+    DrawTextW(item.hDC, text.c_str(), -1, &measured, DT_CALCRECT | kNoteWords);
+    if (measured.bottom - measured.top < icon) {
+        words.top += (icon - (measured.bottom - measured.top)) / 2;
+    }
+    SetBkMode(item.hDC, TRANSPARENT);
+    SetTextColor(item.hDC, GetSysColor(look.ink));
+    DrawTextW(item.hDC, text.c_str(), -1, &words, kNoteWords);
+    SelectObject(item.hDC, old);
+}
+
+// the note under From: the mark of the state of the account chosen (the warning sign, or the gray cloud), and the
+// core's words; hidden while the account is connected
+int NoteIconSize() {
+    return GetSystemMetrics(SM_CXSMICON);
+}
+
+int PlaceAccountNote(Compose* state, int left, int top, int right) {
+    return PlaceNoteLine(state->accountNote, kAccountNoteLook, NoteIconSize(), left, top, right);
+}
+
+void DrawAccountNote(const Compose* state, const DRAWITEMSTRUCT& item) {
+    DrawNoteLine(item, kAccountNoteLook, NoteIconSize(),
+                 [state](HDC dc, int left, int top) { DrawAccountMark(dc, state->noteMark, left, top, NoteIconSize(), false); });
+}
+
+// the note as the account chosen in From is now (the core's words); the window laid out again when it changed
+void UpdateAccountNote(Compose* state, bool layout = true) {
+    core::AccountStatus status(state->core, state->account);
+    std::wstring words = status.Connected() ? L"" : Text(status->compose_note);
+    PeAccountMark mark = words.empty() ? PE_ACCOUNT_MARK_NONE : status->mark;
+    if (words == GetWindowString(state->accountNote) && mark == state->noteMark) {
+        return;
+    }
+    state->noteMark = mark;
+    SetWindowTextW(state->accountNote, words.c_str());
+    if (layout) {
+        Layout(state->window, state);
+    }
+}
+
+// the line that says an AI agent wrote the draft: the Drafts picture, then the words; hidden unless the draft was an
+// agent's
 int AgentIconSize() {
     int cx = 0, cy = 0;
     ImageList_GetIconSize(IconList(IconSet::Folders), &cx, &cy);
     return cx;
 }
 
-// where the words go in the line `area`: after the Drafts picture, inside the frame
-RECT AgentWordsArea(const RECT& area) {
-    return {area.left + Scale(8) + AgentIconSize() + Scale(6), area.top + Scale(5), area.right - Scale(8), area.bottom - Scale(5)};
-}
-
-HFONT AgentFont(const Compose* state) {
-    return reinterpret_cast<HFONT>(SendMessageW(state->agentLine, WM_GETFONT, 0, 0));
-}
-
-// the line from `left` to `right` at `top`, as tall as its words wrapped; where what follows starts. Hidden unless
-// the draft was an agent's
 int PlaceAgentLine(Compose* state, int left, int top, int right) {
-    std::wstring words = GetWindowString(state->agentLine);
-    ShowWindow(state->agentLine, words.empty() ? SW_HIDE : SW_SHOW);
-    if (words.empty()) {
-        return top;
-    }
-    RECT bounds = AgentWordsArea({left, top, right, top});
-    bounds.bottom = bounds.top;
-    HDC dc = GetDC(state->agentLine);
-    HGDIOBJ old = SelectObject(dc, AgentFont(state));
-    DrawTextW(dc, words.c_str(), -1, &bounds, DT_CALCRECT | kAgentWords);
-    SelectObject(dc, old);
-    ReleaseDC(state->agentLine, dc);
-    int height = std::max<int>(AgentIconSize(), bounds.bottom - bounds.top) + 2 * Scale(5);
-    MoveWindow(state->agentLine, left, top, right - left, height, TRUE);
-    InvalidateRect(state->agentLine, nullptr, FALSE);
-    return top + height + Scale(4);
+    return PlaceNoteLine(state->agentLine, kAgentLineLook, AgentIconSize(), left, top, right);
 }
 
-// the information bar's colors of the Windows scheme, as the reading pane's bars have them: the Drafts picture, then
-// the words
-void DrawAgentLine(const Compose* state, const DRAWITEMSTRUCT& item) {
-    RECT area = item.rcItem;
-    FillRect(item.hDC, &area, GetSysColorBrush(COLOR_INFOBK));
-    FrameRect(item.hDC, &area, GetSysColorBrush(COLOR_BTNSHADOW));
-    int icon = AgentIconSize();
-    ImageList_Draw(IconList(IconSet::Folders), FOLDER_DRAFTS, item.hDC, area.left + Scale(8), area.top + Scale(5), ILD_TRANSPARENT);
-    RECT words = AgentWordsArea(area);
-    std::wstring text = GetWindowString(state->agentLine);
-    HGDIOBJ old = SelectObject(item.hDC, AgentFont(state));
-    // one line in the middle of the picture's height
-    RECT measured = words;
-    DrawTextW(item.hDC, text.c_str(), -1, &measured, DT_CALCRECT | kAgentWords);
-    if (measured.bottom - measured.top < icon) {
-        words.top += (icon - (measured.bottom - measured.top)) / 2;
-    }
-    SetBkMode(item.hDC, TRANSPARENT);
-    SetTextColor(item.hDC, GetSysColor(COLOR_INFOTEXT));
-    DrawTextW(item.hDC, text.c_str(), -1, &words, kAgentWords);
-    SelectObject(item.hDC, old);
+void DrawAgentLine(const Compose*, const DRAWITEMSTRUCT& item) {
+    DrawNoteLine(item, kAgentLineLook, AgentIconSize(), [](HDC dc, int left, int top) {
+        ImageList_Draw(IconList(IconSet::Folders), FOLDER_DRAFTS, dc, left, top, ILD_TRANSPARENT);
+    });
 }
 
 // the line under the fields: its Details button is its child, whose click goes on to the window; it draws all of
@@ -1402,6 +1464,10 @@ void CreateFields(HWND hwnd, Compose* state) {
     // (its words its name, for a screen reader); hidden for every other message
     state->agentLine = CreateChild(hwnd, L"STATIC", L"", SS_OWNERDRAW | SS_NOPREFIX, IDC_COMPOSE_AGENT_NOTE, {});
     ShowWindow(state->agentLine, SW_HIDE);
+    // the note under From while the account it goes from is not signed in, laid out with the fields
+    state->accountNote = CreateChild(hwnd, L"STATIC", L"", SS_OWNERDRAW | SS_NOPREFIX, IDC_COMPOSE_ACCOUNT_NOTE, {});
+    ShowWindow(state->accountNote, SW_HIDE);
+    UpdateAccountNote(state, false);
     // the line under the fields that says what signing and encrypting come to (its words its name, for a screen
     // reader), Details at its right end while Encrypt is on; hidden while neither is on
     state->securityLine = CreateChild(hwnd, L"STATIC", L"", SS_OWNERDRAW | SS_NOPREFIX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
@@ -1497,6 +1563,8 @@ void ChooseFrom(Compose* state) {
         // its signature in place of the other's
         core::String signature(pe_signature_block(state->core, state->account));
         state->editor.Signature(signature ? Text(signature.get()) : L"");
+        // and the note of its state, should it not be signed in
+        UpdateAccountNote(state);
     }
     Changed(state);
     // another address signs with its own key, or has none
@@ -1717,6 +1785,10 @@ LRESULT CALLBACK ComposeProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
         }
         if (state && wParam == IDC_COMPOSE_AGENT_NOTE) {
             DrawAgentLine(state, *reinterpret_cast<DRAWITEMSTRUCT*>(lParam));
+            return TRUE;
+        }
+        if (state && wParam == IDC_COMPOSE_ACCOUNT_NOTE) {
+            DrawAccountNote(state, *reinterpret_cast<DRAWITEMSTRUCT*>(lParam));
             return TRUE;
         }
         if (state && wParam == IDC_COMPOSE_KEYS) {
@@ -2006,6 +2078,14 @@ ComposeClose CloseComposeWindows() {
 
 bool ComposeWindowsOpen() {
     return !ComposeWindows().empty();
+}
+
+void ComposeAccountStateChanged(int64_t account) {
+    for (HWND hwnd : ComposeWindows()) {
+        if (Compose* state = StateOf(hwnd); state && state->account == account) {
+            UpdateAccountNote(state);
+        }
+    }
 }
 
 void DestroyComposeWindows() {

@@ -43,7 +43,6 @@ reader-downloading-detail = Kiri kuvatakse siin, kui allalaadimine on lõppenud.
 reader-downloading-size = Kirja suurus on { $size }. Kiri kuvatakse siin, kui allalaadimine on lõppenud.
 reader-failed = Kirja ei saanud alla laadida
 reader-failed-network = Ühendus meiliserveriga ebaõnnestus või katkes ({ $reason }).
-reader-failed-sign-in = Meiliserver lükkas sisselogimise tagasi ({ $reason }). Kontrollige parooli või logige konto seadetes uuesti sisse.
 reader-failed-security = Meiliserveriga ei saanud luua turvalist ühendust ({ $reason }).
 reader-failed-other = Meiliserver vastas: { $reason }.
 reader-retry-note = Allalaadimist proovitakse uuesti, kui ühendus kontoga taastub.

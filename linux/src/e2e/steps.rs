@@ -184,13 +184,7 @@ pub async fn unsubscribing(d: &Driver) {
         !reader.header_text().contains("Unsubscribe"),
         "the header has no Unsubscribe link",
     );
-    let enabled = |command: Command| {
-        shell()
-            .main()
-            .window()
-            .lookup_action(command.name())
-            .is_some_and(|a| a.is_enabled())
-    };
+    let enabled = command_enabled;
     d.check(
         enabled(Command::Unsubscribe),
         "Message > Unsubscribe from List is on for it",
@@ -1177,11 +1171,7 @@ pub async fn several_messages(d: &Driver) {
         counts.ends_with(", 3 selected"),
         &format!("the status bar says 3 selected ({counts})"),
     );
-    let enabled = |command: Command| {
-        main.window()
-            .lookup_action(command.name())
-            .is_some_and(|a| a.is_enabled())
-    };
+    let enabled = command_enabled;
     d.check(
         !enabled(Command::Reply) && enabled(Command::MarkRead),
         "Reply is off for several, Mark as Read is on",
@@ -3770,6 +3760,7 @@ pub async fn all_inboxes_by_account(d: &Driver) {
         labels
             == [
                 "Send and Receive",
+                "Sign In Again\u{2026}",
                 "Mark All Read",
                 "New Folder\u{2026}",
                 "Move Up",
@@ -3777,7 +3768,8 @@ pub async fn all_inboxes_by_account(d: &Driver) {
                 "Properties\u{2026}",
             ],
         &format!(
-            "the first account's right-click menu has Send and Receive, Mark All Read, New Folder, Move Up, Move Down and Properties ({})",
+            "the first account's right-click menu has Send and Receive, Sign In Again, Mark All Read, New Folder, Move Up, Move \
+             Down and Properties ({})",
             labels.join(", ")
         ),
     );

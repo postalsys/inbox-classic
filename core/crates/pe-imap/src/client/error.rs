@@ -95,6 +95,9 @@ impl std::error::Error for Error {}
 impl Error {
     pub fn kind(&self) -> ErrorKind {
         match self {
+            // the provider turned IMAP off for the mailbox, said at sign-in or in a BYE: the account's sign-in to see
+            // to, in the mailbox's settings
+            _ if self.is_imap_disabled() => ErrorKind::Authentication,
             Error::Net(pe_net::Error::Tls(_)) | Error::StartTlsUnavailable | Error::StartTlsInjection => {
                 ErrorKind::Security
             }
@@ -102,6 +105,11 @@ impl Error {
             // PRIVACYREQUIRED (RFC 5530): the password is taken only over an encrypted connection, typing it again
             // does not help
             Error::AuthenticationFailed { code: Some(code), .. } if is_privacy_required(code) => ErrorKind::Security,
+            // a server that has too many connections or is not available now refuses the sign-in for that alone: the
+            // credentials may be good, so it is a connection that failed, tried again later
+            Error::AuthenticationFailed { .. } if self.is_connection_limit() && !self.is_imap_disabled() => {
+                ErrorKind::Network
+            }
             Error::AuthenticationFailed { .. } | Error::NoAuthenticationMethod => ErrorKind::Authentication,
             Error::Refused { .. } => ErrorKind::Refused,
             Error::Protocol(_) | Error::TooManyResponses | Error::Unexpected(_) => ErrorKind::Protocol,
@@ -135,6 +143,28 @@ impl Error {
                 .any(|words| text.contains(words));
         limit_code || in_words
     }
+
+    /// The provider says IMAP is turned off for this mailbox, at sign-in or in a BYE: Gmail's "Your account is not
+    /// enabled for IMAP use" and "IMAP access is disabled for your domain", Microsoft's "User is authenticated but not
+    /// connected" (what Exchange Online says when IMAP is off for the mailbox), and plain words such as "IMAP is
+    /// disabled". Signing in again does not help; the mailbox's settings do.
+    pub fn is_imap_disabled(&self) -> bool {
+        let text = match self {
+            Error::Closed(Some(text)) | Error::AuthenticationFailed { text, .. } | Error::Refused { text, .. } => text,
+            _ => return false,
+        };
+        let text = text.to_ascii_lowercase();
+        [
+            "not enabled for imap",
+            "imap access is disabled",
+            "imap is disabled",
+            "imap is not enabled",
+            "imap access is not enabled",
+            "authenticated but not connected",
+        ]
+        .iter()
+        .any(|words| text.contains(words))
+    }
 }
 
 #[cfg(test)]
@@ -161,6 +191,57 @@ mod tests {
         assert!(!closed("Autologout; idle for too long").is_connection_limit());
         assert!(!Error::Closed(None).is_connection_limit());
         assert!(!Error::Timeout.is_connection_limit());
+    }
+
+    #[test]
+    fn a_full_or_unavailable_server_is_no_refused_sign_in() {
+        let login = |code: Option<&str>, text: &str| Error::AuthenticationFailed {
+            code: code.map(Into::into),
+            text: text.into(),
+        };
+        for full in [
+            login(Some("LIMIT"), "Try later"),
+            login(Some("INUSE"), "Mailbox in use"),
+            login(Some("UNAVAILABLE"), "Backend down"),
+            login(Some("ALERT"), "Too many simultaneous connections. (Failure)"),
+        ] {
+            assert_eq!(full.kind(), ErrorKind::Network, "{full}");
+        }
+        assert_eq!(
+            login(Some("AUTHENTICATIONFAILED"), "Invalid credentials").kind(),
+            ErrorKind::Authentication
+        );
+    }
+
+    #[test]
+    fn imap_turned_off_is_told_from_a_wrong_password() {
+        let login = |code: Option<&str>, text: &str| Error::AuthenticationFailed {
+            code: code.map(Into::into),
+            text: text.into(),
+        };
+        for off in [
+            login(
+                Some("ALERT"),
+                "Your account is not enabled for IMAP use. Please visit your Gmail settings page and enable your \
+                 account for IMAP access. (Failure)",
+            ),
+            login(
+                Some("ALERT"),
+                "IMAP access is disabled for your domain. Please contact your domain administrator for questions \
+                 about this feature. (Failure)",
+            ),
+            login(None, "User is authenticated but not connected."),
+            login(Some("UNAVAILABLE"), "IMAP is disabled for this mailbox"),
+        ] {
+            assert!(off.is_imap_disabled(), "{off}");
+            assert_eq!(off.kind(), ErrorKind::Authentication, "{off}");
+        }
+        let bye = Error::Closed(Some("Your account is not enabled for IMAP use. (Failure)".into()));
+        assert!(bye.is_imap_disabled());
+        assert_eq!(bye.kind(), ErrorKind::Authentication);
+        assert!(!login(Some("AUTHENTICATIONFAILED"), "Invalid credentials").is_imap_disabled());
+        assert!(!login(None, "AUTHENTICATE failed.").is_imap_disabled());
+        assert!(!Error::Timeout.is_imap_disabled());
     }
 }
 

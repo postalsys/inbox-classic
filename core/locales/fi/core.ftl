@@ -48,7 +48,6 @@ reader-downloading-detail = Viesti näkyy tässä, kun lataus on valmis.
 reader-downloading-size = Viestin koko on { $size }. Se näkyy tässä, kun se on ladattu.
 reader-failed = Viestiä ei voitu ladata
 reader-failed-network = Yhteys postipalvelimeen epäonnistui tai katkesi ({ $reason }).
-reader-failed-sign-in = Postipalvelin ei hyväksynyt kirjautumista ({ $reason }). Tarkista salasana tai kirjaudu uudelleen tilin asetuksissa.
 reader-failed-security = Yhteyttä postipalvelimeen ei voitu suojata ({ $reason }).
 reader-failed-other = Postipalvelin vastasi: { $reason }.
 reader-retry-note = Latausta yritetään uudelleen, kun yhteys tiliin palautuu.

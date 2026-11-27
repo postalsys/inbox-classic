@@ -452,12 +452,22 @@ final class UITest {
         (await findMessage("INBOX", pattern)?["flags"] as? [String])?.contains("\\Seen") ?? false
     }
 
+    /// a call of ImapKit's REST API at `url`, with `body` as JSON when given: what it answered, parsed
+    @discardableResult
+    func restCall(_ method: String, _ url: String, _ body: Any? = nil) async throws -> Any? {
+        var request = URLRequest(url: URL(string: url)!)
+        request.httpMethod = method
+        if let body {
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        }
+        let (data, _) = try await URLSession.shared.data(for: request)
+        return try? JSONSerialization.jsonObject(with: data)
+    }
+
     /// `arrived`: when the server says it got it (its INTERNALDATE), now when nil
     func addMessage(_ raw: String, flags: [String] = [], at server: String? = nil, to mailbox: String = "INBOX",
                     arrived: Date? = nil) async throws {
-        var request = URLRequest(url: URL(string: "\(server ?? rest)/\(mailbox)/messages")!)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         var body: [String: Any] = ["raw": raw, "flags": flags]
         if let arrived {
             // as IMAP writes a date-time, which is what the server takes
@@ -467,17 +477,12 @@ final class UITest {
             format.dateFormat = "dd-MMM-yyyy HH:mm:ss '+0000'"
             body["internaldate"] = format.string(from: arrived)
         }
-        request.httpBody = try JSONSerialization.data(withJSONObject: body)
-        _ = try await URLSession.shared.data(for: request)
+        try await restCall("POST", "\(server ?? rest)/\(mailbox)/messages", body)
     }
 
     /// flags changed on the server as another client would: `action` is add, remove or set
     func setFlags(_ mailbox: String, uids: [Int], flags: [String], action: String, at server: String? = nil) async throws {
-        var request = URLRequest(url: URL(string: "\(server ?? rest)/\(mailbox)/messages/flags")!)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try JSONSerialization.data(withJSONObject: ["uids": uids, "flags": flags, "mode": action])
-        _ = try await URLSession.shared.data(for: request)
+        try await restCall("POST", "\(server ?? rest)/\(mailbox)/messages/flags", ["uids": uids, "flags": flags, "mode": action])
     }
 
     /// the mail the Windows test reads too: in the list newest first the newsletter, Ann's message, the minutes, and a

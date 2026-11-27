@@ -109,6 +109,8 @@ public final class Mailbox: NSObject {
     var openDraft: (_ draft: Draft, _ account: Int64) -> Void = { _, _ in }
     /// Edit > Undo when the last thing done was sending a message that still waits
     var undoSend: (() -> Void)?
+    /// the bar's button or the folder list's mark of an account that is not connected: what its state says to do
+    var statusAction: (Int64) -> Void = { _ in }
 
     // the folder tree, as the core lays it out
     private var topNodes: [TreeNode] = []
@@ -225,6 +227,11 @@ public final class Mailbox: NSObject {
     private var summaryRequest: UInt64 = 0
     /// the bar over the list that says what the server refused, taken back (`ActionUndone`)
     private let undoneBar = InfoBar(icon: "warning", close: Text.uiClose.text)
+    /// the bar over the list while the account of what it shows is not signed in or can not connect, with the button
+    /// its state offers (Sign In Again, Enter Password, Try Again...)
+    private let accountBar = InfoBar(icon: "warning", button: "")
+    /// the account the bar speaks of, 0 while it is hidden
+    private(set) var accountBarAccount: Int64 = 0
 
     init(core: Core) {
         self.core = core
@@ -274,6 +281,23 @@ public final class Mailbox: NSObject {
         let barHeight = searchBar.heightAnchor.constraint(equalToConstant: 0)
         searchBar.heightConstraint = barHeight
         setUpSortBar()
+        // at the top: the account of the list is not signed in or can not connect, while that lasts
+        listArea.addSubview(accountBar)
+        accountBar.translatesAutoresizingMaskIntoConstraints = false
+        accountBar.isHidden = true
+        accountBar.wrapText()
+        accountBar.smallButton()
+        accountBar.clicked = { [weak self] in
+            guard let self, accountBarAccount != 0 else { return }
+            statusAction(accountBarAccount)
+        }
+        accountBar.setAccessibilityIdentifier("list.account")
+        accountBar.heightConstraint = accountBar.heightAnchor.constraint(equalToConstant: 0)
+        // its height follows the list's width, which the panes' dividers and the window change
+        listArea.postsFrameChangedNotifications = true
+        NotificationCenter.default.addObserver(forName: NSView.frameDidChangeNotification, object: listArea, queue: nil) { [weak self] _ in
+            MainActor.assumeIsolated { self?.fitAccountBar() }
+        }
         // over the search bar: what the server refused and was taken back, until it is closed
         listArea.addSubview(undoneBar)
         undoneBar.translatesAutoresizingMaskIntoConstraints = false
@@ -283,7 +307,11 @@ public final class Mailbox: NSObject {
         undoneBar.setAccessibilityIdentifier("list.undone")
         undoneBar.heightConstraint = undoneBar.heightAnchor.constraint(equalToConstant: 0)
         NSLayoutConstraint.activate([
-            undoneBar.topAnchor.constraint(equalTo: listArea.topAnchor),
+            accountBar.topAnchor.constraint(equalTo: listArea.topAnchor),
+            accountBar.leadingAnchor.constraint(equalTo: listArea.leadingAnchor),
+            accountBar.trailingAnchor.constraint(equalTo: listArea.trailingAnchor),
+            accountBar.heightConstraint!,
+            undoneBar.topAnchor.constraint(equalTo: accountBar.bottomAnchor),
             undoneBar.leadingAnchor.constraint(equalTo: listArea.leadingAnchor),
             undoneBar.trailingAnchor.constraint(equalTo: listArea.trailingAnchor),
             undoneBar.heightConstraint!,
@@ -621,6 +649,7 @@ public final class Mailbox: NSObject {
             // the folder is gone
             show(PE_TREE_LIST_NONE, folder: 0)
         }
+        updateAccountBar()
         changed()
     }
 
@@ -694,6 +723,41 @@ public final class Mailbox: NSObject {
         accountInfo[account]?.title ?? Text.uiTheAccount.text
     }
 
+    // ---- whether the accounts are signed in ----
+
+    /// the account the bar over the list speaks for, as the core picks it for the list shown; 0 for no bar
+    var barAccount: Int64 { core.statusAccount(list: shownList, folder: folder) }
+
+    /// the bar over the list: shown in the core's words while the list's account is not connected, hidden else
+    func updateAccountBar() {
+        let account = barAccount
+        let status = account != 0 ? core.accountStatus(account) : nil
+        let shown = status.map { !$0.bar.isEmpty } ?? false
+        accountBarAccount = shown ? account : 0
+        accountBar.text = shown ? status?.bar ?? "" : ""
+        accountBar.buttonTitle = shown ? status?.button ?? "" : ""
+        accountBar.isHidden = !shown
+        fitAccountBar()
+    }
+
+    /// the bar as tall as its sentence is on the lines the list's width gives it, none while hidden
+    func fitAccountBar() {
+        let height = accountBar.isHidden ? 0 : accountBar.fittingHeight(width: listArea.bounds.width)
+        if accountBar.heightConstraint?.constant != height {
+            accountBar.heightConstraint?.constant = height
+        }
+    }
+
+    /// what the bar over the list says of the account and its button, empty while it is hidden (the UI test)
+    var accountBarText: (text: String, button: String) {
+        accountBar.isHidden ? ("", "") : (accountBar.text, accountBar.buttonTitle)
+    }
+
+    /// the bar's button pressed, as a click does (the UI test)
+    func pressAccountBar() {
+        accountBar.press()
+    }
+
     func accountEmail(_ account: Int64) -> String {
         accountInfo[account]?.email ?? ""
     }
@@ -719,6 +783,7 @@ public final class Mailbox: NSObject {
         // the message of the folder before is not this folder's, nor is the search
         folder = id
         shownList = list
+        updateAccountBar()
         listView.setList(list, folder: id)
         resetFind()
         clearReader()
@@ -2187,8 +2252,11 @@ public final class Mailbox: NSObject {
         // the count its heading is drawn with collapsed: nothing unread, nothing to mark
         let someUnread = treeNodes.first { $0.kind == PE_TREE_ROW_KIND_ACCOUNT && $0.row.account == account }
             .map { $0.row.countCollapsed > 0 } ?? false
+        // Sign In Again while it needs a sign-in the user can give; it does what the bar's button does
+        let signIn = core.accountState(account) != PE_ACCOUNT_STATE_CONNECTED && core.accountStatus(account).canSignInAgain
         let items: [(String, Selector, Bool)?] = [
             (Text.uiAccountSync.text, #selector(accountMenuSync(_:)), true),
+            (Command.signInAgain.label, #selector(accountMenuSignIn(_:)), signIn),
             (Command.markAllRead.label, #selector(accountMenuMarkRead(_:)), someUnread),
             nil,
             (Command.newFolder.label, #selector(accountMenuNewFolder(_:)), true),
@@ -2231,6 +2299,10 @@ public final class Mailbox: NSObject {
 
     @objc private func accountMenuSync(_ sender: NSMenuItem) {
         core.sync(menuAccount(sender))
+    }
+
+    @objc private func accountMenuSignIn(_ sender: NSMenuItem) {
+        statusAction(menuAccount(sender))
     }
 
     @objc private func accountMenuMarkRead(_ sender: NSMenuItem) {
@@ -2732,6 +2804,10 @@ public final class Mailbox: NSObject {
         case PE_EVENT_KIND_SYNC_FINISHED:
             // how much text the search still has to read
             updateSearchBar()
+        case PE_EVENT_KIND_ACCOUNT_STATE_CHANGED:
+            // the marks of the account's rows, and the bar over the list
+            updateCounts()
+            updateAccountBar()
         default:
             break
         }
@@ -2788,15 +2864,20 @@ extension Mailbox: NSOutlineViewDataSource, NSOutlineViewDelegate {
         let row = node.row
         // collapsed, a row adds the unread messages of the rows it hides
         let collapsed = row.parent && !outlineView.isItemExpanded(node)
+        // a click on the mark of an account that is not connected does what its state offers
+        let account = row.account
+        let markClicked: () -> Void = { [weak self] in self?.statusAction(account) }
         if row.kind == PE_TREE_ROW_KIND_ACCOUNT {
             let heading = (outlineView.makeView(withIdentifier: HeadingCell.identifier, owner: nil) as? HeadingCell) ?? HeadingCell()
             heading.show(name: row.label, count: row.count(collapsed: collapsed))
+            heading.mark.show(row.mark, tip: row.markTooltip, clicked: markClicked)
             heading.setAccessibilityIdentifier("tree.account.\(row.account)")
             return heading
         }
         let cell = (outlineView.makeView(withIdentifier: FolderCell.identifier, owner: nil) as? FolderCell) ?? FolderCell()
         cell.show(name: row.label, count: row.count(collapsed: collapsed), icon: Icons.folder(Icons.treeIcon(row.icon)),
                   bold: row.bold(collapsed: collapsed), spoken: row.title)
+        cell.mark.show(row.mark, tip: row.markTooltip, clicked: markClicked)
         cell.setAccessibilityIdentifier(treeIdentifier(row))
         return cell
     }
@@ -3114,6 +3195,8 @@ final class HeadingCell: NSTableCellView {
     static let identifier = NSUserInterfaceItemIdentifier("heading")
     private let name = HeadingName(labelWithString: "")
     private let count = NSTextField(labelWithString: "")
+    /// the account's sign-in mark, in the count's place
+    let mark = AccountMark()
 
     init() {
         super.init(frame: .zero)
@@ -3125,13 +3208,15 @@ final class HeadingCell: NSTableCellView {
         count.font = .systemFont(ofSize: NSFont.systemFontSize)
         count.textColor = .secondaryLabelColor
         count.alignment = .right
-        let stack = NSStackView(views: [name, count])
+        let stack = NSStackView(views: [name, count, mark])
         stack.spacing = 5
         stack.distribution = .fill
+        stack.detachesHiddenViews = true
         stack.translatesAutoresizingMaskIntoConstraints = false
         name.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         name.setContentHuggingPriority(.init(1), for: .horizontal)
         count.setContentHuggingPriority(.required, for: .horizontal)
+        mark.onCount = { [weak self] hidden in self?.countHidden = hidden }
         addSubview(stack)
         NSLayoutConstraint.activate([
             stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 2),
@@ -3147,11 +3232,16 @@ final class HeadingCell: NSTableCellView {
     /// the unread count it shows, for the UI test
     private(set) var unreadShown: UInt64 = 0
 
+    /// the mark takes the count's place while it is shown
+    private var countHidden = false {
+        didSet { count.isHidden = countHidden || unreadShown == 0 }
+    }
+
     func show(name text: String, count unread: UInt64) {
         unreadShown = unread
         name.stringValue = text
         count.stringValue = unread > 0 ? "\(unread)" : ""
-        count.isHidden = unread == 0
+        count.isHidden = unread == 0 || countHidden
         setAccessibilityLabel(unread > 0 ? Text.macFolderUnread.text(["folder": text, "count": unread]) : text)
     }
 }
@@ -3178,6 +3268,8 @@ final class FolderCell: NSTableCellView {
     private let icon = NSImageView()
     private let name = FolderName(labelWithString: "")
     private let count = NSTextField(labelWithString: "")
+    /// the sign-in mark of the account the row stands for, in the count's place
+    let mark = AccountMark()
 
     init() {
         super.init(frame: .zero)
@@ -3185,9 +3277,11 @@ final class FolderCell: NSTableCellView {
         name.lineBreakMode = .byTruncatingTail
         count.textColor = .secondaryLabelColor
         count.alignment = .right
-        let stack = NSStackView(views: [icon, name, count])
+        let stack = NSStackView(views: [icon, name, count, mark])
         stack.spacing = 5
         stack.distribution = .fill
+        stack.detachesHiddenViews = true
+        mark.onCount = { [weak self] hidden in self?.countHidden = hidden }
         stack.translatesAutoresizingMaskIntoConstraints = false
         name.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         name.setContentHuggingPriority(.init(1), for: .horizontal)
@@ -3210,6 +3304,15 @@ final class FolderCell: NSTableCellView {
     private(set) var unreadShown: UInt64 = 0
     private(set) var isBold = false
 
+    /// the mark takes the count's place while it is shown
+    private var countHidden = false {
+        didSet { count.isHidden = countHidden || unreadShown == 0 }
+    }
+
+    override var backgroundStyle: NSView.BackgroundStyle {
+        didSet { mark.selected = backgroundStyle == .emphasized }
+    }
+
     /// `spoken`: what a screen reader names the row
     func show(name text: String, count unread: UInt64, icon image: NSImage?, bold: Bool, spoken: String) {
         unreadShown = unread
@@ -3218,9 +3321,84 @@ final class FolderCell: NSTableCellView {
         name.bold = bold
         count.stringValue = unread > 0 ? "\(unread)" : ""
         // without a count the name has the row up to its trailing edge
-        count.isHidden = unread == 0
+        count.isHidden = unread == 0 || countHidden
         icon.image = image
         setAccessibilityLabel(unread > 0 ? Text.macFolderUnread.text(["folder": spoken, "count": unread]) : spoken)
+    }
+}
+
+/// The mark of an account that is not connected, at the trailing edge of its rows in the folder list where the count
+/// is: Mail's yellow warning triangle while it needs a sign-in, a quiet grey cloud while it can not connect. A click on
+/// it does what the account's state offers (the rest of the row selects the row); its tooltip, which a screen reader
+/// reads as its name, is the core's
+final class AccountMark: NSButton {
+    private var clickedHandler: () -> Void = {}
+    private var kind = PE_ACCOUNT_MARK_NONE
+    /// tells the cell to hide its count while the mark is shown
+    var onCount: (Bool) -> Void = { _ in }
+    /// on the selected row (the accent colour behind it): the grey mark white, as the row's text
+    var selected = false {
+        didSet { if selected != oldValue { paint() } }
+    }
+
+    init() {
+        super.init(frame: .zero)
+        isBordered = false
+        imagePosition = .imageOnly
+        title = ""
+        target = self
+        action = #selector(fire)
+        setButtonType(.momentaryChange)
+        setContentHuggingPriority(.required, for: .horizontal)
+        setContentCompressionResistancePriority(.required, for: .horizontal)
+        widthAnchor.constraint(equalToConstant: 16).isActive = true
+        heightAnchor.constraint(equalToConstant: 16).isActive = true
+        setAccessibilityIdentifier("tree.mark")
+        isHidden = true
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    /// the mark of the core's row (none hides it), its tooltip and what a click on it does
+    func show(_ mark: PeAccountMark, tip: String, clicked: @escaping () -> Void) {
+        kind = mark
+        clickedHandler = clicked
+        toolTip = tip.isEmpty ? nil : tip
+        setAccessibilityLabel(tip)
+        isHidden = mark == PE_ACCOUNT_MARK_NONE
+        onCount(!isHidden)
+        paint()
+    }
+
+    /// which mark it shows, for the UI test
+    var shown: PeAccountMark { isHidden ? PE_ACCOUNT_MARK_NONE : kind }
+
+    /// the system's warning, yellow with its dark mark, as Mail shows an account that needs attention
+    static let signInImage = NSImage(systemSymbolName: "exclamationmark.triangle.fill", accessibilityDescription: nil)?
+        .withSymbolConfiguration(NSImage.SymbolConfiguration(pointSize: 12, weight: .regular).applying(.preferringMulticolor()))
+    /// quiet, in the colour it is given: it usually mends itself
+    static let cannotConnectImage: NSImage? = {
+        let image = NSImage(systemSymbolName: "icloud.slash", accessibilityDescription: nil)?
+            .withSymbolConfiguration(NSImage.SymbolConfiguration(pointSize: 12, weight: .regular))
+        image?.isTemplate = true
+        return image
+    }()
+
+    /// the picture of `mark` and the colour it is drawn in (nil: its own colours), none for no mark
+    static func picture(_ mark: PeAccountMark, selected: Bool = false) -> (NSImage?, NSColor?) {
+        switch mark {
+        case PE_ACCOUNT_MARK_SIGN_IN: (signInImage, nil)
+        case PE_ACCOUNT_MARK_CANNOT_CONNECT: (cannotConnectImage, selected ? .alternateSelectedControlTextColor : .secondaryLabelColor)
+        default: (nil, nil)
+        }
+    }
+
+    private func paint() {
+        (image, contentTintColor) = AccountMark.picture(kind, selected: selected)
+    }
+
+    @objc private func fire() {
+        clickedHandler()
     }
 }
 

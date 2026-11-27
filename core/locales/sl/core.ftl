@@ -53,7 +53,6 @@ reader-downloading-detail = Sporočilo bo prikazano tukaj, ko bo prenos končan.
 reader-downloading-size = Sporočilo je veliko { $size }. Prikazano bo tukaj, ko bo preneseno.
 reader-failed = Sporočila ni bilo mogoče prenesti
 reader-failed-network = Povezave s poštnim strežnikom ni bilo mogoče vzpostaviti ali pa je bila prekinjena ({ $reason }).
-reader-failed-sign-in = Poštni strežnik ni sprejel prijave ({ $reason }). Preverite geslo ali se znova prijavite v nastavitvah računa.
 reader-failed-security = Povezave s poštnim strežnikom ni bilo mogoče zavarovati ({ $reason }).
 reader-failed-other = Poštni strežnik je odgovoril: { $reason }.
 reader-retry-note = Poskus se bo ponovil, ko se račun znova poveže.
