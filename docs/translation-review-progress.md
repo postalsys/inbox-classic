@@ -1,53 +1,39 @@
-# Translation review, round 9
+# Translation review, round 10
 
 ## Resume here
 
-- Authoritative checkout: `/Users/andris/Projects/PostalExpress`, branch `master`.
-- Round complete. Reviewed content and current baseline: `f2ecb709bede76eb4e1d4373ecae634e6f862bf5`. No pending work; commits remain local.
-- Starting local and fetched origin/master: `c135330965efb301008b51dd99f539ee89687465`.
-- Previous reviewed baseline: `44bd9b2d33db99329a587683ad6061fbcfa7bee7`; advanced after the fully reviewed content commit.
-- User authorized English and translation editing in parallel, committing to master, and explicitly **no push**.
-- Current repository glossary and help-writing rules remain the authorized guidance. No tests, builds, native GUI checks or CI queries.
+Authoritative checkout: `/Users/andris/Projects/PostalExpress`, local `master`. The selected-message wording review
+is complete; commit the content, advance `core/locales/REVIEWED`, confirm zero pending changes, and archive this round.
+Commit locally without pushing. Round 9 remains archived separately.
 
-## Completed review
+## Reviewed wording
 
-Reviewed 13 new English labels, the reopened setting note and the full conversation help topic. Corrected one
-English catalog value and one full topic through 12 exact edits, including an independent cross-review. English
-revision 3 is frozen; the new button labels and count messages were retained.
+Reviewed the selected-message action paragraph in English and all 34 translations, with the target languages
+processed in parallel. Removed the claim that the selected message has a colored edge. The help now refers to the
+selected message without depending on its border color; Windows uses an etched frame. The preceding instruction
+already explains how to select a message. Added the same decision to the glossary.
 
-Reviewed all 34 translations in parallel: 442 new catalog entries, 34 reopened setting notes and one adjacent Latvian
-menu label, totaling 477 entries, plus 34 complete help topics. Corrected 42 catalog values and all 34 topics.
-Together with English, the review covers 491 entries and 35 topics, with 43 corrected catalog values.
+Scope: **35 reviewed and changed help paragraphs in 35 files; zero full-topic reviews and zero catalog changes**.
+All tags, references, keyboard text, platform branches and text outside the exact paragraphs are unchanged.
+The complete 2,135-file inventory still contains 35 languages, with six catalogs and 55 help topics per language.
+No new language or translation changes arrived during this round.
 
-The changes distinguish selecting from folding a message, grouped folded rows, draft-specific buttons, sender
-summaries, platform menu availability, keyboard focus and protected-message pictures. Finnish folding wording,
-Korean spacing, action-label capitalization and Latvian ASCII access keys are corrected. Good new translations are
-retained. Current glossary guidance replaces the old 20-message explanation. No app logic changed.
+## Latest code check and remaining follow-up
 
-Every queued entry/topic and the Latvian neighbor are recorded. Initial snapshots match the starting commit; final
-ledgers, English sources and runtime references match the files. No unresolved entries or remaining review marks.
-The late-arrival audit found no new files, languages or upstream changes. All pre-baseline unmarked differences are
-accounted for by exact completed scope; the reviewed baseline now points to the completed content commit.
+The Windows View menu fix is implemented in [PR #275](https://github.com/postalsys/inbox-classic/pull/275),
+commit `59302b679d19ae63e9125ebebf0568ff6c303f46`, but remains unmerged. It adds the four existing translated
+conversation commands and introduces no new strings. Local and remote master still lack those menu items.
+Keep the current Mac/Linux branch around the menu instructions until that fix is integrated. After integration,
+enable the already-translated paragraph on Windows in all 35 help files and update the glossary's platform note.
+No application code was changed in this translation round.
 
-## Static verification
+## Validation and evidence
 
-- 35 registered languages, 210 catalogs and 56,910 messages (1,626 per language); Fluent syntax and completeness pass.
-- 1,925 help topics checked as 5,775 platform-specific documents; markup and references pass.
-- All 2,730 modeled access-key scopes pass (78 per language), including the new frame More menu.
-- All 34 language checkers report exactly 1,681 expected removed-draft-mark diagnostics each, with zero structural findings.
-- The 560 historical help-reference/literal differences exactly match round 8; no new differences.
-- Exact ledger coverage, unchanged entries/comments, source hashes and whole-worktree diff checks pass.
+Exact before/after paragraph ledgers and file hashes cover every reviewed language. The final audit authenticated
+all 2,135 catalog/help files: the 35 reviewed files match their ledgers and the other 2,100 files are unchanged.
+All 34 static language checkers reported zero structural findings; each produced only its 1,681 expected
+missing-draft-mark diagnostics (1,626 catalog entries and 55 help topics, already reviewed). No pending review
+marks remain. These checks do not constitute native-speaker approval.
 
-These are static checks and contextual editing, not native-speaker approval or runtime testing.
-
-## Evidence
-
-The tracked state records exact IDs/topics, final file hashes and evidence hashes. Detailed snapshots, per-language
-ledgers, source cross-review, final static report, HTML review and late-arrival audit are in
-`build/i18n-round9-20261127`; generated evidence is not committed. Round 8 remains archived separately.
-
-## Completion
-
-The content is committed on local master. REVIEWED points to that commit; the final baseline check reports zero
-pending messages, zero pending help passages and zero unmarked changes. Round 9 is archived. No tests, builds or CI
-were run. The user explicitly prohibited pushing, so the content and completion commits remain local.
+No tests, builds, GUI runs or CI checks were run, as requested. Evidence is saved under the ignored
+`build/i18n-round10-20261127/` directory, including `final-audit.json` and `late-arrival-audit.json`.

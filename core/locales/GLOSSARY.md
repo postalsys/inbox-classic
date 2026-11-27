@@ -157,7 +157,8 @@ checkboxes and Linux switches.
 
 Conversation open/fold wording describes the initial view; later views remember user choices. The starting message
 is open even when read. Clicking an open message selects it; its arrow opens or folds it. Draft frames have Edit
-and More; other messages have Reply, Reply All, Forward and More. Runs of at least four
+and More; other messages have Reply, Reply All, Forward and More. Describe selection without relying on a colored
+edge: Windows uses an etched frame, and the appearance differs by platform. Runs of at least four
 already-folded read messages can share a counted row; the oldest message and two newest read messages stay visible.
 There is no longer a 20-message initial limit. With keyboard focus in the conversation, Right opens all messages
 and Left folds all except the selected one. Next/Previous shortcuts work on every platform; the four conversation
