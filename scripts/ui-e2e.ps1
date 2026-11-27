@@ -8467,12 +8467,19 @@ public static class Dragger {
         }
         CloseStrays 'account sign-in status' -Writing
         # Work removed again, so the steps after see the accounts they saw before
+        # the Accounts window Properties was opened from earlier may still be going: the one that lists the accounts
         Command $main $IDM_ACCOUNTS
-        $accounts = WaitWindow 'InboxClassicAccounts' 'Accounts'
-        if ($accounts) {
-            $accountList = [Native.Win]::GetDlgItem($accounts, 400)
+        $accounts = $null
+        $accountList = WaitFor {
+            $w = WaitWindow 'InboxClassicAccounts' 'Accounts' 2
+            if ($w) {
+                $l = [Native.Win]::GetDlgItem($w, 400)
+                if ($l -ne [IntPtr]::Zero -and (ListCount $l) -ge 3) { $script:statusAccounts = $w; $l }
+            }
+        } 20
+        $accounts = $script:statusAccounts
+        if ($accounts -and $accountList) {
             # Work's row by its name, not its place
-            [void](WaitFor { (ListCount $accountList) -ge 3 } 10)
             $workRow = @(0..((ListCount $accountList) - 1) | Where-Object { [Native.Win]::RemoteListText($accountList, $_, 0) -like '*Work*' })[0]
             if ($null -ne $workRow) { KeyToRow $accountList $workRow }
             Key $accountList $VK_DELETE
@@ -8483,6 +8490,8 @@ public static class Dragger {
             Check ([bool](WaitFor { (ListCount $accountList) -eq 2 } 30)) "Work is removed again after this step ($(ListCount $accountList) accounts)"
             Click $accounts 404
             [void](WaitFor { -not [Native.Win]::IsWindow($accounts) })
+        } else {
+            Check $false 'File > Accounts lists the three accounts, to remove Work again'
         }
     }
 
