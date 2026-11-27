@@ -8471,11 +8471,16 @@ public static class Dragger {
         $accounts = WaitWindow 'InboxClassicAccounts' 'Accounts'
         if ($accounts) {
             $accountList = [Native.Win]::GetDlgItem($accounts, 400)
-            KeyToRow $accountList 2
+            # Work's row by its name, not its place
+            [void](WaitFor { (ListCount $accountList) -ge 3 } 10)
+            $workRow = @(0..((ListCount $accountList) - 1) | Where-Object { [Native.Win]::RemoteListText($accountList, $_, 0) -like '*Work*' })[0]
+            if ($null -ne $workRow) { KeyToRow $accountList $workRow }
             Key $accountList $VK_DELETE
-            $sure = WaitWindow '#32770' 'Remove Account' 10
+            $sure = WaitWindow '#32770' 'Remove Account' 15
+            Check ($null -ne $workRow -and $null -ne $sure) "Work's row is found and Remove asks (row $workRow)"
             if ($sure) { Click $sure 6 }
-            Check ([bool](WaitFor { (ListCount $accountList) -eq 2 } 10)) 'Work is removed again after this step'
+            # an account that was syncing a moment ago is let go of first
+            Check ([bool](WaitFor { (ListCount $accountList) -eq 2 } 30)) "Work is removed again after this step ($(ListCount $accountList) accounts)"
             Click $accounts 404
             [void](WaitFor { -not [Native.Win]::IsWindow($accounts) })
         }
