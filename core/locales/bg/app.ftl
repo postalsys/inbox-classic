@@ -63,17 +63,13 @@ ui-find-in-message-hint = Търсене в това съобщение
 ui-find-not-found = В съобщението не е намерен текстът „{ $words }“.
 cmd-expand-all-threads = Раз&гъване на всички разговори
 cmd-collapse-all-threads = Сви&ване на всички разговори
-# review: new
 cmd-next-in-conversation = С&ледващо съобщение в разговора
-# review: new
 cmd-previous-in-conversation = Пре&дишно съобщение в разговора
-# review: new
 cmd-open-all-messages = Отвар&яне на всички съобщения
-# review: new
 cmd-fold-all-messages = Свиване н&а всички съобщения
 ui-group-by-conversation = &Групиране на съобщенията по разговори
 ui-show-whole-conversation = Показване на &целия разговор в екрана за четене
-ui-show-whole-conversation-note = Отваряне на съобщенията в разговора заедно, включително вашите отговори, черновите и съобщенията в други папки. Прочетените съобщения обикновено са свити до ред; щракнете върху ред, за да отворите или свиете съобщението.
+ui-show-whole-conversation-note = Отваряне на съобщенията в разговора заедно, включително вашите отговори, черновите и съобщенията в други папки. Прочетените съобщения обикновено са свити до ред. Използвайте стрелката на всяко съобщение, за да го отворите или свиете.
 ui-conversation-order = &Ред в разговора:
 ui-conversation-oldest-first = Първо най-старите
 ui-conversation-newest-first = Първо най-новите
@@ -85,32 +81,23 @@ ui-thread-count = { $new ->
 ui-conversation-to = до { $people }
 ui-conversation-draft = Чернова
 ui-conversation-downloading = Изтегля се…
-# review: new
 ui-conversation-you = Аз
-# review: new
 ui-conversation-messages = { $count ->
     [one] { $count } съобщение
    *[other] { $count } съобщения
 }
-# review: new
 ui-conversation-unread = { $count ->
     [one] { $count } непрочетено
    *[other] { $count } непрочетени
 }
-# review: new
 ui-conversation-found-in = Намерено в „{ $folder }“
-# review: new
 ui-conversation-hidden = { $count ->
     [one] Още { $count } съобщение
    *[other] Още { $count } съобщения
 }
-# review: new
 ui-conversation-open-message = Отваряне на съобщението
-# review: new
 ui-conversation-fold-message = Свиване на съобщението
-# review: new
 ui-conversation-more = Още
-# review: new
 ui-conversation-edit = Редактиране
 ui-conversation-elsewhere = { $count ->
     [one] Този разговор има и { $count } съобщение в друга папка.

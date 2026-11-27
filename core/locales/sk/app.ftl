@@ -60,17 +60,13 @@ ui-find-in-message-hint = Nájsť v tejto správe
 ui-find-not-found = „{ $words }“ sa v tejto správe nenachádza
 cmd-expand-all-threads = R&ozbaliť všetky konverzácie
 cmd-collapse-all-threads = Z&baliť všetky konverzácie
-# review: new
 cmd-next-in-conversation = Ďa&lšia správa v konverzácii
-# review: new
 cmd-previous-in-conversation = Predc&hádzajúca správa v konverzácii
-# review: new
 cmd-open-all-messages = Otvoriť vš&etky správy
-# review: new
 cmd-fold-all-messages = Zbaliť všet&ky správy
 ui-group-by-conversation = Zoskupovať správy podľa &konverzácií
 ui-show-whole-conversation = Zobraziť &celú konverzáciu na table na čítanie
-ui-show-whole-conversation-note = Otvorte správy konverzácie spoločne vrátane svojich odpovedí, konceptov a správ v iných priečinkoch. Prečítané správy sú zvyčajne zbalené do riadka; kliknutím na riadok správu otvoríte alebo zbalíte.
+ui-show-whole-conversation-note = Otvorte správy konverzácie spoločne vrátane svojich odpovedí, konceptov a správ v iných priečinkoch. Prečítané správy sú zvyčajne zbalené do riadka. Správu otvoríte alebo zbalíte jej šípkou.
 ui-conversation-order = P&oradie správ v konverzácii:
 ui-conversation-oldest-first = Najstaršie prvé
 ui-conversation-newest-first = Najnovšie prvé
@@ -83,35 +79,26 @@ ui-thread-count = { $new ->
 ui-conversation-to = komu: { $people }
 ui-conversation-draft = Koncept
 ui-conversation-downloading = Sťahovanie…
-# review: new
 ui-conversation-you = Ja
-# review: new
 ui-conversation-messages = { $count ->
     [one] { $count } správa
     [few] { $count } správy
    *[other] { $count } správ
 }
-# review: new
 ui-conversation-unread = { $count ->
     [one] { $count } neprečítaná
     [few] { $count } neprečítané
    *[other] { $count } neprečítaných
 }
-# review: new
 ui-conversation-found-in = Nájdené v priečinku { $folder }
-# review: new
 ui-conversation-hidden = { $count ->
     [one] Ešte { $count } správa
     [few] Ešte { $count } správy
    *[other] Ešte { $count } správ
 }
-# review: new
 ui-conversation-open-message = Otvoriť správu
-# review: new
 ui-conversation-fold-message = Zbaliť správu
-# review: new
 ui-conversation-more = Viac
-# review: new
 ui-conversation-edit = Upraviť
 ui-conversation-elsewhere = { $count ->
     [one] Táto konverzácia má aj { $count } správu v inom priečinku.

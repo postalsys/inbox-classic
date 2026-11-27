@@ -62,17 +62,13 @@ ui-find-in-message-hint = Trova in questo messaggio
 ui-find-not-found = “{ $words }” non è presente in questo messaggio
 cmd-expand-all-threads = &Espandi tutte le conversazioni
 cmd-collapse-all-threads = Comprimi &tutte le conversazioni
-# review: new
 cmd-next-in-conversation = Messaggio successivo &nella conversazione
-# review: new
 cmd-previous-in-conversation = Messaggio precedente nella conversa&zione
-# review: new
 cmd-open-all-messages = Apri t&utti i messaggi
-# review: new
 cmd-fold-all-messages = C&hiudi tutti i messaggi
 ui-group-by-conversation = Raggruppa i messaggi per conversa&zione
 ui-show-whole-conversation = Mostra l’&intera conversazione nel riquadro di lettura
-ui-show-whole-conversation-note = Apri insieme i messaggi di una conversazione, comprese le tue risposte, le bozze e i messaggi salvati in altre cartelle. I messaggi letti sono generalmente ridotti a una riga: fai clic su una riga per aprirla o ridurla.
+ui-show-whole-conversation-note = Apri insieme i messaggi di una conversazione, comprese le tue risposte, le bozze e i messaggi salvati in altre cartelle. I messaggi letti sono generalmente ridotti a una riga. Fai clic su una riga per aprire il messaggio; usa la freccia per aprirlo o ridurlo.
 ui-conversation-order = &Ordine della conversazione:
 ui-conversation-oldest-first = Prima il meno recente
 ui-conversation-newest-first = Prima il più recente
@@ -84,32 +80,23 @@ ui-thread-count = { $new ->
 ui-conversation-to = a { $people }
 ui-conversation-draft = Bozza
 ui-conversation-downloading = Download in corso…
-# review: new
 ui-conversation-you = Io
-# review: new
 ui-conversation-messages = { $count ->
     [one] 1 messaggio
    *[other] { $count } messaggi
 }
-# review: new
 ui-conversation-unread = { $count ->
     [one] 1 da leggere
    *[other] { $count } da leggere
 }
-# review: new
 ui-conversation-found-in = Trovato in { $folder }
-# review: new
 ui-conversation-hidden = { $count ->
     [one] Un altro messaggio
    *[other] Altri { $count } messaggi
 }
-# review: new
 ui-conversation-open-message = Apri messaggio
-# review: new
 ui-conversation-fold-message = Riduci messaggio
-# review: new
 ui-conversation-more = Altro
-# review: new
 ui-conversation-edit = Modifica
 ui-conversation-elsewhere = { $count ->
     [one] Questa conversazione ha anche un messaggio in un’altra cartella.

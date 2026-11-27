@@ -60,17 +60,13 @@ ui-find-in-message-hint = Najít v této zprávě
 ui-find-not-found = „{ $words }“ v této zprávě není
 cmd-expand-all-threads = &Rozbalit všechny konverzace
 cmd-collapse-all-threads = Sbal&it všechny konverzace
-# review: new
 cmd-next-in-conversation = Další zpráva v &konverzaci
-# review: new
 cmd-previous-in-conversation = Předc&hozí zpráva v konverzaci
-# review: new
 cmd-open-all-messages = Otevřít vše&chny zprávy
-# review: new
 cmd-fold-all-messages = S&balit všechny zprávy
 ui-group-by-conversation = &Seskupovat zprávy podle konverzace
 ui-show-whole-conversation = Zobrazit &celou konverzaci v podokně čtení
-ui-show-whole-conversation-note = Otevřete zprávy konverzace společně, včetně svých odpovědí, konceptů a zpráv v jiných složkách. Přečtené zprávy jsou obvykle sbalené do řádku; kliknutím na řádek zprávu otevřete nebo sbalíte.
+ui-show-whole-conversation-note = Otevřete zprávy konverzace společně, včetně svých odpovědí, konceptů a zpráv v jiných složkách. Přečtené zprávy jsou obvykle sbalené do řádku. Zprávu otevřete nebo sbalíte její šipkou.
 ui-conversation-order = Řaz&ení zpráv v konverzaci:
 ui-conversation-oldest-first = Nejstarší první
 ui-conversation-newest-first = Nejnovější první
@@ -83,35 +79,26 @@ ui-thread-count = { $new ->
 ui-conversation-to = komu: { $people }
 ui-conversation-draft = Koncept
 ui-conversation-downloading = Stahování…
-# review: new
 ui-conversation-you = Já
-# review: new
 ui-conversation-messages = { $count ->
     [one] { $count } zpráva
     [few] { $count } zprávy
    *[other] { $count } zpráv
 }
-# review: new
 ui-conversation-unread = { $count ->
     [one] { $count } nepřečtená
     [few] { $count } nepřečtené
    *[other] { $count } nepřečtených
 }
-# review: new
 ui-conversation-found-in = Nalezeno ve složce { $folder }
-# review: new
 ui-conversation-hidden = { $count ->
     [one] Ještě { $count } zpráva
     [few] Ještě { $count } zprávy
    *[other] Ještě { $count } zpráv
 }
-# review: new
 ui-conversation-open-message = Otevřít zprávu
-# review: new
 ui-conversation-fold-message = Sbalit zprávu
-# review: new
 ui-conversation-more = Další
-# review: new
 ui-conversation-edit = Upravit
 ui-conversation-elsewhere = { $count ->
     [one] Tato konverzace má ještě { $count } zprávu v jiné složce.

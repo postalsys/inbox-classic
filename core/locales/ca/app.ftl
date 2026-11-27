@@ -62,17 +62,13 @@ ui-find-in-message-hint = Cerca en aquest missatge
 ui-find-not-found = «{ $words }» no és en aquest missatge
 cmd-expand-all-threads = &Expandeix totes les converses
 cmd-collapse-all-threads = C&ontrau totes les converses
-# review: new
 cmd-next-in-conversation = Missatge següent de la conve&rsa
-# review: new
 cmd-previous-in-conversation = Missatge an&terior de la conversa
-# review: new
 cmd-open-all-messages = O&bre tots els missatges
-# review: new
 cmd-fold-all-messages = Contra&u tots els missatges
 ui-group-by-conversation = Ag&rupa els missatges per conversa
 ui-show-whole-conversation = Mostra &tota la conversa a la subfinestra de lectura
-ui-show-whole-conversation-note = Obriu junts els missatges d’una conversa, amb les vostres respostes, els esborranys i els missatges desats en altres carpetes. Els missatges llegits solen estar plegats en una línia: feu clic en una línia per obrir-la o plegar-la.
+ui-show-whole-conversation-note = Obriu junts els missatges d’una conversa, amb les vostres respostes, els esborranys i els missatges desats en altres carpetes. Els missatges llegits solen estar plegats en una línia. Feu clic en una línia per obrir el missatge; feu servir la fletxa per obrir-lo o plegar-lo.
 ui-conversation-order = &Ordre de la conversa:
 ui-conversation-oldest-first = Primer el més antic
 ui-conversation-newest-first = Primer el més recent
@@ -84,32 +80,23 @@ ui-thread-count = { $new ->
 ui-conversation-to = per a { $people }
 ui-conversation-draft = Esborrany
 ui-conversation-downloading = S’està baixant…
-# review: new
 ui-conversation-you = Jo
-# review: new
 ui-conversation-messages = { $count ->
     [one] 1 missatge
    *[other] { $count } missatges
 }
-# review: new
 ui-conversation-unread = { $count ->
     [one] 1 no llegit
    *[other] { $count } no llegits
 }
-# review: new
 ui-conversation-found-in = Trobat a { $folder }
-# review: new
 ui-conversation-hidden = { $count ->
     [one] 1 missatge més
    *[other] { $count } missatges més
 }
-# review: new
 ui-conversation-open-message = Obre el missatge
-# review: new
 ui-conversation-fold-message = Plega el missatge
-# review: new
 ui-conversation-more = Més
-# review: new
 ui-conversation-edit = Edita
 ui-conversation-elsewhere = { $count ->
     [one] Aquesta conversa també té un missatge en una altra carpeta.

@@ -6125,6 +6125,10 @@ public static class Dragger {
         Check ([bool](WaitFor { (& $stackCount 'gaps') -eq 1 -and (& $stackCount 'rows') -eq 3 -and (& $stackCount 'frames') -eq 1 } 20)) "the read middle of a long conversation is folded into one row ($(& $stackCount 'rows') rows, $(& $stackCount 'gaps') folded)"
         Check ((& $stackCount 'middle') -eq 1) 'a click on it'
         Check ([bool](WaitFor { (& $stackCount 'rows') -eq 19 -and (& $stackCount 'gaps') -eq 0 } 20)) "lists them all ($(& $stackCount 'rows'))"
+        # View has the conversation's commands, as the Mac's and Linux's View menus
+        $viewMenu = [Native.Win]::GetMenu($main)
+        $missing = @($IDM_NEXT_IN_CONVERSATION, $IDM_PREVIOUS_IN_CONVERSATION, $IDM_OPEN_ALL_MESSAGES, $IDM_FOLD_ALL_MESSAGES) | Where-Object { [Native.Win]::GetMenuState($viewMenu, $_, 0) -eq [uint32]::MaxValue }
+        Check (@($missing).Count -eq 0) "View has Next and Previous Message in Conversation, Open All and Fold All Messages ($(@($missing).Count) missing)"
         # every message open: shown at once, only the bodies near what is seen made
         $asked = Get-Date
         Command $main $IDM_OPEN_ALL_MESSAGES

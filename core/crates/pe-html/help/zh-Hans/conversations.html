@@ -1,21 +1,21 @@
 <h1>对话</h1>
 <p class="summary">相互答复的邮件归为一行，您可以监视或忽略一个对话。</p>
 <p>折叠的对话只占一行。该行显示对话的主题、当前列表中它的邮件数以及其中的新邮件数，例如<i>(3，1 封新邮件)</i>。发件人和开头文字取自该行打开的邮件：最早的未读邮件，如果全部已读，则为最新的邮件。只要其中有未读邮件，该行就显示为粗体。按日期和接收日期排序时使用其最新的邮件，其他排序使用其第一封邮件。</p>
-<!--review--><h2>在阅读窗格中查看整个对话</h2>
-<p>选择对话所在的行，即可一起阅读它的邮件，从最早的未读邮件开始；如果全部已读，则从最新的邮件开始。邮件上方显示对话的主题、邮件数和未读邮件数，以及在对话中写过邮件的人。每封展开的邮件都在自己的框中，显示发件人、收件人、发送时间和它自己的按钮。每封折叠的邮件是一行，显示发件人、开头文字和日期；回形针表示它带有附件。最初，未读邮件和最初定位到的邮件处于展开状态，其他已读邮件处于折叠状态。</p>
+<h2>在阅读窗格中查看整个对话</h2>
+<p>选择对话所在的行，即可一起阅读它的邮件，从最早的未读邮件开始；如果全部已读，则从最新的邮件开始。邮件上方显示对话的主题、邮件数和未读邮件数，以及发件人的姓名。每封展开的邮件都在自己的框中，显示发件人、收件人、发送时间和它自己的按钮。每封折叠的邮件是一行，显示发件人、开头文字和日期；回形针表示它带有附件。最初，未读邮件和开始阅读的邮件处于展开状态，其他已读邮件处于折叠状态。</p>
 <ul>
     <li>单击折叠的行可展开该邮件。单击展开邮件框中的任意位置可选中该邮件，邮件仍保持展开。行或框开头的箭头可展开或折叠该邮件。</li>
-    <li>答复、全部答复、转发、打印以及邮件上方的提示栏作用于选中的邮件，即带彩色边框的邮件。每个框还有自己的<b data-text="ui-tb-reply"></b>、<b data-text="ui-tb-reply-all"></b>和<b data-text="ui-tb-forward"></b>按钮，以及<b data-text="ui-conversation-more"></b>按钮，其中包含针对该邮件的打印、标记为未读、删除、打开和邮件源文件。草稿带有<b data-text="ui-conversation-edit"></b>按钮，可继续撰写。</li>
-    <li>您自己的邮件显示为<b data-text="ui-conversation-you"></b>。您在已发送邮件中的答复、您的草稿以及您归档到其他文件夹的邮件也会显示，并各自标明所在的文件夹。垃圾邮件和已删除邮件中的邮件不会显示。</li>
-    <li>在较长的对话中，如果第一封邮件与最后两封已读邮件之间有连续四封或更多已读邮件，它们会折叠为一行，并注明数量。单击该行可列出所有这些邮件。窗格会定位到最初定位到的邮件。</li>
-    <li><b data-text="menu-view"></b> &gt; <b data-text="cmd-next-in-conversation"></b>（<kbd data-command="next_in_conversation"></kbd>）和<b data-text="cmd-previous-in-conversation"></b>（<kbd data-command="previous_in_conversation"></kbd>）会展开并选中下一封或上一封邮件。<b data-text="cmd-open-all-messages"></b>会展开所有邮件，<b data-text="cmd-fold-all-messages"></b>会折叠除选中邮件之外的所有邮件。焦点在对话中时，按<kbd>→</kbd>和<kbd>←</kbd>效果相同。</li>
+    <li>答复、全部答复、转发和打印作用于选中的邮件。草稿以外的邮件有自己的<b data-text="ui-tb-reply"></b>、<b data-text="ui-tb-reply-all"></b>和<b data-text="ui-tb-forward"></b>按钮。<b data-text="ui-conversation-more"></b>提供针对该邮件的打印、标记为未读、删除、打开和查看源文件操作。要继续撰写草稿，请选择该草稿上的<b data-text="ui-conversation-edit"></b>。</li>
+    <li>您自己的邮件会以<b data-text="ui-conversation-you"></b>代替您的姓名。您在已发送邮件中的答复、您的草稿以及您归档到其他文件夹的邮件也会显示，并各自标明所在的文件夹。垃圾邮件和已删除邮件中的邮件不会显示。</li>
+    <li>在较长的对话中，连续四封或更多已折叠的已读邮件会合并为一行，并显示数量。最早的邮件和最新的两封已读邮件仍会显示。单击数量可列出隐藏的邮件。窗格会定位到开始阅读的邮件。</li>
+    <li>按<kbd data-command="next_in_conversation"></kbd>或<kbd data-command="previous_in_conversation"></kbd>可展开并选中下一封或上一封邮件。<!--os:mac,linux-->这些命令也在<b data-text="menu-view"></b>菜单中：<b data-text="cmd-next-in-conversation"></b>和<b data-text="cmd-previous-in-conversation"></b>。同一菜单中的<b data-text="cmd-open-all-messages"></b>会展开所有邮件，<b data-text="cmd-fold-all-messages"></b>会折叠除选中邮件之外的所有邮件。<!--/os-->键盘焦点在对话中时，按<kbd>→</kbd>可展开所有邮件，按<kbd>←</kbd>可折叠除选中邮件之外的所有邮件。</li>
     <li>以展开状态显示的未读邮件会在片刻之后标记为已读。</li>
-    <li>如果展开的邮件中有未显示的网络图片，邮件上方的提示栏会提供显示选项。加密邮件中的图片只有在您在该邮件中请求时才会加载。</li>
-    <li>已签名或已加密的邮件与其他邮件一样显示在对话中，并带有安全标签。</li>
+    <li>对话上方的提示栏可以提供加载选项，以显示已展开邮件中被阻止的网络图片。要加载带有数字签名或已加密邮件中的图片，请先选中该邮件。</li>
+    <li>带有数字签名或已加密的邮件与其他邮件一样显示在对话中，并带有安全标签。</li>
     <li><b data-text="menu-file"></b> &gt; <b data-text="cmd-print-conversation"></b>会依次打印对话中已下载的邮件。已签名或已加密的邮件不包括在内，请单独打开并打印。</li>
     <li>双击某一行或某个框，可在单独的窗口中打开该邮件。</li>
 </ul>
-<p>不属于任何对话的单封邮件也以同样的方式显示在自己的框中。</p><!--/review-->
+<p>单独显示的邮件也使用相同的框架布局。</p>
 <p>如果要一次只查看一封邮件，请在<b data-settings="reading"></b>中关闭<b data-text="ui-show-whole-conversation"></b>。这样，对话所在的行会打开其最早的未读邮件；如果全部已读，则打开最新的邮件。同一页上的<b data-text="ui-conversation-order"></b>可选择在阅读窗格和展开的对话行下方按最早的在前还是最新的在前排列邮件。</p>
 <ul>
     <li>要在对话所在的行下方列出其邮件，请单击它前面的<b><!--os:windows-->+<!--/os--><!--os:mac,linux-->▸<!--/os--></b>，或按<kbd>→</kbd>。要隐藏它们，请单击<b><!--os:windows-->-<!--/os--><!--os:mac,linux-->▾<!--/os--></b>，或按<kbd>←</kbd>。选择该行下方的某封邮件时，只显示这封邮件。</li>

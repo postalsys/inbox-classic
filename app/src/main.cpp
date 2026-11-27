@@ -245,6 +245,9 @@ void UpdateMenu(HMENU menu) {
             EnableMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.CanUnsubscribe() ? MF_ENABLED : MF_GRAYED));
         } else if (int fits = CommandFitsSelection(id); fits >= 0) {
             EnableMenuItem(menu, id, MF_BYCOMMAND | (fits ? MF_ENABLED : MF_GRAYED));
+        } else if (id == IDM_NEXT_IN_CONVERSATION || id == IDM_PREVIOUS_IN_CONVERSATION || id == IDM_OPEN_ALL_MESSAGES ||
+                   id == IDM_FOLD_ALL_MESSAGES) {
+            EnableMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.ShowsConversation() ? MF_ENABLED : MF_GRAYED));
         } else if (id == IDM_EXPAND_ALL_THREADS || id == IDM_COLLAPSE_ALL_THREADS) {
             EnableMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.Grouped() ? MF_ENABLED : MF_GRAYED));
         } else if (id == IDM_HIDE_IGNORED) {
@@ -793,6 +796,12 @@ HMENU BuildMenu() {
     AppendMenuW(view, MF_STRING, IDM_PREVIOUS_MESSAGE, MenuItem(PE_TEXT_CMD_PREVIOUS_MESSAGE, L"Ctrl+,").c_str());
     AppendMenuW(view, MF_STRING, IDM_NEXT_UNREAD, MenuItem(PE_TEXT_CMD_NEXT_UNREAD, L"N").c_str());
     AppendMenuW(view, MF_STRING, IDM_GO_TO_FOLDER, MenuItem(PE_TEXT_CMD_GO_TO_FOLDER, L"Ctrl+Y").c_str());
+    AppendMenuW(view, MF_SEPARATOR, 0, nullptr);
+    // the conversation in the reading pane, as the Mac's and Linux's View menus have it
+    AppendMenuW(view, MF_STRING, IDM_NEXT_IN_CONVERSATION, MenuItem(PE_TEXT_CMD_NEXT_IN_CONVERSATION, L"Alt+Down").c_str());
+    AppendMenuW(view, MF_STRING, IDM_PREVIOUS_IN_CONVERSATION, MenuItem(PE_TEXT_CMD_PREVIOUS_IN_CONVERSATION, L"Alt+Up").c_str());
+    AppendMenuW(view, MF_STRING, IDM_OPEN_ALL_MESSAGES, MenuItem(PE_TEXT_CMD_OPEN_ALL_MESSAGES).c_str());
+    AppendMenuW(view, MF_STRING, IDM_FOLD_ALL_MESSAGES, MenuItem(PE_TEXT_CMD_FOLD_ALL_MESSAGES).c_str());
     AppendMenuW(view, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(view, MF_STRING, IDM_EXPAND_ALL_THREADS, MenuItem(PE_TEXT_CMD_EXPAND_ALL_THREADS).c_str());
     AppendMenuW(view, MF_STRING, IDM_COLLAPSE_ALL_THREADS, MenuItem(PE_TEXT_CMD_COLLAPSE_ALL_THREADS).c_str());

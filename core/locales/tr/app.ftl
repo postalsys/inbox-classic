@@ -62,17 +62,13 @@ ui-find-in-message-hint = Bu iletide bul
 ui-find-not-found = “{ $words }” bu iletide yok
 cmd-expand-all-threads = Tüm Konuşmaları Genişl&et
 cmd-collapse-all-threads = Tüm Konuşmaları &Daralt
-# review: new
 cmd-next-in-conversation = Konuşmadaki Sonraki İle&ti
-# review: new
 cmd-previous-in-conversation = Konuşm&adaki Önceki İleti
-# review: new
 cmd-open-all-messages = Tüm İletileri A&ç
-# review: new
 cmd-fold-all-messages = T&üm İletileri Daralt
 ui-group-by-conversation = İletileri konuşmaya göre &grupla
 ui-show-whole-conversation = &Konuşmanın tamamını okuma bölmesinde göster
-ui-show-whole-conversation-note = Yanıtlarınız, taslaklarınız ve başka klasörlerdeki iletiler dahil konuşmanın iletilerini birlikte açar. Okunmuş iletiler genellikle tek satıra daraltılır; açmak veya daraltmak için satıra tıklayın.
+ui-show-whole-conversation-note = Yanıtlarınız, taslaklarınız ve başka klasörlerdeki iletiler dahil konuşmanın iletilerini birlikte açar. Okunmuş iletiler genellikle tek satıra daraltılır. Bir iletiyi açmak veya daraltmak için yanındaki oku kullanın.
 ui-conversation-order = Konuşma &sırası:
 ui-conversation-oldest-first = Önce en eski
 ui-conversation-newest-first = Önce en yeni
@@ -83,32 +79,23 @@ ui-thread-count = { $new ->
 ui-conversation-to = alıcı: { $people }
 ui-conversation-draft = Taslak
 ui-conversation-downloading = İndiriliyor…
-# review: new
 ui-conversation-you = Ben
-# review: new
 ui-conversation-messages = { $count ->
     [one] 1 ileti
    *[other] { $count } ileti
 }
-# review: new
 ui-conversation-unread = { $count ->
     [one] 1 okunmamış
    *[other] { $count } okunmamış
 }
-# review: new
 ui-conversation-found-in = Bulunduğu klasör: { $folder }
-# review: new
 ui-conversation-hidden = { $count ->
     [one] 1 ileti daha
    *[other] { $count } ileti daha
 }
-# review: new
-ui-conversation-open-message = İletiyi aç
-# review: new
-ui-conversation-fold-message = İletiyi daralt
-# review: new
+ui-conversation-open-message = İletiyi Aç
+ui-conversation-fold-message = İletiyi Daralt
 ui-conversation-more = Diğer
-# review: new
 ui-conversation-edit = Düzenle
 ui-conversation-elsewhere = { $count ->
     [one] Bu konuşmanın başka bir klasörde de bir iletisi var.

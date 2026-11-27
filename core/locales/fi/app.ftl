@@ -63,17 +63,13 @@ ui-find-in-message-hint = Etsi tästä viestistä
 ui-find-not-found = ”{ $words }” ei löydy tästä viestistä
 cmd-expand-all-threads = Laa&jenna kaikki keskustelut
 cmd-collapse-all-threads = Su&pista kaikki keskustelut
-# review: new
 cmd-next-in-conversation = Keskustelu&n seuraava viesti
-# review: new
 cmd-previous-in-conversation = Keskustelun e&dellinen viesti
-# review: new
 cmd-open-all-messages = Avaa kaikki viestit näk&yviin
-# review: new
-cmd-fold-all-messages = Supista kaikki viestit &riviksi
+cmd-fold-all-messages = Supista kaikki viestit &riveiksi
 ui-group-by-conversation = &Ryhmittele viestit keskusteluittain
 ui-show-whole-conversation = Näytä k&oko keskustelu lukuruudussa
-ui-show-whole-conversation-note = Avaa keskustelun viestit yhdessä, myös vastauksesi, luonnoksesi ja muihin kansioihin siirretyt viestit. Luetut viestit on yleensä supistettu riviksi; avaa tai supista viesti napsauttamalla sen riviä.
+ui-show-whole-conversation-note = Avaa keskustelun viestit yhdessä, myös vastauksesi, luonnoksesi ja muissa kansioissa olevat viestit. Luetut viestit on yleensä supistettu riveiksi. Avaa tai supista viesti sen nuolesta.
 ui-conversation-order = Keskustelun &järjestys:
 ui-conversation-oldest-first = Vanhin ensin
 ui-conversation-newest-first = Uusin ensin
@@ -85,32 +81,23 @@ ui-thread-count = { $new ->
 ui-conversation-to = vastaanottajat: { $people }
 ui-conversation-draft = Luonnos
 ui-conversation-downloading = Ladataan…
-# review: new
 ui-conversation-you = Minä
-# review: new
 ui-conversation-messages = { $count ->
     [one] 1 viesti
    *[other] { $count } viestiä
 }
-# review: new
 ui-conversation-unread = { $count ->
     [one] 1 lukematon
    *[other] { $count } lukematonta
 }
-# review: new
 ui-conversation-found-in = Löytyi kansiosta { $folder }
-# review: new
 ui-conversation-hidden = { $count ->
     [one] 1 viesti lisää
    *[other] { $count } viestiä lisää
 }
-# review: new
 ui-conversation-open-message = Avaa viesti
-# review: new
 ui-conversation-fold-message = Supista viesti
-# review: new
 ui-conversation-more = Lisää
-# review: new
 ui-conversation-edit = Muokkaa
 ui-conversation-elsewhere = { $count ->
     [one] Keskusteluun kuuluu myös viesti toisessa kansiossa.

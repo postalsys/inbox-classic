@@ -156,11 +156,20 @@ Removing a computer from sync leaves its synced data available. Shared selection
 checkboxes and Linux switches.
 
 Conversation open/fold wording describes the initial view; later views remember user choices. The starting message
-is open even when read. A long conversation initially includes the latest 20 messages and any earlier span needed
-to include the starting message. The earlier-message link is available only in oldest-first order. Conversation
-printing omits unavailable, digitally signed and encrypted messages. When extending actions to other folders,
-Archive and Move leave additional Sent/Drafts messages there; explicitly selected messages still follow the action.
-Windows/Linux Enter expands a collapsed conversation; Mac Return opens it. Keep the platform-specific shortcut row.
+is open even when read. Clicking an open message selects it; its arrow opens or folds it. Draft frames have Edit
+and More; other messages have Reply, Reply All, Forward and More. Describe selection without relying on a colored
+edge: Windows uses an etched frame, and the appearance differs by platform. Runs of at least four
+already-folded read messages can share a counted row; the oldest message and two newest read messages stay visible.
+There is no longer a 20-message initial limit. With keyboard focus in the conversation, Right opens all messages
+and Left folds all except the selected one. Next/Previous shortcuts work on every platform; the four conversation
+commands currently appear in the View menu only on Mac and Linux. Keep that help branch platform-specific.
+
+Digitally signed and encrypted messages now appear alongside the others, with their security labels. To request
+pictures in one, select that message first. The pictures bar can offer images from other open messages, so do not
+say every bar applies only to the selected message. Conversation printing still omits unavailable, digitally
+signed and encrypted messages. When extending actions to other folders, Archive and Move leave additional
+Sent/Drafts messages there; explicitly selected messages still follow the action. Windows/Linux Enter in the
+message list expands a collapsed conversation; Mac Return opens it. Keep the platform-specific shortcut row.
 
 Reaction badges show up to three distinct emoji and a total when more than one reaction exists. Notification counts
 are new reactions in the batch, possibly across messages, not historical totals for the displayed subject. Sender
@@ -173,6 +182,18 @@ Keep numeric placeholders in plural categories that include 21 or 101; use exact
 sentence. The sync setup scope includes computer name, data choices, Back, Turn On and Cancel together; check its
 keys against the overlapping settings-page scope too. Account rename help uses the Linux-specific account-name
 field on Linux and finishes with OK.
+
+### Round 9 conversation wording
+
+The own-message label replaces a sender name, including in the sender summary; first-person labels such as Moi,
+Mina, Minä, Aš, Es, 自分 or 我 are retained where natural. It does not rename the message. Summary message and unread
+counts are independent. Keep numeric placeholders in plural categories that also cover 21 or 101; the grouped-row
+count is at least four, so its grammatical one category need not mean a single message.
+
+Finnish Fold All uses plural `riveiksi`, since messages retain separate rows. Latvian uses ASCII K in
+`Sa&kļaut visus ziņojumus`; Sort By moves to C in `Kārtot pē&c`. Korean More is `더 보기`. Indonesian and Turkish
+Open/Fold message accessibility labels follow the established action-label capitalization. Preserve the distinction
+between keyboard focus in the conversation and the application merely being in the foreground.
 
 ### Round 8 language decisions
 
@@ -193,11 +214,11 @@ These decisions accompany the completed contextual review; they are not a claim 
 | hr | Retain Croatian račun, računalo, mapa, skica and pristupna fraza; do not drift toward Serbian terminology. Sync computer name/account/Turn On keys I/Č/R are distinct in the full setup scope. |
 | hu | Use Tároló (bucket) for the S3 bucket field; retain the provider term as an aid to locating it in provider settings. Sync bucket/name keys L/G avoid the combined wizard collisions; reaction wording remains gender-neutral. |
 | id | Sync credentials: kredensial masuk. Reaction title uses memberi reaksi, without gendered pronouns. New wizard mnemonic choices: computer name A, Back E, bucket C; account properties P. |
-| it | Keep passphrase di sincronizzazione; use credenziali di accesso and punti di ripristino. Aprire separatamente avoids literal stack wording. Use oggi, TIME without assuming alle for every hour. Access keys: ui-sync-name O, ui-sync-turn-on C, win-sync-back D. |
+| it | Keep passphrase di sincronizzazione; use credenziali di accesso and punti di ripristino. Use oggi, TIME without assuming alle for every hour. Access keys: ui-sync-name O, ui-sync-turn-on C, win-sync-back D. |
 | ja | Sync credential choice uses サインイン情報, not the act of サインイン. Existing スレッド and リアクション retained. New counts follow Japanese no-space convention: 新着{ $new }. |
 | ko | Draft-message badge uses 초안, distinct from the folder 임시 보관함. Keep normal Korean spacing and gender-neutral reaction title { $name }: { $emoji } 반응. |
 | lt | Sync credentials use prisijungimo duomenys, a passphrase is a slaptafrazė, and cryptographic signing is skaitmeninis parašas. Keep numeric one/few/other counts and exact [1] for singular-only prose. The sync wizard Back button uses T, distinct from rules L. |
-| lv | Sync credentials use pierakstīšanās dati; an S3 bucket is konteiners, not the literal spainis. The Show Earlier action takes accusative plural agrākus ziņojumus in zero/other branches. Keep ASCII access keys: S3 bucket K, prefix A, computer name D, Turn On S and Back T. |
+| lv | Sync credentials use pierakstīšanās dati; an S3 bucket is konteiners, not the literal spainis. Keep ASCII access keys: S3 bucket K, prefix A, computer name D, Turn On S and Back T. |
 | nb | Keep synkroniseringspassfrase, påloggingsopplysninger and gjenopprettingspunkter. Use meldingshodet instead of the unexplained hodet. Access keys: cmd-print-conversation U, ui-sync-name N, ui-sync-turn-on Y. |
 | nl | Keep synchronisatiewachtwoordzin, aanmeldgegevens and herstelpunten. The replaced change is explicitly named in sync-news-lost to avoid ambiguous pronouns. Access keys: ui-sync-turn-on T, win-sync-back G. |
 | pl | Use Odbiorcy: before the arbitrary recipient-name list, so names need no genitive inflection after do. Sync computer name/Turn On keys Z/W are distinct in the full setup scope. |

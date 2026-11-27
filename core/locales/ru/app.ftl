@@ -60,17 +60,13 @@ ui-find-in-message-hint = Найти в этом сообщении
 ui-find-not-found = «{ $words }» нет в этом сообщении
 cmd-expand-all-threads = Ра&звернуть все беседы
 cmd-collapse-all-threads = Сверну&ть все беседы
-# review: new
 cmd-next-in-conversation = Сле&дующее сообщение в беседе
-# review: new
 cmd-previous-in-conversation = Предыд&ущее сообщение в беседе
-# review: new
 cmd-open-all-messages = Р&азвернуть все сообщения
-# review: new
 cmd-fold-all-messages = С&вернуть все сообщения
 ui-group-by-conversation = &Группировать сообщения по беседам
 ui-show-whole-conversation = Показывать всю бесе&ду в области чтения
-ui-show-whole-conversation-note = Открывайте сообщения беседы вместе, включая свои ответы, черновики и сообщения в других папках. Прочитанные сообщения обычно свернуты в строку; щелкните строку, чтобы развернуть или свернуть сообщение.
+ui-show-whole-conversation-note = Открывайте сообщения беседы вместе, включая свои ответы, черновики и сообщения в других папках. Прочитанные сообщения обычно свернуты в строку. Стрелка у каждого сообщения позволяет развернуть или свернуть его.
 ui-conversation-order = Поряд&ок сообщений в беседе:
 ui-conversation-oldest-first = Сначала старые
 ui-conversation-newest-first = Сначала новые
@@ -84,38 +80,29 @@ ui-thread-count = { $new ->
 ui-conversation-to = кому: { $people }
 ui-conversation-draft = Черновик
 ui-conversation-downloading = Загрузка…
-# review: new
 ui-conversation-you = Я
-# review: new
 ui-conversation-messages = { $count ->
     [one] { $count } сообщение
     [few] { $count } сообщения
     [many] { $count } сообщений
    *[other] { $count } сообщения
 }
-# review: new
 ui-conversation-unread = { $count ->
     [one] { $count } непрочитанное
     [few] { $count } непрочитанных
     [many] { $count } непрочитанных
    *[other] { $count } непрочитанного
 }
-# review: new
 ui-conversation-found-in = Найдено в папке «{ $folder }»
-# review: new
 ui-conversation-hidden = { $count ->
     [one] Еще { $count } сообщение
     [few] Еще { $count } сообщения
     [many] Еще { $count } сообщений
    *[other] Еще { $count } сообщения
 }
-# review: new
 ui-conversation-open-message = Развернуть сообщение
-# review: new
 ui-conversation-fold-message = Свернуть сообщение
-# review: new
 ui-conversation-more = Еще
-# review: new
 ui-conversation-edit = Изменить
 ui-conversation-elsewhere = { $count ->
     [one] В этой беседе есть еще { $count } сообщение в другой папке.

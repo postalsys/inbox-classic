@@ -61,17 +61,13 @@ ui-find-in-message-hint = Знайти в цьому повідомленні
 ui-find-not-found = «{ $words }» немає в цьому повідомленні
 cmd-expand-all-threads = Розгорнути &всі розмови
 cmd-collapse-all-threads = З&горнути всі розмови
-# review: new
 cmd-next-in-conversation = Наст&упне повідомлення в розмові
-# review: new
 cmd-previous-in-conversation = Попер&еднє повідомлення в розмові
-# review: new
 cmd-open-all-messages = Від&крити всі повідомлення
-# review: new
 cmd-fold-all-messages = Згорнути всі пові&домлення
 ui-group-by-conversation = Гр&упувати повідомлення за розмовами
 ui-show-whole-conversation = Показувати &цілу розмову в області читання
-ui-show-whole-conversation-note = Відкривайте повідомлення розмови разом, зокрема свої відповіді, чернетки й повідомлення в інших папках. Прочитані повідомлення зазвичай згорнуто в рядок; клацніть рядок, щоб відкрити або згорнути повідомлення.
+ui-show-whole-conversation-note = Відкривайте повідомлення розмови разом, зокрема свої відповіді, чернетки й повідомлення в інших папках. Прочитані повідомлення зазвичай згорнуто в рядок. Стрілка біля кожного повідомлення дає змогу відкрити або згорнути його.
 ui-conversation-order = П&орядок повідомлень у розмові:
 ui-conversation-oldest-first = Спочатку старіші
 ui-conversation-newest-first = Спочатку новіші
@@ -85,38 +81,29 @@ ui-thread-count = { $new ->
 ui-conversation-to = кому: { $people }
 ui-conversation-draft = Чернетка
 ui-conversation-downloading = Завантаження…
-# review: new
 ui-conversation-you = Я
-# review: new
 ui-conversation-messages = { $count ->
     [one] { $count } повідомлення
     [few] { $count } повідомлення
     [many] { $count } повідомлень
    *[other] { $count } повідомлення
 }
-# review: new
 ui-conversation-unread = { $count ->
     [one] { $count } непрочитане
     [few] { $count } непрочитані
     [many] { $count } непрочитаних
    *[other] { $count } непрочитаного
 }
-# review: new
 ui-conversation-found-in = Знайдено в папці «{ $folder }»
-# review: new
 ui-conversation-hidden = { $count ->
     [one] Ще { $count } повідомлення
     [few] Ще { $count } повідомлення
     [many] Ще { $count } повідомлень
    *[other] Ще { $count } повідомлення
 }
-# review: new
 ui-conversation-open-message = Відкрити повідомлення
-# review: new
 ui-conversation-fold-message = Згорнути повідомлення
-# review: new
 ui-conversation-more = Більше
-# review: new
 ui-conversation-edit = Редагувати
 ui-conversation-elsewhere = { $count ->
     [1] Ця розмова має ще одне повідомлення в іншій папці.

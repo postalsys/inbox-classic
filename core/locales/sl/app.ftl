@@ -61,17 +61,13 @@ ui-find-in-message-hint = Najdi v tem sporočilu
 ui-find-not-found = »{ $words }« ni v tem sporočilu
 cmd-expand-all-threads = &Razširi vse pogovore
 cmd-collapse-all-threads = Strni vse po&govore
-# review: new
 cmd-next-in-conversation = Nasl&ednje sporočilo v pogovoru
-# review: new
 cmd-previous-in-conversation = Pre&jšnje sporočilo v pogovoru
-# review: new
 cmd-open-all-messages = O&dpri vsa sporočila
-# review: new
 cmd-fold-all-messages = Strni vs&a sporočila
 ui-group-by-conversation = Z&druži sporočila po pogovorih
 ui-show-whole-conversation = Pokaži &celoten pogovor v podoknu za branje
-ui-show-whole-conversation-note = Odprite sporočila pogovora skupaj, vključno z vašimi odgovori, osnutki in sporočili v drugih mapah. Prebrana sporočila so običajno strnjena v vrstico; kliknite vrstico, da sporočilo odprete ali strnete.
+ui-show-whole-conversation-note = Odprite sporočila pogovora skupaj, vključno z vašimi odgovori, osnutki in sporočili v drugih mapah. Prebrana sporočila so običajno strnjena v vrstico. S puščico pri posameznem sporočilu ga odprete ali strnete.
 ui-conversation-order = Vrstni &red v pogovoru:
 ui-conversation-oldest-first = Najstarejša najprej
 ui-conversation-newest-first = Najnovejša najprej
@@ -85,38 +81,29 @@ ui-thread-count = { $new ->
 ui-conversation-to = Prejemniki: { $people }
 ui-conversation-draft = Osnutek
 ui-conversation-downloading = Prenašanje…
-# review: new
 ui-conversation-you = Jaz
-# review: new
 ui-conversation-messages = { $count ->
     [one] { $count } sporočilo
     [two] { $count } sporočili
     [few] { $count } sporočila
    *[other] { $count } sporočil
 }
-# review: new
 ui-conversation-unread = { $count ->
     [one] { $count } neprebrano
     [two] { $count } neprebrani
     [few] { $count } neprebrana
    *[other] { $count } neprebranih
 }
-# review: new
 ui-conversation-found-in = Najdeno v mapi { $folder }
-# review: new
 ui-conversation-hidden = { $count ->
     [one] Še { $count } sporočilo
     [two] Še { $count } sporočili
     [few] Še { $count } sporočila
    *[other] Še { $count } sporočil
 }
-# review: new
 ui-conversation-open-message = Odpri sporočilo
-# review: new
 ui-conversation-fold-message = Strni sporočilo
-# review: new
 ui-conversation-more = Več
-# review: new
 ui-conversation-edit = Uredi
 ui-conversation-elsewhere = { $count ->
     [one] Ta pogovor ima še { $count } sporočilo v drugi mapi.

@@ -60,17 +60,13 @@ ui-find-in-message-hint = Ieškoti šiame laiške
 ui-find-not-found = „{ $words }“ šiame laiške nėra
 cmd-expand-all-threads = Išskleisti &visus pokalbius
 cmd-collapse-all-threads = S&utraukti visus pokalbius
-# review: new
 cmd-next-in-conversation = Kitas laiškas pokalby&je
-# review: new
 cmd-previous-in-conversation = Ankstesnis laiškas pokal&byje
-# review: new
 cmd-open-all-messages = Ati&daryti visus laiškus
-# review: new
 cmd-fold-all-messages = Suskleisti visus lai&škus
 ui-group-by-conversation = &Grupuoti laiškus pagal pokalbius
 ui-show-whole-conversation = Skaitymo srityje rodyti &visą pokalbį
-ui-show-whole-conversation-note = Pokalbio eilutė atveria visus jo laiškus kartu su jūsų atsakymais, juodraščiais ir laiškais, perkeltais į kitus aplankus. Skaityti laiškai paprastai suskleidžiami, tačiau laiškas, nuo kurio pradedama skaityti, lieka išskleistas. Spustelėkite laiško eilutę, kad jį išskleistumėte arba suskleistumėte.
+ui-show-whole-conversation-note = Pokalbio eilutė atveria visus jo laiškus kartu su jūsų atsakymais, juodraščiais ir laiškais kituose aplankuose. Skaityti laiškai paprastai suskleidžiami į eilutes. Norėdami laišką išskleisti arba suskleisti, spustelėkite jo rodyklę.
 ui-conversation-order = Pokalbio laiškų tvar&ka:
 ui-conversation-oldest-first = Seniausi pirmiau
 ui-conversation-newest-first = Naujausi pirmiau
@@ -83,35 +79,26 @@ ui-thread-count = { $new ->
 ui-conversation-to = kam: { $people }
 ui-conversation-draft = Juodraštis
 ui-conversation-downloading = Atsisiunčiama…
-# review: new
 ui-conversation-you = Aš
-# review: new
 ui-conversation-messages = { $count ->
     [one] { $count } laiškas
     [few] { $count } laiškai
    *[other] { $count } laiškų
 }
-# review: new
 ui-conversation-unread = { $count ->
     [one] { $count } neskaitytas
     [few] { $count } neskaityti
    *[other] { $count } neskaitytų
 }
-# review: new
 ui-conversation-found-in = Rasta aplanke „{ $folder }“
-# review: new
 ui-conversation-hidden = { $count ->
     [one] Dar { $count } laiškas
     [few] Dar { $count } laiškai
    *[other] Dar { $count } laiškų
 }
-# review: new
 ui-conversation-open-message = Išskleisti laišką
-# review: new
 ui-conversation-fold-message = Suskleisti laišką
-# review: new
 ui-conversation-more = Daugiau
-# review: new
 ui-conversation-edit = Redaguoti
 ui-conversation-elsewhere = { $count ->
     [1] Šis pokalbis dar turi laišką kitame aplanke.
