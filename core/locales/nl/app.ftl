@@ -62,17 +62,13 @@ ui-find-in-message-hint = Zoeken in dit bericht
 ui-find-not-found = “{ $words }” staat niet in dit bericht
 cmd-expand-all-threads = Alle gesprekken &uitvouwen
 cmd-collapse-all-threads = Alle gesprekken &samenvouwen
-# review: new
 cmd-next-in-conversation = Volge&nd bericht in het gesprek
-# review: new
 cmd-previous-in-conversation = Vorig bericht in het ges&prek
-# review: new
 cmd-open-all-messages = Alle berichten op&enen
-# review: new
 cmd-fold-all-messages = Alle beri&chten inklappen
 ui-group-by-conversation = Berichten groeperen &per gesprek
 ui-show-whole-conversation = &Hele gesprek tonen in het leesvenster
-ui-show-whole-conversation-note = Open de berichten van een gesprek samen, inclusief je antwoorden, concepten en berichten uit andere mappen. Gelezen berichten zijn meestal ingeklapt tot één regel: klik op een regel om die te openen of in te klappen.
+ui-show-whole-conversation-note = Open de berichten van een gesprek samen, inclusief je antwoorden, concepten en berichten uit andere mappen. Gelezen berichten zijn meestal ingeklapt tot één regel. Klik op een regel om het bericht te openen; gebruik de pijl om het te openen of in te klappen.
 ui-conversation-order = Volg&orde in gesprekken:
 ui-conversation-oldest-first = Oudste eerst
 ui-conversation-newest-first = Nieuwste eerst
@@ -83,32 +79,23 @@ ui-thread-count = { $new ->
 ui-conversation-to = aan { $people }
 ui-conversation-draft = Concept
 ui-conversation-downloading = Downloaden…
-# review: new
 ui-conversation-you = Ik
-# review: new
 ui-conversation-messages = { $count ->
     [one] 1 bericht
    *[other] { $count } berichten
 }
-# review: new
 ui-conversation-unread = { $count ->
     [one] 1 ongelezen
    *[other] { $count } ongelezen
 }
-# review: new
 ui-conversation-found-in = Gevonden in { $folder }
-# review: new
 ui-conversation-hidden = { $count ->
     [one] Nog 1 bericht
    *[other] Nog { $count } berichten
 }
-# review: new
 ui-conversation-open-message = Bericht openen
-# review: new
 ui-conversation-fold-message = Bericht inklappen
-# review: new
 ui-conversation-more = Meer
-# review: new
 ui-conversation-edit = Bewerken
 ui-conversation-elsewhere = { $count ->
     [one] Dit gesprek heeft ook een bericht in een andere map.

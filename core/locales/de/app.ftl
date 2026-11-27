@@ -60,17 +60,13 @@ ui-find-in-message-hint = In dieser Nachricht suchen
 ui-find-not-found = „{ $words }“ kommt in dieser Nachricht nicht vor
 cmd-expand-all-threads = Alle Unterhaltungen &erweitern
 cmd-collapse-all-threads = Alle Unterhaltungen &reduzieren
-# review: new
 cmd-next-in-conversation = Nä&chste Nachricht der Unterhaltung
-# review: new
 cmd-previous-in-conversation = Vorherige Nachricht der Un&terhaltung
-# review: new
 cmd-open-all-messages = &Alle Nachrichten öffnen
-# review: new
 cmd-fold-all-messages = Alle Nachrichten ein&klappen
 ui-group-by-conversation = Nachrichten nach &Unterhaltung gruppieren
 ui-show-whole-conversation = Die &ganze Unterhaltung im Lesebereich anzeigen
-ui-show-whole-conversation-note = Öffnen Sie die Nachrichten einer Unterhaltung gemeinsam, einschließlich Ihrer Antworten, Entwürfe und Nachrichten aus anderen Ordnern. Gelesene Nachrichten sind meist zu einer Zeile eingeklappt: Klicken Sie auf eine Zeile, um sie zu öffnen oder einzuklappen.
+ui-show-whole-conversation-note = Öffnen Sie die Nachrichten einer Unterhaltung gemeinsam, einschließlich Ihrer Antworten, Entwürfe und Nachrichten aus anderen Ordnern. Gelesene Nachrichten sind meist zu einer Zeile eingeklappt. Klicken Sie auf eine Zeile, um die Nachricht zu öffnen; mit dem Pfeil öffnen Sie sie oder klappen sie ein.
 ui-conversation-order = &Reihenfolge in Unterhaltungen:
 ui-conversation-oldest-first = Älteste zuerst
 ui-conversation-newest-first = Neueste zuerst
@@ -81,32 +77,23 @@ ui-thread-count = { $new ->
 ui-conversation-to = an { $people }
 ui-conversation-draft = Entwurf
 ui-conversation-downloading = Wird heruntergeladen…
-# review: new
 ui-conversation-you = Ich
-# review: new
 ui-conversation-messages = { $count ->
     [one] 1 Nachricht
    *[other] { $count } Nachrichten
 }
-# review: new
 ui-conversation-unread = { $count ->
     [one] 1 ungelesen
    *[other] { $count } ungelesen
 }
-# review: new
 ui-conversation-found-in = Gefunden in { $folder }
-# review: new
 ui-conversation-hidden = { $count ->
     [one] 1 weitere Nachricht
    *[other] { $count } weitere Nachrichten
 }
-# review: new
 ui-conversation-open-message = Nachricht öffnen
-# review: new
 ui-conversation-fold-message = Nachricht einklappen
-# review: new
 ui-conversation-more = Mehr
-# review: new
 ui-conversation-edit = Bearbeiten
 ui-conversation-elsewhere = { $count ->
     [one] Diese Unterhaltung hat auch eine Nachricht in einem anderen Ordner.

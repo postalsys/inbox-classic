@@ -63,17 +63,13 @@ ui-find-in-message-hint = Tìm trong thư này
 ui-find-not-found = Không có “{ $words }” trong thư này
 cmd-expand-all-threads = Mở rộn&g tất cả cuộc hội thoại
 cmd-collapse-all-threads = T&hu gọn tất cả cuộc hội thoại
-# review: new
 cmd-next-in-conversation = Thư tiếp th&eo trong cuộc hội thoại
-# review: new
 cmd-previous-in-conversation = Thư trước trong cuộc hộ&i thoại
-# review: new
 cmd-open-all-messages = Mở tất cả thư tr&ong cuộc hội thoại
-# review: new
 cmd-fold-all-messages = Thu gọn &lại tất cả thư
 ui-group-by-conversation = &Nhóm thư theo cuộc hội thoại
 ui-show-whole-conversation = Hiện toàn bộ &cuộc hội thoại trong ngăn đọc
-ui-show-whole-conversation-note = Mở cùng lúc các thư trong cuộc hội thoại, gồm thư trả lời, thư nháp của bạn và thư trong các thư mục khác. Thư đã đọc thường được thu gọn thành một dòng; bấm vào dòng để mở hoặc thu gọn thư.
+ui-show-whole-conversation-note = Mở cùng lúc các thư trong cuộc hội thoại, gồm thư trả lời, thư nháp của bạn và thư trong các thư mục khác. Thư đã đọc thường được thu gọn thành một dòng. Dùng mũi tên ở mỗi thư để mở hoặc thu gọn thư đó.
 ui-conversation-order = Thứ tự &sắp xếp cuộc hội thoại:
 ui-conversation-oldest-first = Cũ nhất trước
 ui-conversation-newest-first = Mới nhất trước
@@ -84,23 +80,14 @@ ui-thread-count = { $new ->
 ui-conversation-to = đến { $people }
 ui-conversation-draft = Thư nháp
 ui-conversation-downloading = Đang tải xuống…
-# review: new
 ui-conversation-you = Tôi
-# review: new
 ui-conversation-messages = { $count } thư
-# review: new
 ui-conversation-unread = { $count } chưa đọc
-# review: new
 ui-conversation-found-in = Tìm thấy trong { $folder }
-# review: new
 ui-conversation-hidden = { $count } thư khác
-# review: new
 ui-conversation-open-message = Mở thư
-# review: new
 ui-conversation-fold-message = Thu gọn thư
-# review: new
 ui-conversation-more = Thêm
-# review: new
 ui-conversation-edit = Sửa
 ui-conversation-elsewhere = { $count ->
     [1] Cuộc hội thoại này còn có 1 thư trong thư mục khác.

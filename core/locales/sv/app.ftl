@@ -62,17 +62,13 @@ ui-find-in-message-hint = Sök i det här meddelandet
 ui-find-not-found = ”{ $words }” finns inte i det här meddelandet
 cmd-expand-all-threads = &Expandera alla konversationer
 cmd-collapse-all-threads = Komprimera &alla konversationer
-# review: new
 cmd-next-in-conversation = Nästa meddelande &i konversationen
-# review: new
 cmd-previous-in-conversation = Föregående meddelande i kon&versationen
-# review: new
 cmd-open-all-messages = Ö&ppna alla meddelanden
-# review: new
 cmd-fold-all-messages = Fäll i&hop alla meddelanden
 ui-group-by-conversation = Gr&uppera meddelanden efter konversation
 ui-show-whole-conversation = Visa hela konversationen i läs&fönstret
-ui-show-whole-conversation-note = Öppna en konversations meddelanden tillsammans, inklusive dina svar, utkast och meddelanden i andra mappar. Lästa meddelanden är oftast hopfällda till en rad: klicka på en rad för att öppna eller fälla ihop den.
+ui-show-whole-conversation-note = Öppna en konversations meddelanden tillsammans, inklusive dina svar, utkast och meddelanden i andra mappar. Lästa meddelanden är oftast hopfällda till en rad. Klicka på en rad för att öppna meddelandet; använd pilen för att öppna eller fälla ihop det.
 ui-conversation-order = &Ordning i konversationer:
 ui-conversation-oldest-first = Äldsta först
 ui-conversation-newest-first = Nyaste först
@@ -84,32 +80,23 @@ ui-thread-count = { $new ->
 ui-conversation-to = till { $people }
 ui-conversation-draft = Utkast
 ui-conversation-downloading = Hämtar…
-# review: new
 ui-conversation-you = Jag
-# review: new
 ui-conversation-messages = { $count ->
     [one] 1 meddelande
    *[other] { $count } meddelanden
 }
-# review: new
 ui-conversation-unread = { $count ->
     [one] 1 oläst
    *[other] { $count } olästa
 }
-# review: new
 ui-conversation-found-in = Hittades i { $folder }
-# review: new
 ui-conversation-hidden = { $count ->
     [one] 1 meddelande till
    *[other] { $count } meddelanden till
 }
-# review: new
 ui-conversation-open-message = Öppna meddelande
-# review: new
 ui-conversation-fold-message = Fäll ihop meddelande
-# review: new
 ui-conversation-more = Mer
-# review: new
 ui-conversation-edit = Redigera
 ui-conversation-elsewhere = { $count ->
     [one] Den här konversationen har också ett meddelande i en annan mapp.

@@ -12,7 +12,7 @@ menu-tools = Rī&ki
 menu-message = &Ziņojums
 menu-help = &Palīdzība
 menu-layout = &Izkārtojums
-menu-sort-by = &Kārtot pēc
+menu-sort-by = Kārtot pē&c
 menu-text-size = &Teksta lielums
 menu-folder = &Mape
 menu-insert = &Ievietot
@@ -63,17 +63,13 @@ ui-find-in-message-hint = Meklēt šajā ziņojumā
 ui-find-not-found = Šajā ziņojumā nav „{ $words }”
 cmd-expand-all-threads = Izvērst visas &sarunas
 cmd-collapse-all-threads = Sakļaut visas sar&unas
-# review: new
 cmd-next-in-conversation = Nākamais ziņo&jums sarunā
-# review: new
 cmd-previous-in-conversation = I&epriekšējais ziņojums sarunā
-# review: new
 cmd-open-all-messages = Atvērt &visus ziņojumus
-# review: new
-cmd-fold-all-messages = Sak&ļaut visus ziņojumus
+cmd-fold-all-messages = Sa&kļaut visus ziņojumus
 ui-group-by-conversation = &Grupēt ziņojumus pēc sarunām
 ui-show-whole-conversation = Lasīšanas rūtī rādīt &visu sarunu
-ui-show-whole-conversation-note = Atveriet sarunas ziņojumus kopā, arī jūsu atbildes, melnrakstus un ziņojumus citās mapēs. Lasītie ziņojumi parasti ir sakļauti vienā rindā; noklikšķiniet uz rindas, lai ziņojumu atvērtu vai sakļautu.
+ui-show-whole-conversation-note = Atveriet sarunas ziņojumus kopā, arī savas atbildes, melnrakstus un ziņojumus citās mapēs. Lasītie ziņojumi parasti ir sakļauti rindās. Lai atvērtu vai sakļautu ziņojumu, izmantojiet tā bultiņu.
 ui-conversation-order = Sarunas &secība:
 ui-conversation-oldest-first = Vispirms vecākie
 ui-conversation-newest-first = Vispirms jaunākie
@@ -86,35 +82,26 @@ ui-thread-count = { $new ->
 ui-conversation-to = kam: { $people }
 ui-conversation-draft = Melnraksts
 ui-conversation-downloading = Lejupielādē…
-# review: new
 ui-conversation-you = Es
-# review: new
 ui-conversation-messages = { $count ->
     [zero] { $count } ziņojumu
     [one] { $count } ziņojums
    *[other] { $count } ziņojumi
 }
-# review: new
 ui-conversation-unread = { $count ->
     [zero] { $count } nelasītu
     [one] { $count } nelasīts
    *[other] { $count } nelasīti
 }
-# review: new
 ui-conversation-found-in = Atrasts mapē „{ $folder }”
-# review: new
 ui-conversation-hidden = { $count ->
     [zero] Vēl { $count } ziņojumu
     [one] Vēl { $count } ziņojums
    *[other] Vēl { $count } ziņojumi
 }
-# review: new
 ui-conversation-open-message = Atvērt ziņojumu
-# review: new
 ui-conversation-fold-message = Sakļaut ziņojumu
-# review: new
 ui-conversation-more = Vairāk
-# review: new
 ui-conversation-edit = Rediģēt
 ui-conversation-elsewhere = { $count ->
     [1] Šai sarunai ir arī ziņojums citā mapē.

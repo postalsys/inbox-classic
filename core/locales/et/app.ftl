@@ -60,17 +60,13 @@ ui-find-in-message-hint = Otsi sellest kirjast
 ui-find-not-found = „{ $words }“ ei ole selles kirjas
 cmd-expand-all-threads = &Laienda kõik vestlused
 cmd-collapse-all-threads = &Ahenda kõik vestlused
-# review: new
 cmd-next-in-conversation = Järgmine kiri &vestluses
-# review: new
 cmd-previous-in-conversation = Eelmi&ne kiri vestluses
-# review: new
 cmd-open-all-messages = Ava kõik kirja&d
-# review: new
 cmd-fold-all-messages = Ahenda k&õik kirjad
 ui-group-by-conversation = &Rühmita kirjad vestluste kaupa
 ui-show-whole-conversation = Näita lugemispaanil kogu &vestlust
-ui-show-whole-conversation-note = Avage vestluse kirjad koos oma vastuste, mustandite ja teistes kaustades olevate kirjadega. Loetud kirjad on tavaliselt ahendatud üheks reaks; klõpsake rida, et kiri avada või ahendada.
+ui-show-whole-conversation-note = Avage vestluse kirjad koos, sealhulgas oma vastused, mustandid ja teistes kaustades olevad kirjad. Loetud kirjad on tavaliselt ahendatud üheks reaks. Kirja avamiseks või ahendamiseks kasutage selle juures olevat noolt.
 ui-conversation-order = Vestluse &järjestus:
 ui-conversation-oldest-first = Vanimad eespool
 ui-conversation-newest-first = Uusimad eespool
@@ -82,32 +78,23 @@ ui-thread-count = { $new ->
 ui-conversation-to = kellele: { $people }
 ui-conversation-draft = Mustand
 ui-conversation-downloading = Allalaadimine…
-# review: new
 ui-conversation-you = Mina
-# review: new
 ui-conversation-messages = { $count ->
     [one] 1 kiri
    *[other] { $count } kirja
 }
-# review: new
 ui-conversation-unread = { $count ->
     [one] 1 lugemata
    *[other] { $count } lugemata
 }
-# review: new
 ui-conversation-found-in = Leitud kaustast { $folder }
-# review: new
 ui-conversation-hidden = { $count ->
     [one] Veel 1 kiri
    *[other] Veel { $count } kirja
 }
-# review: new
 ui-conversation-open-message = Ava kiri
-# review: new
 ui-conversation-fold-message = Ahenda kiri
-# review: new
 ui-conversation-more = Rohkem
-# review: new
 ui-conversation-edit = Muuda
 ui-conversation-elsewhere = { $count ->
     [one] Sellel vestlusel on ka üks kiri teises kaustas.
