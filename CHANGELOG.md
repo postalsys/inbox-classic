@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.23.1](https://github.com/postalsys/inbox-classic/compare/v0.23.0...v0.23.1) (2026-11-28)
+
+
+### Bug Fixes
+
+* a very long message scrolls in its body ([ad0cc4a](https://github.com/postalsys/inbox-classic/commit/ad0cc4a6ac5f6ce8c1b1d3b7f93f347c8a39970b))
+* a very long message scrolls in its body instead of making it taller than memory allows ([1babdea](https://github.com/postalsys/inbox-classic/commit/1babdea53a653b5c232517c84b5e9c8a5b7adc56))
+
 ## [0.23.0](https://github.com/postalsys/inbox-classic/compare/v0.22.0...v0.23.0) (2026-11-28)
 
 
