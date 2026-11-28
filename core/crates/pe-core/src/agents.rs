@@ -586,8 +586,8 @@ pub fn access_text(host: &AgentHost) -> String {
     }
     let can = match can.as_slice() {
         [] => tr(Text::AgentCanNothing),
-        [one] => capitalized(one),
-        [first @ .., last] => capitalized(&tr_args(
+        [one] => crate::text::capitalized(one),
+        [first @ .., last] => crate::text::capitalized(&tr_args(
             Text::AgentCanList,
             &[
                 ("first", (&crate::text::word_list(first)).into()),
@@ -600,14 +600,6 @@ pub fn access_text(host: &AgentHost) -> String {
         Text::AgentAccess,
         &[("can", (&can).into()), ("accounts", (&accounts).into())],
     )
-}
-
-fn capitalized(text: &str) -> String {
-    let mut chars = text.chars();
-    chars
-        .next()
-        .map(|c| c.to_uppercase().chain(chars).collect())
-        .unwrap_or_default()
 }
 
 /// A JSON string

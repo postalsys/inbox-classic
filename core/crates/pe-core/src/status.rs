@@ -546,7 +546,8 @@ pub(crate) fn words(
         bar: tr_args(bar, &args),
         button: tr(button),
         notification_title: tr_args(Text::AccountNotifyTitleSignIn, &[account()]),
-        notification_text: tr_args(notification, &args),
+        // a notification may start with the provider's name, or "the mail server" in a language that writes it small
+        notification_text: crate::text::capitalized(&tr_args(notification, &args)),
         compose_note: tr(Text::AccountStateComposeSignIn),
         admin_link,
         help_topic: "password-not-accepted".into(),

@@ -3,6 +3,15 @@
 
 use pe_i18n::{Text, tr, tr_args};
 
+/// `text` with its first letter in capitals, for words that start a sentence whatever case the catalog gives them
+pub(crate) fn capitalized(text: &str) -> String {
+    let mut chars = text.chars();
+    chars
+        .next()
+        .map(|c| c.to_uppercase().chain(chars).collect())
+        .unwrap_or_default()
+}
+
 /// The limits of downloaded messages Settings offers, in megabytes
 pub const DOWNLOAD_LIMITS_MB: [u64; 6] = [250, 500, 1024, 2048, 5120, 10240];
 
@@ -434,6 +443,18 @@ mod download_limit_tests {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_sentence_starts_with_a_capital_whatever_the_catalog_writes() {
+        assert_eq!(
+            capitalized("le serveur de messagerie a refusé"),
+            "Le serveur de messagerie a refusé"
+        );
+        assert_eq!(capitalized("Der Mailserver"), "Der Mailserver");
+        assert_eq!(capitalized("éé"), "Éé");
+        assert_eq!(capitalized("邮件服务器"), "邮件服务器");
+        assert_eq!(capitalized(""), "");
+    }
 
     #[test]
     fn medium_is_the_usual_size() {

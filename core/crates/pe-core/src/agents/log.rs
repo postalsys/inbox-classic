@@ -134,7 +134,7 @@ pub fn read_summary_text(summary: &ReadSummary) -> String {
             ],
         ),
     };
-    super::capitalized(&line)
+    crate::text::capitalized(&line)
 }
 
 /// One read, in a line: "Read “Lunch”", "Searched for “invoice”: 4 messages"
