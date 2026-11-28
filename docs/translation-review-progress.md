@@ -3,8 +3,9 @@
 ## Resume here
 
 Authoritative checkout: `/Users/andris/Projects/PostalExpress`, local `master`.
-Review and static validation are complete. Commit the content, advance REVIEWED, confirm zero pending/unmarked
-changes, archive this round and commit the metadata. **Do not push.** No tests, builds, GUI runs or CI checks.
+**Round 11 is complete.** Reviewed content is committed in `cacbccffec3f43c0d02636785b56b148d071796d`.
+REVIEWED points to that commit. The final check reports zero pending and zero unaccounted translation changes.
+This round is archived in `translation-review-round11-state.json` and `translation-review-round11-progress.md`. **Do not push.** No tests, builds, GUI runs or CI checks.
 Starting commit: `117580f3bc744d123c35b4499df2d059b18dddc3`. Previous reviewed baseline: `82a928b66c7309c3068f9f7438d43e6ed85d4d8b`.
 Round 10 is complete and archived. Current repository guidance was explicitly authorized by the user.
 
@@ -44,4 +45,6 @@ The late source refresh still matches `117580f3bc744d123c35b4499df2d059b18dddc3`
 Static checks and contextual editing do not constitute native-speaker approval.
 
 Evidence is in the ignored `build/i18n-round11-20261128/` directory: exact language ledgers, `final-quality-audit.json`,
-`late-arrival-audit.json`, source hashes and the review inventory. Final baseline verification remains before closure.
+`late-arrival-audit.json`, source hashes and the review inventory. The final baseline check passed. No pending work remains in this round.
+
+All review changes are committed on local master. Nothing was pushed by this review session.

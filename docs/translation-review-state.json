@@ -1,6 +1,6 @@
 {
   "round": 11,
-  "status": "reviewed_awaiting_baseline_commit",
+  "status": "complete",
   "starting_commit": "117580f3bc744d123c35b4499df2d059b18dddc3",
   "starting_review_baseline": "82a928b66c7309c3068f9f7438d43e6ed85d4d8b",
   "previous_round": 10,
@@ -144,7 +144,8 @@
         "No change to app behavior, shared glossary/state, generated files or other locales.",
         "Source revision3 distinguishes independent SMTP attempts from incoming connection failure; only refused sign-in unconditionally holds sending.",
         "Arbitrary account names follow акаунт in Bulgarian quotes. Provider fallback Пощенският сървър remains a grammatical subject in both refusal and IMAP clauses. Count form акаунта after plural numerals."
-      ]
+      ],
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "ca",
@@ -290,7 +291,8 @@
         "native_speaker_gui_validation": false,
         "mnemonic_decision": "Sign In Again uses I; T collided with Send/Receive All in Tools. I is free in Tools and all account/Inbox variants.",
         "compose_connection_followup": "English revision3: connection problem does not itself block independent SMTP; message stays in Outbox if sending fails. Signed-out state blocks sending unconditionally."
-      }
+      },
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "cs",
@@ -421,7 +423,8 @@
         "No change to app behavior, shared glossary/state, generated files or other locales.",
         "Source revision3 distinguishes independent SMTP attempts from incoming connection failure; only refused sign-in unconditionally holds sending.",
         "Account names follow účet; arbitrary providers precede a colon, avoiding provider gender and case assumptions. Infinitive command labels and polite plural help."
-      ]
+      ],
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "da",
@@ -566,7 +569,8 @@
         },
         "native_speaker_gui_validation": false,
         "compose_connection_followup": "English revision3: connection problem does not itself block independent SMTP; message stays in Outbox if sending fails. Signed-out state blocks sending unconditionally."
-      }
+      },
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "de",
@@ -711,7 +715,8 @@
         },
         "native_speaker_gui_validation": false,
         "compose_connection_followup": "English revision3: connection problem does not itself block independent SMTP; message stays in Outbox if sending fails. Signed-out state blocks sending unconditionally."
-      }
+      },
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "el",
@@ -847,7 +852,8 @@
         "Conversation menu change removes only the obsolete Mac/Linux platform wrapper: four commands are now present in Windows as well. Other platform branches and literal shortcuts retained.",
         "No tests/builds/CI/Git/shared progress or glossary changes; parent owns aggregate static validation.",
         "Parent-owned Greek review after explicit handoff. Greek polite plural, noun action labels, guillemets, and unaccented Eta mnemonic (Sigma conflicts with Empty Folder). Arbitrary provider is a colon label with nominative mail-server fallback. Two counted status branches retain count. Connection compose note conditional on send failure. Full no-connection review also aligns the quoted reader error to its actual Greek catalog and restores the possibility of server rejection after reconnecting."
-      ]
+      ],
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "en",
@@ -966,7 +972,8 @@
         "Help password topic rewritten with existing dynamic controls plus new ui-no reference. Add IMAP remedy because Help for ImapOff points here.",
         "English account-state-mail-server is The mail server: every interpolation starts a full clause or sentence. Target fallback capitalization must suit its own sentence structures. No runtime usage outside status.rs words/signs_in.",
         "Compose CannotConnect must not promise sending is blocked: worker.rs1631-1644 blocks send_outbox only for signed_out(), then independently tries SMTP. An IMAP connection failure can coexist with successful SMTP sending. Say IF sending fails, the message stays in Outbox. Signed-out compose note remains unconditional because that state really blocks sending."
-      ]
+      ],
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "es",
@@ -1116,7 +1123,8 @@
           "reason": "New command key distinct in actual Tools and account/Inbox context scopes; neighboring labels unchanged."
         },
         "compose_connection_followup": "English revision3: connection problem does not itself block independent SMTP; message stays in Outbox if sending fails. Signed-out state blocks sending unconditionally."
-      }
+      },
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "et",
@@ -1254,7 +1262,8 @@
         "Polite plural; inflected konto/domeen/aadress heads keep names unchanged. Counted statuses use the correct >=2 forms. Sign In Again uses free G across Tools/account/Inbox menus. Provider fallback capitalized for clause/sentence starts in frozen English revision 2.",
         "English revision3: IMAP connectivity failure does not prevent SMTP attempts. Only failed sending keeps a message in Outbox; signed-out accounts still wait unconditionally (worker.rs1631-1644).",
         "Peer wording followup: idiomatic rejection wording (ei lubanud sisse logida / menolak permintaan masuk) replaces literal acceptance-of-sign-in phrasing. Password refusals stay distinct."
-      ]
+      ],
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "fi",
@@ -1391,7 +1400,8 @@
         "No tests/builds/CI/Git/shared progress or glossary changes; parent owns aggregate static validation.",
         "Informal singular; head nouns tili, verkkotunnus and osoite carry case without changing arbitrary names. The >=2 statuses use tilille/tiliä and retain all counts. New command uses U across the actual combined scopes.",
         "English revision3: IMAP connectivity failure does not prevent SMTP attempts. Only failed sending keeps a message in Outbox; signed-out accounts still wait unconditionally (worker.rs1631-1644)."
-      ]
+      ],
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "fr",
@@ -1536,7 +1546,8 @@
         },
         "native_speaker_gui_validation": false,
         "compose_connection_followup": "English revision3: connection problem does not itself block independent SMTP; message stays in Outbox if sending fails. Signed-out state blocks sending unconditionally."
-      }
+      },
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "hr",
@@ -1667,7 +1678,8 @@
         "No change to app behavior, shared glossary/state, generated files or other locales.",
         "Source revision3 distinguishes independent SMTP attempts from incoming connection failure; only refused sign-in unconditionally holds sending.",
         "Croatian Ijekavian, račun/mapa/poslužitelj/preglednik and formal plural instructions retained. All one/few/other branches retain count including21."
-      ]
+      ],
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "hu",
@@ -1798,7 +1810,8 @@
         "No change to app behavior, shared glossary/state, generated files or other locales.",
         "Source revision3 distinguishes independent SMTP attempts from incoming connection failure; only refused sign-in unconditionally holds sending.",
         "Colon-led account/domain/address labels avoid suffixes and a(z) on arbitrary placeholders. Singular noun/predicate after every number. Dynamic articles checked: a Küldés/fogadás/Jelszó/Hivatkozás/Nem, az Igen/Újra/Újrapróbálkozás. Two stale network-error quotations aligned to current catalogs."
-      ]
+      ],
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "id",
@@ -1935,7 +1948,8 @@
         "No tests/builds/CI/Git/shared progress or glossary changes; parent owns aggregate static validation.",
         "Formal Anda; Title Case commands and buttons. Keep masuk distinct from terhubung, kotak surat distinct from Kotak Masuk, and conditional kata sandi aplikasi. Counts remain plain counted phrases. U is free for Masuk Lagi. Existing accurate local Outbox retry paragraph retained; compose connection warning is conditional.",
         "Peer wording followup: idiomatic rejection wording (ei lubanud sisse logida / menolak permintaan masuk) replaces literal acceptance-of-sign-in phrasing. Password refusals stay distinct."
-      ]
+      ],
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "it",
@@ -2080,7 +2094,8 @@
         },
         "native_speaker_gui_validation": false,
         "compose_connection_followup": "English revision3: connection problem does not itself block independent SMTP; message stays in Outbox if sending fails. Signed-out state blocks sending unconditionally."
-      }
+      },
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "ja",
@@ -2216,7 +2231,8 @@
         "Conversation menu change removes only the obsolete Mac/Linux platform wrapper: four commands are now present in Windows as well. Other platform branches and literal shortcuts retained.",
         "No tests/builds/CI/Git/shared progress or glossary changes; parent owns aggregate static validation.",
         "Retain サインイン versus 接続, メール サーバー spacing, account counter 個 and full-width punctuation. Bracketed I mnemonic matches English and is free in all four menu variants. New notifications and compose warnings do not promise delivery; existing accurate no-connection Outbox paragraph retained."
-      ]
+      ],
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "ko",
@@ -2352,7 +2368,8 @@
         "Conversation menu change removes only the obsolete Mac/Linux platform wrapper: four commands are now present in Windows as well. Other platform branches and literal shortcuts retained.",
         "No tests/builds/CI/Git/shared progress or glossary changes; parent owns aggregate static validation.",
         "Retain 합니다체, 로그인 versus 연결, 사서함 for mailbox and 보낼 편지함. Account/address/domain head nouns avoid arbitrary-name particle selection; provider 에서/에 따르면 also fits 메일 서버. Korean spaces and ASCII punctuation preserved. Plain counted accounts; bracketed I mnemonic. Compose connection outcome conditional."
-      ]
+      ],
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "lt",
@@ -2489,7 +2506,8 @@
         "No tests/builds/CI/Git/shared progress or glossary changes; parent owns aggregate static validation.",
         "Polite plural, feminine programa for Inbox Classic. Names follow paskyra/domenas/adresas heads; provider stays nominative, including Pašto serveris fallback. Counted one retains the count at21; few/other forms reflect case. New command uses J, free across combined scopes.",
         "English revision3: IMAP connectivity failure does not prevent SMTP attempts. Only failed sending keeps a message in Outbox; signed-out accounts still wait unconditionally (worker.rs1631-1644)."
-      ]
+      ],
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "lv",
@@ -2625,7 +2643,8 @@
         "Conversation menu change removes only the obsolete Mac/Linux platform wrapper: four commands are now present in Windows as well. Other platform branches and literal shortcuts retained.",
         "No tests/builds/CI/Git/shared progress or glossary changes; parent owns aggregate static validation.",
         "Polite plural; impersonal sign-in wording avoids user-gender assumptions. Quoted account names and domain/address heads stay unchanged. Counted one includes21 and zero includes11/30; locative forms differ from nominative connection counts. ASCII S is free in the new command. Compose connection warning is conditional on failed sending, per English revision3."
-      ]
+      ],
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "nb",
@@ -2770,7 +2789,8 @@
         },
         "native_speaker_gui_validation": false,
         "compose_connection_followup": "English revision3: connection problem does not itself block independent SMTP; message stays in Outbox if sending fails. Signed-out state blocks sending unconditionally."
-      }
+      },
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "nl",
@@ -2915,7 +2935,8 @@
         },
         "native_speaker_gui_validation": false,
         "compose_connection_followup": "English revision3: connection problem does not itself block independent SMTP; message stays in Outbox if sending fails. Signed-out state blocks sending unconditionally."
-      }
+      },
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "pl",
@@ -3046,7 +3067,8 @@
         "No change to app behavior, shared glossary/state, generated files or other locales.",
         "Source revision3 distinguishes independent SMTP attempts from incoming connection failure; only refused sign-in unconditionally holds sending.",
         "Informal imperative instructions with capitalized Twoje/Twój, no gendered user past forms. Provider labels avoid grammatical gender assumptions; one/few/many/other numeric branches."
-      ]
+      ],
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "pt",
@@ -3196,7 +3218,8 @@
           "reason": "New command key distinct in actual Tools and account/Inbox context scopes; neighboring labels unchanged."
         },
         "compose_connection_followup": "English revision3: connection problem does not itself block independent SMTP; message stays in Outbox if sending fails. Signed-out state blocks sending unconditionally."
-      }
+      },
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "pt-BR",
@@ -3341,7 +3364,8 @@
         },
         "native_speaker_gui_validation": false,
         "compose_connection_followup": "English revision3: connection problem does not itself block independent SMTP; message stays in Outbox if sending fails. Signed-out state blocks sending unconditionally."
-      }
+      },
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "ro",
@@ -3472,7 +3496,8 @@
         "No change to app behavior, shared glossary/state, generated files or other locales.",
         "Source revision3 distinguishes independent SMTP attempts from incoming connection failure; only refused sign-in unconditionally holds sending.",
         "Autentificare distinguishes credential/sign-in refusal from conexiune/conectare network state. Existing named aplicație de conectare retained for OAuth application context. Other plural uses de, few does not."
-      ]
+      ],
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "ru",
@@ -3606,7 +3631,8 @@
         "Source revision3 distinguishes independent SMTP attempts from incoming connection failure; only refused sign-in unconditionally holds sending.",
         "Lowercase вы, е without ё, guillemets, arbitrary titles after учетная запись. Numeric one remains valid for21; provider colon avoids gender/case changes.",
         "Parent authorized an additional reviewed ID reader-failed-network after the full help review uncovered its missing interrupted-connection meaning. Reopened exact value and corrected its help quotation."
-      ]
+      ],
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "sk",
@@ -3737,7 +3763,8 @@
         "No change to app behavior, shared glossary/state, generated files or other locales.",
         "Source revision3 distinguishes independent SMTP attempts from incoming connection failure; only refused sign-in unconditionally holds sending.",
         "Konto/priečinok retained, formal plural prose, mnemonic without diacritics. Updated stale reader network-error quotation to current localized value."
-      ]
+      ],
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "sl",
@@ -3868,7 +3895,8 @@
         "No change to app behavior, shared glossary/state, generated files or other locales.",
         "Source revision3 distinguishes independent SMTP attempts from incoming connection failure; only refused sign-in unconditionally holds sending.",
         "Polite plural prose and imperative singular controls. one/two/few/other preserve counts including101/102. Existing additional advice to inspect failed Outbox message retained."
-      ]
+      ],
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "sr-Latn",
@@ -3999,7 +4027,8 @@
         "No change to app behavior, shared glossary/state, generated files or other locales.",
         "Source revision3 distinguishes independent SMTP attempts from incoming connection failure; only refused sign-in unconditionally holds sending.",
         "Serbian Latin Ekavian, nalog/fascikla/server/pregledač and pružalac usluge. All one/few/other counts remain numeric including21."
-      ]
+      ],
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "sv",
@@ -4145,7 +4174,8 @@
         "native_speaker_gui_validation": false,
         "compose_connection_followup": "English revision3: connection problem does not itself block independent SMTP; message stays in Outbox if sending fails. Signed-out state blocks sending unconditionally.",
         "raw_error_followup": "Restored literal English connection error and timeout quotes from pe-net/stream.rs35 and pe-imap/client/error.rs67; only localized failure-network/reader-failed-network examples translated."
-      }
+      },
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "tr",
@@ -4281,7 +4311,8 @@
         "Conversation menu change removes only the obsolete Mac/Linux platform wrapper: four commands are now present in Windows as well. Other platform branches and literal shortcuts retained.",
         "No tests/builds/CI/Git/shared progress or glossary changes; parent owns aggregate static validation.",
         "Turkish keeps arbitrary account, domain and address names uninflected with hesabı/etki alanı/adresi head nouns, including the expected-address contrast. Provider names remain bare subjects, and Posta sunucusu fits the fallback. Counted labels retain the numeric value with singular hesap after every number. The O access key in Yeniden &Oturum Aç... is available in all four actual command scopes and avoids dotted/dotless I. Browser sign-in rejection uses natural oturum açma isteğini reddetti wording. Compose connection trouble is conditional on sending actually failing; signed-out compose waits unconditionally. Full help preserves good existing terminology, narrows app-password conditions, explains admin approval and disabled IMAP, and does not promise successful retry or lockout prevention."
-      ]
+      ],
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "uk",
@@ -4412,7 +4443,8 @@
         "No change to app behavior, shared glossary/state, generated files or other locales.",
         "Source revision3 distinguishes independent SMTP attempts from incoming connection failure; only refused sign-in unconditionally holds sending.",
         "Curly apostrophes, lowercase ви, guillemets and head nouns before arbitrary names/dynamic controls. one/few/many/other retain counts including21. Two stale network-error quotations aligned to current catalogs."
-      ]
+      ],
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "vi",
@@ -4548,7 +4580,8 @@
         "Conversation menu change removes only the obsolete Mac/Linux platform wrapper: four commands are now present in Windows as well. Other platform branches and literal shortcuts retained.",
         "No tests/builds/CI/Git/shared progress or glossary changes; parent owns aggregate static validation.",
         "Sentence case and bạn; đăng nhập remains distinct from kết nối, hộp thư from Hộp thư đến. Preserve thiết đặt for mailbox settings and plain counted tài khoản. ASCII N in Đăng nhập lại is free across combined scopes. Existing accurate Outbox retry paragraph retained; compose waiting is conditional on sending failure."
-      ]
+      ],
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "zh-Hans",
@@ -4684,7 +4717,8 @@
         "Conversation menu change removes only the obsolete Mac/Linux platform wrapper: four commands are now present in Windows as well. Other platform branches and literal shortcuts retained.",
         "No tests/builds/CI/Git/shared progress or glossary changes; parent owns aggregate static validation.",
         "Retain Microsoft 帐户, 登录 versus 连接, 邮箱 for mailbox versus 收件箱 for Inbox, and full-width punctuation. Plain counted accounts use 个 and no plural selector. Bracketed I is free. Protected source meaning and conditional SMTP failure retained; no placeholder spacing or inflection added."
-      ]
+      ],
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     },
     {
       "language": "zh-Hant",
@@ -4820,7 +4854,8 @@
         "Conversation menu change removes only the obsolete Mac/Linux platform wrapper: four commands are now present in Windows as well. Other platform branches and literal shortcuts retained.",
         "No tests/builds/CI/Git/shared progress or glossary changes; parent owns aggregate static validation.",
         "Taiwan terminology preserved: 登入/連線, 信箱/收件匣, 寄件匣, 郵件伺服器, 服務提供者 and 權限範圍. Rejection phrasing natural and separate from password acceptance. Plain counted accounts with 個; bracketed I mnemonic. Existing accurate no-connection retry paragraph retained."
-      ]
+      ],
+      "parent_validation": "Passed final aggregate static checks and zero-pending baseline check; no tests/builds/CI run."
     }
   ],
   "initial_files_sha256": {
@@ -7029,11 +7064,13 @@
   },
   "validation_policy": "No tests, builds, CI queries or manually triggered workflows. Translation static checks and caller inspection only.",
   "evidence_checkpoint": "/Users/andris/Projects/PostalExpress/build/i18n-round11-20261128",
-  "next_batch": "Commit reviewed content, advance REVIEWED, finish zero-pending baseline verification and archive round11. Do not push.",
+  "next_batch": "None. Start a new review round for later source or translation changes. Keep these commits local unless the user authorizes a push.",
   "publication": {
     "authorized": false,
     "instruction": "Commit to master; do not push",
-    "pushed": false
+    "pushed": false,
+    "target": "local master",
+    "reviewed_content_commit": "cacbccffec3f43c0d02636785b56b148d071796d"
   },
   "parallel_review": true,
   "created_at": "2026-11-28T04:31:00.072664+00:00",
@@ -8803,5 +8840,18 @@
     "all_accounted_for": true,
     "unknown": [],
     "log_sha256": "b1b9919ce09f3af12289c96b094e726eb2a239dc6729923e836f8451ee78c0a0"
+  },
+  "reviewed_content_commit": "cacbccffec3f43c0d02636785b56b148d071796d",
+  "reviewed_baseline": "cacbccffec3f43c0d02636785b56b148d071796d",
+  "completed_at": "2026-11-28T04:56:54.652068+00:00",
+  "final_baseline_check": {
+    "command": "node scripts/i18n-review.mjs --check",
+    "exit_code": 0,
+    "summary": "0 messages and 0 help passages wait for a review; 0 new or changed without a mark",
+    "log_sha256": "b1c34ba0bdb98083b3495bd5142c475b9a57f7e00a57bfe38fadbde7c1539398"
+  },
+  "archive": {
+    "state": "docs/translation-review-round11-state.json",
+    "progress": "docs/translation-review-round11-progress.md"
   }
 }
