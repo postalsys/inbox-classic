@@ -5,7 +5,7 @@
 
 Name:           inbox-classic
 # x-release-please-start-version
-Version:        0.22.0
+Version:        0.23.0
 # x-release-please-end
 Release:        1%{?dist}
 Summary:        A fast, simple mail program
