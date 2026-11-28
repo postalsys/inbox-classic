@@ -1102,12 +1102,24 @@ fn signs_in_with_oauth() {
     .unwrap();
     // a message sent goes at once, as in the other tests
     core.set_send_delay(0).unwrap();
+    // set once the account names another address than its token's, after which its syncs may be refused
+    let refusals_expected = std::cell::Cell::new(false);
     let wait = |accept: &dyn Fn(&Event) -> bool| loop {
         let event = events.recv_timeout(patience()).expect("an event");
         if accept(&event) {
             return event;
         }
-        assert!(!matches!(event, Event::Failed { .. }), "{event:?}");
+        let refused = matches!(
+            event,
+            Event::Failed {
+                kind: pe_core::FailureKind::Authentication,
+                ..
+            }
+        );
+        assert!(
+            !matches!(event, Event::Failed { .. }) || (refused && refusals_expected.get()),
+            "{event:?}"
+        );
     };
 
     assert_eq!(
@@ -1160,6 +1172,7 @@ fn signs_in_with_oauth() {
     let mut other = server.account_settings();
     other.email = "someone.else@example.com".into();
     core.update_account(account, &other).unwrap();
+    refusals_expected.set(true);
     let (again, _) = sign_in(SIGNED_IN, "the-code");
     assert_eq!(
         core.reauthorize(account, again).unwrap(),
