@@ -1163,3 +1163,85 @@ reaction-notification-text = { $count ->
     [few] la { $subject } (în total { $count } reacții noi)
    *[other] la { $subject } (în total { $count } de reacții noi)
 }
+
+reader-failed-signed-out = Serverul de e-mail nu a acceptat autentificarea acestui cont. Bara de deasupra listei de mesaje explică ce trebuie să faceți.
+
+account-state-tooltip-refused = Cont neautentificat: autentificarea nu a fost acceptată
+
+account-state-tooltip-admin = Cont neautentificat: un administrator trebuie să aprobe mai întâi Inbox Classic
+
+account-state-tooltip-imap-off = Cont neautentificat: IMAP este dezactivat pentru această căsuță poștală
+
+account-state-tooltip-other-address = Cont neautentificat: autentificarea din browser s-a făcut cu altă adresă
+
+account-state-tooltip-cannot-connect = Nu se poate stabili conexiunea cu serverul de e-mail
+
+account-state-mail-server = Serverul de e-mail
+
+account-state-bar-refused-browser = Contul „{ $account }” nu este autentificat: { $provider } nu a acceptat autentificarea. Poșta din acest cont poate să nu fie actualizată.
+
+account-state-bar-refused-password = Contul „{ $account }” nu este autentificat: serverul de e-mail nu a acceptat parola. Poșta din acest cont poate să nu fie actualizată.
+
+account-state-bar-admin = Contul „{ $account }” nu este autentificat: un administrator al domeniului { $domain } trebuie să aprobe Inbox Classic înainte de autentificare. Poșta din acest cont poate să nu fie actualizată.
+
+account-state-bar-imap-off = Contul „{ $account }” nu este autentificat: { $provider } indică faptul că IMAP este dezactivat pentru această căsuță poștală. Activați-l în setările căsuței, apoi trimiteți și primiți din nou poșta.
+
+account-state-bar-other-address = Contul „{ $account }” nu este autentificat: autentificarea din browser s-a făcut cu { $email }, nu cu { $expected }. Încercați din nou și alegeți { $expected }.
+
+account-state-bar-cannot-connect = Contul „{ $account }” nu se poate conecta la serverul său de e-mail. Poșta din acest cont poate să nu fie actualizată.
+
+account-state-button-sign-in = Autentificare din nou
+
+account-state-button-password = Introducere parolă
+
+account-state-button-admin-link = Copiere link pentru administrator
+
+account-state-button-help = Ajutor
+
+account-state-button-try-again = Reîncercare
+
+account-state-admin-link-copied = Linkul a fost copiat. Trimiteți-l administratorului organizației dvs.
+
+account-state-app-password-hint = Dacă furnizorul cere o parolă de aplicație pentru programele de e-mail, introduceți-o aici în locul parolei obișnuite.
+
+account-status-sign-in = Contul „{ $account }” necesită autentificare
+
+account-status-cannot-connect = Contul „{ $account }” nu se poate conecta
+
+account-status-failed = { $account }: { $reason }
+
+account-status-sign-in-many = { $count ->
+    [one] { $count } cont necesită autentificare
+    [few] { $count } conturi necesită autentificare
+   *[other] { $count } de conturi necesită autentificare
+}
+
+account-status-cannot-connect-many = { $count ->
+    [one] { $count } cont nu se poate conecta
+    [few] { $count } conturi nu se pot conecta
+   *[other] { $count } de conturi nu se pot conecta
+}
+
+account-notify-title-sign-in = Contul „{ $account }” nu este autentificat
+
+account-notify-text-refused-browser = { $provider } nu a acceptat autentificarea. Autentificați-vă din nou pentru a primi mesaje noi.
+
+account-notify-text-refused-password = Serverul de e-mail nu a acceptat parola. Introduceți-o din nou pentru a primi mesaje noi.
+
+account-notify-text-admin = Un administrator al domeniului { $domain } trebuie să aprobe mai întâi Inbox Classic.
+
+account-notify-text-imap-off = { $provider } indică faptul că IMAP este dezactivat pentru această căsuță poștală.
+
+account-notify-text-other-address = Autentificarea din browser s-a făcut cu { $email }. Încercați din nou și alegeți { $expected }.
+
+account-notify-title-cannot-connect = Contul „{ $account }” nu se poate conecta
+
+account-notify-text-cannot-connect = Inbox Classic nu se poate conecta la serverul de e-mail. Va continua să încerce.
+
+account-state-compose-sign-in = Acest cont nu este autentificat; mesajul va aștepta în Mesaje de trimis.
+
+account-state-compose-cannot-connect = Acest cont are o problemă de conexiune. Dacă trimiterea nu reușește, mesajul va rămâne în Mesaje de trimis.
+
+account-state-outbox-sign-in = În așteptare: contul „{ $account }” nu este autentificat
+
+account-state-outbox-cannot-connect = În așteptare: contul „{ $account }” nu se poate conecta

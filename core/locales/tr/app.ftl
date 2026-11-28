@@ -870,3 +870,5 @@ ui-reactions-label = Tepkiler:
 ui-reaction-open-email = Tepki E-postasını Aç
 ui-reaction-show-as-email = E-posta Olarak Göster
 ui-reaction-when = Tepki: { $when }
+
+cmd-sign-in-again = Yeniden &Oturum Aç...

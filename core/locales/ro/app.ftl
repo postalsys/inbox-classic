@@ -886,3 +886,5 @@ ui-reactions-label = Reacții:
 ui-reaction-open-email = Deschidere e-mail cu reacția
 ui-reaction-show-as-email = Afișare ca e-mail
 ui-reaction-when = Reacție: { $when }
+
+cmd-sign-in-again = A&utentificare din nou...

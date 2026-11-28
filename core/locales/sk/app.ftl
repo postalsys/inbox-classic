@@ -885,3 +885,5 @@ ui-reactions-label = Reakcie:
 ui-reaction-open-email = Otvoriť e-mail s reakciou
 ui-reaction-show-as-email = Zobraziť ako e-mail
 ui-reaction-when = Reakcia: { $when }
+
+cmd-sign-in-again = &Znova sa prihlásiť...

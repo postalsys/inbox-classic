@@ -1034,3 +1034,77 @@ reaction-notification-text = { $count ->
     [one] kirjale { $subject }
    *[other] kirjale { $subject } (kokku { $count } uut reaktsiooni)
 }
+
+reader-failed-signed-out = Meiliserver ei lubanud selle kontoga sisse logida. Kirjaloendi kohal olev riba selgitab, mida teha.
+
+account-state-tooltip-refused = Sisse logimata: sisselogimine lükati tagasi
+
+account-state-tooltip-admin = Sisse logimata: administraator peab esmalt Inbox Classicu heaks kiitma
+
+account-state-tooltip-imap-off = Sisse logimata: selle postkasti IMAP-juurdepääs on välja lülitatud
+
+account-state-tooltip-other-address = Sisse logimata: brauseris logiti sisse teise aadressiga
+
+account-state-tooltip-cannot-connect = Meiliserveriga ei saa ühendust
+
+account-state-mail-server = Meiliserver
+
+account-state-bar-refused-browser = Kontole { $account } pole sisse logitud: { $provider } ei lubanud sisse logida. Kontol kuvatavad kirjad ei pruugi olla ajakohased.
+
+account-state-bar-refused-password = Kontole { $account } pole sisse logitud: meiliserver ei võtnud parooli vastu. Kontol kuvatavad kirjad ei pruugi olla ajakohased.
+
+account-state-bar-admin = Kontole { $account } pole sisse logitud: domeeni { $domain } administraator peab enne sisselogimist Inbox Classicu heaks kiitma. Kontol kuvatavad kirjad ei pruugi olla ajakohased.
+
+account-state-bar-imap-off = Kontole { $account } pole sisse logitud: { $provider } teatab, et selle postkasti IMAP-juurdepääs on välja lülitatud. Lülitage see postkasti seadetes sisse ning proovige uuesti kirju saata ja vastu võtta.
+
+account-state-bar-other-address = Kontole { $account } pole sisse logitud: brauseris logiti sisse aadressiga { $email }, mitte aadressiga { $expected }. Proovige uuesti ja valige { $expected }.
+
+account-state-bar-cannot-connect = Konto { $account } ei saa oma meiliserveriga ühendust. Kontol kuvatavad kirjad ei pruugi olla ajakohased.
+
+account-state-button-sign-in = Logi uuesti sisse
+
+account-state-button-password = Sisesta parool
+
+account-state-button-admin-link = Kopeeri administraatorile saadetav link
+
+account-state-button-help = Abi
+
+account-state-button-try-again = Proovi uuesti
+
+account-state-admin-link-copied = Link on kopeeritud. Saatke see oma organisatsiooni administraatorile.
+
+account-state-app-password-hint = Kui teie teenusepakkuja nõuab meiliprogrammides rakenduse parooli, sisestage siia see oma tavapärase parooli asemel.
+
+account-status-sign-in = Kontole { $account } tuleb sisse logida
+
+account-status-cannot-connect = Konto { $account } ei saa ühendust
+
+account-status-failed = { $account }: { $reason }
+
+account-status-sign-in-many = { $count } kontole tuleb sisse logida
+
+account-status-cannot-connect-many = { $count } kontot ei saa ühendust
+
+account-notify-title-sign-in = Kontole { $account } pole sisse logitud
+
+account-notify-text-refused-browser = { $provider } ei lubanud sisse logida. Uute kirjade vastuvõtmiseks logige uuesti sisse.
+
+account-notify-text-refused-password = Meiliserver ei võtnud parooli vastu. Uute kirjade vastuvõtmiseks sisestage see uuesti.
+
+account-notify-text-admin = Domeeni { $domain } administraator peab esmalt Inbox Classicu heaks kiitma.
+
+account-notify-text-imap-off = { $provider } teatab, et selle postkasti IMAP-juurdepääs on välja lülitatud.
+
+account-notify-text-other-address = Brauseris logiti sisse aadressiga { $email }. Proovige uuesti ja valige { $expected }.
+
+account-notify-title-cannot-connect = Konto { $account } ei saa ühendust
+
+account-notify-text-cannot-connect = Meiliserveriga ei saa ühendust. Inbox Classic jätkab proovimist.
+
+account-state-compose-sign-in = Sellele kontole pole sisse logitud. Kiri jääb väljundkausta ootele.
+
+account-state-compose-cannot-connect = Sellel kontol on ühendusprobleem. Kui saatmine ebaõnnestub, jääb kiri väljundkausta.
+
+account-state-outbox-sign-in = Ootel: kontole { $account } pole sisse logitud
+
+account-state-outbox-cannot-connect = Ootel: konto { $account } ei saa ühendust

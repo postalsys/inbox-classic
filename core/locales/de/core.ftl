@@ -1046,3 +1046,83 @@ reaction-notification-text = { $count ->
     [one] auf { $subject }
    *[other] auf { $subject } (insgesamt { $count } neue Reaktionen)
 }
+
+reader-failed-signed-out = Der Mailserver hat die Anmeldung dieses Kontos abgelehnt. Die Leiste über der Nachrichtenliste erklärt, was Sie tun können.
+
+account-state-tooltip-refused = Nicht angemeldet: Die Anmeldung wurde abgelehnt
+
+account-state-tooltip-admin = Nicht angemeldet: Ein Administrator muss Inbox Classic zuerst freigeben
+
+account-state-tooltip-imap-off = Nicht angemeldet: IMAP ist für dieses Postfach ausgeschaltet
+
+account-state-tooltip-other-address = Nicht angemeldet: Im Browser wurde eine andere Adresse angemeldet
+
+account-state-tooltip-cannot-connect = Keine Verbindung zum Mailserver möglich
+
+account-state-mail-server = Der Mailserver
+
+account-state-bar-refused-browser = Das Konto { $account } ist nicht angemeldet: { $provider } hat die Anmeldung abgelehnt. Die Nachrichten sind möglicherweise nicht aktuell.
+
+account-state-bar-refused-password = Das Konto { $account } ist nicht angemeldet: Der Mailserver hat das Passwort abgelehnt. Die Nachrichten sind möglicherweise nicht aktuell.
+
+account-state-bar-admin = Das Konto { $account } ist nicht angemeldet: Ein Administrator für die Domain { $domain } muss Inbox Classic vor der Anmeldung freigeben. Die Nachrichten sind möglicherweise nicht aktuell.
+
+account-state-bar-imap-off = Das Konto { $account } ist nicht angemeldet: { $provider } meldet, dass IMAP für dieses Postfach ausgeschaltet ist. Schalten Sie es in den Postfacheinstellungen ein und senden und empfangen Sie erneut.
+
+account-state-bar-other-address = Das Konto { $account } ist nicht angemeldet: Im Browser wurde { $email } statt { $expected } angemeldet. Versuchen Sie es erneut und wählen Sie { $expected }.
+
+account-state-bar-cannot-connect = Das Konto { $account } kann keine Verbindung zu seinem Mailserver herstellen. Die Nachrichten sind möglicherweise nicht aktuell.
+
+account-state-button-sign-in = Erneut anmelden
+
+account-state-button-password = Passwort eingeben
+
+account-state-button-admin-link = Link für Administrator kopieren
+
+account-state-button-help = Hilfe
+
+account-state-button-try-again = Erneut versuchen
+
+account-state-admin-link-copied = Der Link wurde kopiert. Senden Sie ihn an den Administrator Ihrer Organisation.
+
+account-state-app-password-hint = Falls Ihr Anbieter für E-Mail-Programme ein App-Passwort verlangt, geben Sie es hier anstelle Ihres üblichen Passworts ein.
+
+account-status-sign-in = Sie müssen sich beim Konto { $account } anmelden
+
+account-status-cannot-connect = Das Konto { $account } kann keine Verbindung herstellen
+
+account-status-failed = { $account }: { $reason }
+
+account-status-sign-in-many = { $count ->
+    [one] Sie müssen sich bei { $count } Konto anmelden
+   *[other] Sie müssen sich bei { $count } Konten anmelden
+}
+
+account-status-cannot-connect-many = { $count ->
+    [one] { $count } Konto kann keine Verbindung herstellen
+   *[other] { $count } Konten können keine Verbindung herstellen
+}
+
+account-notify-title-sign-in = Das Konto { $account } ist nicht angemeldet
+
+account-notify-text-refused-browser = { $provider } hat die Anmeldung abgelehnt. Melden Sie sich erneut an, um neue Nachrichten zu empfangen.
+
+account-notify-text-refused-password = Der Mailserver hat das Passwort abgelehnt. Geben Sie es erneut ein, um neue Nachrichten zu empfangen.
+
+account-notify-text-admin = Ein Administrator für die Domain { $domain } muss Inbox Classic zuerst freigeben.
+
+account-notify-text-imap-off = { $provider } meldet, dass IMAP für dieses Postfach ausgeschaltet ist.
+
+account-notify-text-other-address = Im Browser wurde { $email } angemeldet. Versuchen Sie es erneut und wählen Sie { $expected }.
+
+account-notify-title-cannot-connect = Das Konto { $account } kann keine Verbindung herstellen
+
+account-notify-text-cannot-connect = Keine Verbindung zum Mailserver möglich. Inbox Classic versucht es weiter.
+
+account-state-compose-sign-in = Dieses Konto ist nicht angemeldet; die Nachricht wartet im Postausgang.
+
+account-state-compose-cannot-connect = Dieses Konto hat ein Verbindungsproblem. Schlägt das Senden fehl, bleibt die Nachricht im Postausgang.
+
+account-state-outbox-sign-in = Wartet: Das Konto { $account } ist nicht angemeldet
+
+account-state-outbox-cannot-connect = Wartet: Das Konto { $account } kann keine Verbindung herstellen

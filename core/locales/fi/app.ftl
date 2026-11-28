@@ -872,3 +872,5 @@ ui-reactions-label = Reaktiot:
 ui-reaction-open-email = Avaa reaktioviesti
 ui-reaction-show-as-email = Näytä sähköpostina
 ui-reaction-when = Reaktio: { $when }
+
+cmd-sign-in-again = Kirjaudu &uudelleen...

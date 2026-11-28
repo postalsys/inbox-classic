@@ -846,3 +846,5 @@ ui-reactions-label = 반응:
 ui-reaction-open-email = 반응 메일 열기
 ui-reaction-show-as-email = 메일로 표시
 ui-reaction-when = 반응한 시간: { $when }
+
+cmd-sign-in-again = 다시 로그인(&I)...

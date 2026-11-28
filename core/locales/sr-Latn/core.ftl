@@ -1177,3 +1177,85 @@ reaction-notification-text = { $count ->
     [1] na poruku { $subject }
    *[other] na poruku { $subject } (ukupno novih reakcija: { $count })
 }
+
+reader-failed-signed-out = Server e-pošte nije prihvatio prijavu ovog naloga. Traka iznad liste poruka objašnjava šta da uradite.
+
+account-state-tooltip-refused = Nalog nije prijavljen: prijava nije prihvaćena
+
+account-state-tooltip-admin = Nalog nije prijavljen: administrator prvo mora da odobri Inbox Classic
+
+account-state-tooltip-imap-off = Nalog nije prijavljen: IMAP je isključen za ovo poštansko sanduče
+
+account-state-tooltip-other-address = Nalog nije prijavljen: u pregledaču je prijavljena druga adresa
+
+account-state-tooltip-cannot-connect = Nije moguće povezati se sa serverom e-pošte
+
+account-state-mail-server = Server e-pošte
+
+account-state-bar-refused-browser = Nalog „{ $account }“ nije prijavljen. { $provider }: prijava nije prihvaćena. Pošta naloga možda nije ažurna.
+
+account-state-bar-refused-password = Nalog „{ $account }“ nije prijavljen: server e-pošte nije prihvatio njegovu lozinku. Pošta naloga možda nije ažurna.
+
+account-state-bar-admin = Nalog „{ $account }“ nije prijavljen: administrator domena { $domain } mora da odobri Inbox Classic pre nego što prijava bude moguća. Pošta naloga možda nije ažurna.
+
+account-state-bar-imap-off = Nalog „{ $account }“ nije prijavljen. { $provider }: IMAP je isključen za ovo poštansko sanduče. Uključite ga u podešavanjima sandučeta, pa ponovo pošaljite i primite poštu.
+
+account-state-bar-other-address = Nalog „{ $account }“ nije prijavljen: u pregledaču je prijavljena adresa { $email }, a ne { $expected }. Pokušajte ponovo i izaberite { $expected }.
+
+account-state-bar-cannot-connect = Nalog „{ $account }“ ne može da se poveže sa svojim serverom e-pošte. Njegova pošta možda nije ažurna.
+
+account-state-button-sign-in = Ponovo se prijavi
+
+account-state-button-password = Unesi lozinku
+
+account-state-button-admin-link = Kopiraj vezu za administratora
+
+account-state-button-help = Pomoć
+
+account-state-button-try-again = Pokušaj ponovo
+
+account-state-admin-link-copied = Veza je kopirana. Pošaljite je administratoru svoje organizacije.
+
+account-state-app-password-hint = Ako pružalac usluge traži lozinku za aplikaciju za programe za poštu, unesite je ovde umesto uobičajene lozinke.
+
+account-status-sign-in = Nalog „{ $account }“ zahteva prijavu
+
+account-status-cannot-connect = Nalog „{ $account }“ ne može da se poveže
+
+account-status-failed = { $account }: { $reason }
+
+account-status-sign-in-many = { $count ->
+    [one] { $count } nalog zahteva prijavu
+    [few] { $count } naloga zahtevaju prijavu
+   *[other] { $count } naloga zahteva prijavu
+}
+
+account-status-cannot-connect-many = { $count ->
+    [one] { $count } nalog ne može da se poveže
+    [few] { $count } naloga ne mogu da se povežu
+   *[other] { $count } naloga ne može da se poveže
+}
+
+account-notify-title-sign-in = Nalog „{ $account }“ nije prijavljen
+
+account-notify-text-refused-browser = { $provider }: prijava nije prihvaćena. Prijavite se ponovo da biste primali novu poštu.
+
+account-notify-text-refused-password = Server e-pošte nije prihvatio lozinku. Unesite je ponovo da biste primali novu poštu.
+
+account-notify-text-admin = Administrator domena { $domain } prvo mora da odobri Inbox Classic.
+
+account-notify-text-imap-off = { $provider }: IMAP je isključen za ovo poštansko sanduče.
+
+account-notify-text-other-address = U pregledaču je prijavljena adresa { $email }. Pokušajte ponovo i izaberite { $expected }.
+
+account-notify-title-cannot-connect = Nalog „{ $account }“ ne može da se poveže
+
+account-notify-text-cannot-connect = Inbox Classic ne može da se poveže sa serverom e-pošte. Nastaviće da pokušava.
+
+account-state-compose-sign-in = Ovaj nalog nije prijavljen; poruka će sačekati u fascikli Izlazno sanduče.
+
+account-state-compose-cannot-connect = Ovaj nalog ima problem sa vezom. Ako slanje ne uspe, poruka će ostati u fascikli Izlazno sanduče.
+
+account-state-outbox-sign-in = Čekanje: nalog „{ $account }“ nije prijavljen
+
+account-state-outbox-cannot-connect = Čekanje: nalog „{ $account }“ ne može da se poveže

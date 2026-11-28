@@ -13,6 +13,6 @@
     <li>Öffnen Sie die Eigenschaften des Kontos unter <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b> und prüfen Sie die Servernamen und Ports.</li>
     <li>Schlägt das Senden fehl, prüfen Sie die Kombination aus Port und Verschlüsselung anhand der Anbieterangaben. Üblich sind SSL/TLS mit Port 465 oder STARTTLS mit Port 587. Manche Netzwerke sperren die Mail-Ports, besonders Port 25.</li>
 </ol>
-<p>Inbox Classic versucht es beim nächsten Abrufen erneut. Um es jetzt zu versuchen, klicken Sie auf <b data-text="ui-tb-sync"></b>.</p>
-<p>Eine Nachricht, die Sie ohne Verbindung senden, bleibt im Postausgang. Inbox Classic versucht das Senden später erneut; die Erreichbarkeit allein garantiert noch keinen erfolgreichen Versand.</p>
+<p>Inbox Classic versucht es beim nächsten Abrufen erneut. Nach zwei aufeinanderfolgenden Verbindungsfehlern erscheint eine Warnung neben dem Konto in der Ordnerliste und über seiner Nachrichtenliste. Um es jetzt zu versuchen, klicken Sie auf das Warnsymbol, auf <b data-text="account-state-button-try-again"></b> in der Leiste oder auf <b data-text="ui-tb-sync"></b>. Die Warnung verschwindet, wenn das Konto wieder eine Verbindung herstellt.</p>
+<p>Eine Nachricht, die Sie ohne Verbindung senden, bleibt im lokalen Postausgang. Inbox Classic versucht es erneut, sobald es eine Verbindung herstellen kann; der Server kann die Nachricht trotzdem ablehnen.</p>
 <nav class="related"><a href="topic:drafts-outbox"></a> <a href="topic:certificate-errors"></a> <a href="topic:message-not-shown"></a></nav>

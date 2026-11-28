@@ -5,7 +5,7 @@
     <li>«connection error: …»</li>
     <li>«the server did not answer in time»</li>
     <li>«la connexió amb el servidor ha fallat (…)»</li>
-    <li>«No s’ha pogut accedir al servidor de correu (…).»</li>
+    <li>«No s’ha pogut establir la connexió amb el servidor de correu o s’ha interromput (…).»</li>
 </ul>
 <p>Per solucionar-ho:</p>
 <ol>
@@ -13,6 +13,6 @@
     <li>Obriu les propietats del compte a <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b> i comproveu els noms i els ports dels servidors.</li>
     <li>Si l’enviament falla, comproveu les opcions de sortida: normalment, SSL/TLS fa servir el port 465 i STARTTLS el 587. Algunes xarxes bloquegen els ports de correu, sobretot el port 25.</li>
 </ol>
-<p>Inbox Classic ho torna a provar a la comprovació de correu següent. Per provar-ho ara, feu clic a <b data-text="ui-tb-sync"></b>.</p>
-<p>Un missatge que envieu sense connexió espera a la Safata de sortida i se’n torna a intentar l’enviament quan es pot connectar amb el servidor. El contingut es conserva mentre espera.</p>
+<p>Inbox Classic ho torna a provar a la comprovació de correu següent. Després de dos errors de connexió consecutius, apareix un avís al costat del compte a la llista de carpetes i sobre la seva llista de missatges. Per provar-ho ara, feu clic a la icona d’avís, a <b data-text="account-state-button-try-again"></b> a la barra o a <b data-text="ui-tb-sync"></b>. L’avís desapareix quan el compte es torna a connectar.</p>
+<p>Un missatge que envieu sense connexió es queda a la Safata de sortida local. Inbox Classic ho torna a provar quan es pot connectar; el servidor encara pot rebutjar el missatge.</p>
 <nav class="related"><a href="topic:drafts-outbox"></a> <a href="topic:certificate-errors"></a> <a href="topic:message-not-shown"></a></nav>

@@ -825,3 +825,5 @@ ui-reactions-label = リアクション:
 ui-reaction-open-email = リアクションのメールを開く
 ui-reaction-show-as-email = メールとして表示
 ui-reaction-when = リアクション日時: { $when }
+
+cmd-sign-in-again = 再サインイン(&I)...

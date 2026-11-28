@@ -1090,3 +1090,83 @@ reaction-notification-text = { $count ->
     [one] a { $subject }
    *[other] a { $subject } ({ $count } reaccions noves en total)
 }
+
+reader-failed-signed-out = El servidor de correu ha rebutjat l’inici de sessió d’aquest compte. La barra de sobre la llista de missatges explica què cal fer.
+
+account-state-tooltip-refused = Sessió no iniciada: s’ha rebutjat l’inici de sessió
+
+account-state-tooltip-admin = Sessió no iniciada: un administrador ha d’autoritzar Inbox Classic primer
+
+account-state-tooltip-imap-off = Sessió no iniciada: IMAP està desactivat per a aquesta bústia
+
+account-state-tooltip-other-address = Sessió no iniciada: el navegador ha iniciat la sessió amb una altra adreça
+
+account-state-tooltip-cannot-connect = No es pot connectar amb el servidor de correu
+
+account-state-mail-server = El servidor de correu
+
+account-state-bar-refused-browser = El compte { $account } no té la sessió iniciada: { $provider } ha rebutjat l’inici de sessió. El correu pot no estar actualitzat.
+
+account-state-bar-refused-password = El compte { $account } no té la sessió iniciada: el servidor de correu ha rebutjat la contrasenya. El correu pot no estar actualitzat.
+
+account-state-bar-admin = El compte { $account } no té la sessió iniciada: cal que un administrador del domini { $domain } autoritzi Inbox Classic abans d’iniciar-la. El correu pot no estar actualitzat.
+
+account-state-bar-imap-off = El compte { $account } no té la sessió iniciada: { $provider } indica que IMAP està desactivat per a aquesta bústia. Activeu-lo a la configuració de la bústia i torneu a enviar i rebre correu.
+
+account-state-bar-other-address = El compte { $account } no té la sessió iniciada: el navegador ha iniciat la sessió amb { $email } en lloc de { $expected }. Torneu-ho a provar i trieu { $expected }.
+
+account-state-bar-cannot-connect = El compte { $account } no es pot connectar amb el servidor de correu. El correu pot no estar actualitzat.
+
+account-state-button-sign-in = Torna a iniciar la sessió
+
+account-state-button-password = Introdueix la contrasenya
+
+account-state-button-admin-link = Copia l’enllaç per a l’administrador
+
+account-state-button-help = Ajuda
+
+account-state-button-try-again = Torna-ho a provar
+
+account-state-admin-link-copied = S’ha copiat l’enllaç. Envieu-lo a l’administrador de la vostra organització.
+
+account-state-app-password-hint = Si el proveïdor demana una contrasenya d’aplicació per als programes de correu, introduïu-la aquí en lloc de la contrasenya habitual.
+
+account-status-sign-in = Cal iniciar la sessió al compte { $account }
+
+account-status-cannot-connect = El compte { $account } no es pot connectar
+
+account-status-failed = { $account }: { $reason }
+
+account-status-sign-in-many = { $count ->
+    [one] Cal iniciar la sessió en { $count } compte
+   *[other] Cal iniciar la sessió en { $count } comptes
+}
+
+account-status-cannot-connect-many = { $count ->
+    [one] { $count } compte no es pot connectar
+   *[other] { $count } comptes no es poden connectar
+}
+
+account-notify-title-sign-in = El compte { $account } no té la sessió iniciada
+
+account-notify-text-refused-browser = { $provider }: s’ha rebutjat l’inici de sessió. Torneu a iniciar-la per rebre correu nou.
+
+account-notify-text-refused-password = El servidor de correu ha rebutjat la contrasenya. Torneu a introduir-la per rebre correu nou.
+
+account-notify-text-admin = Cal que un administrador del domini { $domain } autoritzi Inbox Classic primer.
+
+account-notify-text-imap-off = { $provider }: IMAP està desactivat per a aquesta bústia.
+
+account-notify-text-other-address = El navegador ha iniciat la sessió amb { $email }. Torneu-ho a provar i trieu { $expected }.
+
+account-notify-title-cannot-connect = El compte { $account } no es pot connectar
+
+account-notify-text-cannot-connect = No es pot connectar amb el servidor de correu. Inbox Classic ho continua provant.
+
+account-state-compose-sign-in = Aquest compte no té la sessió iniciada; el missatge esperarà a la Safata de sortida.
+
+account-state-compose-cannot-connect = Aquest compte té un problema de connexió. Si l’enviament falla, el missatge es quedarà a la Safata de sortida.
+
+account-state-outbox-sign-in = En espera: el compte { $account } no té la sessió iniciada
+
+account-state-outbox-cannot-connect = En espera: el compte { $account } no es pot connectar

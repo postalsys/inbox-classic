@@ -870,3 +870,5 @@ ui-reactions-label = Reacties:
 ui-reaction-open-email = E-mail met reactie openen
 ui-reaction-show-as-email = Tonen als e-mail
 ui-reaction-when = Gereageerd: { $when }
+
+cmd-sign-in-again = Opn&ieuw aanmelden...

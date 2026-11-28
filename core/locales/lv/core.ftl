@@ -1179,3 +1179,85 @@ reaction-notification-text = { $count ->
     [1] uz ziņojumu { $subject }
    *[other] uz ziņojumu { $subject } (jauno reakciju kopskaits: { $count })
 }
+
+reader-failed-signed-out = Pasta serveris nepieņēma pierakstīšanos šajā kontā. Josla virs ziņojumu saraksta paskaidro, kā rīkoties.
+
+account-state-tooltip-refused = Pierakstīšanās nav veikta: tā tika noraidīta
+
+account-state-tooltip-admin = Pierakstīšanās nav veikta: administratoram vispirms jāapstiprina Inbox Classic
+
+account-state-tooltip-imap-off = Pierakstīšanās nav veikta: šai pastkastei ir izslēgta IMAP piekļuve
+
+account-state-tooltip-other-address = Pierakstīšanās nav veikta: pārlūkprogrammā izmantota cita adrese
+
+account-state-tooltip-cannot-connect = Nevar izveidot savienojumu ar pasta serveri
+
+account-state-mail-server = Pasta serveris
+
+account-state-bar-refused-browser = Kontā „{ $account }” nav veikta pierakstīšanās: { $provider } to nepieņēma. Kontā redzamie ziņojumi var nebūt atjaunināti.
+
+account-state-bar-refused-password = Kontā „{ $account }” nav veikta pierakstīšanās: pasta serveris nepieņēma paroli. Kontā redzamie ziņojumi var nebūt atjaunināti.
+
+account-state-bar-admin = Kontā „{ $account }” nav veikta pierakstīšanās: domēna { $domain } administratoram jāapstiprina Inbox Classic, lai varētu pierakstīties. Kontā redzamie ziņojumi var nebūt atjaunināti.
+
+account-state-bar-imap-off = Kontā „{ $account }” nav veikta pierakstīšanās: { $provider } ziņo, ka šai pastkastei ir izslēgta IMAP piekļuve. Ieslēdziet to pastkastes iestatījumos un vēlreiz mēģiniet sūtīt un saņemt pastu.
+
+account-state-bar-other-address = Kontā „{ $account }” nav veikta pierakstīšanās: pārlūkprogrammā izmantota adrese { $email }, nevis { $expected }. Mēģiniet vēlreiz un izvēlieties { $expected }.
+
+account-state-bar-cannot-connect = Konts „{ $account }” nevar izveidot savienojumu ar savu pasta serveri. Kontā redzamie ziņojumi var nebūt atjaunināti.
+
+account-state-button-sign-in = Pierakstīties vēlreiz
+
+account-state-button-password = Ievadīt paroli
+
+account-state-button-admin-link = Kopēt saiti administratoram
+
+account-state-button-help = Palīdzība
+
+account-state-button-try-again = Mēģināt vēlreiz
+
+account-state-admin-link-copied = Saite ir nokopēta. Nosūtiet to savas organizācijas administratoram.
+
+account-state-app-password-hint = Ja pakalpojuma sniedzējs pasta programmām prasa lietotnes paroli, ievadiet to šeit parastās paroles vietā.
+
+account-status-sign-in = Jāpierakstās kontā „{ $account }”
+
+account-status-cannot-connect = Konts „{ $account }” nevar izveidot savienojumu
+
+account-status-failed = { $account }: { $reason }
+
+account-status-sign-in-many = { $count ->
+    [zero] Jāpierakstās { $count } kontos
+    [one] Jāpierakstās { $count } kontā
+   *[other] Jāpierakstās { $count } kontos
+}
+
+account-status-cannot-connect-many = { $count ->
+    [zero] { $count } kontu nevar izveidot savienojumu
+    [one] { $count } konts nevar izveidot savienojumu
+   *[other] { $count } konti nevar izveidot savienojumu
+}
+
+account-notify-title-sign-in = Kontā „{ $account }” nav veikta pierakstīšanās
+
+account-notify-text-refused-browser = { $provider } nepieņēma pierakstīšanos. Pierakstieties vēlreiz, lai saņemtu jaunus ziņojumus.
+
+account-notify-text-refused-password = Pasta serveris nepieņēma paroli. Ievadiet to vēlreiz, lai saņemtu jaunus ziņojumus.
+
+account-notify-text-admin = Domēna { $domain } administratoram vispirms jāapstiprina Inbox Classic.
+
+account-notify-text-imap-off = { $provider } ziņo, ka šai pastkastei ir izslēgta IMAP piekļuve.
+
+account-notify-text-other-address = Pārlūkprogrammā veikta pierakstīšanās ar adresi { $email }. Mēģiniet vēlreiz un izvēlieties { $expected }.
+
+account-notify-title-cannot-connect = Konts „{ $account }” nevar izveidot savienojumu
+
+account-notify-text-cannot-connect = Inbox Classic nevar izveidot savienojumu ar pasta serveri un turpinās mēģināt.
+
+account-state-compose-sign-in = Šajā kontā nav veikta pierakstīšanās. Ziņojums gaidīs izsūtnē.
+
+account-state-compose-cannot-connect = Šim kontam ir savienojuma problēma. Ja nosūtīšana neizdosies, ziņojums paliks izsūtnē.
+
+account-state-outbox-sign-in = Gaida: kontā „{ $account }” nav veikta pierakstīšanās
+
+account-state-outbox-cannot-connect = Gaida: konts „{ $account }” nevar izveidot savienojumu

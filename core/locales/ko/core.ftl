@@ -910,3 +910,77 @@ reaction-notification-text = { $count ->
     [1] 대상: { $subject }
    *[other] 대상: { $subject }, 새 반응 총 { $count }개
 }
+
+reader-failed-signed-out = 메일 서버가 이 계정의 로그인을 거부했습니다. 메시지 목록 위의 막대에서 해결 방법을 확인하십시오.
+
+account-state-tooltip-refused = 로그인되지 않음: 로그인이 거부되었습니다
+
+account-state-tooltip-admin = 로그인되지 않음: 관리자가 먼저 Inbox Classic을 승인해야 합니다
+
+account-state-tooltip-imap-off = 로그인되지 않음: 이 사서함에서 IMAP이 비활성화되어 있습니다
+
+account-state-tooltip-other-address = 로그인되지 않음: 브라우저에서 다른 주소로 로그인했습니다
+
+account-state-tooltip-cannot-connect = 메일 서버에 연결할 수 없습니다
+
+account-state-mail-server = 메일 서버
+
+account-state-bar-refused-browser = { $account } 계정에 로그인되지 않았습니다. { $provider }에서 로그인을 거부했습니다. 이 계정의 메일이 최신 상태가 아닐 수 있습니다.
+
+account-state-bar-refused-password = { $account } 계정에 로그인되지 않았습니다. 메일 서버가 암호를 거부했습니다. 이 계정의 메일이 최신 상태가 아닐 수 있습니다.
+
+account-state-bar-admin = { $account } 계정에 로그인되지 않았습니다. 로그인하려면 { $domain } 도메인의 관리자가 먼저 Inbox Classic을 승인해야 합니다. 이 계정의 메일이 최신 상태가 아닐 수 있습니다.
+
+account-state-bar-imap-off = { $account } 계정에 로그인되지 않았습니다. { $provider }에 따르면 이 사서함에서 IMAP이 비활성화되어 있습니다. 사서함 설정에서 IMAP을 켠 다음 다시 보내기/받기를 실행하십시오.
+
+account-state-bar-other-address = { $account } 계정에 로그인되지 않았습니다. 브라우저에서는 { $expected } 주소가 아닌 { $email } 주소로 로그인했습니다. 다시 시도하고 { $expected } 주소를 선택하십시오.
+
+account-state-bar-cannot-connect = { $account } 계정에서 메일 서버에 연결할 수 없습니다. 이 계정의 메일이 최신 상태가 아닐 수 있습니다.
+
+account-state-button-sign-in = 다시 로그인
+
+account-state-button-password = 암호 입력
+
+account-state-button-admin-link = 관리자에게 보낼 링크 복사
+
+account-state-button-help = 도움말
+
+account-state-button-try-again = 다시 시도
+
+account-state-admin-link-copied = 링크를 복사했습니다. 조직의 관리자에게 보내십시오.
+
+account-state-app-password-hint = 공급자가 메일 프로그램에 앱 암호를 요구하는 경우 평소 암호 대신 앱 암호를 여기에 입력하십시오.
+
+account-status-sign-in = { $account } 계정에 로그인이 필요합니다
+
+account-status-cannot-connect = { $account } 계정에서 연결할 수 없습니다
+
+account-status-failed = { $account }: { $reason }
+
+account-status-sign-in-many = { $count }개 계정에 로그인이 필요합니다
+
+account-status-cannot-connect-many = { $count }개 계정에서 연결할 수 없습니다
+
+account-notify-title-sign-in = { $account } 계정에 로그인되지 않았습니다
+
+account-notify-text-refused-browser = { $provider }에서 로그인을 거부했습니다. 새 메일을 받으려면 다시 로그인하십시오.
+
+account-notify-text-refused-password = 메일 서버가 암호를 거부했습니다. 새 메일을 받으려면 암호를 다시 입력하십시오.
+
+account-notify-text-admin = { $domain } 도메인의 관리자가 먼저 Inbox Classic을 승인해야 합니다.
+
+account-notify-text-imap-off = { $provider }에 따르면 이 사서함에서 IMAP이 비활성화되어 있습니다.
+
+account-notify-text-other-address = 브라우저에서 { $email } 주소로 로그인했습니다. 다시 시도하고 { $expected } 주소를 선택하십시오.
+
+account-notify-title-cannot-connect = { $account } 계정에서 연결할 수 없습니다
+
+account-notify-text-cannot-connect = Inbox Classic이 메일 서버에 연결할 수 없습니다. 계속 시도합니다.
+
+account-state-compose-sign-in = 이 계정에 로그인되지 않았으므로 메시지는 보낼 편지함에서 대기합니다.
+
+account-state-compose-cannot-connect = 이 계정에 연결 문제가 있습니다. 보내기에 실패하면 메시지가 보낼 편지함에 남습니다.
+
+account-state-outbox-sign-in = 대기 중: { $account } 계정에 로그인되지 않았습니다
+
+account-state-outbox-cannot-connect = 대기 중: { $account } 계정에서 연결할 수 없습니다

@@ -1071,3 +1071,83 @@ reaction-notification-text = { $count ->
     [one] på { $subject }
    *[other] på { $subject } ({ $count } nye reaksjoner totalt)
 }
+
+reader-failed-signed-out = E-postserveren avviste påloggingen til denne kontoen. Feltet over meldingslisten forklarer hva du kan gjøre.
+
+account-state-tooltip-refused = Ikke pålogget: påloggingen ble avvist
+
+account-state-tooltip-admin = Ikke pålogget: en administrator må først godkjenne Inbox Classic
+
+account-state-tooltip-imap-off = Ikke pålogget: IMAP er slått av for denne postkassen
+
+account-state-tooltip-other-address = Ikke pålogget: nettleseren logget på med en annen adresse
+
+account-state-tooltip-cannot-connect = Kan ikke koble til e-postserveren
+
+account-state-mail-server = E-postserveren
+
+account-state-bar-refused-browser = Kontoen { $account } er ikke pålogget: { $provider } avviste påloggingen. E-posten er kanskje ikke oppdatert.
+
+account-state-bar-refused-password = Kontoen { $account } er ikke pålogget: e-postserveren avviste passordet. E-posten er kanskje ikke oppdatert.
+
+account-state-bar-admin = Kontoen { $account } er ikke pålogget: en administrator for domenet { $domain } må godkjenne Inbox Classic før du kan logge på. E-posten er kanskje ikke oppdatert.
+
+account-state-bar-imap-off = Kontoen { $account } er ikke pålogget: { $provider } opplyser at IMAP er slått av for denne postkassen. Slå det på i innstillingene for postkassen, og prøv å sende og motta igjen.
+
+account-state-bar-other-address = Kontoen { $account } er ikke pålogget: nettleseren logget på med { $email } i stedet for { $expected }. Prøv igjen, og velg { $expected }.
+
+account-state-bar-cannot-connect = Kontoen { $account } kan ikke koble til e-postserveren. E-posten er kanskje ikke oppdatert.
+
+account-state-button-sign-in = Logg på igjen
+
+account-state-button-password = Skriv inn passord
+
+account-state-button-admin-link = Kopier lenke til administrator
+
+account-state-button-help = Hjelp
+
+account-state-button-try-again = Prøv igjen
+
+account-state-admin-link-copied = Lenken er kopiert. Send den til administratoren i organisasjonen din.
+
+account-state-app-password-hint = Hvis leverandøren krever et app-passord for e-postprogrammer, skriver du det inn her i stedet for det vanlige passordet.
+
+account-status-sign-in = Du må logge på kontoen { $account }
+
+account-status-cannot-connect = Kontoen { $account } kan ikke koble til
+
+account-status-failed = { $account }: { $reason }
+
+account-status-sign-in-many = { $count ->
+    [one] Du må logge på { $count } konto
+   *[other] Du må logge på { $count } kontoer
+}
+
+account-status-cannot-connect-many = { $count ->
+    [one] { $count } konto kan ikke koble til
+   *[other] { $count } kontoer kan ikke koble til
+}
+
+account-notify-title-sign-in = Kontoen { $account } er ikke pålogget
+
+account-notify-text-refused-browser = { $provider } avviste påloggingen. Logg på igjen for å motta ny e-post.
+
+account-notify-text-refused-password = E-postserveren avviste passordet. Skriv det inn igjen for å motta ny e-post.
+
+account-notify-text-admin = En administrator for domenet { $domain } må først godkjenne Inbox Classic.
+
+account-notify-text-imap-off = { $provider } opplyser at IMAP er slått av for denne postkassen.
+
+account-notify-text-other-address = Nettleseren logget på med { $email }. Prøv igjen, og velg { $expected }.
+
+account-notify-title-cannot-connect = Kontoen { $account } kan ikke koble til
+
+account-notify-text-cannot-connect = Kan ikke koble til e-postserveren. Inbox Classic fortsetter å prøve.
+
+account-state-compose-sign-in = Denne kontoen er ikke pålogget; meldingen venter i Utboks.
+
+account-state-compose-cannot-connect = Denne kontoen har et tilkoblingsproblem. Hvis sendingen mislykkes, blir meldingen liggende i Utboks.
+
+account-state-outbox-sign-in = Venter: kontoen { $account } er ikke pålogget
+
+account-state-outbox-cannot-connect = Venter: kontoen { $account } kan ikke koble til

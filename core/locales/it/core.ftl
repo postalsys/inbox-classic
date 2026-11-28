@@ -1098,3 +1098,83 @@ reaction-notification-text = { $count ->
     [one] a { $subject }
    *[other] a { $subject } ({ $count } nuove reazioni in tutto)
 }
+
+reader-failed-signed-out = Il server di posta ha rifiutato l’accesso a questo account. La barra sopra l’elenco dei messaggi spiega cosa fare.
+
+account-state-tooltip-refused = Accesso non effettuato: l’accesso è stato rifiutato
+
+account-state-tooltip-admin = Accesso non effettuato: un amministratore deve prima autorizzare Inbox Classic
+
+account-state-tooltip-imap-off = Accesso non effettuato: IMAP è disattivato per questa casella di posta
+
+account-state-tooltip-other-address = Accesso non effettuato: il browser ha effettuato l’accesso con un altro indirizzo
+
+account-state-tooltip-cannot-connect = Impossibile connettersi al server di posta
+
+account-state-mail-server = Il server di posta
+
+account-state-bar-refused-browser = Non è stato effettuato l’accesso all’account { $account }: { $provider } ha rifiutato l’accesso. La posta potrebbe non essere aggiornata.
+
+account-state-bar-refused-password = Non è stato effettuato l’accesso all’account { $account }: il server di posta ha rifiutato la password. La posta potrebbe non essere aggiornata.
+
+account-state-bar-admin = Non è stato effettuato l’accesso all’account { $account }: un amministratore del dominio { $domain } deve autorizzare Inbox Classic prima dell’accesso. La posta potrebbe non essere aggiornata.
+
+account-state-bar-imap-off = Non è stato effettuato l’accesso all’account { $account }: { $provider } indica che IMAP è disattivato per questa casella di posta. Attivalo nelle impostazioni della casella, poi invia e ricevi di nuovo.
+
+account-state-bar-other-address = Non è stato effettuato l’accesso all’account { $account }: il browser ha effettuato l’accesso con { $email } invece di { $expected }. Riprova e scegli { $expected }.
+
+account-state-bar-cannot-connect = L’account { $account } non riesce a connettersi al server di posta. La posta potrebbe non essere aggiornata.
+
+account-state-button-sign-in = Accedi di nuovo
+
+account-state-button-password = Inserisci password
+
+account-state-button-admin-link = Copia il collegamento per l’amministratore
+
+account-state-button-help = Guida
+
+account-state-button-try-again = Riprova
+
+account-state-admin-link-copied = Il collegamento è stato copiato. Invialo all’amministratore della tua organizzazione.
+
+account-state-app-password-hint = Se il provider richiede una password per le app nei programmi di posta, inseriscila qui al posto della password abituale.
+
+account-status-sign-in = Devi accedere all’account { $account }
+
+account-status-cannot-connect = L’account { $account } non riesce a connettersi
+
+account-status-failed = { $account }: { $reason }
+
+account-status-sign-in-many = { $count ->
+    [one] Devi accedere a { $count } account
+   *[other] Devi accedere a { $count } account
+}
+
+account-status-cannot-connect-many = { $count ->
+    [one] { $count } account non riesce a connettersi
+   *[other] { $count } account non riescono a connettersi
+}
+
+account-notify-title-sign-in = Accesso non effettuato all’account { $account }
+
+account-notify-text-refused-browser = { $provider }: accesso rifiutato. Accedi di nuovo per ricevere nuovi messaggi.
+
+account-notify-text-refused-password = Il server di posta ha rifiutato la password. Inseriscila di nuovo per ricevere nuovi messaggi.
+
+account-notify-text-admin = Un amministratore del dominio { $domain } deve prima autorizzare Inbox Classic.
+
+account-notify-text-imap-off = { $provider }: IMAP è disattivato per questa casella di posta.
+
+account-notify-text-other-address = Il browser ha effettuato l’accesso con { $email }. Riprova e scegli { $expected }.
+
+account-notify-title-cannot-connect = L’account { $account } non riesce a connettersi
+
+account-notify-text-cannot-connect = Impossibile connettersi al server di posta. Inbox Classic continua a riprovare.
+
+account-state-compose-sign-in = Non è stato effettuato l’accesso a questo account; il messaggio resterà in Posta in uscita.
+
+account-state-compose-cannot-connect = Questo account ha un problema di connessione. Se l’invio non riesce, il messaggio resterà in Posta in uscita.
+
+account-state-outbox-sign-in = In attesa: accesso non effettuato all’account { $account }
+
+account-state-outbox-cannot-connect = In attesa: l’account { $account } non riesce a connettersi

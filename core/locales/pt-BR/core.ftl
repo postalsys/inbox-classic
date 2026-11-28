@@ -1123,3 +1123,83 @@ reaction-notification-text = { $count ->
     [1] a { $subject }
    *[other] a { $subject } ({ $count } novas reações no total)
 }
+
+reader-failed-signed-out = O servidor de e-mail não aceitou o login desta conta. A barra acima da lista de mensagens explica o que fazer.
+
+account-state-tooltip-refused = Login não realizado: o login não foi aceito
+
+account-state-tooltip-admin = Login não realizado: um administrador precisa autorizar o Inbox Classic primeiro
+
+account-state-tooltip-imap-off = Login não realizado: o IMAP está desativado para esta caixa de correio
+
+account-state-tooltip-other-address = Login não realizado: o navegador fez login com outro endereço
+
+account-state-tooltip-cannot-connect = Não é possível conectar ao servidor de e-mail
+
+account-state-mail-server = O servidor de e-mail
+
+account-state-bar-refused-browser = Não foi feito login na conta { $account }: { $provider } não aceitou o login. Os e-mails podem estar desatualizados.
+
+account-state-bar-refused-password = Não foi feito login na conta { $account }: o servidor de e-mail não aceitou a senha. Os e-mails podem estar desatualizados.
+
+account-state-bar-admin = Não foi feito login na conta { $account }: um administrador do domínio { $domain } precisa autorizar o Inbox Classic antes do login. Os e-mails podem estar desatualizados.
+
+account-state-bar-imap-off = Não foi feito login na conta { $account }: { $provider } informa que o IMAP está desativado para esta caixa de correio. Ative-o nas configurações da caixa de correio e tente enviar e receber novamente.
+
+account-state-bar-other-address = Não foi feito login na conta { $account }: o navegador fez login com { $email } em vez de { $expected }. Tente novamente e escolha { $expected }.
+
+account-state-bar-cannot-connect = A conta { $account } não consegue conectar ao servidor de e-mail. Os e-mails podem estar desatualizados.
+
+account-state-button-sign-in = Fazer login novamente
+
+account-state-button-password = Digitar senha
+
+account-state-button-admin-link = Copiar link para o administrador
+
+account-state-button-help = Ajuda
+
+account-state-button-try-again = Tentar novamente
+
+account-state-admin-link-copied = O link foi copiado. Envie-o ao administrador da sua organização.
+
+account-state-app-password-hint = Se o provedor exigir uma senha de app para programas de e-mail, digite-a aqui no lugar da sua senha habitual.
+
+account-status-sign-in = É preciso fazer login na conta { $account }
+
+account-status-cannot-connect = A conta { $account } não consegue se conectar
+
+account-status-failed = { $account }: { $reason }
+
+account-status-sign-in-many = { $count ->
+    [one] É preciso fazer login em { $count } conta
+   *[other] É preciso fazer login em { $count } contas
+}
+
+account-status-cannot-connect-many = { $count ->
+    [one] { $count } conta não consegue se conectar
+   *[other] { $count } contas não conseguem se conectar
+}
+
+account-notify-title-sign-in = Não foi feito login na conta { $account }
+
+account-notify-text-refused-browser = { $provider }: o login não foi aceito. Faça login novamente para receber novos e-mails.
+
+account-notify-text-refused-password = O servidor de e-mail não aceitou a senha. Digite-a novamente para receber novos e-mails.
+
+account-notify-text-admin = Um administrador do domínio { $domain } precisa autorizar o Inbox Classic primeiro.
+
+account-notify-text-imap-off = { $provider }: o IMAP está desativado para esta caixa de correio.
+
+account-notify-text-other-address = O navegador fez login com { $email }. Tente novamente e escolha { $expected }.
+
+account-notify-title-cannot-connect = A conta { $account } não consegue se conectar
+
+account-notify-text-cannot-connect = Não é possível conectar ao servidor de e-mail. O Inbox Classic continua tentando.
+
+account-state-compose-sign-in = Não foi feito login nesta conta; a mensagem ficará aguardando na Caixa de Saída.
+
+account-state-compose-cannot-connect = Esta conta tem um problema de conexão. Se o envio falhar, a mensagem ficará na Caixa de Saída.
+
+account-state-outbox-sign-in = Aguardando: não foi feito login na conta { $account }
+
+account-state-outbox-cannot-connect = Aguardando: a conta { $account } não consegue se conectar

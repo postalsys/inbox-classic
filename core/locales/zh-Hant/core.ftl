@@ -905,3 +905,77 @@ reaction-notification-text = { $count ->
     [1] 郵件：{ $subject }
    *[other] 郵件：{ $subject }，共有{ $count }個新回應
 }
+
+reader-failed-signed-out = 郵件伺服器拒絕了這個帳戶的登入要求。郵件清單上方的提示列會說明處理方式。
+
+account-state-tooltip-refused = 未登入：登入要求遭到拒絕
+
+account-state-tooltip-admin = 未登入：管理員必須先核准 Inbox Classic
+
+account-state-tooltip-imap-off = 未登入：這個信箱未啟用 IMAP
+
+account-state-tooltip-other-address = 未登入：瀏覽器登入了其他地址
+
+account-state-tooltip-cannot-connect = 無法連線到郵件伺服器
+
+account-state-mail-server = 郵件伺服器
+
+account-state-bar-refused-browser = 帳戶{ $account }未登入：{ $provider }拒絕了登入要求。此帳戶的郵件可能尚未更新。
+
+account-state-bar-refused-password = 帳戶{ $account }未登入：郵件伺服器不接受密碼。此帳戶的郵件可能尚未更新。
+
+account-state-bar-admin = 帳戶{ $account }未登入：網域{ $domain }的管理員必須先核准 Inbox Classic，才能登入。此帳戶的郵件可能尚未更新。
+
+account-state-bar-imap-off = 帳戶{ $account }未登入：{ $provider }表示這個信箱未啟用 IMAP。請在信箱設定中啟用，然後再次傳送及接收郵件。
+
+account-state-bar-other-address = 帳戶{ $account }未登入：瀏覽器登入的是{ $email }，而不是{ $expected }。請再試一次，並選取{ $expected }。
+
+account-state-bar-cannot-connect = 帳戶{ $account }無法連線到其郵件伺服器。此帳戶的郵件可能尚未更新。
+
+account-state-button-sign-in = 重新登入
+
+account-state-button-password = 輸入密碼
+
+account-state-button-admin-link = 複製給管理員的連結
+
+account-state-button-help = 說明
+
+account-state-button-try-again = 再試一次
+
+account-state-admin-link-copied = 已複製連結。請將連結傳送給您組織的管理員。
+
+account-state-app-password-hint = 如果您的服務提供者要求郵件程式使用應用程式密碼，請在此輸入應用程式密碼，而非您平常的密碼。
+
+account-status-sign-in = 帳戶{ $account }需要登入
+
+account-status-cannot-connect = 帳戶{ $account }無法連線
+
+account-status-failed = { $account }：{ $reason }
+
+account-status-sign-in-many = { $count }個帳戶需要登入
+
+account-status-cannot-connect-many = { $count }個帳戶無法連線
+
+account-notify-title-sign-in = 帳戶{ $account }未登入
+
+account-notify-text-refused-browser = { $provider }拒絕了登入要求。請重新登入以接收新郵件。
+
+account-notify-text-refused-password = 郵件伺服器不接受密碼。請重新輸入以接收新郵件。
+
+account-notify-text-admin = 網域{ $domain }的管理員必須先核准 Inbox Classic。
+
+account-notify-text-imap-off = { $provider }表示這個信箱未啟用 IMAP。
+
+account-notify-text-other-address = 瀏覽器登入的是{ $email }。請再試一次，並選取{ $expected }。
+
+account-notify-title-cannot-connect = 帳戶{ $account }無法連線
+
+account-notify-text-cannot-connect = Inbox Classic 無法連線到郵件伺服器，將繼續嘗試。
+
+account-state-compose-sign-in = 這個帳戶尚未登入，郵件會在寄件匣中等候。
+
+account-state-compose-cannot-connect = 這個帳戶發生連線問題。如果傳送失敗，郵件會留在寄件匣中。
+
+account-state-outbox-sign-in = 等候中：帳戶{ $account }未登入
+
+account-state-outbox-cannot-connect = 等候中：帳戶{ $account }無法連線

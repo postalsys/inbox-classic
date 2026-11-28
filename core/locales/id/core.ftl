@@ -914,3 +914,77 @@ reaction-notification-text = { $count ->
     [1] pada { $subject }
    *[other] pada { $subject } (total { $count } reaksi baru)
 }
+
+reader-failed-signed-out = Server email menolak permintaan masuk ke akun ini. Bilah di atas daftar pesan menjelaskan apa yang perlu dilakukan.
+
+account-state-tooltip-refused = Belum masuk: permintaan masuk ditolak
+
+account-state-tooltip-admin = Belum masuk: administrator harus menyetujui Inbox Classic terlebih dahulu
+
+account-state-tooltip-imap-off = Belum masuk: IMAP dinonaktifkan untuk kotak surat ini
+
+account-state-tooltip-other-address = Belum masuk: browser masuk dengan alamat lain
+
+account-state-tooltip-cannot-connect = Tidak dapat terhubung ke server email
+
+account-state-mail-server = Server email
+
+account-state-bar-refused-browser = Akun { $account } belum masuk: { $provider } menolak permintaan masuk. Email di akun ini mungkin belum diperbarui.
+
+account-state-bar-refused-password = Akun { $account } belum masuk: server email menolak kata sandinya. Email di akun ini mungkin belum diperbarui.
+
+account-state-bar-admin = Akun { $account } belum masuk: administrator domain { $domain } harus menyetujui Inbox Classic sebelum akun dapat masuk. Email di akun ini mungkin belum diperbarui.
+
+account-state-bar-imap-off = Akun { $account } belum masuk: { $provider } menyatakan bahwa IMAP dinonaktifkan untuk kotak surat ini. Aktifkan IMAP di pengaturan kotak surat, lalu kirim dan terima email lagi.
+
+account-state-bar-other-address = Akun { $account } belum masuk: browser masuk dengan alamat { $email }, bukan { $expected }. Coba lagi dan pilih { $expected }.
+
+account-state-bar-cannot-connect = Akun { $account } tidak dapat terhubung ke server emailnya. Email di akun ini mungkin belum diperbarui.
+
+account-state-button-sign-in = Masuk Lagi
+
+account-state-button-password = Masukkan Kata Sandi
+
+account-state-button-admin-link = Salin Tautan untuk Administrator
+
+account-state-button-help = Bantuan
+
+account-state-button-try-again = Coba Lagi
+
+account-state-admin-link-copied = Tautan telah disalin. Kirimkan kepada administrator organisasi Anda.
+
+account-state-app-password-hint = Jika penyedia Anda mewajibkan kata sandi aplikasi untuk program email, masukkan kata sandi aplikasi di sini sebagai pengganti kata sandi biasa.
+
+account-status-sign-in = Perlu masuk ke akun { $account }
+
+account-status-cannot-connect = Akun { $account } tidak dapat terhubung
+
+account-status-failed = { $account }: { $reason }
+
+account-status-sign-in-many = Perlu masuk ke { $count } akun
+
+account-status-cannot-connect-many = { $count } akun tidak dapat terhubung
+
+account-notify-title-sign-in = Akun { $account } belum masuk
+
+account-notify-text-refused-browser = { $provider } menolak permintaan masuk. Masuk lagi untuk menerima email baru.
+
+account-notify-text-refused-password = Server email menolak kata sandi. Masukkan lagi untuk menerima email baru.
+
+account-notify-text-admin = Administrator domain { $domain } harus menyetujui Inbox Classic terlebih dahulu.
+
+account-notify-text-imap-off = { $provider } menyatakan bahwa IMAP dinonaktifkan untuk kotak surat ini.
+
+account-notify-text-other-address = Browser masuk dengan alamat { $email }. Coba lagi dan pilih { $expected }.
+
+account-notify-title-cannot-connect = Akun { $account } tidak dapat terhubung
+
+account-notify-text-cannot-connect = Inbox Classic tidak dapat terhubung ke server email dan akan terus mencoba.
+
+account-state-compose-sign-in = Akun ini belum masuk. Pesan akan menunggu di Kotak Keluar.
+
+account-state-compose-cannot-connect = Akun ini mengalami masalah koneksi. Jika pengiriman gagal, pesan akan tetap berada di Kotak Keluar.
+
+account-state-outbox-sign-in = Menunggu: akun { $account } belum masuk
+
+account-state-outbox-cannot-connect = Menunggu: akun { $account } tidak dapat terhubung

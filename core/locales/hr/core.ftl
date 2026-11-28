@@ -1162,3 +1162,85 @@ reaction-notification-text = { $count ->
     [few] na { $subject } (ukupno { $count } nove reakcije)
    *[other] na { $subject } (ukupno { $count } novih reakcija)
 }
+
+reader-failed-signed-out = Poslužitelj e-pošte nije prihvatio prijavu ovog računa. Traka iznad popisa poruka objašnjava što učiniti.
+
+account-state-tooltip-refused = Nema prijave: prijava nije prihvaćena
+
+account-state-tooltip-admin = Nema prijave: administrator prvo mora odobriti Inbox Classic
+
+account-state-tooltip-imap-off = Nema prijave: IMAP je isključen za ovaj poštanski sandučić
+
+account-state-tooltip-other-address = Nema prijave: u pregledniku je prijavljena druga adresa
+
+account-state-tooltip-cannot-connect = Nije moguće povezati se s poslužiteljem e-pošte
+
+account-state-mail-server = Poslužitelj e-pošte
+
+account-state-bar-refused-browser = Račun „{ $account }“ nije prijavljen. { $provider }: prijava nije prihvaćena. Pošta računa možda nije ažurna.
+
+account-state-bar-refused-password = Račun „{ $account }“ nije prijavljen: poslužitelj e-pošte nije prihvatio njegovu lozinku. Pošta računa možda nije ažurna.
+
+account-state-bar-admin = Račun „{ $account }“ nije prijavljen: administrator domene { $domain } mora odobriti Inbox Classic prije prijave. Pošta računa možda nije ažurna.
+
+account-state-bar-imap-off = Račun „{ $account }“ nije prijavljen. { $provider }: IMAP je isključen za ovaj poštanski sandučić. Uključite ga u postavkama sandučića pa ponovno pošaljite i primite poštu.
+
+account-state-bar-other-address = Račun „{ $account }“ nije prijavljen: u pregledniku je prijavljena adresa { $email }, a ne { $expected }. Pokušajte ponovno i odaberite { $expected }.
+
+account-state-bar-cannot-connect = Račun „{ $account }“ ne može se povezati sa svojim poslužiteljem e-pošte. Njegova pošta možda nije ažurna.
+
+account-state-button-sign-in = Ponovno se prijavi
+
+account-state-button-password = Unesi lozinku
+
+account-state-button-admin-link = Kopiraj poveznicu za administratora
+
+account-state-button-help = Pomoć
+
+account-state-button-try-again = Pokušaj ponovno
+
+account-state-admin-link-copied = Poveznica je kopirana. Pošaljite je administratoru svoje organizacije.
+
+account-state-app-password-hint = Ako davatelj usluge za programe za poštu traži lozinku za aplikaciju, unesite je ovdje umjesto uobičajene lozinke.
+
+account-status-sign-in = Račun „{ $account }“ traži prijavu
+
+account-status-cannot-connect = Račun „{ $account }“ ne može se povezati
+
+account-status-failed = { $account }: { $reason }
+
+account-status-sign-in-many = { $count ->
+    [one] { $count } račun traži prijavu
+    [few] { $count } računa traže prijavu
+   *[other] { $count } računa traži prijavu
+}
+
+account-status-cannot-connect-many = { $count ->
+    [one] { $count } račun ne može se povezati
+    [few] { $count } računa ne mogu se povezati
+   *[other] { $count } računa ne može se povezati
+}
+
+account-notify-title-sign-in = Račun „{ $account }“ nije prijavljen
+
+account-notify-text-refused-browser = { $provider }: prijava nije prihvaćena. Ponovno se prijavite za primanje nove pošte.
+
+account-notify-text-refused-password = Poslužitelj e-pošte nije prihvatio lozinku. Unesite je ponovno za primanje nove pošte.
+
+account-notify-text-admin = Administrator domene { $domain } prvo mora odobriti Inbox Classic.
+
+account-notify-text-imap-off = { $provider }: IMAP je isključen za ovaj poštanski sandučić.
+
+account-notify-text-other-address = U pregledniku je prijavljena adresa { $email }. Pokušajte ponovno i odaberite { $expected }.
+
+account-notify-title-cannot-connect = Račun „{ $account }“ ne može se povezati
+
+account-notify-text-cannot-connect = Inbox Classic ne može se povezati s poslužiteljem e-pošte. Nastavit će pokušavati.
+
+account-state-compose-sign-in = Ovaj račun nije prijavljen; poruka će čekati u mapi Izlazna pošta.
+
+account-state-compose-cannot-connect = Ovaj račun ima poteškoća s vezom. Ako slanje ne uspije, poruka će ostati u mapi Izlazna pošta.
+
+account-state-outbox-sign-in = Čekanje: račun „{ $account }“ nije prijavljen
+
+account-state-outbox-cannot-connect = Čekanje: račun „{ $account }“ ne može se povezati

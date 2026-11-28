@@ -869,3 +869,5 @@ ui-reactions-label = Reakciók:
 ui-reaction-open-email = Reakciós e-mail megnyitása
 ui-reaction-show-as-email = Megjelenítés e-mailként
 ui-reaction-when = Reakció: { $when }
+
+cmd-sign-in-again = Újra bejelentke&zés...

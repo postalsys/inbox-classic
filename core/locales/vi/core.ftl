@@ -914,3 +914,77 @@ reaction-notification-text = { $count ->
     [1] về { $subject }
    *[other] về { $subject } (tổng cộng { $count } cảm xúc mới)
 }
+
+reader-failed-signed-out = Máy chủ thư đã từ chối yêu cầu đăng nhập của tài khoản này. Thanh phía trên danh sách thư giải thích cách xử lý.
+
+account-state-tooltip-refused = Chưa đăng nhập: yêu cầu đăng nhập bị từ chối
+
+account-state-tooltip-admin = Chưa đăng nhập: quản trị viên phải phê duyệt Inbox Classic trước
+
+account-state-tooltip-imap-off = Chưa đăng nhập: IMAP đang bị tắt cho hộp thư này
+
+account-state-tooltip-other-address = Chưa đăng nhập: trình duyệt đã đăng nhập bằng địa chỉ khác
+
+account-state-tooltip-cannot-connect = Không thể kết nối với máy chủ thư
+
+account-state-mail-server = Máy chủ thư
+
+account-state-bar-refused-browser = Tài khoản { $account } chưa đăng nhập: { $provider } đã từ chối yêu cầu đăng nhập. Thư của tài khoản có thể chưa được cập nhật.
+
+account-state-bar-refused-password = Tài khoản { $account } chưa đăng nhập: máy chủ thư không chấp nhận mật khẩu. Thư của tài khoản có thể chưa được cập nhật.
+
+account-state-bar-admin = Tài khoản { $account } chưa đăng nhập: quản trị viên của miền { $domain } phải phê duyệt Inbox Classic trước khi bạn có thể đăng nhập. Thư của tài khoản có thể chưa được cập nhật.
+
+account-state-bar-imap-off = Tài khoản { $account } chưa đăng nhập: { $provider } cho biết IMAP đang bị tắt cho hộp thư này. Hãy bật IMAP trong thiết đặt hộp thư rồi gửi và nhận thư lại.
+
+account-state-bar-other-address = Tài khoản { $account } chưa đăng nhập: trình duyệt đã đăng nhập bằng { $email }, không phải { $expected }. Hãy thử lại và chọn { $expected }.
+
+account-state-bar-cannot-connect = Tài khoản { $account } không thể kết nối với máy chủ thư. Thư của tài khoản có thể chưa được cập nhật.
+
+account-state-button-sign-in = Đăng nhập lại
+
+account-state-button-password = Nhập mật khẩu
+
+account-state-button-admin-link = Sao chép liên kết cho quản trị viên
+
+account-state-button-help = Trợ giúp
+
+account-state-button-try-again = Thử lại
+
+account-state-admin-link-copied = Đã sao chép liên kết. Hãy gửi liên kết cho quản trị viên của tổ chức bạn.
+
+account-state-app-password-hint = Nếu nhà cung cấp yêu cầu mật khẩu ứng dụng cho chương trình email, hãy nhập mật khẩu ứng dụng vào đây thay cho mật khẩu thông thường.
+
+account-status-sign-in = Cần đăng nhập vào tài khoản { $account }
+
+account-status-cannot-connect = Tài khoản { $account } không thể kết nối
+
+account-status-failed = { $account }: { $reason }
+
+account-status-sign-in-many = Cần đăng nhập vào { $count } tài khoản
+
+account-status-cannot-connect-many = { $count } tài khoản không thể kết nối
+
+account-notify-title-sign-in = Tài khoản { $account } chưa đăng nhập
+
+account-notify-text-refused-browser = { $provider } đã từ chối yêu cầu đăng nhập. Hãy đăng nhập lại để nhận thư mới.
+
+account-notify-text-refused-password = Máy chủ thư không chấp nhận mật khẩu. Hãy nhập lại để nhận thư mới.
+
+account-notify-text-admin = Quản trị viên của miền { $domain } phải phê duyệt Inbox Classic trước.
+
+account-notify-text-imap-off = { $provider } cho biết IMAP đang bị tắt cho hộp thư này.
+
+account-notify-text-other-address = Trình duyệt đã đăng nhập bằng { $email }. Hãy thử lại và chọn { $expected }.
+
+account-notify-title-cannot-connect = Tài khoản { $account } không thể kết nối
+
+account-notify-text-cannot-connect = Inbox Classic không thể kết nối với máy chủ thư và sẽ tiếp tục thử.
+
+account-state-compose-sign-in = Tài khoản này chưa đăng nhập; thư sẽ chờ trong Hộp thư đi.
+
+account-state-compose-cannot-connect = Tài khoản này gặp sự cố kết nối. Nếu gửi không thành công, thư sẽ nằm lại trong Hộp thư đi.
+
+account-state-outbox-sign-in = Đang chờ: tài khoản { $account } chưa đăng nhập
+
+account-state-outbox-cannot-connect = Đang chờ: tài khoản { $account } không thể kết nối

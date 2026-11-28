@@ -871,3 +871,5 @@ ui-reactions-label = Αντιδράσεις:
 ui-reaction-open-email = Άνοιγμα του email της αντίδρασης
 ui-reaction-show-as-email = Εμφάνιση ως email
 ui-reaction-when = Αντίδραση: { $when }
+
+cmd-sign-in-again = Επανασύνδεσ&η...

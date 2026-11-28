@@ -5,7 +5,7 @@
     <li>«connection error: …»</li>
     <li>«the server did not answer in time»</li>
     <li>«a ligação ao servidor falhou (…)»</li>
-    <li>«Não foi possível obter a mensagem do servidor de correio (…).»</li>
+    <li>«A ligação ao servidor de correio falhou ou foi interrompida (…).»</li>
 </ul>
 <p>Para resolver:</p>
 <ol>
@@ -13,6 +13,6 @@
     <li>Abra as propriedades da conta em <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b> e verifique os nomes dos servidores e as portas.</li>
     <li>Se o envio falhar, confirme a porta e o modo de encriptação indicados pelo fornecedor, por exemplo SSL/TLS na porta 465 ou STARTTLS na porta 587. Algumas redes bloqueiam as portas de correio, em especial a porta 25.</li>
 </ol>
-<p>O Inbox Classic tenta novamente na próxima verificação de correio. Para tentar de imediato, clique em <b data-text="ui-tb-sync"></b>.</p>
-<p>Uma mensagem que envie sem ligação fica na Caixa de Saída até ser possível contactar o servidor e concluir o envio. Uma ligação restabelecida permite nova tentativa, mas não garante que o envio seja aceite.</p>
+<p>O Inbox Classic tenta novamente na próxima verificação de correio. Após duas falhas de ligação consecutivas, aparece um aviso junto da conta na lista de pastas e por cima da respetiva lista de mensagens. Para tentar agora, clique no ícone de aviso, em <b data-text="account-state-button-try-again"></b> na barra ou em <b data-text="ui-tb-sync"></b>. O aviso desaparece quando a conta volta a ligar-se.</p>
+<p>Uma mensagem que envie sem ligação fica na Caixa de Saída local. O Inbox Classic tenta novamente quando consegue ligar-se; o servidor ainda pode recusar a mensagem.</p>
 <nav class="related"><a href="topic:drafts-outbox"></a> <a href="topic:certificate-errors"></a> <a href="topic:message-not-shown"></a></nav>

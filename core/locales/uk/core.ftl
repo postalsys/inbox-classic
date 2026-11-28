@@ -1240,3 +1240,87 @@ reaction-notification-text = { $count ->
     [1] на повідомлення { $subject }
    *[other] на повідомлення { $subject } (усього нових реакцій: { $count })
 }
+
+reader-failed-signed-out = Поштовий сервер відхилив вхід до цього облікового запису. Панель над списком повідомлень пояснює, що робити.
+
+account-state-tooltip-refused = Вхід не виконано: спробу входу відхилено
+
+account-state-tooltip-admin = Вхід не виконано: спочатку адміністратор має схвалити Inbox Classic
+
+account-state-tooltip-imap-off = Вхід не виконано: IMAP вимкнено для цієї поштової скриньки
+
+account-state-tooltip-other-address = Вхід не виконано: у браузері ввійшли з іншою адресою
+
+account-state-tooltip-cannot-connect = Не вдається з’єднатися з поштовим сервером
+
+account-state-mail-server = Поштовий сервер
+
+account-state-bar-refused-browser = Вхід до облікового запису «{ $account }» не виконано. { $provider }: вхід відхилено. Пошта в цьому обліковому записі може бути неактуальною.
+
+account-state-bar-refused-password = Вхід до облікового запису «{ $account }» не виконано: поштовий сервер не прийняв пароль. Пошта в цьому обліковому записі може бути неактуальною.
+
+account-state-bar-admin = Вхід до облікового запису «{ $account }» не виконано: адміністратор домену { $domain } має схвалити Inbox Classic, перш ніж вхід стане можливим. Пошта в цьому обліковому записі може бути неактуальною.
+
+account-state-bar-imap-off = Вхід до облікового запису «{ $account }» не виконано. { $provider }: IMAP вимкнено для цієї поштової скриньки. Увімкніть його в параметрах скриньки, а потім знову надішліть і отримайте пошту.
+
+account-state-bar-other-address = Вхід до облікового запису «{ $account }» не виконано: у браузері ввійшли з адресою { $email }, а не { $expected }. Спробуйте знову й виберіть { $expected }.
+
+account-state-bar-cannot-connect = Обліковий запис «{ $account }» не може з’єднатися зі своїм поштовим сервером. Пошта в ньому може бути неактуальною.
+
+account-state-button-sign-in = Увійти знову
+
+account-state-button-password = Ввести пароль
+
+account-state-button-admin-link = Копіювати посилання для адміністратора
+
+account-state-button-help = Довідка
+
+account-state-button-try-again = Спробувати знову
+
+account-state-admin-link-copied = Посилання скопійовано. Надішліть його адміністратору своєї організації.
+
+account-state-app-password-hint = Якщо провайдер вимагає пароль застосунку для поштових програм, введіть його тут замість звичайного пароля.
+
+account-status-sign-in = Обліковий запис «{ $account }» потребує входу
+
+account-status-cannot-connect = Обліковий запис «{ $account }» не може з’єднатися
+
+account-status-failed = { $account }: { $reason }
+
+account-status-sign-in-many = { $count ->
+    [one] { $count } обліковий запис потребує входу
+    [few] { $count } облікові записи потребують входу
+    [many] { $count } облікових записів потребують входу
+   *[other] { $count } облікового запису потребують входу
+}
+
+account-status-cannot-connect-many = { $count ->
+    [one] { $count } обліковий запис не може з’єднатися
+    [few] { $count } облікові записи не можуть з’єднатися
+    [many] { $count } облікових записів не можуть з’єднатися
+   *[other] { $count } облікового запису не можуть з’єднатися
+}
+
+account-notify-title-sign-in = Вхід до облікового запису «{ $account }» не виконано
+
+account-notify-text-refused-browser = { $provider }: вхід відхилено. Увійдіть знову, щоб отримувати нову пошту.
+
+account-notify-text-refused-password = Поштовий сервер не прийняв пароль. Введіть його знову, щоб отримувати нову пошту.
+
+account-notify-text-admin = Адміністратор домену { $domain } має спочатку схвалити Inbox Classic.
+
+account-notify-text-imap-off = { $provider }: IMAP вимкнено для цієї поштової скриньки.
+
+account-notify-text-other-address = У браузері ввійшли з адресою { $email }. Спробуйте знову й виберіть { $expected }.
+
+account-notify-title-cannot-connect = Обліковий запис «{ $account }» не може з’єднатися
+
+account-notify-text-cannot-connect = Inbox Classic не може з’єднатися з поштовим сервером. Програма продовжить спроби.
+
+account-state-compose-sign-in = Вхід до цього облікового запису не виконано; повідомлення чекатиме в папці «Вихідні».
+
+account-state-compose-cannot-connect = Цей обліковий запис має проблему зі з’єднанням. Якщо надсилання не вдасться, повідомлення залишиться в папці «Вихідні».
+
+account-state-outbox-sign-in = Очікування: вхід до облікового запису «{ $account }» не виконано
+
+account-state-outbox-cannot-connect = Очікування: обліковий запис «{ $account }» не може з’єднатися

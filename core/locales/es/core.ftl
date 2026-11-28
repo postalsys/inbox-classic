@@ -1073,3 +1073,83 @@ reaction-notification-text = { $count ->
     [one] a { $subject }
    *[other] a { $subject } ({ $count } reacciones nuevas en total)
 }
+
+reader-failed-signed-out = El servidor de correo ha rechazado el inicio de sesión de esta cuenta. La barra sobre la lista de mensajes explica qué hacer.
+
+account-state-tooltip-refused = Sesión no iniciada: se ha rechazado el inicio de sesión
+
+account-state-tooltip-admin = Sesión no iniciada: un administrador debe autorizar Inbox Classic primero
+
+account-state-tooltip-imap-off = Sesión no iniciada: IMAP está desactivado para este buzón
+
+account-state-tooltip-other-address = Sesión no iniciada: el navegador ha iniciado sesión con otra dirección
+
+account-state-tooltip-cannot-connect = No se puede conectar con el servidor de correo
+
+account-state-mail-server = El servidor de correo
+
+account-state-bar-refused-browser = No se ha iniciado sesión en la cuenta { $account }: { $provider } ha rechazado el inicio de sesión. El correo puede no estar actualizado.
+
+account-state-bar-refused-password = No se ha iniciado sesión en la cuenta { $account }: el servidor de correo ha rechazado la contraseña. El correo puede no estar actualizado.
+
+account-state-bar-admin = No se ha iniciado sesión en la cuenta { $account }: un administrador del dominio { $domain } debe autorizar Inbox Classic antes de iniciar sesión. El correo puede no estar actualizado.
+
+account-state-bar-imap-off = No se ha iniciado sesión en la cuenta { $account }: { $provider } indica que IMAP está desactivado para este buzón. Actívelo en la configuración del buzón y vuelva a enviar y recibir correo.
+
+account-state-bar-other-address = No se ha iniciado sesión en la cuenta { $account }: el navegador ha iniciado sesión con { $email } en lugar de { $expected }. Vuelva a intentarlo y elija { $expected }.
+
+account-state-bar-cannot-connect = La cuenta { $account } no se puede conectar con su servidor de correo. El correo puede no estar actualizado.
+
+account-state-button-sign-in = Iniciar sesión de nuevo
+
+account-state-button-password = Introducir contraseña
+
+account-state-button-admin-link = Copiar enlace para el administrador
+
+account-state-button-help = Ayuda
+
+account-state-button-try-again = Reintentar
+
+account-state-admin-link-copied = Se ha copiado el enlace. Envíelo al administrador de su organización.
+
+account-state-app-password-hint = Si su proveedor exige una contraseña de aplicación para los programas de correo, introdúzcala aquí en lugar de su contraseña habitual.
+
+account-status-sign-in = Debe iniciar sesión en la cuenta { $account }
+
+account-status-cannot-connect = La cuenta { $account } no se puede conectar
+
+account-status-failed = { $account }: { $reason }
+
+account-status-sign-in-many = { $count ->
+    [one] Debe iniciar sesión en { $count } cuenta
+   *[other] Debe iniciar sesión en { $count } cuentas
+}
+
+account-status-cannot-connect-many = { $count ->
+    [one] { $count } cuenta no se puede conectar
+   *[other] { $count } cuentas no se pueden conectar
+}
+
+account-notify-title-sign-in = No se ha iniciado sesión en la cuenta { $account }
+
+account-notify-text-refused-browser = { $provider }: se ha rechazado el inicio de sesión. Inicie sesión de nuevo para recibir correo nuevo.
+
+account-notify-text-refused-password = El servidor de correo ha rechazado la contraseña. Introdúzcala de nuevo para recibir correo nuevo.
+
+account-notify-text-admin = Un administrador del dominio { $domain } debe autorizar Inbox Classic primero.
+
+account-notify-text-imap-off = { $provider }: IMAP está desactivado para este buzón.
+
+account-notify-text-other-address = El navegador ha iniciado sesión con { $email }. Vuelva a intentarlo y elija { $expected }.
+
+account-notify-title-cannot-connect = La cuenta { $account } no se puede conectar
+
+account-notify-text-cannot-connect = No se puede conectar con el servidor de correo. Inbox Classic sigue intentándolo.
+
+account-state-compose-sign-in = No se ha iniciado sesión en esta cuenta; el mensaje esperará en la Bandeja de salida.
+
+account-state-compose-cannot-connect = Esta cuenta tiene un problema de conexión. Si falla el envío, el mensaje permanecerá en la Bandeja de salida.
+
+account-state-outbox-sign-in = En espera: no se ha iniciado sesión en la cuenta { $account }
+
+account-state-outbox-cannot-connect = En espera: la cuenta { $account } no se puede conectar

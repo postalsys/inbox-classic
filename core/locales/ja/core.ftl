@@ -821,3 +821,77 @@ reaction-notification-text = { $count ->
     [1] 対象: { $subject }
    *[other] 対象: { $subject }（新しいリアクションは合計{ $count }件）
 }
+
+reader-failed-signed-out = メール サーバーがこのアカウントのサインインを受け付けませんでした。メッセージ一覧の上のバーに対処方法が表示されます。
+
+account-state-tooltip-refused = サインインしていません：サインインが拒否されました
+
+account-state-tooltip-admin = サインインしていません：先に管理者がInbox Classicを承認する必要があります
+
+account-state-tooltip-imap-off = サインインしていません：このメールボックスではIMAPが無効になっています
+
+account-state-tooltip-other-address = サインインしていません：ブラウザーでは別のアドレスでサインインしました
+
+account-state-tooltip-cannot-connect = メール サーバーに接続できません
+
+account-state-mail-server = メール サーバー
+
+account-state-bar-refused-browser = { $account }にサインインしていません：{ $provider }がサインインを受け付けませんでした。このアカウントのメールは最新の状態ではない可能性があります。
+
+account-state-bar-refused-password = { $account }にサインインしていません：メール サーバーがパスワードを受け付けませんでした。このアカウントのメールは最新の状態ではない可能性があります。
+
+account-state-bar-admin = { $account }にサインインしていません：サインインするには、先に{ $domain }の管理者がInbox Classicを承認する必要があります。このアカウントのメールは最新の状態ではない可能性があります。
+
+account-state-bar-imap-off = { $account }にサインインしていません：{ $provider }によると、このメールボックスではIMAPが無効になっています。メールボックスの設定で有効にしてから、もう一度送受信してください。
+
+account-state-bar-other-address = { $account }にサインインしていません：ブラウザーでは{ $expected }ではなく{ $email }でサインインしました。もう一度試して{ $expected }を選択してください。
+
+account-state-bar-cannot-connect = { $account }のメール サーバーに接続できません。このアカウントのメールは最新の状態ではない可能性があります。
+
+account-state-button-sign-in = 再サインイン
+
+account-state-button-password = パスワードの入力
+
+account-state-button-admin-link = 管理者に送るリンクをコピー
+
+account-state-button-help = ヘルプ
+
+account-state-button-try-again = 再試行
+
+account-state-admin-link-copied = リンクをコピーしました。組織の管理者に送ってください。
+
+account-state-app-password-hint = プロバイダーがメール プログラム用のアプリ パスワードを求めている場合は、通常のパスワードの代わりにここに入力してください。
+
+account-status-sign-in = { $account }へのサインインが必要です
+
+account-status-cannot-connect = { $account }で接続できません
+
+account-status-failed = { $account }：{ $reason }
+
+account-status-sign-in-many = { $count }個のアカウントでサインインが必要です
+
+account-status-cannot-connect-many = { $count }個のアカウントで接続できません
+
+account-notify-title-sign-in = { $account }にサインインしていません
+
+account-notify-text-refused-browser = { $provider }がサインインを受け付けませんでした。新しいメールを受信するには、もう一度サインインしてください。
+
+account-notify-text-refused-password = メール サーバーがパスワードを受け付けませんでした。新しいメールを受信するには、もう一度入力してください。
+
+account-notify-text-admin = 先に{ $domain }の管理者がInbox Classicを承認する必要があります。
+
+account-notify-text-imap-off = { $provider }によると、このメールボックスではIMAPが無効になっています。
+
+account-notify-text-other-address = ブラウザーでは{ $email }でサインインしました。もう一度試して{ $expected }を選択してください。
+
+account-notify-title-cannot-connect = { $account }で接続できません
+
+account-notify-text-cannot-connect = Inbox Classicはメール サーバーに接続できません。引き続き接続を試みます。
+
+account-state-compose-sign-in = このアカウントにサインインしていないため、メッセージは送信トレイで待機します。
+
+account-state-compose-cannot-connect = このアカウントに接続の問題があります。送信に失敗した場合、メッセージは送信トレイに残ります。
+
+account-state-outbox-sign-in = 待機中：{ $account }にサインインしていません
+
+account-state-outbox-cannot-connect = 待機中：{ $account }で接続できません

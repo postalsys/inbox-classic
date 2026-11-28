@@ -1192,3 +1192,85 @@ reaction-notification-text = { $count ->
     [few] na správu { $subject } (spolu { $count } nové reakcie)
    *[other] na správu { $subject } (spolu { $count } nových reakcií)
 }
+
+reader-failed-signed-out = Poštový server neprijal prihlásenie tohto konta. Panel nad zoznamom správ vysvetľuje, čo robiť.
+
+account-state-tooltip-refused = Neprihlásené: prihlásenie nebolo prijaté
+
+account-state-tooltip-admin = Neprihlásené: správca musí najprv schváliť Inbox Classic
+
+account-state-tooltip-imap-off = Neprihlásené: pre túto schránku je vypnutý IMAP
+
+account-state-tooltip-other-address = Neprihlásené: v prehliadači je prihlásená iná adresa
+
+account-state-tooltip-cannot-connect = Nedá sa pripojiť k poštovému serveru
+
+account-state-mail-server = Poštový server
+
+account-state-bar-refused-browser = Konto „{ $account }“ nie je prihlásené. { $provider }: prihlásenie nebolo prijaté. Pošta konta nemusí byť aktuálna.
+
+account-state-bar-refused-password = Konto „{ $account }“ nie je prihlásené: poštový server neprijal jeho heslo. Pošta konta nemusí byť aktuálna.
+
+account-state-bar-admin = Konto „{ $account }“ nie je prihlásené: správca domény { $domain } musí schváliť Inbox Classic, aby sa konto mohlo prihlásiť. Pošta konta nemusí byť aktuálna.
+
+account-state-bar-imap-off = Konto „{ $account }“ nie je prihlásené. { $provider }: pre túto schránku je vypnutý IMAP. Zapnite ho v nastaveniach schránky a znova odošlite a prijmite poštu.
+
+account-state-bar-other-address = Konto „{ $account }“ nie je prihlásené: v prehliadači je prihlásená adresa { $email }, nie { $expected }. Skúste to znova a vyberte { $expected }.
+
+account-state-bar-cannot-connect = Konto „{ $account }“ sa nemôže pripojiť k svojmu poštovému serveru. Jeho pošta nemusí byť aktuálna.
+
+account-state-button-sign-in = Znova sa prihlásiť
+
+account-state-button-password = Zadať heslo
+
+account-state-button-admin-link = Kopírovať odkaz pre správcu
+
+account-state-button-help = Pomocník
+
+account-state-button-try-again = Skúsiť znova
+
+account-state-admin-link-copied = Odkaz je skopírovaný. Pošlite ho správcovi svojej organizácie.
+
+account-state-app-password-hint = Ak poskytovateľ vyžaduje pre poštové programy heslo aplikácie, zadajte ho sem namiesto bežného hesla.
+
+account-status-sign-in = Konto „{ $account }“ vyžaduje prihlásenie
+
+account-status-cannot-connect = Konto „{ $account }“ sa nemôže pripojiť
+
+account-status-failed = { $account }: { $reason }
+
+account-status-sign-in-many = { $count ->
+    [one] { $count } konto vyžaduje prihlásenie
+    [few] { $count } kontá vyžadujú prihlásenie
+   *[other] { $count } kont vyžaduje prihlásenie
+}
+
+account-status-cannot-connect-many = { $count ->
+    [one] { $count } konto sa nemôže pripojiť
+    [few] { $count } kontá sa nemôžu pripojiť
+   *[other] { $count } kont sa nemôže pripojiť
+}
+
+account-notify-title-sign-in = Konto „{ $account }“ nie je prihlásené
+
+account-notify-text-refused-browser = { $provider }: prihlásenie nebolo prijaté. Ak chcete prijímať novú poštu, znova sa prihláste.
+
+account-notify-text-refused-password = Poštový server neprijal heslo. Ak chcete prijímať novú poštu, zadajte ho znova.
+
+account-notify-text-admin = Správca domény { $domain } musí najprv schváliť Inbox Classic.
+
+account-notify-text-imap-off = { $provider }: pre túto schránku je vypnutý IMAP.
+
+account-notify-text-other-address = V prehliadači je prihlásená adresa { $email }. Skúste to znova a vyberte { $expected }.
+
+account-notify-title-cannot-connect = Konto „{ $account }“ sa nemôže pripojiť
+
+account-notify-text-cannot-connect = Inbox Classic sa nemôže pripojiť k poštovému serveru. Bude to skúšať ďalej.
+
+account-state-compose-sign-in = Toto konto nie je prihlásené; správa počká v priečinku Pošta na odoslanie.
+
+account-state-compose-cannot-connect = Toto konto má problém s pripojením. Ak odoslanie zlyhá, správa zostane v priečinku Pošta na odoslanie.
+
+account-state-outbox-sign-in = Čakanie: konto „{ $account }“ nie je prihlásené
+
+account-state-outbox-cannot-connect = Čakanie: konto „{ $account }“ sa nemôže pripojiť

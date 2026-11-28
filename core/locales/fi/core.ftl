@@ -1077,3 +1077,77 @@ reaction-notification-text = { $count ->
     [one] viestiin { $subject }
    *[other] viestiin { $subject } (yhteensä { $count } uutta reaktiota)
 }
+
+reader-failed-signed-out = Postipalvelin ei hyväksynyt tämän tilin kirjautumista. Viestiluettelon yläpuolella oleva palkki kertoo, mitä tehdä.
+
+account-state-tooltip-refused = Ei kirjautuneena: kirjautumista ei hyväksytty
+
+account-state-tooltip-admin = Ei kirjautuneena: järjestelmänvalvojan on ensin hyväksyttävä Inbox Classic
+
+account-state-tooltip-imap-off = Ei kirjautuneena: tämän postilaatikon IMAP-käyttö on poissa käytöstä
+
+account-state-tooltip-other-address = Ei kirjautuneena: selaimessa kirjauduttiin toisella osoitteella
+
+account-state-tooltip-cannot-connect = Postipalvelimeen ei saada yhteyttä
+
+account-state-mail-server = Postipalvelin
+
+account-state-bar-refused-browser = Tilille { $account } ei ole kirjauduttu: { $provider } ei hyväksynyt kirjautumista. Tilin viestit eivät ehkä ole ajan tasalla.
+
+account-state-bar-refused-password = Tilille { $account } ei ole kirjauduttu: postipalvelin ei hyväksynyt salasanaa. Tilin viestit eivät ehkä ole ajan tasalla.
+
+account-state-bar-admin = Tilille { $account } ei ole kirjauduttu: verkkotunnuksen { $domain } järjestelmänvalvojan on hyväksyttävä Inbox Classic ennen kirjautumista. Tilin viestit eivät ehkä ole ajan tasalla.
+
+account-state-bar-imap-off = Tilille { $account } ei ole kirjauduttu: { $provider } ilmoittaa, että tämän postilaatikon IMAP-käyttö on poissa käytöstä. Ota se käyttöön postilaatikon asetuksissa ja lähetä ja vastaanota uudelleen.
+
+account-state-bar-other-address = Tilille { $account } ei ole kirjauduttu: selaimessa kirjauduttiin osoitteella { $email }, ei osoitteella { $expected }. Yritä uudelleen ja valitse { $expected }.
+
+account-state-bar-cannot-connect = Tili { $account } ei saa yhteyttä postipalvelimeensa. Tilin viestit eivät ehkä ole ajan tasalla.
+
+account-state-button-sign-in = Kirjaudu uudelleen
+
+account-state-button-password = Anna salasana
+
+account-state-button-admin-link = Kopioi linkki järjestelmänvalvojalle
+
+account-state-button-help = Ohje
+
+account-state-button-try-again = Yritä uudelleen
+
+account-state-admin-link-copied = Linkki on kopioitu. Lähetä se organisaatiosi järjestelmänvalvojalle.
+
+account-state-app-password-hint = Jos palveluntarjoajasi vaatii sähköpostiohjelmiin sovellussalasanan, anna se tähän tavallisen salasanasi sijaan.
+
+account-status-sign-in = Tilille { $account } on kirjauduttava
+
+account-status-cannot-connect = Tili { $account } ei saa yhteyttä
+
+account-status-failed = { $account }: { $reason }
+
+account-status-sign-in-many = { $count } tilille on kirjauduttava
+
+account-status-cannot-connect-many = { $count } tiliä ei saa yhteyttä
+
+account-notify-title-sign-in = Tilille { $account } ei ole kirjauduttu
+
+account-notify-text-refused-browser = { $provider } ei hyväksynyt kirjautumista. Kirjaudu uudelleen, jotta saat uudet viestit.
+
+account-notify-text-refused-password = Postipalvelin ei hyväksynyt salasanaa. Anna se uudelleen, jotta saat uudet viestit.
+
+account-notify-text-admin = Verkkotunnuksen { $domain } järjestelmänvalvojan on ensin hyväksyttävä Inbox Classic.
+
+account-notify-text-imap-off = { $provider } ilmoittaa, että tämän postilaatikon IMAP-käyttö on poissa käytöstä.
+
+account-notify-text-other-address = Selaimessa kirjauduttiin osoitteella { $email }. Yritä uudelleen ja valitse { $expected }.
+
+account-notify-title-cannot-connect = Tili { $account } ei saa yhteyttä
+
+account-notify-text-cannot-connect = Inbox Classic ei saa yhteyttä postipalvelimeen. Se jatkaa yrittämistä.
+
+account-state-compose-sign-in = Tälle tilille ei ole kirjauduttu. Viesti jää odottamaan Lähtevät-kansioon.
+
+account-state-compose-cannot-connect = Tällä tilillä on yhteysongelma. Jos lähettäminen epäonnistuu, viesti jää Lähtevät-kansioon.
+
+account-state-outbox-sign-in = Odottaa: tilille { $account } ei ole kirjauduttu
+
+account-state-outbox-cannot-connect = Odottaa: tili { $account } ei saa yhteyttä

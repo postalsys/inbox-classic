@@ -1171,3 +1171,85 @@ reaction-notification-text = { $count ->
     [1] į laišką { $subject }
    *[other] į laišką { $subject } (naujų reakcijų iš viso: { $count })
 }
+
+reader-failed-signed-out = Pašto serveris atmetė prisijungimą prie šios paskyros. Juostoje virš laiškų sąrašo paaiškinta, ką daryti.
+
+account-state-tooltip-refused = Neprisijungta: prisijungimas atmestas
+
+account-state-tooltip-admin = Neprisijungta: administratorius pirmiausia turi patvirtinti Inbox Classic
+
+account-state-tooltip-imap-off = Neprisijungta: šiai pašto dėžutei išjungta IMAP prieiga
+
+account-state-tooltip-other-address = Neprisijungta: naršyklėje prisijungta kitu adresu
+
+account-state-tooltip-cannot-connect = Nepavyksta užmegzti ryšio su pašto serveriu
+
+account-state-mail-server = Pašto serveris
+
+account-state-bar-refused-browser = Prie paskyros „{ $account }“ neprisijungta: { $provider } atmetė prisijungimą. Rodomi paskyros laiškai gali būti neatnaujinti.
+
+account-state-bar-refused-password = Prie paskyros „{ $account }“ neprisijungta: pašto serveris atmetė slaptažodį. Rodomi paskyros laiškai gali būti neatnaujinti.
+
+account-state-bar-admin = Prie paskyros „{ $account }“ neprisijungta: domeno { $domain } administratorius turi patvirtinti Inbox Classic, kad būtų galima prisijungti. Rodomi paskyros laiškai gali būti neatnaujinti.
+
+account-state-bar-imap-off = Prie paskyros „{ $account }“ neprisijungta: { $provider } praneša, kad šiai pašto dėžutei išjungta IMAP prieiga. Įjunkite ją pašto dėžutės nustatymuose ir bandykite vėl siųsti bei gauti laiškus.
+
+account-state-bar-other-address = Prie paskyros „{ $account }“ neprisijungta: naršyklėje prisijungta adresu { $email }, o ne { $expected }. Bandykite dar kartą ir pasirinkite { $expected }.
+
+account-state-bar-cannot-connect = Paskyra „{ $account }“ negali užmegzti ryšio su pašto serveriu. Rodomi paskyros laiškai gali būti neatnaujinti.
+
+account-state-button-sign-in = Prisijungti iš naujo
+
+account-state-button-password = Įvesti slaptažodį
+
+account-state-button-admin-link = Kopijuoti nuorodą administratoriui
+
+account-state-button-help = Žinynas
+
+account-state-button-try-again = Bandyti dar kartą
+
+account-state-admin-link-copied = Nuoroda nukopijuota. Nusiųskite ją savo organizacijos administratoriui.
+
+account-state-app-password-hint = Jei paslaugų teikėjas pašto programoms reikalauja programos slaptažodžio, įveskite jį čia vietoje įprasto slaptažodžio.
+
+account-status-sign-in = Reikia prisijungti prie paskyros „{ $account }“
+
+account-status-cannot-connect = Paskyra „{ $account }“ negali užmegzti ryšio
+
+account-status-failed = { $account }: { $reason }
+
+account-status-sign-in-many = { $count ->
+    [one] Reikia prisijungti prie { $count } paskyros
+    [few] Reikia prisijungti prie { $count } paskyrų
+   *[other] Reikia prisijungti prie { $count } paskyrų
+}
+
+account-status-cannot-connect-many = { $count ->
+    [one] { $count } paskyra negali užmegzti ryšio
+    [few] { $count } paskyros negali užmegzti ryšio
+   *[other] { $count } paskyrų negali užmegzti ryšio
+}
+
+account-notify-title-sign-in = Prie paskyros „{ $account }“ neprisijungta
+
+account-notify-text-refused-browser = { $provider } atmetė prisijungimą. Kad gautumėte naujus laiškus, prisijunkite iš naujo.
+
+account-notify-text-refused-password = Pašto serveris atmetė slaptažodį. Kad gautumėte naujus laiškus, įveskite jį dar kartą.
+
+account-notify-text-admin = Domeno { $domain } administratorius pirmiausia turi patvirtinti Inbox Classic.
+
+account-notify-text-imap-off = { $provider } praneša, kad šiai pašto dėžutei išjungta IMAP prieiga.
+
+account-notify-text-other-address = Naršyklėje prisijungta adresu { $email }. Bandykite dar kartą ir pasirinkite { $expected }.
+
+account-notify-title-cannot-connect = Paskyra „{ $account }“ negali užmegzti ryšio
+
+account-notify-text-cannot-connect = Inbox Classic negali užmegzti ryšio su pašto serveriu. Programa bandys dar kartą.
+
+account-state-compose-sign-in = Prie šios paskyros neprisijungta. Laiškas lauks aplanke „Siunčiami laiškai“.
+
+account-state-compose-cannot-connect = Šiai paskyrai kilo ryšio problema. Jei išsiųsti nepavyks, laiškas liks aplanke „Siunčiami laiškai“.
+
+account-state-outbox-sign-in = Laukiama: prie paskyros „{ $account }“ neprisijungta
+
+account-state-outbox-cannot-connect = Laukiama: paskyra „{ $account }“ negali užmegzti ryšio

@@ -884,3 +884,5 @@ ui-reactions-label = Reakcijas:
 ui-reaction-open-email = Atvērt reakcijas e-pasta ziņojumu
 ui-reaction-show-as-email = Rādīt kā e-pasta ziņojumu
 ui-reaction-when = Reakcija: { $when }
+
+cmd-sign-in-again = Pierak&stīties vēlreiz...

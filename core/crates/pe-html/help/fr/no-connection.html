@@ -5,7 +5,7 @@
     <li>« connection error: … »</li>
     <li>« the server did not answer in time »</li>
     <li>« la connexion au serveur a échoué (…) »</li>
-    <li>« Le serveur de messagerie est inaccessible (…). »</li>
+    <li>« La connexion au serveur de messagerie a échoué ou a été interrompue (…). »</li>
 </ul>
 <p>Pour corriger le problème :</p>
 <ol>
@@ -13,6 +13,6 @@
     <li>Ouvrez les propriétés du compte dans <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b> et vérifiez les noms des serveurs et les ports.</li>
     <li>Si l’envoi échoue, vérifiez le port et le mode de chiffrement indiqués par le fournisseur, généralement SSL/TLS sur le port 465 ou STARTTLS sur le port 587. Certains réseaux bloquent les ports de messagerie, en particulier le port 25.</li>
 </ol>
-<p>Inbox Classic réessaie à la prochaine relève du courrier. Pour réessayer maintenant, cliquez sur <b data-text="ui-tb-sync"></b>.</p>
-<p>Un message mis en attente sans connexion reste dans la Boîte d’envoi. Inbox Classic réessaie de l’envoyer lors d’une relève du courrier lorsque la connexion est rétablie.</p>
+<p>Inbox Classic réessaie à la prochaine relève du courrier. Après deux échecs de connexion consécutifs, un avertissement apparaît à côté du compte dans la liste des dossiers et au-dessus de sa liste de messages. Pour réessayer maintenant, cliquez sur l’icône d’avertissement, sur <b data-text="account-state-button-try-again"></b> dans la barre ou sur <b data-text="ui-tb-sync"></b>. L’avertissement disparaît quand le compte se reconnecte.</p>
+<p>Un message envoyé sans connexion reste dans la Boîte d’envoi locale. Inbox Classic réessaie dès qu’il peut se connecter ; le serveur peut encore refuser le message.</p>
 <nav class="related"><a href="topic:drafts-outbox"></a> <a href="topic:certificate-errors"></a> <a href="topic:message-not-shown"></a></nav>

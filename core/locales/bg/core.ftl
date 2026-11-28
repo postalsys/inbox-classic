@@ -1083,3 +1083,83 @@ reaction-notification-text = { $count ->
     [one] към { $subject }
    *[other] към { $subject } (общо { $count } нови реакции)
 }
+
+reader-failed-signed-out = Пощенският сървър не прие влизането в този акаунт. Лентата над списъка със съобщения обяснява какво да направите.
+
+account-state-tooltip-refused = Не сте влезли: влизането не беше прието
+
+account-state-tooltip-admin = Не сте влезли: администратор трябва първо да одобри Inbox Classic
+
+account-state-tooltip-imap-off = Не сте влезли: IMAP е изключен за тази пощенска кутия
+
+account-state-tooltip-other-address = Не сте влезли: в браузъра е избран друг адрес
+
+account-state-tooltip-cannot-connect = Няма връзка с пощенския сървър
+
+account-state-mail-server = Пощенският сървър
+
+account-state-bar-refused-browser = Не сте влезли в акаунта „{ $account }“: { $provider } не прие влизането. Пощата в акаунта може да не е актуална.
+
+account-state-bar-refused-password = Не сте влезли в акаунта „{ $account }“: пощенският сървър не прие паролата. Пощата в акаунта може да не е актуална.
+
+account-state-bar-admin = Не сте влезли в акаунта „{ $account }“: администратор на { $domain } трябва да одобри Inbox Classic, за да можете да влезете. Пощата в акаунта може да не е актуална.
+
+account-state-bar-imap-off = Не сте влезли в акаунта „{ $account }“: { $provider } съобщава, че IMAP е изключен за тази пощенска кутия. Включете го в настройките на кутията и опитайте отново да изпратите и получите поща.
+
+account-state-bar-other-address = Не сте влезли в акаунта „{ $account }“: в браузъра сте влезли с { $email }, а не с { $expected }. Опитайте отново и изберете { $expected }.
+
+account-state-bar-cannot-connect = Акаунтът „{ $account }“ не може да се свърже с пощенския си сървър. Пощата в него може да не е актуална.
+
+account-state-button-sign-in = Повторно влизане
+
+account-state-button-password = Въвеждане на парола
+
+account-state-button-admin-link = Копиране на връзката за администратора
+
+account-state-button-help = Помощ
+
+account-state-button-try-again = Нов опит
+
+account-state-admin-link-copied = Връзката е копирана. Изпратете я на администратора на вашата организация.
+
+account-state-app-password-hint = Ако доставчикът изисква парола за приложение за пощенски програми, въведете я тук вместо обичайната си парола.
+
+account-status-sign-in = Трябва да влезете в акаунта „{ $account }“
+
+account-status-cannot-connect = Акаунтът „{ $account }“ не може да се свърже
+
+account-status-failed = { $account }: { $reason }
+
+account-status-sign-in-many = { $count ->
+    [one] Трябва да влезете в { $count } акаунт
+   *[other] Трябва да влезете в { $count } акаунта
+}
+
+account-status-cannot-connect-many = { $count ->
+    [one] { $count } акаунт не може да се свърже
+   *[other] { $count } акаунта не могат да се свържат
+}
+
+account-notify-title-sign-in = Не сте влезли в акаунта „{ $account }“
+
+account-notify-text-refused-browser = { $provider } не прие влизането. Влезте отново, за да получите нова поща.
+
+account-notify-text-refused-password = Пощенският сървър не прие паролата. Въведете я отново, за да получите нова поща.
+
+account-notify-text-admin = Администратор на { $domain } трябва първо да одобри Inbox Classic.
+
+account-notify-text-imap-off = { $provider } съобщава, че IMAP е изключен за тази пощенска кутия.
+
+account-notify-text-other-address = В браузъра сте влезли с { $email }. Опитайте отново и изберете { $expected }.
+
+account-notify-title-cannot-connect = Акаунтът „{ $account }“ не може да се свърже
+
+account-notify-text-cannot-connect = Inbox Classic не може да се свърже с пощенския сървър. Програмата ще продължи да опитва.
+
+account-state-compose-sign-in = Не сте влезли в този акаунт; съобщението ще изчака в „Изходящи“.
+
+account-state-compose-cannot-connect = Този акаунт има проблем с връзката. Ако изпращането не успее, съобщението ще остане в „Изходящи“.
+
+account-state-outbox-sign-in = Изчакване: не сте влезли в акаунта „{ $account }“
+
+account-state-outbox-cannot-connect = Изчакване: акаунтът „{ $account }“ не може да се свърже

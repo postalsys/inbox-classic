@@ -872,3 +872,5 @@ ui-reactions-label = Реакции:
 ui-reaction-open-email = Отваряне на имейла с реакцията
 ui-reaction-show-as-email = Показване като имейл
 ui-reaction-when = Реакция: { $when }
+
+cmd-sign-in-again = Повторно влизан&е...

@@ -50,7 +50,7 @@ reader-downloading-detail = The message will appear here once the download is co
 reader-downloading-size = The message is { $size }. It will appear here once it is downloaded.
 reader-failed = The message could not be downloaded
 reader-failed-network = The connection to the mail server could not be made or was interrupted ({ $reason }).
-reader-failed-signed-out = The mail server did not accept the account’s sign-in. The bar over the message list says why and how to sign in again.
+reader-failed-signed-out = The mail server did not accept this account’s sign-in. The bar above the message list explains what to do.
 reader-failed-security = The connection to the mail server could not be made secure ({ $reason }).
 reader-failed-other = The mail server answered: { $reason }.
 reader-retry-note = It will be tried again when the account reconnects.
@@ -1097,7 +1097,7 @@ account-state-tooltip-other-address = Not signed in: the browser signed in to an
 account-state-tooltip-cannot-connect = Cannot connect to the mail server
 # who refused a password, in account-state-bar-imap-off and the like when the account signs in with a password, or
 # when the provider of a sign-in has no name
-account-state-mail-server = the mail server
+account-state-mail-server = The mail server
 # the bar over the message list of the account's folders; { $provider } is who signs it in ("Microsoft", "Google",
 # the name of a sign-in app)
 account-state-bar-refused-browser = { $account } is not signed in: { $provider } did not accept its sign-in. Its mail may be out of date.
@@ -1139,10 +1139,10 @@ account-notify-text-admin = An administrator of { $domain } must approve Inbox C
 account-notify-text-imap-off = { $provider } says IMAP is turned off for this mailbox.
 account-notify-text-other-address = The browser signed in to { $email }. Try again and choose { $expected }.
 account-notify-title-cannot-connect = { $account } cannot connect
-account-notify-text-cannot-connect = The mail server cannot be reached. Inbox Classic keeps trying.
+account-notify-text-cannot-connect = Inbox Classic cannot connect to the mail server. It will keep trying.
 # under From in the compose window while this account is chosen
 account-state-compose-sign-in = This account is not signed in; the message will wait in the Outbox.
-account-state-compose-cannot-connect = This account cannot connect now; the message will wait in the Outbox.
+account-state-compose-cannot-connect = This account has a connection problem. If sending fails, the message will stay in the Outbox.
 # the reason a message waits in the Outbox
 account-state-outbox-sign-in = Waiting: { $account } is not signed in
 account-state-outbox-cannot-connect = Waiting: { $account } cannot connect

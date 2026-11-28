@@ -1109,3 +1109,83 @@ reaction-notification-text = { $count ->
     [one] στο μήνυμα { $subject }
    *[other] στο μήνυμα { $subject } (συνολικά { $count } νέες αντιδράσεις)
 }
+
+reader-failed-signed-out = Ο διακομιστής αλληλογραφίας δεν δέχτηκε τη σύνδεση αυτού του λογαριασμού. Η γραμμή πάνω από τη λίστα μηνυμάτων εξηγεί τι να κάνετε.
+
+account-state-tooltip-refused = Δεν έχει γίνει σύνδεση: η προσπάθεια σύνδεσης απορρίφθηκε
+
+account-state-tooltip-admin = Δεν έχει γίνει σύνδεση: πρέπει πρώτα να εγκρίνει το Inbox Classic ένας διαχειριστής
+
+account-state-tooltip-imap-off = Δεν έχει γίνει σύνδεση: το IMAP είναι απενεργοποιημένο για αυτό το γραμματοκιβώτιο
+
+account-state-tooltip-other-address = Δεν έχει γίνει σύνδεση: στο πρόγραμμα περιήγησης χρησιμοποιήθηκε άλλη διεύθυνση
+
+account-state-tooltip-cannot-connect = Δεν είναι δυνατή η σύνδεση με τον διακομιστή αλληλογραφίας
+
+account-state-mail-server = Ο διακομιστής αλληλογραφίας
+
+account-state-bar-refused-browser = Δεν έχει γίνει σύνδεση στον λογαριασμό «{ $account }». { $provider }: η σύνδεση απορρίφθηκε. Η αλληλογραφία του λογαριασμού μπορεί να μην είναι ενημερωμένη.
+
+account-state-bar-refused-password = Δεν έχει γίνει σύνδεση στον λογαριασμό «{ $account }»: ο διακομιστής αλληλογραφίας δεν δέχτηκε τον κωδικό πρόσβασης. Η αλληλογραφία του λογαριασμού μπορεί να μην είναι ενημερωμένη.
+
+account-state-bar-admin = Δεν έχει γίνει σύνδεση στον λογαριασμό «{ $account }»: απαιτείται πρώτα έγκριση του Inbox Classic από διαχειριστή του τομέα «{ $domain }». Η αλληλογραφία του λογαριασμού μπορεί να μην είναι ενημερωμένη.
+
+account-state-bar-imap-off = Δεν έχει γίνει σύνδεση στον λογαριασμό «{ $account }». { $provider }: το IMAP είναι απενεργοποιημένο για αυτό το γραμματοκιβώτιο. Ενεργοποιήστε το στις ρυθμίσεις του γραμματοκιβωτίου και δοκιμάστε ξανά αποστολή και λήψη.
+
+account-state-bar-other-address = Δεν έχει γίνει σύνδεση στον λογαριασμό «{ $account }»: στο πρόγραμμα περιήγησης χρησιμοποιήθηκε η διεύθυνση { $email } αντί για τη διεύθυνση { $expected }. Δοκιμάστε ξανά και επιλέξτε { $expected }.
+
+account-state-bar-cannot-connect = Ο λογαριασμός «{ $account }» δεν μπορεί να συνδεθεί με τον διακομιστή αλληλογραφίας. Η αλληλογραφία του λογαριασμού μπορεί να μην είναι ενημερωμένη.
+
+account-state-button-sign-in = Επανασύνδεση
+
+account-state-button-password = Εισαγωγή κωδικού πρόσβασης
+
+account-state-button-admin-link = Αντιγραφή συνδέσμου για τον διαχειριστή
+
+account-state-button-help = Βοήθεια
+
+account-state-button-try-again = Επανάληψη
+
+account-state-admin-link-copied = Ο σύνδεσμος αντιγράφηκε. Στείλτε τον στον διαχειριστή του οργανισμού σας.
+
+account-state-app-password-hint = Αν ο πάροχός σας απαιτεί κωδικό πρόσβασης εφαρμογής για προγράμματα αλληλογραφίας, εισαγάγετέ τον εδώ αντί για τον συνηθισμένο σας κωδικό.
+
+account-status-sign-in = Απαιτείται σύνδεση στον λογαριασμό «{ $account }»
+
+account-status-cannot-connect = Ο λογαριασμός «{ $account }» δεν μπορεί να συνδεθεί
+
+account-status-failed = { $account }: { $reason }
+
+account-status-sign-in-many = { $count ->
+    [one] Απαιτείται σύνδεση σε { $count } λογαριασμό
+   *[other] Απαιτείται σύνδεση σε { $count } λογαριασμούς
+}
+
+account-status-cannot-connect-many = { $count ->
+    [one] { $count } λογαριασμός δεν μπορεί να συνδεθεί
+   *[other] { $count } λογαριασμοί δεν μπορούν να συνδεθούν
+}
+
+account-notify-title-sign-in = Δεν έχει γίνει σύνδεση στον λογαριασμό «{ $account }»
+
+account-notify-text-refused-browser = { $provider }: η σύνδεση απορρίφθηκε. Συνδεθείτε ξανά για να λαμβάνετε νέα μηνύματα.
+
+account-notify-text-refused-password = Ο διακομιστής αλληλογραφίας δεν δέχτηκε τον κωδικό πρόσβασης. Εισαγάγετέ τον ξανά για να λαμβάνετε νέα μηνύματα.
+
+account-notify-text-admin = Πρέπει πρώτα να εγκρίνει το Inbox Classic ένας διαχειριστής του τομέα «{ $domain }».
+
+account-notify-text-imap-off = { $provider }: το IMAP είναι απενεργοποιημένο για αυτό το γραμματοκιβώτιο.
+
+account-notify-text-other-address = Στο πρόγραμμα περιήγησης χρησιμοποιήθηκε η διεύθυνση { $email }. Δοκιμάστε ξανά και επιλέξτε { $expected }.
+
+account-notify-title-cannot-connect = Ο λογαριασμός «{ $account }» δεν μπορεί να συνδεθεί
+
+account-notify-text-cannot-connect = Το Inbox Classic δεν μπορεί να συνδεθεί με τον διακομιστή αλληλογραφίας. Θα συνεχίσει να προσπαθεί.
+
+account-state-compose-sign-in = Δεν έχει γίνει σύνδεση σε αυτόν τον λογαριασμό· το μήνυμα θα περιμένει στα Εξερχόμενα.
+
+account-state-compose-cannot-connect = Αυτός ο λογαριασμός έχει πρόβλημα σύνδεσης. Αν η αποστολή αποτύχει, το μήνυμα θα παραμείνει στα Εξερχόμενα.
+
+account-state-outbox-sign-in = Σε αναμονή: δεν έχει γίνει σύνδεση στον λογαριασμό «{ $account }»
+
+account-state-outbox-cannot-connect = Σε αναμονή: ο λογαριασμός «{ $account }» δεν μπορεί να συνδεθεί

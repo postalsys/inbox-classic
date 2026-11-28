@@ -885,3 +885,5 @@ ui-reactions-label = Reakcijos:
 ui-reaction-open-email = Atidaryti reakcijos laišką
 ui-reaction-show-as-email = Rodyti kaip laišką
 ui-reaction-when = Reakcija: { $when }
+
+cmd-sign-in-again = Prisi&jungti iš naujo...

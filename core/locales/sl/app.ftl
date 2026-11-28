@@ -902,3 +902,5 @@ ui-reactions-label = Odzivi:
 ui-reaction-open-email = Odpri e-poštno sporočilo z odzivom
 ui-reaction-show-as-email = Pokaži kot e-poštno sporočilo
 ui-reaction-when = Odziv: { $when }
+
+cmd-sign-in-again = &Znova se prijavi...

@@ -5,7 +5,7 @@
     <li>«connection error: …»</li>
     <li>«the server did not answer in time»</li>
     <li>«la conexión con el servidor falló (…)»</li>
-    <li>«No se pudo conectar con el servidor de correo (…).»</li>
+    <li>«No se pudo establecer la conexión con el servidor de correo o se interrumpió (…).»</li>
 </ul>
 <p>Para solucionarlo:</p>
 <ol>
@@ -13,6 +13,6 @@
     <li>Abra las propiedades de la cuenta en <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b> y compruebe los nombres de los servidores y los puertos.</li>
     <li>Si falla el envío, compruebe el puerto y el tipo de seguridad que exige su proveedor; suelen ser SSL/TLS con 465 o STARTTLS con 587. Algunas redes bloquean los puertos de correo, sobre todo el 25.</li>
 </ol>
-<p>Inbox Classic vuelve a intentarlo en la siguiente comprobación de correo. Para intentarlo ahora, haga clic en <b data-text="ui-tb-sync"></b>.</p>
-<p>Un mensaje que envía sin conexión espera en la Bandeja de salida y la aplicación vuelve a intentar enviarlo al recuperar la conexión. La entrega aún puede fallar por otros motivos.</p>
+<p>Inbox Classic vuelve a intentarlo en la siguiente comprobación de correo. Tras dos fallos de conexión consecutivos, aparece un aviso junto a la cuenta en la lista de carpetas y sobre su lista de mensajes. Para intentarlo ahora, haga clic en el icono de aviso, en <b data-text="account-state-button-try-again"></b> en la barra o en <b data-text="ui-tb-sync"></b>. El aviso desaparece cuando la cuenta se vuelve a conectar.</p>
+<p>Un mensaje que envía sin conexión permanece en la Bandeja de salida local. Inbox Classic vuelve a intentarlo cuando puede conectarse; el servidor aún puede rechazar el mensaje.</p>
 <nav class="related"><a href="topic:drafts-outbox"></a> <a href="topic:certificate-errors"></a> <a href="topic:message-not-shown"></a></nav>

@@ -1065,3 +1065,83 @@ reaction-notification-text = { $count ->
     [one] op { $subject }
    *[other] op { $subject } ({ $count } nieuwe reacties in totaal)
 }
+
+reader-failed-signed-out = De mailserver heeft de aanmelding van dit account geweigerd. De balk boven de berichtenlijst legt uit wat je kunt doen.
+
+account-state-tooltip-refused = Niet aangemeld: de aanmelding is geweigerd
+
+account-state-tooltip-admin = Niet aangemeld: een beheerder moet Inbox Classic eerst toestemming geven
+
+account-state-tooltip-imap-off = Niet aangemeld: IMAP is uitgeschakeld voor deze mailbox
+
+account-state-tooltip-other-address = Niet aangemeld: de browser is aangemeld met een ander adres
+
+account-state-tooltip-cannot-connect = Kan geen verbinding maken met de mailserver
+
+account-state-mail-server = de mailserver
+
+account-state-bar-refused-browser = Het account { $account } is niet aangemeld: { $provider } heeft de aanmelding geweigerd. De mail is mogelijk niet bijgewerkt.
+
+account-state-bar-refused-password = Het account { $account } is niet aangemeld: de mailserver heeft het wachtwoord geweigerd. De mail is mogelijk niet bijgewerkt.
+
+account-state-bar-admin = Het account { $account } is niet aangemeld: een beheerder van het domein { $domain } moet Inbox Classic eerst toestemming geven. De mail is mogelijk niet bijgewerkt.
+
+account-state-bar-imap-off = Het account { $account } is niet aangemeld: volgens { $provider } is IMAP uitgeschakeld voor deze mailbox. Schakel het in bij de instellingen van de mailbox en probeer opnieuw te verzenden en ontvangen.
+
+account-state-bar-other-address = Het account { $account } is niet aangemeld: de browser is aangemeld met { $email } in plaats van { $expected }. Probeer het opnieuw en kies { $expected }.
+
+account-state-bar-cannot-connect = Het account { $account } kan geen verbinding maken met de mailserver. De mail is mogelijk niet bijgewerkt.
+
+account-state-button-sign-in = Opnieuw aanmelden
+
+account-state-button-password = Wachtwoord invoeren
+
+account-state-button-admin-link = Koppeling voor beheerder kopiëren
+
+account-state-button-help = Help
+
+account-state-button-try-again = Opnieuw proberen
+
+account-state-admin-link-copied = De koppeling is gekopieerd. Stuur deze naar de beheerder van je organisatie.
+
+account-state-app-password-hint = Als je provider een app-wachtwoord vereist voor e-mailprogramma’s, gebruik dat dan hier in plaats van je gewone wachtwoord.
+
+account-status-sign-in = Je moet je aanmelden bij het account { $account }
+
+account-status-cannot-connect = Het account { $account } kan geen verbinding maken
+
+account-status-failed = { $account }: { $reason }
+
+account-status-sign-in-many = { $count ->
+    [one] Je moet je aanmelden bij { $count } account
+   *[other] Je moet je aanmelden bij { $count } accounts
+}
+
+account-status-cannot-connect-many = { $count ->
+    [one] { $count } account kan geen verbinding maken
+   *[other] { $count } accounts kunnen geen verbinding maken
+}
+
+account-notify-title-sign-in = Het account { $account } is niet aangemeld
+
+account-notify-text-refused-browser = De aanmelding is geweigerd door { $provider }. Meld je opnieuw aan om nieuwe mail te ontvangen.
+
+account-notify-text-refused-password = De mailserver heeft het wachtwoord geweigerd. Voer het opnieuw in om nieuwe mail te ontvangen.
+
+account-notify-text-admin = Een beheerder van het domein { $domain } moet Inbox Classic eerst toestemming geven.
+
+account-notify-text-imap-off = Volgens { $provider } is IMAP uitgeschakeld voor deze mailbox.
+
+account-notify-text-other-address = De browser is aangemeld met { $email }. Probeer het opnieuw en kies { $expected }.
+
+account-notify-title-cannot-connect = Het account { $account } kan geen verbinding maken
+
+account-notify-text-cannot-connect = Kan geen verbinding maken met de mailserver. Inbox Classic blijft het proberen.
+
+account-state-compose-sign-in = Dit account is niet aangemeld; het bericht blijft wachten in Postvak UIT.
+
+account-state-compose-cannot-connect = Dit account heeft een verbindingsprobleem. Als het verzenden mislukt, blijft het bericht in Postvak UIT staan.
+
+account-state-outbox-sign-in = In afwachting: het account { $account } is niet aangemeld
+
+account-state-outbox-cannot-connect = In afwachting: het account { $account } kan geen verbinding maken

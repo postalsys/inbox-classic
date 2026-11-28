@@ -841,3 +841,5 @@ ui-reactions-label = Reaksi:
 ui-reaction-open-email = Buka Email Reaksi
 ui-reaction-show-as-email = Tampilkan sebagai Email
 ui-reaction-when = Bereaksi pada { $when }
+
+cmd-sign-in-again = Mas&uk Lagi...

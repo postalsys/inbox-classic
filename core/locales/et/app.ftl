@@ -867,3 +867,5 @@ ui-reactions-label = Reaktsioonid:
 ui-reaction-open-email = Ava reaktsiooni e-kiri
 ui-reaction-show-as-email = Näita tavalise kirjana
 ui-reaction-when = Reaktsioon: { $when }
+
+cmd-sign-in-again = Lo&gi uuesti sisse...

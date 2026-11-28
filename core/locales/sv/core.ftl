@@ -1070,3 +1070,83 @@ reaction-notification-text = { $count ->
     [one] på { $subject }
    *[other] på { $subject } ({ $count } nya reaktioner totalt)
 }
+
+reader-failed-signed-out = E-postservern avvisade inloggningen för det här kontot. Fältet ovanför meddelandelistan förklarar vad du kan göra.
+
+account-state-tooltip-refused = Inte inloggat: inloggningen avvisades
+
+account-state-tooltip-admin = Inte inloggat: en administratör måste först godkänna Inbox Classic
+
+account-state-tooltip-imap-off = Inte inloggat: IMAP är avstängt för den här brevlådan
+
+account-state-tooltip-other-address = Inte inloggat: webbläsaren loggade in med en annan adress
+
+account-state-tooltip-cannot-connect = Kan inte ansluta till e-postservern
+
+account-state-mail-server = E-postservern
+
+account-state-bar-refused-browser = Kontot { $account } är inte inloggat: { $provider } avvisade inloggningen. E-posten kanske inte är uppdaterad.
+
+account-state-bar-refused-password = Kontot { $account } är inte inloggat: e-postservern avvisade lösenordet. E-posten kanske inte är uppdaterad.
+
+account-state-bar-admin = Kontot { $account } är inte inloggat: en administratör för domänen { $domain } måste godkänna Inbox Classic innan du kan logga in. E-posten kanske inte är uppdaterad.
+
+account-state-bar-imap-off = Kontot { $account } är inte inloggat: { $provider } uppger att IMAP är avstängt för den här brevlådan. Slå på det i brevlådans inställningar och försök skicka och ta emot igen.
+
+account-state-bar-other-address = Kontot { $account } är inte inloggat: webbläsaren loggade in med { $email } i stället för { $expected }. Försök igen och välj { $expected }.
+
+account-state-bar-cannot-connect = Kontot { $account } kan inte ansluta till e-postservern. E-posten kanske inte är uppdaterad.
+
+account-state-button-sign-in = Logga in igen
+
+account-state-button-password = Ange lösenord
+
+account-state-button-admin-link = Kopiera länk till administratör
+
+account-state-button-help = Hjälp
+
+account-state-button-try-again = Försök igen
+
+account-state-admin-link-copied = Länken har kopierats. Skicka den till administratören i din organisation.
+
+account-state-app-password-hint = Om leverantören kräver ett applösenord för e-postprogram ska du ange det här i stället för ditt vanliga lösenord.
+
+account-status-sign-in = Du behöver logga in på kontot { $account }
+
+account-status-cannot-connect = Kontot { $account } kan inte ansluta
+
+account-status-failed = { $account }: { $reason }
+
+account-status-sign-in-many = { $count ->
+    [one] Du behöver logga in på { $count } konto
+   *[other] Du behöver logga in på { $count } konton
+}
+
+account-status-cannot-connect-many = { $count ->
+    [one] { $count } konto kan inte ansluta
+   *[other] { $count } konton kan inte ansluta
+}
+
+account-notify-title-sign-in = Kontot { $account } är inte inloggat
+
+account-notify-text-refused-browser = { $provider } avvisade inloggningen. Logga in igen för att få ny e-post.
+
+account-notify-text-refused-password = E-postservern avvisade lösenordet. Ange det igen för att få ny e-post.
+
+account-notify-text-admin = En administratör för domänen { $domain } måste först godkänna Inbox Classic.
+
+account-notify-text-imap-off = { $provider } uppger att IMAP är avstängt för den här brevlådan.
+
+account-notify-text-other-address = Webbläsaren loggade in med { $email }. Försök igen och välj { $expected }.
+
+account-notify-title-cannot-connect = Kontot { $account } kan inte ansluta
+
+account-notify-text-cannot-connect = Kan inte ansluta till e-postservern. Inbox Classic fortsätter att försöka.
+
+account-state-compose-sign-in = Det här kontot är inte inloggat; meddelandet väntar i Utkorgen.
+
+account-state-compose-cannot-connect = Det här kontot har ett anslutningsproblem. Om sändningen misslyckas blir meddelandet kvar i Utkorgen.
+
+account-state-outbox-sign-in = Väntar: kontot { $account } är inte inloggat
+
+account-state-outbox-cannot-connect = Väntar: kontot { $account } kan inte ansluta

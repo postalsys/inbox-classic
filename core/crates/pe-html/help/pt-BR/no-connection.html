@@ -5,7 +5,7 @@
     <li>“connection error: …”</li>
     <li>“the server did not answer in time”</li>
     <li>“a conexão com o servidor falhou (…)”</li>
-    <li>“Não foi possível contatar o servidor de e-mail (…).”</li>
+    <li>“Não foi possível conectar ao servidor de e-mail, ou a conexão foi interrompida (…).”</li>
 </ul>
 <p>Para resolver:</p>
 <ol>
@@ -13,6 +13,6 @@
     <li>Abra as propriedades da conta em <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b> e verifique os nomes dos servidores e as portas.</li>
     <li>Se o envio falhar, confirme as configurações de envio: normalmente, SSL/TLS usa a porta 465 e STARTTLS usa a porta 587. Algumas redes bloqueiam as portas de e-mail, em especial a porta 25.</li>
 </ol>
-<p>O Inbox Classic tenta novamente na próxima verificação de e-mails. Para tentar agora, clique em <b data-text="ui-tb-sync"></b>.</p>
-<p>Uma mensagem que você enviar sem conexão aguarda na Caixa de Saída e o aplicativo tenta enviá-la quando a conexão voltar. O servidor ainda pode recusar o envio. O conteúdo permanece salvo enquanto aguarda o envio.</p>
+<p>O Inbox Classic tenta novamente na próxima verificação de e-mails. Após duas falhas de conexão seguidas, um aviso aparece ao lado da conta na lista de pastas e acima da lista de mensagens dela. Para tentar agora, clique no ícone de aviso, em <b data-text="account-state-button-try-again"></b> na barra ou em <b data-text="ui-tb-sync"></b>. O aviso desaparece quando a conta se conecta novamente.</p>
+<p>Uma mensagem que você envia sem conexão fica na Caixa de Saída local. O Inbox Classic tenta novamente quando consegue se conectar; o servidor ainda pode recusar a mensagem.</p>
 <nav class="related"><a href="topic:drafts-outbox"></a> <a href="topic:certificate-errors"></a> <a href="topic:message-not-shown"></a></nav>

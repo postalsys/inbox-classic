@@ -97,6 +97,31 @@ name or address rather than promising a prefix-only search.
 Keep bracketed CJK access keys and full-width field colons in catalogs. The help renderer removes those decorations
 when inserting control names into prose; translations must not compensate for rendering problems by changing labels.
 
+## Account sign-in and connection status
+
+Keep a refused sign-in separate from a failed connection. A connection warning can also mean a TLS/security
+failure; do not say the server is necessarily unreachable. The connection warning appears after two consecutive
+failed syncs and clears when the account reconnects. Avoid identifying warning icons only by their color.
+
+The account name, provider/sign-in-app name, domain and email addresses are arbitrary strings. Rephrase around
+them rather than adding case endings. The provider can also be the localized `account-state-mail-server` fallback;
+its capitalization and case must fit every bar and notification that uses it. The two counted status strings are
+used for two or more accounts, including 21 and 101 where applicable; keep the count in those plural branches.
+French and Dutch keep this fallback lowercase after their chosen prepositions; a fallback need not copy English
+capitalization. Greek uses a provider label followed by a colon to avoid inflecting an arbitrary name.
+
+The bar above the message list can ask for a new password, browser sign-in, administrator approval or IMAP
+access. It does not always offer another sign-in. Retrying reduces repeated rejected attempts but cannot guarantee
+that the provider will never lock the account. Do not promise a universal sign-in expiry period or that a prompt
+can appear only once. A message waiting in the Outbox has not been sent.
+An incoming-connection failure does not necessarily block outgoing mail: the send path tries SMTP independently.
+The compose connection warning must say the message stays in the Outbox if sending fails. A refused account sign-in
+does block the Outbox, so its separate compose notice can describe waiting without that condition.
+
+`cmd-sign-in-again` appears in Tools, the account context menu and the account-bearing Inbox/folder context menus.
+Choose its access key against every one of those scopes. The account-status action buttons have no access keys
+in English; keep them as concise button labels.
+
 ## Key publishing, lookup and sender checks
 
 Publishing uploads the public part of an own key. Uploading it and listing its email addresses are separate:
@@ -161,8 +186,8 @@ and More; other messages have Reply, Reply All, Forward and More. Describe selec
 edge: Windows uses an etched frame, and the appearance differs by platform. Runs of at least four
 already-folded read messages can share a counted row; the oldest message and two newest read messages stay visible.
 There is no longer a 20-message initial limit. With keyboard focus in the conversation, Right opens all messages
-and Left folds all except the selected one. Next/Previous shortcuts work on every platform; the four conversation
-commands currently appear in the View menu only on Mac and Linux. Keep that help branch platform-specific.
+and Left folds all except the selected one. Next/Previous shortcuts and the four conversation commands in the View
+menu are available on Windows, Mac and Linux. The menu instructions apply to all three platforms.
 
 Digitally signed and encrypted messages now appear alongside the others, with their security labels. To request
 pictures in one, select that message first. The pictures bar can offer images from other open messages, so do not

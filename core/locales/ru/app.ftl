@@ -896,3 +896,5 @@ ui-reactions-label = Реакции:
 ui-reaction-open-email = Открыть письмо с реакцией
 ui-reaction-show-as-email = Показать как письмо
 ui-reaction-when = Реакция: { $when }
+
+cmd-sign-in-again = Вой&ти снова...

@@ -842,3 +842,5 @@ ui-reactions-label = Cảm xúc:
 ui-reaction-open-email = Mở email cảm xúc
 ui-reaction-show-as-email = Hiển thị dưới dạng email
 ui-reaction-when = Bày tỏ lúc { $when }
+
+cmd-sign-in-again = Đă&ng nhập lại...

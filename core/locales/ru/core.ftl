@@ -48,7 +48,7 @@ reader-downloading = Загрузка сообщения…
 reader-downloading-detail = Сообщение появится здесь, когда загрузка завершится.
 reader-downloading-size = Размер сообщения: { $size }. Оно появится здесь после загрузки.
 reader-failed = Не удалось загрузить сообщение
-reader-failed-network = Не удалось связаться с почтовым сервером ({ $reason }).
+reader-failed-network = Соединение с почтовым сервером не удалось установить или оно было прервано ({ $reason }).
 reader-failed-security = Не удалось установить защищенное соединение с почтовым сервером ({ $reason }).
 reader-failed-other = Ответ почтового сервера: { $reason }.
 reader-retry-note = Загрузка повторится после восстановления подключения к учетной записи.
@@ -1222,3 +1222,87 @@ reaction-notification-text = { $count ->
     [many] на { $subject } (всего { $count } новых реакций)
    *[other] на { $subject } (всего { $count } новой реакции)
 }
+
+reader-failed-signed-out = Почтовый сервер отклонил вход в эту учетную запись. Панель над списком сообщений объясняет, что делать.
+
+account-state-tooltip-refused = Вход не выполнен: попытка входа отклонена
+
+account-state-tooltip-admin = Вход не выполнен: сначала администратор должен одобрить Inbox Classic
+
+account-state-tooltip-imap-off = Вход не выполнен: IMAP отключен для этого почтового ящика
+
+account-state-tooltip-other-address = Вход не выполнен: в браузере выбран другой адрес
+
+account-state-tooltip-cannot-connect = Не удается подключиться к почтовому серверу
+
+account-state-mail-server = Почтовый сервер
+
+account-state-bar-refused-browser = Вход в учетную запись «{ $account }» не выполнен. { $provider }: вход отклонен. Почта в этой учетной записи может быть неактуальной.
+
+account-state-bar-refused-password = Вход в учетную запись «{ $account }» не выполнен: почтовый сервер не принял пароль. Почта в этой учетной записи может быть неактуальной.
+
+account-state-bar-admin = Вход в учетную запись «{ $account }» не выполнен: администратор домена { $domain } должен одобрить Inbox Classic, прежде чем вход станет возможен. Почта в этой учетной записи может быть неактуальной.
+
+account-state-bar-imap-off = Вход в учетную запись «{ $account }» не выполнен. { $provider }: IMAP отключен для этого почтового ящика. Включите его в настройках ящика, затем снова отправьте и получите почту.
+
+account-state-bar-other-address = Вход в учетную запись «{ $account }» не выполнен: в браузере выполнен вход с адресом { $email }, а не { $expected }. Попробуйте снова и выберите { $expected }.
+
+account-state-bar-cannot-connect = Учетная запись «{ $account }» не может подключиться к своему почтовому серверу. Почта в ней может быть неактуальной.
+
+account-state-button-sign-in = Войти снова
+
+account-state-button-password = Ввести пароль
+
+account-state-button-admin-link = Копировать ссылку для администратора
+
+account-state-button-help = Справка
+
+account-state-button-try-again = Повторить попытку
+
+account-state-admin-link-copied = Ссылка скопирована. Отправьте ее администратору вашей организации.
+
+account-state-app-password-hint = Если провайдер требует пароль приложения для почтовых программ, введите его здесь вместо обычного пароля.
+
+account-status-sign-in = Требуется вход в учетную запись «{ $account }»
+
+account-status-cannot-connect = Учетная запись «{ $account }» не может подключиться
+
+account-status-failed = { $account }: { $reason }
+
+account-status-sign-in-many = { $count ->
+    [one] Требуется вход в { $count } учетную запись
+    [few] Требуется вход в { $count } учетные записи
+    [many] Требуется вход в { $count } учетных записей
+   *[other] Требуется вход в { $count } учетной записи
+}
+
+account-status-cannot-connect-many = { $count ->
+    [one] { $count } учетная запись не может подключиться
+    [few] { $count } учетные записи не могут подключиться
+    [many] { $count } учетных записей не могут подключиться
+   *[other] { $count } учетной записи не могут подключиться
+}
+
+account-notify-title-sign-in = Вход в учетную запись «{ $account }» не выполнен
+
+account-notify-text-refused-browser = { $provider }: вход отклонен. Войдите снова, чтобы получать новую почту.
+
+account-notify-text-refused-password = Почтовый сервер не принял пароль. Введите его снова, чтобы получать новую почту.
+
+account-notify-text-admin = Администратор домена { $domain } должен сначала одобрить Inbox Classic.
+
+account-notify-text-imap-off = { $provider }: IMAP отключен для этого почтового ящика.
+
+account-notify-text-other-address = В браузере выполнен вход с адресом { $email }. Попробуйте снова и выберите { $expected }.
+
+account-notify-title-cannot-connect = Учетная запись «{ $account }» не может подключиться
+
+account-notify-text-cannot-connect = Inbox Classic не может подключиться к почтовому серверу. Программа продолжит попытки.
+
+account-state-compose-sign-in = Вход в эту учетную запись не выполнен; сообщение будет ждать в папке «Исходящие».
+
+account-state-compose-cannot-connect = У этой учетной записи проблема с подключением. Если отправка не удастся, сообщение останется в папке «Исходящие».
+
+account-state-outbox-sign-in = Ожидание: вход в учетную запись «{ $account }» не выполнен
+
+account-state-outbox-cannot-connect = Ожидание: учетная запись «{ $account }» не может подключиться

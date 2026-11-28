@@ -871,3 +871,5 @@ ui-reactions-label = Reazioni:
 ui-reaction-open-email = Apri l’e-mail della reazione
 ui-reaction-show-as-email = Mostra come e-mail
 ui-reaction-when = Reazione: { $when }
+
+cmd-sign-in-again = Accedi di nuo&vo...

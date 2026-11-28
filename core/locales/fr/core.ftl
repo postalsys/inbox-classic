@@ -1089,3 +1089,83 @@ reaction-notification-text = { $count ->
     [one] à { $subject }
    *[other] à { $subject } ({ $count } nouvelles réactions au total)
 }
+
+reader-failed-signed-out = Le serveur de messagerie a refusé la connexion à ce compte. La barre au-dessus de la liste des messages indique la marche à suivre.
+
+account-state-tooltip-refused = Compte non connecté : la connexion a été refusée
+
+account-state-tooltip-admin = Compte non connecté : un administrateur doit d’abord autoriser Inbox Classic
+
+account-state-tooltip-imap-off = Compte non connecté : IMAP est désactivé pour cette boîte aux lettres
+
+account-state-tooltip-other-address = Compte non connecté : le navigateur s’est connecté à une autre adresse
+
+account-state-tooltip-cannot-connect = Impossible de se connecter au serveur de messagerie
+
+account-state-mail-server = le serveur de messagerie
+
+account-state-bar-refused-browser = Le compte { $account } n’est pas connecté : sa connexion a été refusée par { $provider }. Son courrier peut ne pas être à jour.
+
+account-state-bar-refused-password = Le compte { $account } n’est pas connecté : le serveur de messagerie a refusé son mot de passe. Son courrier peut ne pas être à jour.
+
+account-state-bar-admin = Le compte { $account } n’est pas connecté : un administrateur du domaine { $domain } doit autoriser Inbox Classic avant toute connexion. Son courrier peut ne pas être à jour.
+
+account-state-bar-imap-off = Le compte { $account } n’est pas connecté : selon { $provider }, IMAP est désactivé pour cette boîte aux lettres. Activez-le dans les paramètres de la boîte, puis relancez l’envoi et la réception.
+
+account-state-bar-other-address = Le compte { $account } n’est pas connecté : le navigateur s’est connecté à { $email } au lieu de { $expected }. Réessayez et choisissez { $expected }.
+
+account-state-bar-cannot-connect = Le compte { $account } ne parvient pas à se connecter à son serveur de messagerie. Son courrier peut ne pas être à jour.
+
+account-state-button-sign-in = Se reconnecter
+
+account-state-button-password = Saisir le mot de passe
+
+account-state-button-admin-link = Copier le lien pour l’administrateur
+
+account-state-button-help = Aide
+
+account-state-button-try-again = Réessayer
+
+account-state-admin-link-copied = Le lien est copié. Envoyez-le à l’administrateur de votre organisation.
+
+account-state-app-password-hint = Si votre fournisseur demande un mot de passe d’application pour les logiciels de messagerie, saisissez-le ici à la place de votre mot de passe habituel.
+
+account-status-sign-in = Vous devez vous connecter au compte { $account }
+
+account-status-cannot-connect = Le compte { $account } ne parvient pas à se connecter
+
+account-status-failed = { $account } : { $reason }
+
+account-status-sign-in-many = { $count ->
+    [one] Vous devez vous connecter à { $count } compte
+   *[other] Vous devez vous connecter à { $count } comptes
+}
+
+account-status-cannot-connect-many = { $count ->
+    [one] { $count } compte ne parvient pas à se connecter
+   *[other] { $count } comptes ne parviennent pas à se connecter
+}
+
+account-notify-title-sign-in = Le compte { $account } n’est pas connecté
+
+account-notify-text-refused-browser = La connexion a été refusée par { $provider }. Reconnectez-vous pour recevoir de nouveaux messages.
+
+account-notify-text-refused-password = Le serveur de messagerie a refusé le mot de passe. Saisissez-le de nouveau pour recevoir de nouveaux messages.
+
+account-notify-text-admin = Un administrateur du domaine { $domain } doit d’abord autoriser Inbox Classic.
+
+account-notify-text-imap-off = Selon { $provider }, IMAP est désactivé pour cette boîte aux lettres.
+
+account-notify-text-other-address = Le navigateur s’est connecté à { $email }. Réessayez et choisissez { $expected }.
+
+account-notify-title-cannot-connect = Le compte { $account } ne parvient pas à se connecter
+
+account-notify-text-cannot-connect = Impossible de se connecter au serveur de messagerie. Inbox Classic continue de réessayer.
+
+account-state-compose-sign-in = Ce compte n’est pas connecté ; le message restera en attente dans la Boîte d’envoi.
+
+account-state-compose-cannot-connect = Ce compte rencontre un problème de connexion. Si l’envoi échoue, le message restera dans la Boîte d’envoi.
+
+account-state-outbox-sign-in = En attente : le compte { $account } n’est pas connecté
+
+account-state-outbox-cannot-connect = En attente : le compte { $account } ne parvient pas à se connecter

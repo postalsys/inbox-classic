@@ -1243,3 +1243,87 @@ reaction-notification-text = { $count ->
     [many] na wiadomość { $subject } (łącznie { $count } nowych reakcji)
    *[other] na wiadomość { $subject } (łącznie { $count } nowych reakcji)
 }
+
+reader-failed-signed-out = Serwer poczty nie zaakceptował logowania do tego konta. Pasek nad listą wiadomości wyjaśnia, co zrobić.
+
+account-state-tooltip-refused = Nie zalogowano: logowanie nie zostało zaakceptowane
+
+account-state-tooltip-admin = Nie zalogowano: administrator musi najpierw zatwierdzić Inbox Classic
+
+account-state-tooltip-imap-off = Nie zalogowano: IMAP jest wyłączony dla tej skrzynki
+
+account-state-tooltip-other-address = Nie zalogowano: w przeglądarce zalogowano się na inny adres
+
+account-state-tooltip-cannot-connect = Nie można połączyć się z serwerem poczty
+
+account-state-mail-server = Serwer poczty
+
+account-state-bar-refused-browser = Konto „{ $account }” nie jest zalogowane. { $provider }: logowanie nie zostało zaakceptowane. Poczta na tym koncie może być nieaktualna.
+
+account-state-bar-refused-password = Konto „{ $account }” nie jest zalogowane: serwer poczty nie zaakceptował jego hasła. Poczta na tym koncie może być nieaktualna.
+
+account-state-bar-admin = Konto „{ $account }” nie jest zalogowane: administrator domeny { $domain } musi zatwierdzić Inbox Classic, zanim logowanie będzie możliwe. Poczta na tym koncie może być nieaktualna.
+
+account-state-bar-imap-off = Konto „{ $account }” nie jest zalogowane. { $provider }: IMAP jest wyłączony dla tej skrzynki. Włącz go w ustawieniach skrzynki, a potem ponownie wyślij i odbierz pocztę.
+
+account-state-bar-other-address = Konto „{ $account }” nie jest zalogowane: w przeglądarce zalogowano się na adres { $email }, a nie { $expected }. Spróbuj ponownie i wybierz { $expected }.
+
+account-state-bar-cannot-connect = Konto „{ $account }” nie może połączyć się ze swoim serwerem poczty. Poczta na tym koncie może być nieaktualna.
+
+account-state-button-sign-in = Zaloguj się ponownie
+
+account-state-button-password = Wpisz hasło
+
+account-state-button-admin-link = Kopiuj link dla administratora
+
+account-state-button-help = Pomoc
+
+account-state-button-try-again = Spróbuj ponownie
+
+account-state-admin-link-copied = Link został skopiowany. Wyślij go administratorowi swojej organizacji.
+
+account-state-app-password-hint = Jeśli dostawca wymaga hasła aplikacji dla programów pocztowych, wpisz je tutaj zamiast zwykłego hasła.
+
+account-status-sign-in = Konto „{ $account }” wymaga logowania
+
+account-status-cannot-connect = Konto „{ $account }” nie może się połączyć
+
+account-status-failed = { $account }: { $reason }
+
+account-status-sign-in-many = { $count ->
+    [one] { $count } konto wymaga logowania
+    [few] { $count } konta wymagają logowania
+    [many] { $count } kont wymaga logowania
+   *[other] { $count } kont wymaga logowania
+}
+
+account-status-cannot-connect-many = { $count ->
+    [one] { $count } konto nie może się połączyć
+    [few] { $count } konta nie mogą się połączyć
+    [many] { $count } kont nie może się połączyć
+   *[other] { $count } kont nie może się połączyć
+}
+
+account-notify-title-sign-in = Konto „{ $account }” nie jest zalogowane
+
+account-notify-text-refused-browser = { $provider }: logowanie nie zostało zaakceptowane. Zaloguj się ponownie, aby odebrać nową pocztę.
+
+account-notify-text-refused-password = Serwer poczty nie zaakceptował hasła. Wpisz je ponownie, aby odebrać nową pocztę.
+
+account-notify-text-admin = Administrator domeny { $domain } musi najpierw zatwierdzić Inbox Classic.
+
+account-notify-text-imap-off = { $provider }: IMAP jest wyłączony dla tej skrzynki.
+
+account-notify-text-other-address = W przeglądarce zalogowano się na adres { $email }. Spróbuj ponownie i wybierz { $expected }.
+
+account-notify-title-cannot-connect = Konto „{ $account }” nie może się połączyć
+
+account-notify-text-cannot-connect = Inbox Classic nie może połączyć się z serwerem poczty. Będzie dalej próbować.
+
+account-state-compose-sign-in = To konto nie jest zalogowane; wiadomość będzie czekać w Skrzynce nadawczej.
+
+account-state-compose-cannot-connect = To konto ma problem z połączeniem. Jeśli wysyłanie się nie powiedzie, wiadomość pozostanie w Skrzynce nadawczej.
+
+account-state-outbox-sign-in = Oczekiwanie: konto „{ $account }” nie jest zalogowane
+
+account-state-outbox-cannot-connect = Oczekiwanie: konto „{ $account }” nie może się połączyć

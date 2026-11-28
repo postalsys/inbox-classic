@@ -1091,3 +1091,83 @@ reaction-notification-text = { $count ->
     [one] på { $subject }
    *[other] på { $subject } ({ $count } nye reaktioner i alt)
 }
+
+reader-failed-signed-out = Mailserveren afviste denne kontos login. Bjælken over meddelelseslisten forklarer, hvad du kan gøre.
+
+account-state-tooltip-refused = Ikke logget ind: loginforsøget blev afvist
+
+account-state-tooltip-admin = Ikke logget ind: en administrator skal først godkende Inbox Classic
+
+account-state-tooltip-imap-off = Ikke logget ind: IMAP er slået fra for denne postkasse
+
+account-state-tooltip-other-address = Ikke logget ind: browseren loggede ind med en anden adresse
+
+account-state-tooltip-cannot-connect = Kan ikke oprette forbindelse til mailserveren
+
+account-state-mail-server = Mailserveren
+
+account-state-bar-refused-browser = Kontoen { $account } er ikke logget ind: { $provider } afviste loginforsøget. Meddelelserne er muligvis ikke ajour.
+
+account-state-bar-refused-password = Kontoen { $account } er ikke logget ind: mailserveren afviste adgangskoden. Meddelelserne er muligvis ikke ajour.
+
+account-state-bar-admin = Kontoen { $account } er ikke logget ind: en administrator for domænet { $domain } skal godkende Inbox Classic, før du kan logge ind. Meddelelserne er muligvis ikke ajour.
+
+account-state-bar-imap-off = Kontoen { $account } er ikke logget ind: { $provider } oplyser, at IMAP er slået fra for denne postkasse. Slå det til i postkassens indstillinger, og prøv at sende og modtage igen.
+
+account-state-bar-other-address = Kontoen { $account } er ikke logget ind: browseren loggede ind med { $email } i stedet for { $expected }. Prøv igen, og vælg { $expected }.
+
+account-state-bar-cannot-connect = Kontoen { $account } kan ikke oprette forbindelse til mailserveren. Meddelelserne er muligvis ikke ajour.
+
+account-state-button-sign-in = Log ind igen
+
+account-state-button-password = Angiv adgangskode
+
+account-state-button-admin-link = Kopiér link til administrator
+
+account-state-button-help = Hjælp
+
+account-state-button-try-again = Prøv igen
+
+account-state-admin-link-copied = Linket er kopieret. Send det til administratoren i din organisation.
+
+account-state-app-password-hint = Hvis udbyderen kræver en appadgangskode til mailprogrammer, skal du angive den her i stedet for din normale adgangskode.
+
+account-status-sign-in = Du skal logge ind på kontoen { $account }
+
+account-status-cannot-connect = Kontoen { $account } kan ikke oprette forbindelse
+
+account-status-failed = { $account }: { $reason }
+
+account-status-sign-in-many = { $count ->
+    [one] Du skal logge ind på { $count } konto
+   *[other] Du skal logge ind på { $count } konti
+}
+
+account-status-cannot-connect-many = { $count ->
+    [one] { $count } konto kan ikke oprette forbindelse
+   *[other] { $count } konti kan ikke oprette forbindelse
+}
+
+account-notify-title-sign-in = Kontoen { $account } er ikke logget ind
+
+account-notify-text-refused-browser = { $provider } afviste loginforsøget. Log ind igen for at modtage ny mail.
+
+account-notify-text-refused-password = Mailserveren afviste adgangskoden. Angiv den igen for at modtage ny mail.
+
+account-notify-text-admin = En administrator for domænet { $domain } skal først godkende Inbox Classic.
+
+account-notify-text-imap-off = { $provider } oplyser, at IMAP er slået fra for denne postkasse.
+
+account-notify-text-other-address = Browseren loggede ind med { $email }. Prøv igen, og vælg { $expected }.
+
+account-notify-title-cannot-connect = Kontoen { $account } kan ikke oprette forbindelse
+
+account-notify-text-cannot-connect = Kan ikke oprette forbindelse til mailserveren. Inbox Classic bliver ved med at prøve.
+
+account-state-compose-sign-in = Denne konto er ikke logget ind; meddelelsen venter i Udbakke.
+
+account-state-compose-cannot-connect = Denne konto har et forbindelsesproblem. Hvis afsendelsen mislykkes, bliver meddelelsen i Udbakke.
+
+account-state-outbox-sign-in = Venter: kontoen { $account } er ikke logget ind
+
+account-state-outbox-cannot-connect = Venter: kontoen { $account } kan ikke oprette forbindelse

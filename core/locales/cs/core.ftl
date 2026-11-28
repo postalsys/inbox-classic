@@ -1154,3 +1154,85 @@ reaction-notification-text = { $count ->
     [few] na zprávu { $subject } (celkem { $count } nové reakce)
    *[other] na zprávu { $subject } (celkem { $count } nových reakcí)
 }
+
+reader-failed-signed-out = Poštovní server nepřijal přihlášení tohoto účtu. Lišta nad seznamem zpráv vysvětluje, co dělat.
+
+account-state-tooltip-refused = Nepřihlášeno: přihlášení nebylo přijato
+
+account-state-tooltip-admin = Nepřihlášeno: správce musí nejprve schválit Inbox Classic
+
+account-state-tooltip-imap-off = Nepřihlášeno: pro tuto schránku je vypnutý IMAP
+
+account-state-tooltip-other-address = Nepřihlášeno: v prohlížeči je přihlášena jiná adresa
+
+account-state-tooltip-cannot-connect = Nelze se připojit k poštovnímu serveru
+
+account-state-mail-server = Poštovní server
+
+account-state-bar-refused-browser = Účet „{ $account }“ není přihlášen. { $provider }: přihlášení nebylo přijato. Pošta účtu nemusí být aktuální.
+
+account-state-bar-refused-password = Účet „{ $account }“ není přihlášen: poštovní server nepřijal jeho heslo. Pošta účtu nemusí být aktuální.
+
+account-state-bar-admin = Účet „{ $account }“ není přihlášen: správce domény { $domain } musí schválit Inbox Classic, aby se účet mohl přihlásit. Pošta účtu nemusí být aktuální.
+
+account-state-bar-imap-off = Účet „{ $account }“ není přihlášen. { $provider }: pro tuto schránku je vypnutý IMAP. Zapněte jej v nastavení schránky a znovu odešlete a přijměte poštu.
+
+account-state-bar-other-address = Účet „{ $account }“ není přihlášen: v prohlížeči je přihlášena adresa { $email }, nikoli { $expected }. Zkuste to znovu a vyberte { $expected }.
+
+account-state-bar-cannot-connect = Účet „{ $account }“ se nemůže připojit ke svému poštovnímu serveru. Jeho pošta nemusí být aktuální.
+
+account-state-button-sign-in = Znovu přihlásit
+
+account-state-button-password = Zadat heslo
+
+account-state-button-admin-link = Zkopírovat odkaz pro správce
+
+account-state-button-help = Nápověda
+
+account-state-button-try-again = Zkusit znovu
+
+account-state-admin-link-copied = Odkaz je zkopírován. Pošlete jej správci své organizace.
+
+account-state-app-password-hint = Pokud poskytovatel pro poštovní programy vyžaduje heslo aplikace, zadejte je sem místo obvyklého hesla.
+
+account-status-sign-in = Účet „{ $account }“ vyžaduje přihlášení
+
+account-status-cannot-connect = Účet „{ $account }“ se nemůže připojit
+
+account-status-failed = { $account }: { $reason }
+
+account-status-sign-in-many = { $count ->
+    [one] { $count } účet vyžaduje přihlášení
+    [few] { $count } účty vyžadují přihlášení
+   *[other] { $count } účtů vyžaduje přihlášení
+}
+
+account-status-cannot-connect-many = { $count ->
+    [one] { $count } účet se nemůže připojit
+    [few] { $count } účty se nemohou připojit
+   *[other] { $count } účtů se nemůže připojit
+}
+
+account-notify-title-sign-in = Účet „{ $account }“ není přihlášen
+
+account-notify-text-refused-browser = { $provider }: přihlášení nebylo přijato. Pro příjem nové pošty se znovu přihlaste.
+
+account-notify-text-refused-password = Poštovní server nepřijal heslo. Pro příjem nové pošty je zadejte znovu.
+
+account-notify-text-admin = Správce domény { $domain } musí nejprve schválit Inbox Classic.
+
+account-notify-text-imap-off = { $provider }: pro tuto schránku je vypnutý IMAP.
+
+account-notify-text-other-address = V prohlížeči je přihlášena adresa { $email }. Zkuste to znovu a vyberte { $expected }.
+
+account-notify-title-cannot-connect = Účet „{ $account }“ se nemůže připojit
+
+account-notify-text-cannot-connect = Inbox Classic se nemůže připojit k poštovnímu serveru. Bude to zkoušet dál.
+
+account-state-compose-sign-in = Tento účet není přihlášen; zpráva počká ve složce Pošta k odeslání.
+
+account-state-compose-cannot-connect = Tento účet má problém s připojením. Pokud se odeslání nezdaří, zpráva zůstane ve složce Pošta k odeslání.
+
+account-state-outbox-sign-in = Čekání: účet „{ $account }“ není přihlášen
+
+account-state-outbox-cannot-connect = Čekání: účet „{ $account }“ se nemůže připojit

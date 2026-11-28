@@ -1061,3 +1061,77 @@ reaction-notification-text = { $count ->
     [one] Konu: { $subject }
    *[other] Konu: { $subject } (toplam { $count } yeni tepki)
 }
+
+reader-failed-signed-out = Posta sunucusu bu hesabın oturum açma isteğini reddetti. İleti listesinin üstündeki çubuk ne yapmanız gerektiğini açıklar.
+
+account-state-tooltip-refused = Oturum açık değil: oturum açma isteği reddedildi
+
+account-state-tooltip-admin = Oturum açık değil: önce bir yöneticinin Inbox Classic için onay vermesi gerekiyor
+
+account-state-tooltip-imap-off = Oturum açık değil: bu posta kutusunda IMAP kapalı
+
+account-state-tooltip-other-address = Oturum açık değil: tarayıcıda başka bir adresle oturum açıldı
+
+account-state-tooltip-cannot-connect = Posta sunucusuna bağlanılamıyor
+
+account-state-mail-server = Posta sunucusu
+
+account-state-bar-refused-browser = { $account } hesabında oturum açık değil: { $provider } oturum açma isteğini reddetti. Hesaptaki iletiler güncel olmayabilir.
+
+account-state-bar-refused-password = { $account } hesabında oturum açık değil: posta sunucusu parolayı reddetti. Hesaptaki iletiler güncel olmayabilir.
+
+account-state-bar-admin = { $account } hesabında oturum açık değil: oturum açılabilmesi için { $domain } etki alanının bir yöneticisinin Inbox Classic için onay vermesi gerekiyor. Hesaptaki iletiler güncel olmayabilir.
+
+account-state-bar-imap-off = { $account } hesabında oturum açık değil: { $provider }, bu posta kutusunda IMAP'in kapalı olduğunu bildiriyor. Posta kutusunun ayarlarından IMAP'i etkinleştirin, ardından yeniden gönderip alın.
+
+account-state-bar-other-address = { $account } hesabında oturum açık değil: tarayıcıda { $expected } adresi yerine { $email } adresiyle oturum açıldı. Yeniden deneyin ve { $expected } adresini seçin.
+
+account-state-bar-cannot-connect = { $account } hesabı posta sunucusuna bağlanamıyor. Hesaptaki iletiler güncel olmayabilir.
+
+account-state-button-sign-in = Yeniden Oturum Aç
+
+account-state-button-password = Parolayı Gir
+
+account-state-button-admin-link = Yönetici İçin Bağlantıyı Kopyala
+
+account-state-button-help = Yardım
+
+account-state-button-try-again = Yeniden Dene
+
+account-state-admin-link-copied = Bağlantı kopyalandı. Kuruluşunuzun yöneticisine gönderin.
+
+account-state-app-password-hint = Sağlayıcınız posta programları için uygulama parolası istiyorsa buraya normal parolanız yerine uygulama parolasını girin.
+
+account-status-sign-in = { $account } hesabında oturum açmanız gerekiyor
+
+account-status-cannot-connect = { $account } hesabı bağlanamıyor
+
+account-status-failed = { $account }: { $reason }
+
+account-status-sign-in-many = { $count } hesapta oturum açmanız gerekiyor
+
+account-status-cannot-connect-many = { $count } hesap bağlanamıyor
+
+account-notify-title-sign-in = { $account } hesabında oturum açık değil
+
+account-notify-text-refused-browser = { $provider } oturum açma isteğini reddetti. Yeni posta almak için yeniden oturum açın.
+
+account-notify-text-refused-password = Posta sunucusu parolayı reddetti. Yeni posta almak için parolayı yeniden girin.
+
+account-notify-text-admin = Önce { $domain } etki alanının bir yöneticisinin Inbox Classic için onay vermesi gerekiyor.
+
+account-notify-text-imap-off = { $provider }, bu posta kutusunda IMAP'in kapalı olduğunu bildiriyor.
+
+account-notify-text-other-address = Tarayıcıda { $email } adresiyle oturum açıldı. Yeniden deneyin ve { $expected } adresini seçin.
+
+account-notify-title-cannot-connect = { $account } hesabı bağlanamıyor
+
+account-notify-text-cannot-connect = Inbox Classic posta sunucusuna bağlanamıyor. Denemeye devam edecek.
+
+account-state-compose-sign-in = Bu hesapta oturum açık değil; ileti Giden Kutusu'nda bekleyecek.
+
+account-state-compose-cannot-connect = Bu hesapta bağlantı sorunu var. Gönderim başarısız olursa ileti Giden Kutusu'nda kalır.
+
+account-state-outbox-sign-in = Bekliyor: { $account } hesabında oturum açık değil
+
+account-state-outbox-cannot-connect = Bekliyor: { $account } hesabı bağlanamıyor

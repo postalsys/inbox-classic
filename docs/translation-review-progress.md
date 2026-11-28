@@ -1,44 +1,47 @@
-# Translation review, round 10
+# Translation review, round 11
 
 ## Resume here
 
-Authoritative checkout: `/Users/andris/Projects/PostalExpress`, local `master`. **Round 10 is complete.**
-All reviewed English and translation changes are committed in `82a928b66c7309c3068f9f7438d43e6ed85d4d8b`;
-`core/locales/REVIEWED` points to that commit. The final check reports zero pending and zero unaccounted changes.
-This round is archived in `translation-review-round10-state.json` and `translation-review-round10-progress.md`.
-Nothing was pushed by this review session. Round 9 remains archived separately.
+Authoritative checkout: `/Users/andris/Projects/PostalExpress`, local `master`.
+Review and static validation are complete. Commit the content, advance REVIEWED, confirm zero pending/unmarked
+changes, archive this round and commit the metadata. **Do not push.** No tests, builds, GUI runs or CI checks.
+Starting commit: `117580f3bc744d123c35b4499df2d059b18dddc3`. Previous reviewed baseline: `82a928b66c7309c3068f9f7438d43e6ed85d4d8b`.
+Round 10 is complete and archived. Current repository guidance was explicitly authorized by the user.
 
-## Reviewed wording
+## Reviewed changes
 
-Reviewed the selected-message action paragraph in English and all 34 translations, with the target languages
-processed in parallel. Removed the claim that the selected message has a colored edge. The help now refers to the
-selected message without depending on its border color; Windows uses an etched frame. The preceding instruction
-already explains how to select a message. Added the same decision to the glossary.
+Reviewed all **38 new or changed English catalog entries** and improved four values. Added **1,292 translations**
+across all **34 target languages**. Also corrected the existing Russian `reader-failed-network` message to cover
+interrupted connections, with its matching help quotation. Target review: **1,293 catalog entries/values**.
 
-Scope: **35 reviewed and changed help paragraphs in 35 files; zero full-topic reviews and zero catalog changes**.
-All tags, references, keyboard text, platform branches and text outside the exact paragraphs are unchanged.
-The complete 2,135-file inventory still contains 35 languages, with six catalogs and 55 help topics per language.
-No new language or translation changes arrived during this round.
+Reviewed two complete help topics per language (`no-connection` and `password-not-accepted`): **70 full-topic reviews**
+including English. Also reviewed and changed the exact conversation View menu paragraph in each language:
+**35 paragraph reviews**, without claiming another full-topic review. All 105 affected help files changed.
 
-## Latest code check and remaining follow-up
+The account-status feature distinguishes a rejected sign-in from a connection or TLS failure. The wording explains
+administrator approval, IMAP access, wrong browser accounts and stale mail without inflecting arbitrary names.
+The compose connection warning now makes Outbox waiting conditional on sending failure, because outgoing mail may
+still connect independently. The help avoids a universal expiry period, a lockout-prevention guarantee and stale
+dialog quotations. Source evidence and decisions are recorded in the state and English ledger.
 
-The Windows View menu fix is implemented in [PR #275](https://github.com/postalsys/inbox-classic/pull/275),
-commit `59302b679d19ae63e9125ebebf0568ff6c303f46`, but remains unmerged. It adds the four existing translated
-conversation commands and introduces no new strings. Local and remote master still lack those menu items.
-Keep the current Mac/Linux branch around the menu instructions until that fix is integrated. After integration,
-enable the already-translated paragraph on Windows in all 35 help files and update the glossary's platform note.
-No application code was changed in this translation round.
+PR #275 has merged: the existing conversation View menu instructions now appear on Windows as well as Mac/Linux.
+The selected-message wording from round 10 is preserved. Glossary guidance reflects the current behavior.
 
-## Validation and evidence
+Three reviewers processed language groups in parallel; the parent reviewed English and took over Greek for the final
+batch. All 35 exact language ledgers are authenticated against the final English revision (3), with no unresolved
+passages. No application code or generated sources were changed.
 
-Exact before/after paragraph ledgers and file hashes cover every reviewed language. The final audit authenticated
-all 2,135 catalog/help files: the 35 reviewed files match their ledgers and the other 2,100 files are unchanged.
-All 34 static language checkers reported zero structural findings; each produced only its 1,681 expected
-missing-draft-mark diagnostics (1,626 catalog entries and 55 help topics, already reviewed). No pending review
-marks remain. These checks do not constitute native-speaker approval.
+## Validation
 
-No tests, builds, GUI runs or CI checks were run, as requested. Evidence is saved under the ignored
-`build/i18n-round10-20261127/` directory, including `final-audit.json` and `late-arrival-audit.json`.
+All **2,135 catalog/help files** are accounted for. Each of 35 languages has **1,663 catalog IDs and 55 help topics**;
+there are no missing messages/topics or pending review marks. The Fluent parser and all 34 static language checkers
+have zero structural findings. Each checker reports only 1,718 expected missing-draft-mark diagnostics for already
+reviewed content. All **2,730 menu/dialog mnemonic scopes** pass (78 per language).
 
-The final remote refresh still shows master at `c135330965efb301008b51dd99f539ee89687465` and PR #275 open.
-The completed translation content remains on local master. The remaining menu-help follow-up is described above.
+The help audit checked **5,775 platform-specific help variants** for markup, references, platform branches and literal keys.
+The 560 historical source/translation reference or literal differences are unchanged; no new differences appeared.
+The late source refresh still matches `117580f3bc744d123c35b4499df2d059b18dddc3`, and all unreviewed files are unchanged.
+Static checks and contextual editing do not constitute native-speaker approval.
+
+Evidence is in the ignored `build/i18n-round11-20261128/` directory: exact language ledgers, `final-quality-audit.json`,
+`late-arrival-audit.json`, source hashes and the review inventory. Final baseline verification remains before closure.

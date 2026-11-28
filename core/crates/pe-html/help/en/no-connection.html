@@ -13,6 +13,6 @@
     <li>Open the account’s properties in <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b> and check the server names and ports.</li>
     <li>If sending fails, check the outgoing server’s security and port: typically SSL/TLS on port 465 or STARTTLS on port 587. Some networks block the mail ports, port 25 in particular.</li>
 </ol>
-<p>Inbox Classic tries again at the next check for mail. When an account cannot connect twice in a row, a gray mark appears on it in the folder list and a bar over its list says so. To try now, click the mark, <b data-text="account-state-button-try-again"></b> in the bar, or <b data-text="ui-tb-sync"></b>. The mark goes by itself once the server answers.</p>
+<p>Inbox Classic tries again at the next check for mail. After two consecutive connection failures, a connection warning appears beside the account in the folder list and above its message list. To try now, click the warning icon, <b data-text="account-state-button-try-again"></b> in the bar, or <b data-text="ui-tb-sync"></b>. The warning disappears when the account reconnects.</p>
 <p>A message you send without a connection stays in the local Outbox. Inbox Classic retries when it can connect; the server may still reject the message.</p>
 <nav class="related"><a href="topic:drafts-outbox"></a> <a href="topic:certificate-errors"></a> <a href="topic:message-not-shown"></a></nav>

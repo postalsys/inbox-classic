@@ -1048,3 +1048,83 @@ reaction-notification-text = { $count ->
     [one] erre: { $subject }
    *[other] erre: { $subject } (összesen { $count } új reakció)
 }
+
+reader-failed-signed-out = A levelezőkiszolgáló nem fogadta el a fiók bejelentkezését. Az üzenetlista feletti sáv ismerteti a teendőket.
+
+account-state-tooltip-refused = Nincs bejelentkezve: a bejelentkezést elutasították
+
+account-state-tooltip-admin = Nincs bejelentkezve: a rendszergazdának előbb jóvá kell hagynia az Inbox Classic használatát
+
+account-state-tooltip-imap-off = Nincs bejelentkezve: ehhez a postafiókhoz ki van kapcsolva az IMAP
+
+account-state-tooltip-other-address = Nincs bejelentkezve: a böngészőben egy másik címhez történt bejelentkezés
+
+account-state-tooltip-cannot-connect = Nem sikerül kapcsolódni a levelezőkiszolgálóhoz
+
+account-state-mail-server = A levelezőkiszolgáló
+
+account-state-bar-refused-browser = Bejelentkezés szükséges ehhez a fiókhoz: { $account }. { $provider } nem fogadta el a bejelentkezést. A fiók levelezése nem feltétlenül naprakész.
+
+account-state-bar-refused-password = Bejelentkezés szükséges ehhez a fiókhoz: { $account }. A levelezőkiszolgáló nem fogadta el a jelszót. A fiók levelezése nem feltétlenül naprakész.
+
+account-state-bar-admin = Bejelentkezés szükséges ehhez a fiókhoz: { $account }. Ehhez a tartomány rendszergazdájának jóvá kell hagynia az Inbox Classic használatát. Tartomány: { $domain }. A fiók levelezése nem feltétlenül naprakész.
+
+account-state-bar-imap-off = Bejelentkezés szükséges ehhez a fiókhoz: { $account }. { $provider } szerint ehhez a postafiókhoz ki van kapcsolva az IMAP. Kapcsolja be a postafiók beállításaiban, majd indítsa újra a küldést és fogadást.
+
+account-state-bar-other-address = Bejelentkezés szükséges ehhez a fiókhoz: { $account }. A böngészőben másik címhez történt bejelentkezés: { $email }. A várt cím: { $expected }. Próbálja újra, és válassza ezt: { $expected }.
+
+account-state-bar-cannot-connect = Nem sikerül kapcsolódni a fiók levelezőkiszolgálójához. Fiók: { $account }. A fiók levelezése nem feltétlenül naprakész.
+
+account-state-button-sign-in = Újra bejelentkezés
+
+account-state-button-password = Jelszó megadása
+
+account-state-button-admin-link = Hivatkozás másolása a rendszergazdának
+
+account-state-button-help = Súgó
+
+account-state-button-try-again = Újrapróbálkozás
+
+account-state-admin-link-copied = A hivatkozás a vágólapra került. Küldje el a szervezet rendszergazdájának.
+
+account-state-app-password-hint = Ha a szolgáltató alkalmazásjelszót kér a levelezőprogramokhoz, itt azt adja meg a szokásos jelszó helyett.
+
+account-status-sign-in = Bejelentkezés szükséges. Fiók: { $account }
+
+account-status-cannot-connect = Nem sikerül kapcsolódni. Fiók: { $account }
+
+account-status-failed = { $account }: { $reason }
+
+account-status-sign-in-many = { $count ->
+    [one] { $count } fiókhoz bejelentkezés szükséges
+   *[other] { $count } fiókhoz bejelentkezés szükséges
+}
+
+account-status-cannot-connect-many = { $count ->
+    [one] { $count } fiók nem tud kapcsolódni
+   *[other] { $count } fiók nem tud kapcsolódni
+}
+
+account-notify-title-sign-in = Nincs bejelentkezve. Fiók: { $account }
+
+account-notify-text-refused-browser = { $provider } nem fogadta el a bejelentkezést. Új levelek fogadásához jelentkezzen be újra.
+
+account-notify-text-refused-password = A levelezőkiszolgáló nem fogadta el a jelszót. Új levelek fogadásához adja meg újra.
+
+account-notify-text-admin = A tartomány rendszergazdájának előbb jóvá kell hagynia az Inbox Classic használatát. Tartomány: { $domain }.
+
+account-notify-text-imap-off = { $provider } szerint ehhez a postafiókhoz ki van kapcsolva az IMAP.
+
+account-notify-text-other-address = A böngészőben ehhez a címhez történt bejelentkezés: { $email }. Próbálja újra, és válassza ezt: { $expected }.
+
+account-notify-title-cannot-connect = Nem sikerül kapcsolódni. Fiók: { $account }
+
+account-notify-text-cannot-connect = Az Inbox Classic nem tud kapcsolódni a levelezőkiszolgálóhoz. Továbbra is próbálkozni fog.
+
+account-state-compose-sign-in = Ez a fiók nincs bejelentkezve; az üzenet a Postázandó üzenetek mappában várakozik majd.
+
+account-state-compose-cannot-connect = Ennél a fióknál kapcsolódási probléma van. Ha a küldés nem sikerül, az üzenet a Postázandó üzenetek mappában marad.
+
+account-state-outbox-sign-in = Várakozás bejelentkezésre. Fiók: { $account }
+
+account-state-outbox-cannot-connect = Várakozás kapcsolódásra. Fiók: { $account }

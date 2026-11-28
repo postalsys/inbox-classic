@@ -4,8 +4,8 @@
 <ul>
     <li>„connection error: …” (kapcsolódási hiba)</li>
     <li>„the server did not answer in time” (a kiszolgáló nem válaszolt időben)</li>
-    <li>„nem sikerült kapcsolódni a kiszolgálóhoz (…)”</li>
-    <li>„A levelezőkiszolgáló nem érhető el (…).”</li>
+    <li>„megszakadt vagy nem jött létre a kapcsolat a kiszolgálóval (…)”</li>
+    <li>„Nem sikerült kapcsolódni a levelezőkiszolgálóhoz, vagy a kapcsolat megszakadt (…).”</li>
 </ul>
 <p>A hiba elhárítása:</p>
 <ol>
@@ -13,6 +13,6 @@
     <li>Nyissa meg a fiók tulajdonságait itt: <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>. Ellenőrizze a kiszolgálók nevét és portját.</li>
     <li>Ha a küldés nem sikerül, ellenőrizze a szolgáltató által megadott portot és titkosítási módot. Gyakori a 465-ös port SSL/TLS, illetve az 587-es STARTTLS használatával. Egyes hálózatok letiltják a levelezési portokat, különösen a 25-öst.</li>
 </ol>
-<p>Az Inbox Classic a következő levélellenőrzéskor újra próbálkozik. Azonnali újrapróbálkozáshoz kattintson a <b data-text="ui-tb-sync"></b> gombra.</p>
-<p>Ha nincs kapcsolat, a küldési sorba helyezett üzenet a Postázandó üzenetek mappában marad. Az Inbox Classic újra megpróbálja elküldeni, amikor eléri a kiszolgálót. Az üzenetet a sikertelen kapcsolódás miatt nem kell újra megírnia.</p>
+<p>Az Inbox Classic a következő levélellenőrzéskor újra próbálkozik. Két egymást követő kapcsolódási hiba után figyelmeztetés jelenik meg a fiók mellett a mappalistában és az üzenetlistája felett. Azonnali újrapróbálkozáshoz kattintson a figyelmeztető ikonra, a sávban az <b data-text="account-state-button-try-again"></b> gombra vagy a <b data-text="ui-tb-sync"></b> gombra. A figyelmeztetés eltűnik, amint a fiók újra kapcsolódik.</p>
+<p>A kapcsolat nélkül küldési sorba helyezett üzenet a helyi Postázandó üzenetek mappában marad. Az Inbox Classic újra próbálkozik, amikor kapcsolódni tud; a kiszolgáló azonban még elutasíthatja az üzenetet.</p>
 <nav class="related"><a href="topic:drafts-outbox"></a> <a href="topic:certificate-errors"></a> <a href="topic:message-not-shown"></a></nav>

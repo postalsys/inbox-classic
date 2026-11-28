@@ -841,3 +841,5 @@ ui-reactions-label = 回應：
 ui-reaction-open-email = 開啟回應郵件
 ui-reaction-show-as-email = 顯示為郵件
 ui-reaction-when = 回應時間：{ $when }
+
+cmd-sign-in-again = 重新登入(&I)...

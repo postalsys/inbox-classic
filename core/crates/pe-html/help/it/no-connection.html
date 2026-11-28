@@ -5,7 +5,7 @@
     <li>“connection error: …”</li>
     <li>“the server did not answer in time”</li>
     <li>“la connessione al server non è riuscita (…)”</li>
-    <li>“Impossibile raggiungere il server di posta (…).”</li>
+    <li>“Impossibile collegarsi al server di posta, oppure la connessione è stata interrotta (…).”</li>
 </ul>
 <p>Per risolvere:</p>
 <ol>
@@ -13,6 +13,6 @@
     <li>Apri le proprietà dell’account in <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b> e controlla i nomi dei server e le porte.</li>
     <li>Se l’invio non riesce, controlla le impostazioni consigliate dal provider per la posta in uscita: in genere la porta 465 con SSL/TLS o la 587 con STARTTLS. Alcune reti bloccano le porte della posta, in particolare la porta 25.</li>
 </ol>
-<p>Inbox Classic riprova al successivo controllo della posta. Per riprovare subito, fai clic su <b data-text="ui-tb-sync"></b>.</p>
-<p>Un messaggio inviato mentre manca la connessione attende in Posta in uscita e Inbox Classic riprova a inviarlo quando riesce di nuovo a connettersi al server. Non perdi nulla di ciò che hai scritto.</p>
+<p>Inbox Classic riprova al successivo controllo della posta. Dopo due errori di connessione consecutivi, compare un avviso accanto all’account nell’elenco delle cartelle e sopra il suo elenco dei messaggi. Per riprovare subito, fai clic sull’icona di avviso, su <b data-text="account-state-button-try-again"></b> nella barra o su <b data-text="ui-tb-sync"></b>. L’avviso scompare quando l’account si riconnette.</p>
+<p>Un messaggio che invii senza connessione resta nella cartella locale Posta in uscita. Inbox Classic riprova quando riesce a connettersi; il server può comunque rifiutare il messaggio.</p>
 <nav class="related"><a href="topic:drafts-outbox"></a> <a href="topic:certificate-errors"></a> <a href="topic:message-not-shown"></a></nav>

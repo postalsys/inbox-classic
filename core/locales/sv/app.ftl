@@ -870,3 +870,5 @@ ui-reactions-label = Reaktioner:
 ui-reaction-open-email = Öppna reaktionens e-postmeddelande
 ui-reaction-show-as-email = Visa som e-postmeddelande
 ui-reaction-when = Reaktion: { $when }
+
+cmd-sign-in-again = &Logga in igen...
