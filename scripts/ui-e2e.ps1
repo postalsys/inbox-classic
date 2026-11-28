@@ -1899,6 +1899,24 @@ public static class Dragger {
     Check ($null -ne (WaitFor { if ((& $textLook 'Downloading') -eq 1 -and (& $textLook 'The figures are attached') -eq 2) { 1 } } 15)) 'and the message is made again: the tile no longer says it is on its way'
     SelectFolder 0
 
+    Step 'a very long message scrolls in its body'
+    # SCENARIO 17b: thousands of lines, dated ahead of the large message, so it is the first row of Archive
+    $lines = (1..6000 | ForEach-Object { "Line $_ of the night's server log." }) -join "`r`n"
+    AddMessage ("From: Ops Example <ops@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: The night's server log`r`n" +
+        "Message-ID: <server-log@example.com>`r`nDate: $([DateTime]::UtcNow.AddMinutes(20).ToString('r'))`r`n`r`n$lines`r`n") @() 'Archive'
+    Command $main $IDM_SYNC
+    [void](WaitFor { Find 'Archive' "Subject: The night's server log" } 30)
+    SelectFolder 3
+    [void](WaitFor { (SubjectRows "The night's server log").Count -gt 0 } 10)
+    SelectRow 0
+    # the body's height times 10, plus 1 once its document is found taller than a body is made (pe_stack_body_max)
+    $tall = WaitFor { $a = [Native.Win]::SendText($main, 0x50565753, 'tall'); if ($a -gt 0 -and $a % 10 -eq 1) { $a } } 30
+    Check ($null -ne $tall) "a document taller than a body is made scrolls by itself ($([Native.Win]::SendText($main, 0x50565753, 'tall')))"
+    # 16,000 CSS pixels at most, times the text size's zoom (1.4 at the largest) and the screen's scale (2 at most here)
+    $height = if ($tall) { [Math]::Floor($tall / 10) } else { 0 }
+    Check ($height -gt 0 -and $height -le 16000 * 1.4 * 2) "its body stops at the most ($height pixels)"
+    SelectFolder 0
+
     Step 'the Outbox: a send that can not go'
     SetSmtpPort '1'
     $compose = WaitCompose { Command $main $IDM_NEW_MAIL }

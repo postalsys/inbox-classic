@@ -46,8 +46,9 @@ public:
     int64_t TestPreviews(const std::wstring& query);
     // a frame of the reading pane's stack (stack.h): the document's height in pixels of the window (its CSS pixels
     // times the text size's zoom and the screen's scale), its parts' frames sized first, by the core's script; `done`
-    // gets it, not when there is no document yet
-    void MeasureHeight(std::function<void(int pixels)> done);
+    // gets it, not when there is no document yet, and whether the document is taller than a body is made
+    // (pe_stack_body_max), so that it scrolls by itself
+    void MeasureHeight(std::function<void(int pixels, bool scrollsItself)> done);
     // a click in the document or the keyboard to it: `focused` is told (the stack selects its message)
     void OnFocus(std::function<void()> focused);
     // its text size changed (View > Text Size): `zoomed` is told (the stack measures its body again)

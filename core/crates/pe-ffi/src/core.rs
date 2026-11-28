@@ -2870,7 +2870,8 @@ pub extern "C" fn pe_measure_script() -> *const c_char {
 
 /// The script the app runs in a message's document in a frame of the reading pane's stack: its parts' frames sized,
 /// then the document's height in CSS pixels, a number; the frame's web view is made that tall (times the text size's
-/// zoom) and never scrolls by itself. Run once it loaded, after its pictures loaded and when the width or the text
+/// zoom) and never scrolls by itself, but for a document taller than [`pe_stack_body_max`], which scrolls in a body
+/// that tall. Run once it loaded, after its pictures loaded and when the width or the text
 /// size changed. A static string, not freed.
 #[unsafe(no_mangle)]
 pub extern "C" fn pe_height_script() -> *const c_char {
@@ -2878,6 +2879,13 @@ pub extern "C" fn pe_height_script() -> *const c_char {
     SCRIPT
         .get_or_init(|| std::ffi::CString::new(pe_html::HEIGHT_SCRIPT).unwrap_or_default())
         .as_ptr()
+}
+
+/// The tallest a body of the stack is made, in CSS pixels ([`pe_height_script`] says no more): a body measured this
+/// tall scrolls by itself, so the app leaves the wheel over it to it
+#[unsafe(no_mangle)]
+pub extern "C" fn pe_stack_body_max() -> u32 {
+    pe_html::STACK_BODY_MAX
 }
 
 /// The view of a message whose source is in the store (after `MessageReady`), NULL otherwise. Built on the

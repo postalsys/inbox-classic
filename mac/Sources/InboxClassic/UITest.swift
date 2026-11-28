@@ -680,6 +680,7 @@ final class UITest {
         try await writing()
         try await notDownloaded()
         try await largeMessage()
+        try await tallMessage()
         // before the Drafts step, whose Send/Recv brings the newest message the organizing step starts from
         try await undoSend()
         try await attachmentReminder()

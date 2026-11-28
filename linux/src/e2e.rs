@@ -1253,6 +1253,7 @@ async fn scenario(d: Rc<Driver>) {
     writing(&d).await;
     steps::not_downloaded(&d).await;
     steps::large_message(&d).await;
+    steps::tall_message(&d).await;
     outbox(&d).await;
     drafts(&d).await;
     drafts_saved_automatically(&d).await;

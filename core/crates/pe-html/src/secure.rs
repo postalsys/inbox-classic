@@ -96,14 +96,19 @@ pub const MEASURE_SCRIPT: &str = "for(const f of document.querySelectorAll('ifra
 const r=d&&d.documentElement;if(!r)continue;const h=Math.max(48,Math.ceil(r.getBoundingClientRect().height))+'px';\
 if(f.style.height!==h)f.style.height=h}";
 
+/// The tallest a body of a conversation's stack is made, in CSS pixels: a document taller than this (a log of
+/// thousands of lines) scrolls by itself in a body this tall, as a web view many screens tall takes more memory than
+/// the system gives (WebKitGTK draws a web view in one buffer, 7 GB for an 8 MB text)
+pub const STACK_BODY_MAX: u32 = 16_000;
+
 /// The script the apps run in a message's document in a frame of a conversation's stack (docs/conversation-view-plan.md),
 /// whose web view is as tall as its document and never scrolls by itself: its parts' frames sized
 /// ([`MEASURE_SCRIPT`]), then the document's height in CSS pixels, by the same rule (the root's own height, never under
-/// 48). A number; 0 before there is a document.
+/// 48), at most [`STACK_BODY_MAX`]: a body that tall scrolls by itself. A number; 0 before there is a document.
 pub const HEIGHT_SCRIPT: &str = "(()=>{for(const f of document.querySelectorAll('iframe.pe-d')){const d=f.contentDocument;\
 const r=d&&d.documentElement;if(!r)continue;const h=Math.max(48,Math.ceil(r.getBoundingClientRect().height))+'px';\
 if(f.style.height!==h)f.style.height=h}const r=document.documentElement;\
-return r?Math.max(48,Math.ceil(r.getBoundingClientRect().height)):0})()";
+return r?Math.min(16000,Math.max(48,Math.ceil(r.getBoundingClientRect().height))):0})()";
 
 /// The frame of the document at `part-N` (N `index`) on a page of documents in frames, titled `title`: sandboxed with no
 /// scripts, forms or popups, the page around it navigated by a click only; the same for every such page
@@ -205,6 +210,10 @@ mod height_tests {
         assert!(
             super::HEIGHT_SCRIPT.ends_with("})()"),
             "an expression the apps evaluate"
+        );
+        assert!(
+            super::HEIGHT_SCRIPT.contains(&format!("Math.min({},", super::STACK_BODY_MAX)),
+            "a body is never made taller than the most"
         );
     }
 }

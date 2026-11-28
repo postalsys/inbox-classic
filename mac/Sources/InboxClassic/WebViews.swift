@@ -424,11 +424,15 @@ final class Preview: NSObject {
                 lastHeight = height
                 unchanged = 0
             }
+            // a document taller than a body is made scrolls by itself, the wheel over it its own
+            (view as? ReadingView)?.fitsContent = height < Self.bodyMax
             fitted(CGFloat(height) * view.pageZoom)
         }
     }
 
     static let heightScript = String(cString: pe_height_script())
+    /// the tallest a body of the stack is made (pe_stack_body_max), in CSS pixels
+    static let bodyMax = Double(pe_stack_body_max())
 
     /// View > Text Size: the documents of the stack's frames measured again
     static func textSizeChanged() {
@@ -469,7 +473,8 @@ final class Preview: NSObject {
 /// download, which a message's web view never does. A preview's picture is the core's copy, not the file, so its
 /// Download Image or Open Image would not be the file either; its link opens the file, as Open Link does.
 final class ReadingView: WKWebView {
-    /// a frame of the reading pane's stack: as tall as its document, the wheel's vertical turns scroll the stack
+    /// a frame of the reading pane's stack: as tall as its document, the wheel's vertical turns scroll the stack (not
+    /// for a document taller than a body is made, which scrolls by itself)
     var fitsContent = false
     /// a click in the document: the stack selects the frame's message
     var clicked: (() -> Void)?
