@@ -162,7 +162,7 @@ extension UITest {
         await selectRow(0)
         let stack = main.mailbox.reader.stack
         let most = CGFloat(pe_stack_body_max()) * TextSize.zoom
-        let tall = { stack.frameViews.first?.tallForTest ?? (0, false) }
+        let tall = { stack.frameViews.first?.tallForTest ?? (height: 0, scrollsItself: false) }
         check(await waitUntil(30) { tall().scrollsItself }, "a document taller than a body is made scrolls by itself (\(tall()))")
         check(tall().height > 0 && tall().height <= most + 1, "its body stops at the most (\(Int(tall().height)) of \(Int(most)) points)")
         await search("")
