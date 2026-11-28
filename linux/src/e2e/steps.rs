@@ -3337,6 +3337,48 @@ pub async fn large_message(d: &Driver) {
     select_folder("Inbox");
 }
 
+/// A message of thousands of lines: its body as tall as a body is made at most, the rest scrolled in it (SCENARIO 17b)
+pub async fn tall_message(d: &Driver) {
+    d.step("a very long message scrolls in its body");
+    let lines: Vec<String> = (1..=6000)
+        .map(|n| format!("Line {n} of the night's server log."))
+        .collect();
+    let _ = d.add_message_to(
+        "Archive",
+        &format!(
+            "From: Ops Example <ops@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: The night's server log\r\n\
+             Date: {}\r\nMessage-ID: <server-log@example.com>\r\n\r\n{}\r\n",
+            date_now(0),
+            lines.join("\r\n")
+        ),
+    );
+    run_command(Command::Sync);
+    select_folder("Archive");
+    wait_for(20, || d.find("Archive", "Subject: The night's server log")).await;
+    if let Some(archive) = folder_id("Archive") {
+        wait_until(30, || {
+            listed_in_folder(archive, 0, 500)
+                .iter()
+                .any(|m| m.info.subject == "The night's server log")
+        })
+        .await;
+    }
+    show_found("subject:\"server log\"").await;
+    let tall = || shell().main().reader.stack.selected_tall();
+    d.check(
+        wait_until(30, || tall().is_some_and(|t| t.2)).await,
+        &format!("a document taller than a body is made scrolls by itself ({:?})", tall()),
+    );
+    let (height, zoom, _) = tall().unwrap_or_default();
+    let most = (f64::from(pe_html::STACK_BODY_MAX) * zoom).ceil() as i32;
+    d.check(
+        height > 0 && height <= most,
+        &format!("its body stops at the most ({height} of {most} pixels)"),
+    );
+    search("").await;
+    select_folder("Inbox");
+}
+
 /// The second account's mail on its own server, for All Inboxes: unread, dated now (a later date is listed at the
 /// message's arrival), so it is among the newest in the list
 pub fn seed_second(d: &Driver) {

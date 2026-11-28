@@ -48,8 +48,8 @@ pub use previews::{
     parse_preview_address, parse_preview_link, preview_address, preview_origin, preview_token,
 };
 pub use secure::{
-    FIND_KEY_LINK, HEIGHT_SCRIPT, MEASURE_SCRIPT, PART_DOCUMENT, PART_LINK, PartTone, SecurePart, find_key_link,
-    key_handle, part_document, part_link, secure_page,
+    FIND_KEY_LINK, HEIGHT_SCRIPT, MEASURE_SCRIPT, PART_DOCUMENT, PART_LINK, PartTone, STACK_BODY_MAX, SecurePart,
+    find_key_link, key_handle, part_document, part_link, secure_page,
 };
 pub use visible::visible_html;
 

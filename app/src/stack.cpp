@@ -296,6 +296,11 @@ int64_t ConversationStack::TestPreviews(const std::wstring& query) {
         }
         return std::max(0, scroll_ - bodyTop) + 1;
     }
+    // "tall": the body's height in pixels times 10, plus 1 when its document is taller than a body is made, so that
+    // it scrolls by itself
+    if (query == L"tall") {
+        return static_cast<int64_t>(frame->height) * 10 + (frame->scrollsItself ? 1 : 0);
+    }
     int64_t answer = frame->body->TestPreviews(query);
     bool point = answer > 0 && query != L"state" && query != L"overflow" && query != L"tiles" && query != L"inline" &&
                  !query.starts_with(L"text:") && !query.starts_with(L"part:") && !query.starts_with(L"partframe:") && query != L"menu";
@@ -577,12 +582,13 @@ void ConversationStack::MeasureBodies() {
             continue;
         }
         Key at = key;
-        frame.body->MeasureHeight([this, at, slow](int pixels) {
+        frame.body->MeasureHeight([this, at, slow](int pixels, bool scrollsItself) {
             auto found = frames_.find(at);
             if (found == frames_.end()) {
                 return;
             }
             Frame& measured = found->second;
+            measured.scrollsItself = scrollsItself;
             int height = std::max(Scale(48), pixels);
             if (std::abs(height - measured.height) < 2) {
                 measured.settled = slow && ++measured.steady >= kSteadyReadings;
@@ -926,8 +932,10 @@ LRESULT CALLBACK ConversationStack::MouseHook(int code, WPARAM wParam, LPARAM lP
                 PostMessageW(stack, kClicked, 0, reinterpret_cast<LPARAM>(under));
                 break;
             }
-            // over the stack, its bodies too (WebView2's windows are its children): the stack scrolls, not a body
-            if (GetAsyncKeyState(VK_CONTROL) >= 0) {
+            // over the stack, its bodies too (WebView2's windows are its children): the stack scrolls, not a body, but
+            // for one taller than a body is made
+            auto* shown = reinterpret_cast<ConversationStack*>(GetWindowLongPtrW(stack, GWLP_USERDATA));
+            if (GetAsyncKeyState(VK_CONTROL) >= 0 && !(shown && shown->ScrollsItself(under))) {
                 PostMessageW(stack, kWheel, static_cast<WPARAM>(static_cast<short>(HIWORD(mouse->mouseData))), 0);
                 return 1;
             }
@@ -935,6 +943,13 @@ LRESULT CALLBACK ConversationStack::MouseHook(int code, WPARAM wParam, LPARAM lP
         }
     }
     return CallNextHookEx(g_hook, code, wParam, lParam);
+}
+
+bool ConversationStack::ScrollsItself(HWND under) const {
+    return std::any_of(frames_.begin(), frames_.end(), [under](const auto& entry) {
+        const Frame& frame = entry.second;
+        return frame.scrollsItself && frame.host && (under == frame.host || IsChild(frame.host, under));
+    });
 }
 
 LRESULT CALLBACK ConversationStack::Proc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {

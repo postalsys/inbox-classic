@@ -146,6 +146,29 @@ extension UITest {
         selectFolder(named: "Inbox")
     }
 
+    /// a message of thousands of lines: its body as tall as a body is made at most, the rest scrolled in it (SCENARIO
+    /// 17b)
+    func tallMessage() async throws {
+        step("a very long message scrolls in its body")
+        let lines = (1...6000).map { "Line \($0) of the night's server log." }.joined(separator: "\r\n")
+        try await addMessage("From: Ops Example <ops@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: The night's server log\r\n"
+            + "Date: \(rfc2822(Date()))\r\nMessage-ID: <server-log@example.com>\r\n\r\n" + lines + "\r\n", to: "Archive")
+        command(.sync)
+        selectFolder(named: "Archive")
+        _ = await waitFor(20) { await findMessage("Archive", "Subject: The night's server log") }
+        await pause(1)
+        await search("subject:\"server log\"")
+        _ = await waitUntil(20) { list.numberOfRows == 1 }
+        await selectRow(0)
+        let stack = main.mailbox.reader.stack
+        let most = CGFloat(pe_stack_body_max()) * TextSize.zoom
+        let tall = { stack.frameViews.first?.tallForTest ?? (0, false) }
+        check(await waitUntil(30) { tall().scrollsItself }, "a document taller than a body is made scrolls by itself (\(tall()))")
+        check(tall().height > 0 && tall().height <= most + 1, "its body stops at the most (\(Int(tall().height)) of \(Int(most)) points)")
+        await search("")
+        selectFolder(named: "Inbox")
+    }
+
     /// a new message downloaded ahead opens from the store, no connection used (SCENARIO 49b). Near the end: everything
     /// recent is downloaded from now on, which the steps before do not expect.
     func openedFromStore() async throws {

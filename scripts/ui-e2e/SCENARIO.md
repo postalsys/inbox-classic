@@ -241,6 +241,15 @@ apart):
 - the status bar says how far the rest is ("Downloading 1.0 MB of 4.1 MB"), then that it is all here ("Downloaded
   4.1 MB")
 
+## 17b. A very long message scrolls in its body
+
+A plain message of 6,000 lines, much taller than the most a body of the stack is made (`pe_stack_body_max`, 16,000
+CSS pixels):
+
+- opened, its document is found taller than a body is made, and the body scrolls by itself (the wheel over it is its
+  own, not the stack's)
+- its body stops at the most, times the text size's zoom
+
 ## 18. The Outbox: a send that can not go
 
 Screenshots: `write-7-outbox`

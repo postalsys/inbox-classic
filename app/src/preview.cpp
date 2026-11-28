@@ -577,7 +577,7 @@ void Preview::Measure() {
     }
 }
 
-void Preview::MeasureHeight(std::function<void(int pixels)> done) {
+void Preview::MeasureHeight(std::function<void(int pixels, bool scrollsItself)> done) {
     if (!view_ || !controller_) {
         return;
     }
@@ -594,7 +594,7 @@ void Preview::MeasureHeight(std::function<void(int pixels)> done) {
                              if (SUCCEEDED(controller.As(&scaled))) {
                                  scaled->get_RasterizationScale(&scale);
                              }
-                             done(static_cast<int>(std::ceil(css * zoom * scale)));
+                             done(static_cast<int>(std::ceil(css * zoom * scale)), css >= pe_stack_body_max());
                              return S_OK;
                          }).Get());
 }

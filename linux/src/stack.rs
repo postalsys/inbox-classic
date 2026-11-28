@@ -364,6 +364,15 @@ impl Stack {
         }
     }
 
+    /// The selected frame's body: its height in pixels, the text size's zoom, and whether its document is taller than a
+    /// body is made, so it scrolls by itself (the UI test)
+    #[cfg(feature = "e2e")]
+    pub fn selected_tall(&self) -> Option<(i32, f64, bool)> {
+        let frame = self.selected_frame()?;
+        let zoom = frame.body.borrow().as_ref()?.view.zoom_level();
+        Some((frame.height.get(), zoom, frame.scrolls_itself.get()))
+    }
+
     /// Whether the selected frame shows a drawn picture (the UI test)
     #[cfg(feature = "e2e")]
     pub fn selected_picture_drawn(&self) -> bool {
@@ -588,6 +597,9 @@ struct Frame {
     pictures: Cell<bool>,
     /// The document's height last measured, in pixels: kept while the body is let go
     height: Rc<Cell<i32>>,
+    /// Its document is taller than a body is made ([`pe_html::STACK_BODY_MAX`]): the body scrolls by itself, the wheel
+    /// over it its own
+    scrolls_itself: Rc<Cell<bool>>,
     measure_timer: Rc<RefCell<Option<glib::SourceId>>>,
     asked: Asked,
     links: Links,
@@ -673,6 +685,7 @@ impl Frame {
             view: RefCell::default(),
             pictures: Cell::new(false),
             height: Rc::new(Cell::new(120)),
+            scrolls_itself: Rc::default(),
             measure_timer: Rc::default(),
             asked,
             links,
@@ -884,12 +897,14 @@ impl Frame {
     }
 
     /// The vertical turns of the wheel over the body scroll the stack, not the body, which is as tall as its document
+    /// (but for one taller than a body is made, which scrolls by itself)
     fn pass_scroll(&self, view: &webkit::WebView) {
         let scroll = gtk::EventControllerScroll::new(gtk::EventControllerScrollFlags::BOTH_AXES);
         scroll.set_propagation_phase(gtk::PropagationPhase::Capture);
         let scroller = self.scroller.clone();
+        let scrolls_itself = self.scrolls_itself.clone();
         scroll.connect_scroll(move |controller, dx, dy| {
-            if dy.abs() < dx.abs() {
+            if dy.abs() < dx.abs() || scrolls_itself.get() {
                 return glib::Propagation::Proceed;
             }
             let adjustment = scroller.vadjustment();
@@ -939,6 +954,7 @@ impl Frame {
         self.stop_measuring();
         let Some(body) = self.body.borrow().clone() else { return };
         let height = self.height.clone();
+        let scrolls_itself = self.scrolls_itself.clone();
         let steady = Rc::new(Cell::new(0u32));
         let timer_slot = self.measure_timer.clone();
         let weak = body.view.downgrade();
@@ -949,7 +965,8 @@ impl Frame {
                 timer_slot.borrow_mut().take();
                 return glib::ControlFlow::Break;
             };
-            let (height, steady, sized) = (height.clone(), steady.clone(), view.clone());
+            let (height, steady, sized, scrolls_itself) =
+                (height.clone(), steady.clone(), view.clone(), scrolls_itself.clone());
             let loading = view.is_loading();
             view.evaluate_javascript(
                 pe_html::HEIGHT_SCRIPT,
@@ -961,6 +978,7 @@ impl Frame {
                         steady.set(0);
                         return;
                     };
+                    scrolls_itself.set(css >= f64::from(pe_html::STACK_BODY_MAX));
                     let pixels = ((css * sized.zoom_level()).ceil() as i32).max(48);
                     if pixels != height.get() {
                         height.set(pixels);

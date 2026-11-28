@@ -683,6 +683,11 @@ final class StackFrame: NSView {
     /// whether its body was measured once (it keeps its height when let go)
     var fittedForTest: Bool { fitted }
 
+    /// its body's height in points, and whether its document is taller than a body is made, so it scrolls by itself
+    var tallForTest: (height: CGFloat, scrollsItself: Bool) {
+        (height, fitted && (body?.view as? ReadingView)?.fitsContent == false)
+    }
+
     /// what its body is, for a failed check: made or not, measured or not, its height
     var bodyForTest: String {
         let shown = view == nil ? "no view" : view?.info == nil ? "no info" : "a view"

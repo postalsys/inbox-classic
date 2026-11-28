@@ -65,8 +65,8 @@ public:
     // the selected frame's body: Find, Print, the keyboard and the UI test act on it; NULL while it is not made
     Preview* SelectedBody();
     // the UI test's look at the selected body's previews (Preview::TestPreviews), the stack standing in for the page's
-    // own scroll: "scroll" and "scroll:N" are the stack's, measured from the body's top, and a point outside what is
-    // seen is scrolled to first (-1 then, the test asks again)
+    // own scroll: "scroll" and "scroll:N" are the stack's, measured from the body's top, "tall" the body's height and
+    // whether it scrolls by itself, and a point outside what is seen is scrolled to first (-1 then, the test asks again)
     int64_t TestPreviews(const std::wstring& query);
     // a picture the core drew (PictureReady): the rows and frames with its key drawn again
     void PictureReady(uint64_t request);
@@ -106,6 +106,9 @@ private:
         // asked to measure, how many slow readings in a row found the same height, and whether it is settled (measured
         // no more until something can change its height)
         int height = 0;
+        // its document is taller than a body is made (pe_stack_body_max): the body scrolls by itself, the wheel over
+        // it its own
+        bool scrollsItself = false;
         int measured = 0;
         int steady = 0;
         bool settled = false;
@@ -139,6 +142,8 @@ private:
 
     static LRESULT CALLBACK Proc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
     static LRESULT CALLBACK MouseHook(int code, WPARAM wParam, LPARAM lParam);
+    // whether `under` is in the window of a body that scrolls by itself
+    bool ScrollsItself(HWND under) const;
     LRESULT Handle(UINT message, WPARAM wParam, LPARAM lParam);
     // every row, gap and frame placed for the client width, the scroll bar set, the children moved
     void Layout();
