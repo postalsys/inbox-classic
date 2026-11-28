@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.23.0](https://github.com/postalsys/inbox-classic/compare/v0.22.0...v0.23.0) (2026-11-28)
+
+
+### Features
+
+* native conversation stack in the reading pane on all three apps ([4f30651](https://github.com/postalsys/inbox-classic/commit/4f306515ed0e47bfd6664fcc2bcb33e95e2bf9f6))
+* say when an account is not signed in or cannot connect, and sign it in again from there ([117580f](https://github.com/postalsys/inbox-classic/commit/117580f3bc744d123c35b4499df2d059b18dddc3))
+* say when an account is not signed in or cannot connect, and sign it in again from there ([ad4e1de](https://github.com/postalsys/inbox-classic/commit/ad4e1de7ef18612bd6715beb67599039ed5cd4af))
+
+
+### Bug Fixes
+
+* **i18n:** review native conversation reader wording ([f2ecb70](https://github.com/postalsys/inbox-classic/commit/f2ecb709bede76eb4e1d4373ecae634e6f862bf5))
+* **i18n:** translate account status and review sign-in help ([cacbccf](https://github.com/postalsys/inbox-classic/commit/cacbccffec3f43c0d02636785b56b148d071796d))
+* **status:** start an account notification with a capital ([1d2a41c](https://github.com/postalsys/inbox-classic/commit/1d2a41c4f427842fb18f4a707f126e4c61a77d82))
+* the reading pane looks native on Windows, the Mac and Linux ([d9e17bd](https://github.com/postalsys/inbox-classic/commit/d9e17bd62eee6067b5c5d86fc88edd5dbe9bdf46))
+* the reading pane looks native on Windows, the Mac and Linux ([6e1cfe2](https://github.com/postalsys/inbox-classic/commit/6e1cfe2bdf56c126cd037c2220c19a12e8f93cf9))
+* **windows:** View has the conversation's commands, as on the Mac and Linux ([a1656ef](https://github.com/postalsys/inbox-classic/commit/a1656ef5437edaf9bb1daed6f3c8f6684c73af6d))
+* **windows:** View has the conversation's commands; translation review round nine ([4949433](https://github.com/postalsys/inbox-classic/commit/4949433ba880877b224c055c15f6d3cfd161f7ec))
+
+
+### Performance Improvements
+
+* large folders stay fast on Linux, the Mac and Windows ([c135330](https://github.com/postalsys/inbox-classic/commit/c135330965efb301008b51dd99f539ee89687465))
+* large folders stay fast on Linux, the Mac and Windows ([1db938a](https://github.com/postalsys/inbox-classic/commit/1db938a3e5f2cb7eb82d4dbc9392f540f03fea84))
+
 ## [0.22.0](https://github.com/postalsys/inbox-classic/compare/v0.21.0...v0.22.0) (2026-11-26)
 
 
